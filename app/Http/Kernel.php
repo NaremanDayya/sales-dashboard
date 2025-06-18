@@ -2,12 +2,9 @@
 
 namespace App\Http;
 
-use App\Console\Commands\NotifyAgreementNoticePeriod;
-use App\Console\Commands\NotifyLateCustomers;
-use App\Console\Commands\NotifyPendedRequest;
+
 use App\Http\Middleware\AdminRoleMiddleware as MiddlewareRoleMiddleware;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
-use Illuminate\Support\Facades\Schedule;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
@@ -19,10 +16,7 @@ class Kernel extends HttpKernel
      */
 
 
-    protected function schedule(Schedule $schedule)
-    {
-        $schedule->job('RunDailyCommandJob')->dailyAt('09:00');
-    }
+
     protected $middleware = [
         \Illuminate\Http\Middleware\HandleCors::class,
         \App\Http\Middleware\TrustProxies::class,
