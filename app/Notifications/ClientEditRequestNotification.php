@@ -28,15 +28,12 @@ class ClientEditRequestNotification extends Notification implements ShouldBroadc
     public function toDatabase($notifiable)
     {
         return [
-            'message' => "تم إرسال طلب تعديل جديد لعميل رقم #{$this->clientEditRequest->client_id}.",
+            'message' => "📝 تم إرسال طلب تعديل جديد لبيانات العميل \"{$this->clientEditRequest->client->company_name}\" بواسطة المندوب \"{$this->clientEditRequest->salesRep->name}\"",
             'client_edit_request_id' => $this->clientEditRequest->id,
             'client_id' => $this->clientEditRequest->client_id,
             'edited_field' => $this->clientEditRequest->request_type,
             'status' => $this->clientEditRequest->status,
-            'url' => route('admin.client-request.edit',
-             ['client' => $this->clientEditRequest->client_id,
-             'client_request' => $this->clientEditRequest->id
-            ], true),
+            'url' => route('admin.allRequests'),
         ];
     }
 
@@ -48,7 +45,10 @@ class ClientEditRequestNotification extends Notification implements ShouldBroadc
             'client_id' => $this->clientEditRequest->client_id,
             'edited_field' => $this->clientEditRequest->request_type,
             'status' => $this->clientEditRequest->status,
-            'url' => route('admin.client-request.update', ['client' => $this->clientEditRequest->client_id, 'client_request' => $this->clientEditRequest->id]),
+            'url' => route('admin.client-request.update', [
+                'client' => $this->clientEditRequest->client_id,
+                'client_request' => $this->clientEditRequest->id
+            ]),
         ]);
     }
 
@@ -57,8 +57,9 @@ class ClientEditRequestNotification extends Notification implements ShouldBroadc
         $adminUser = User::where('role', 'admin')->first();
 
         return [new PrivateChannel('client.request.sent.' . $adminUser->id)];
-   }
-   public function broadcastAs()
+    }
+
+    public function broadcastAs()
     {
         return 'new.client.edit.request';
     }

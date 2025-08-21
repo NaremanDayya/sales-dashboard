@@ -34,9 +34,9 @@
                                         clip-rule="evenodd" />
                                 </svg>
                             </div>
-                            <input type="text" id="clientSearch"
-                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-[#a855f7]  sm:text-sm"
-                                placeholder="ابحث عن العملاء...">
+<input type="text" id="modalSearchInput"
+    class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-[#a855f7]  sm:text-sm"
+    placeholder="ابحث عن العملاء...">
                         </div>
 
                         <!-- Client list -->

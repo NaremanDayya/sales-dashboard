@@ -59,8 +59,13 @@
             <div class="shrink-0">
                 <x-wirechat::avatar disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
                     group="{{ $conversation->isGroup() }}"
-                    :src="$group ? $group?->cover_url : $receiver?->cover_url ?? null" class="w-12 h-12" />
-            </div>
+:src="$group 
+    ? $group?->cover_url 
+    : ($receiver?->personal_image 
+        ? asset('storage/' . $receiver->personal_image) 
+        : null)"
+class="w-12 h-12"
+/>            </div>
 
             <aside class="grid  grid-cols-12 w-full">
                 <div

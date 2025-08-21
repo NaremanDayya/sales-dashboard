@@ -89,7 +89,7 @@ class NewClientNotification extends Notification implements ShouldQueue, ShouldB
         return [
             'client_id' => $this->client->id,
             'client_name' => $this->client->company_name,
-            'message' => 'A new client (' . $this->client->company_name . ') has been created.',
+	'message' => "🆕 تم إضافة عميل جديد: \"{$this->client->company_name}\" إلى النظام.",
             'url' => route('sales-reps.clients.show', [
                 'sales_rep' => $this->client->sales_rep_id,
                 'client' => $this->client->id,

@@ -1,20 +1,19 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl" class="html no-sidebar" style='width:100%'>
 @include('components.toast')
 
 @include('partials.head')
 
-<body class="bg-gray-100" style="display: flex; flex-direction: column; min-height: 100vh; margin: 0; padding: 0;">
+<body class="bg-gray-100" style="display: flex; flex-direction: column; min-height: 100vh; margin: 0; padding: 2;">
 
     <!-- ======= Header ======= -->
     @include('partials.header')
     <!-- End Header -->
 
     <!-- ======= Sidebar ======= -->
-    @include('partials.sidebar')
 
     <!-- End Sidebar -->
-    <main id="main" class="main h-[calc(100vh_-_3.9rem)]" style="flex: 1;">
+    <main id="main" class="main w-full" style="flex: 1;">
         @if (session('success'))
         <div class="toast-container position-fixed" style="top: 100px; right: 20px; z-index: 1300;">
             <div class="toast show align-items-center text-bg-success border-0" role="alert" aria-live="assertive"
@@ -63,7 +62,9 @@
     </main>
 
     <!-- ======= Footer ======= -->
+<div class="pt-4">
     @include('partials.footer')
+</div>
     <!-- End Footer -->
 
     <!-- Vendor JS Files -->
@@ -84,39 +85,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+      <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ar.js"></script>
+
     <script src="resources/js/app.js"></script>
     <script>
         window.userId = {{ Auth::id() }};
     </script>
-{{-- <script>
-    document.addEventListener('alpine:init', () => {
-    Alpine.store('notifications', {
-        unreadCount: {{ $unreadCount }},
-
-        init() {
-            if (typeof Echo !== 'undefined') {
-                Echo.private(`user.notifications.${{{ auth()->id() }}}`)
-                    .notification((notification) => {
-                        this.unreadCount++;
-                        this.refreshList();
-                    });
-            }
-        },
-
-        refreshList() {
-            fetch('{{ route("notifications.list") }}')
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('notification-list').innerHTML = html;
-                });
-        },
-
-        markAsRead() {
-            this.unreadCount = 0;
-        }
-    });
-});
-</script> --}}
 
     @livewireScripts
     @wirechatAssets

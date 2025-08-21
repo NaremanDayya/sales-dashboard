@@ -138,23 +138,41 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('login') }}">
-                @csrf
+<form method="POST" action="{{ route('login') }}" autocomplete="off">
+    @csrf
 
-                <!-- Email Input -->
-                <div class="mb-4 position-relative">
-                    <label for="email" class="form-label">البريد الإلكتروني</label>
-                    <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" required autofocus>
-                </div>
+    <!-- Hidden fake fields to trick browsers -->
+    <input type="text" name="fake_username" style="display:none">
+    <input type="password" name="fake_password" style="display:none">
 
-                <!-- Password Input -->
-                <div class="mb-4 position-relative">
-                    <label for="password" class="form-label">كلمة المرور</label>
-                    <div class="position-relative">
-                        <input type="password" class="form-control" id="password" name="password" required>
-                        <span class="password-toggle" onclick="togglePassword()">👁️</span>
-                    </div>
-                </div>
+    <!-- Email Input -->
+    <div class="mb-4 position-relative">
+        <label for="email" class="form-label">البريد الإلكتروني</label>
+        <input type="email" 
+               class="form-control" 
+               id="email" 
+               name="email" 
+               value="{{ old('email') }}" 
+               required 
+               autofocus
+               autocomplete="username">
+    </div>
+
+    <!-- Password Input -->
+    <div class="mb-4 position-relative">
+        <label for="password" class="form-label">كلمة المرور</label>
+        <div class="position-relative">
+            <input type="password" 
+                   class="form-control" 
+                   id="password" 
+                   name="password" 
+                   required
+                   autocomplete="current-password"
+                   readonly
+                   onfocus="this.removeAttribute('readonly')">
+            <span class="password-toggle" onclick="togglePassword()">👁️</span>
+        </div>
+    </div>
 
                 <!-- Remember Me Checkbox -->
                 <div class="mb-4 form-check">
@@ -165,15 +183,6 @@
                 <!-- Submit Button -->
                 <button type="submit" class="btn btn-primary">تسجيل الدخول</button>
 
-                <div class="footer-links">
-                    @if (Route::has('password.request'))
-                        <a href="{{ route('password.request') }}" class="footer-link">نسيت كلمة المرور؟</a>
-                    @endif
-
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}" class="footer-link">إنشاء حساب جديد</a>
-                    @endif
-                </div>
             </form>
 
             <div class="copyright">
@@ -185,6 +194,15 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
         <script>
+		  document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            const passwordField = document.getElementById('password');
+            if (passwordField) {
+                passwordField.setAttribute('autocomplete', 'new-password');
+                passwordField.value = '';
+            }
+        }, 100);
+    });
             function togglePassword() {
                 const passwordField = document.getElementById('password');
                 if (passwordField.type === 'password') {

@@ -21,8 +21,8 @@ window.Echo = new Echo({
 });
 
 // New client created
-const userId = document.head.querySelector('meta[name="user-id"]')?.content;
-const receiverId = document.head.querySelector('meta[name="receiver-id"]')?.content;
+const userIdMeta = document.querySelector('meta[name="user-id"]');
+const userId = userIdMeta ? userIdMeta.getAttribute("content") : null;
 
 if (userId) {
     // ✅ Approved Requests
@@ -42,7 +42,38 @@ if (userId) {
             });
         }
     );
-
+	  window.Echo.private(`salesrep-login-ip`).listen(
+        ".Illuminate\\Notifications\\Events\\BroadcastNotificationCreated",
+        (data) => {
+            Toast.fire({
+                icon: "success",
+                title: "✅ تم قبول الطلب",
+                html: `<div>
+                    <p>${data.message}</p>
+                    <a href="${data.url}" class="text-blue-500 hover:underline">
+                        عرض الطلب الموافق عليه
+                    </a>
+                </div>`,
+                timer: 8000,
+            });
+        }
+    );
+          window.Echo.private(`birthday`).listen(
+        ".Illuminate\\Notifications\\Events\\BroadcastNotificationCreated",
+        (data) => {
+            Toast.fire({
+                icon: "success",
+                title: "✅ تم قبول الطلب",
+                html: `<div>
+                    <p>${data.message}</p>
+                    <a href="${data.url}" class="text-blue-500 hover:underline">
+                        عرض الطلب الموافق عليه
+                    </a>
+                </div>`,
+                timer: 8000,
+            });
+        }
+    );
     // ❌ Rejected Requests
     window.Echo.private(`client.request.rejected.${userId}`).listen(
         ".Illuminate\\Notifications\\Events\\BroadcastNotificationCreated",
@@ -288,16 +319,17 @@ if (userId) {
             });
         }
     );
+window.Echo.private(`chat.${userId}`).listen(
+        ".Illuminate\\Notifications\\Events\\BroadcastNotificationCreated",
+        (e) => {
+             //alert("Receiver got a message!\nMessage ID: " + e.message_id);
+            Livewire.dispatch("refresh");
+        }
+    );
 } else {
     console.warn("User ID meta tag not found.");
 }
 
-if (receiverId) {
-    window.Echo.private(`chat.${receiverId}`).listen(
-        ".Illuminate\\Notifications\\Events\\BroadcastNotificationCreated", (e) => {
-        Livewire.dispatch("refresh");
-    });
-}
 
 Echo.private(`participant.${encodedType}.${userId}`).listen(
     ".Namu\\WireChat\\Events\\NotifyParticipant",

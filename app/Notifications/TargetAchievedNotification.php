@@ -31,22 +31,20 @@ class TargetAchievedNotification extends Notification implements ShouldQueue, Sh
 
     public function toDatabase($notifiable)
     {
-        return [
-            'title' => '🎯 Target Achieved!',
-            'message' => 'You have achieved your monthly target for the service: ' . $this->target->service->name,
-            'service_name' => $this->target->service->name,
-            'month' => $this->target->month,
-            'year' => $this->target->year,
-            'achieved_amount' => $this->target->achieved_amount,
-            'target_amount' => $this->target->target_amount,
-            'url' => route('salesrep.agreements.show', [
-                'salesrep' => $this->target->sales_rep_id,
-                'agreement' => $this->target->agreement_id,
-            ], true),
-            'percentage' => number_format(($this->target->achieved_amount / $this->target->target_amount) * 100, 2),
-            'commission_amount' => $this->commission?->commission_amount ?? 0,
-        ];
-    }
+return [
+    'title' => '🎯 تم تحقيق الهدف!',
+    'message' => 'لقد حققت هدفك الشهري لخدمة: ' . $this->target->service->name,
+    'service_name' => $this->target->service->name_ar,
+    'month' => $this->target->month,
+    'year' => $this->target->year,
+    'achieved_amount' => $this->target->achieved_amount,
+    'target_amount' => $this->target->target_amount,
+    'percentage' => number_format(($this->target->achieved_amount / $this->target->target_amount) * 100, 2),
+    'commission_amount' => $this->commission?->commission_amount ?? 0,
+    'url' => route('sales-rep.targets.index', [
+        'sales_rep' => $this->target->sales_rep_id,
+    ]),
+];    }
 
     public function toBroadcast($notifiable)
     {
@@ -69,12 +67,6 @@ class TargetAchievedNotification extends Notification implements ShouldQueue, Sh
     }
     public function broadcastOn()
     {
-        $adminUser = User::where('role', 'admin')->first();
-
-        return [new PrivateChannel('target.achieved.' . $adminUser->id)];
-    }
-    public function broadcastAs()
-    {
-        return 'target.achieved';
+        return [new PrivateChannel('target.achieved.' .$this->target->salesRep->user->id)];
     }
 }

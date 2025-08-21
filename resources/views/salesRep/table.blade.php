@@ -480,6 +480,9 @@
         <div class="table-header">
             <h2 id="title" class="table-title">مندوبي المبيعات</h2>
             <div class="table-actions d-flex align-items-center gap-2">
+<button class="btn btn-primary" onclick="window.location.href='/salesreps/credentials'">
+    <i class="fas fa-plus"></i> بيانات دخول المندوبين
+</button>
                 <button class="btn btn-primary" onclick="addNewSalesRep()">
                     <i class="fas fa-plus"></i> إضافة مندوب
                 </button>

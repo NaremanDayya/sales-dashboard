@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Namu\WireChat\Traits\Chatable;
 use Spatie\Permission\Traits\HasRoles;
+use Carbon\Carbon;
 
 class SalesRep extends Model
 {
@@ -25,9 +26,17 @@ class SalesRep extends Model
         'interested_customers',
         'user_id',
     ];
+protected $appends = ['active_agreements_count', 'inactive_agreements_count'];
+
     protected $casts = [
         'start_work_date' => 'date',
     ];
+
+	public function loginIps()
+{
+    return $this->hasMany(SalesRepLoginIp ::class);
+}	
+
     public function clients()
     {
         return $this->hasMany(Client::class);
@@ -40,21 +49,36 @@ class SalesRep extends Model
     {
         return $this->hasMany(Agreement::class, 'sales_rep_id');
     }
+public function getActiveAgreementsCountAttribute()
+{
+    return $this->agreements()->where('agreement_status', 'active')->count();
+}
+
+public function getInactiveAgreementsCountAttribute()
+{
+    return $this->agreements()->where('agreement_status', 'expired')->count();
+}
     public function commissions()
     {
         return $this->hasMany(Commission::class, 'sales_rep_id');
     }
-    public function clientRequest()
-    {
-        return $this->hasMany(ClientEditRequest::class, 'sales_rep_id');
-    }
-    public function agreementRequest()
-    {
-        return $this->hasMany(AgreementEditRequest::class, 'sales_rep_id');
-    }
+public function clientRequest()
+{
+    return $this->hasMany(ClientEditRequest::class, 'sales_rep_id', 'user_id');
+}
+
+public function agreementRequest()
+{
+    return $this->hasMany(AgreementEditRequest::class, 'sales_rep_id', 'user_id');
+}
+public function chatClientRequest()
+{
+    return $this->hasMany(ClientRequest::class, 'sales_rep_id', 'user_id');
+}
+
     public function getTotalOrdersAttribute()
     {
-        return $this->clientRequest()->count() + $this->agreementRequest()->count();
+        return $this->clientRequest()->count() + $this->agreementRequest()->count() + $this->chatClientRequest()->count();
     }
 
     public function getLateCustomersAttribute()
@@ -115,13 +139,14 @@ class SalesRep extends Model
     }
     public function pendedRequest()
     {
-        return $this->hasMany(ClientEditRequest::class, 'sales_rep_id')
+        return $this->clientRequest()
             ->where('status', 'pending');
     }
     public function getTotalPendedRequestsAttribute()
     {
         return $this->pendedRequest()->count() +
-            $this->agreementRequest()->where('status', 'pending')->count();
+            $this->agreementRequest()->where('status', 'pending')->count() +
+ $this->chatClientRequest()->where('status', 'pending')->count();
     }
     public function interestedClients()
     {
@@ -160,5 +185,17 @@ class SalesRep extends Model
 
         return strtr($duration, $replacements);
     }
+	public function getWorkDurationAttribute()
+{
+    if (!$this->start_work_date) { 
+        return null;
+    }
 
+    $startDate = Carbon::parse($this->start_work_date);
+    $diff = $startDate->diff(Carbon::now());
+
+    $duration = "{$diff->y} years, {$diff->m} months, {$diff->d} days";
+
+    return $this->translateDurationToArabic($duration);
+}
 }

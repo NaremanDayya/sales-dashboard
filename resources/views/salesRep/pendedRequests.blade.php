@@ -1,5 +1,5 @@
-@extends('layouts.table')
-@section('title', 'الطلبات المعلقة')
+@extends('layouts.master')
+@section('title', 'الطلبات ')
 @push('styles')
 <style>
     :root {
@@ -39,7 +39,10 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         margin: 1rem;
     }
-
+data-table th,
+data-table td {
+    text-align: center;
+}
     .table-header {
         display: flex;
         justify-content: space-between;
@@ -65,7 +68,7 @@
     .btn {
         padding: 8px 16px;
         border-radius: 6px;
-        font-weight: 500;
+        font-weight: 800;
         font-size: 14px;
         display: inline-flex;
         align-items: center;
@@ -171,6 +174,8 @@
         border-bottom: 1px solid var(--gray-200);
         text-align: right;
         vertical-align: middle;
+font-size: 14px;
+    font-weight: 800;
     }
 
     .status-badge {
@@ -455,11 +460,11 @@
 @section('content')
 <div id="print-area" class="table-container">
     <div class="table-header">
-        <h2 id="title" class="table-title">الطلبات المعلقة</h2>
+        <h2 id="title" class="table-title">الطلبات</h2>
         <div class="table-actions d-flex align-items-center gap-2">
             @isset($salesRep)
-            <div class="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-full">
-                المندوب: {{ $salesRep->name }}
+            <div class="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-full" style="font-size:14px; font-weight:800;">
+                سفير العلامة التجارية: {{ $salesRep->name }}
             </div>
             @endisset
             <div class="export-options">
@@ -503,103 +508,357 @@
             <i class="fas fa-search search-icon"></i>
         </div>
 
-        <div>
-            <div class="d-flex align-items-center mb-3 gap-2">
-                <i class="fas fa-filter text-secondary"></i>
-                <select id="filterSelect" onchange="applyFilter()" class="form-select w-auto">
-                    <option value="">الكل</option>
-                    <option value="client">طلبات العملاء</option>
-                    <option value="agreement">طلبات الاتفاقيات</option>
-                </select>
-            </div>
+ <div>
+        <div class="d-flex align-items-center mb-3 gap-2">
+            <i class="fas fa-filter text-secondary"></i>
+            <select id="filterSelect" onchange="applyFilter()" class="form-select w-auto" style="font-size: 14px;font-weight: 800;">
+                <option value="">الكل</option>
+                <option value="client">طلبات تعديل  العملاء</option>
+                <option value="agreement">طلبات تعديل  الاتفاقيات</option>
+<option value="client_chat">طلبات العملاء </option>                 
+<option value="approved">مقبولة</option>
+                <option value="rejected">مرفوضة</option>
+                <option value="pending">معلقة</option>
+            </select>
         </div>
-    </div>
+    </div>    </div>
 
     <div class="table-responsive">
         <div class="pdf-content">
             <div class="pdf-header" style="display: none;">
                 <div
                     class="header-content d-flex align-items-center justify-content-between flex-wrap mb-4 p-3 shadow rounded bg-white">
-                    <div class="d-flex flex-column align-items-center text-center mx-auto">
+                    <div class="d-flex umn align-items-center text-center mx-auto">
                         <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="header-logo mb-2" />
                         <h2 class="header-text">تقرير الطلبات المعلقة</h2>
                     </div>
                 </div>
             </div>
-            <table class="data-table">
+            <table class="data-table text-center">
                 <thead>
                     <tr>
-                        <th>نوع الطلب</th>
-                        <th>الجهة</th>
-                        <th>المندوب</th>
-                        <th>الحقل المعدل</th>
-                        <th>الوصف</th>
-                        <th>الحالة</th>
-                        <th>تاريخ الطلب</th>
+        <th class="text-center">ID</th>
+                 
+       <th class="text-center">نوع الطلب</th>
+                        <th class="text-center">الجهة</th>
+                        <th class="text-center">سفير العلامة التجارية</th>
+                        <th class="text-center">الحقل المعدل</th>
+                        <th class="text-center">الوصف</th>
+                        <th class="text-center">تاريخ الطلب</th>
+			<th class="text-center">تاريخ الاستجابة</th>
+			<th class="text-center">مدة الاستجابة</th>
                         @if(auth()->user()->role == 'admin')
                         <th class="no-print">الإجراءات</th>
                         @endif
 
                     </tr>
                 </thead>
-                <tbody id="tableBody">
+                <tbody id="tableBody" class="text-center">
                     @foreach($clientRequests as $request)
                     <tr>
-                        <td>طلب تعديل عميل</td>
-                        <td>
-                            <a href="{{ route('sales-reps.clients.show', ['sales_rep' => $request->sales_rep_id, 'client' => $request->client_id]) }}"
-                                class="text-blue-600 hover:underline" target="_blank">
+    
+<td class="text-center">{{ $request->id }}</td>
+
+<td style="font-size: 14px; font-weight: 700; white-space: nowrap;">
+    <div class="flex items-center space-x-2">
+{{--
+<form action="{{ route('admin.client-request.delete', ['client_request' => $request->id]) }}"
+      method="POST"
+      onsubmit="return confirm('هل أنت متأكد من حذف هذا الطلب؟')">
+    @csrf
+    @method('DELETE')
+    <button type="submit" class="text-red-600 hover:text-red-900">
+        <i class="fas fa-trash-alt"></i>
+    </button>
+</form>
+--}}
+
+	  <a href="{{ route('sales-reps.client-requests.show', ['client' => $request->client_id, 'client_request' => $request->id]) }}"
+           class="text-gray-800 hover:text-primary hover:underline">
+            طلب تعديل عميل
+        </a>
+  
+  </div>
+</td>
+
+                     <td class="text-center">
+                            <a href="{{ route('sales-reps.clients.show', ['sales_rep' => $request->client->sales_rep_id, 'client' => $request->client_id]) }}"
+                                class="text-blue-600 hover:underline">
                                 {{ $request->client->company_name ?? 'عميل غير معروف' }}
                             </a>
                         </td>
-                        <td>
-                            <a href="{{ route('sales-reps.show', ['sales_rep' => $request->sales_rep_id]) }}"
-                                class="hover:text-indigo-600 hover:underline">
+                        <td class="text-center">
+                            <a href="{{ route('sales-reps.show', ['sales_rep' => $request->client->sales_rep_id]) }}"
+                                class="hover:text-indigo-600 hover:underline" style="text-align:center;">
                                 {{ $request->salesRep->name ?? 'مندوب غير معروف' }}
                             </a>
                         </td>
-                        <td>{{ $request->edited_field }}</td>
-                        <td>{{ $request->description }}</td>
-                        <td>
-                            <span
-                                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                {{ $request->status }}
-                            </span>
-                        </td>
-                        <td>{{ $request->created_at->diffForHumans() }}</td>
-                        <td class="no-print">
-                            @if(auth()->user()->role == 'admin' || auth()->id() == $request->sales_rep_id)
-                            <div class="flex space-x-2">
-                                @php
-                                $route = '#';
-                                if ($request->request_type === 'client_data_change') {
-                                $route = route('admin.client-request.review', [
-                                'client' => $request->client_id,
-                                'client_request' => $request->id,
-                                ]);
-                                } elseif ($request->request_type === 'agreement_data_change') {
-                                $route = route('admin.agreement-request.review', [
-                                'agreement' => $request->agreement_id,
-                                'agreement_request' => $request->id,
-                                ]);
-                                }
-                                @endphp
+ <td class="text-center">
+ @php
+        $editedFieldsTranslation = [
+            'company_name' => 'اسم الشركة',
+    'logo' => 'الشعار', 
+    'address' => 'العنوان',
+    'contact_person' => 'الشخص المسؤول',
+    'interest_status' => 'حالة الاهتمام',
+    'phone' => 'رقم الهاتف',
+    'contact_position' => 'منصب المسؤول'
+        ];
+        echo $editedFieldsTranslation[$request->edited_field] ?? $request->edited_field;
+    @endphp
+</td>                        <td class="text-center">{{ $request->description }}</td>
+<td class="text-center">
+    <div class="text-gray-600 dark:text-gray-300">
+        {{ $request->created_at->format('Y-m-d H:i') }}
+    </div>
 
-                                <a href="{{ $route }}"
-                                    class="px-3 py-1 bg-green-100 text-green-800 rounded-md text-sm hover:bg-green-200 transition-colors">
-                                    تقييم
-                                </a>
-                            </div>
-                            @endif
+    <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        {{ $request->created_at->diffForHumans() }}
+    </div>
+</td>
+
+<td class="text-center">
+    @if($request->status === 'pending')
+        <div class="text-yellow-600 dark:text-yellow-400">
+            لم تتم استجابة الطلب بعد
+        </div>
+    @else
+        <div class="text-gray-600 dark:text-gray-300">
+            {{ $request->updated_at->format('Y-m-d H:i') }}
+        </div>
+
+        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {{ $request->updated_at->diffForHumans() }}
+        </div>
+    @endif
+</td>
+
+<td class="text-center">
+    @if($request->status === 'pending')
+        لم تتم استجابة الطلب بعد
+    @else
+        @php
+            $diff = $request->created_at->diff($request->updated_at);
+            $hours = $diff->h;
+            $minutes = $diff->i;
+            $days = $diff->d;
+        @endphp
+
+        
+@if($days > 0)
+    {{ $days }} @if($days > 10) يومًا @elseif($days > 2) أيام @elseif($days == 2) يومان @else يوم @endif
+@endif
+
+@if($hours > 0)
+    {{ $hours }} @if($hours > 10) ساعة @elseif($hours > 2) ساعات @elseif($hours == 2) ساعتان @else ساعة @endif
+@endif
+
+@if($minutes > 0)
+    {{ $minutes }} @if($minutes > 10) دقيقة @elseif($minutes > 2) دقائق @elseif($minutes == 2) دقيقتان @else دقيقة @endif
+@endif
+    @endif
+</td>
+
+@if(auth()->user()->role == 'admin')
+                        <td class="no-print">
+        <div class="flex space-x-2">
+   @if ($request->status === 'pending')
+                                            @php
+                                                $updateRoute = '#';
+                                                if ($request->request_type === 'client_data_change') {
+                                                    $updateRoute = route('admin.client-request.update', [
+                                                        'client' => $request->client_id,
+                                                        'client_request' => $request->id,
+                                                    ]);
+                                                } elseif ($request->request_type === 'agreement_data_change') {
+                                                    $updateRoute = route('admin.agreement-request.update', [
+                                                        'agreement' => $request->agreement_id,
+                                                        'agreement_request' => $request->id,
+                                                    ]);
+                                                }
+                                            @endphp
+
+                                            @if ($updateRoute !== '#')
+                                                <form action="{{ $updateRoute }}" method="POST"
+                                                    class="inline-flex gap-2">
+                                                    @csrf
+                                                    @method('PUT')
+
+                                                    <button type="submit" name="status" value="approved"
+                                                        class="px-3 py-1 bg-green-100 text-green-800 rounded-md text-sm hover:bg-green-200 transition-colors">
+                                                         قبول
+                                                    </button>
+
+                                                    <button type="submit" name="status" value="rejected"
+                                                        class="px-3 py-1 bg-red-100 text-red-800 rounded-md text-sm hover:bg-red-200 transition-colors">
+                                                         رفض
+                                                    </button>
+          
+                                      </form>
+ @endif
+  @else
+                @if ($request->status === 'approved')
+                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-md text-sm">
+                         مقبول
+                    </span>
+                @elseif ($request->status === 'rejected')
+                    <span class="px-3 py-1 bg-red-100 text-red-800 rounded-md text-sm">
+                         مرفوض
+                    </span>
+                @endif
+            @endif
+ </div>
                         </td>
+@endif
                     </tr>
                     @endforeach
+@foreach($chatClientRequests as $request)
+<tr>
+    <td class="text-center">{{ $request->id }}</td>
+
+ <td style="font-size: 14px; font-weight: 700; white-space: nowrap;">
+    <a href="{{ route('sales-reps.clientRequests.show', ['client' => $request->client_id, 'client_request' => $request->id]) }}"
+       class="text-gray-800 hover:text-primary hover:underline">
+ {{-- <form action="{{ route('admin.chat-client-request.destroy' , [ 'client' => $request->client_id,   'client_request' => $request->id  ]) }}" method="POST" class="inline">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('هل أنت متأكد من رغبتك في حذف هذا الطلب؟')">
+                    <i class="fas fa-trash-alt"></i> <!-- Font Awesome delete icon -->
+                </button>
+            </form>
+--}}
+
+طلب خاص بالعميل
+    </a>
+</td>
+    <td class="text-center">
+        <a href="{{ route('sales-reps.clients.show', ['sales_rep' => $request->client->sales_rep_id, 'client' => $request->client_id]) }}"
+           class="text-blue-600 hover:underline">
+            {{ $request->client->company_name ?? 'عميل غير معروف' }}
+        </a>
+    </td>
+    <td class="text-center">
+        <a href="{{ route('sales-reps.show', ['sales_rep' => $request->client->sales_rep_id]) }}"
+           class="hover:text-indigo-600 hover:underline">
+            {{ $request->salesRep->name ?? 'مندوب غير معروف' }}
+        </a>
+    </td>
+    <td class="text-center">—</td>
+    <td class="text-center">{{ $request->message }}</td>
+<td class="text-center">
+    <div class="text-gray-600 dark:text-gray-300">
+        {{ $request->created_at->format('Y-m-d H:i') }}
+    </div>
+    
+    <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        {{ $request->created_at->diffForHumans() }}
+    </div>
+</td>
+
+<td class="text-center">
+    @if($request->status === 'pending')
+        <div class="text-yellow-600 dark:text-yellow-400">
+            لم تتم استجابة الطلب بعد
+        </div>
+    @else
+        <div class="text-gray-600 dark:text-gray-300">
+            {{ $request->updated_at->format('Y-m-d H:i') }}
+        </div>
+        
+        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {{ $request->updated_at->diffForHumans() }}
+        </div>
+    @endif
+</td>
+<td class="text-center">
+    @if($request->status === 'pending')
+        لم تتم استجابة الطلب بعد
+    @else
+        @php
+            $diff = $request->created_at->diff($request->updated_at);
+            $hours = $diff->h;
+            $minutes = $diff->i;
+            $days = $diff->d;
+        @endphp
+
+	@if($days > 0)
+    {{ $days }} @if($days > 10) يومًا @elseif($days > 2) أيام @elseif($days == 2) يومان @else يوم @endif
+@endif
+
+@if($hours > 0)
+    {{ $hours }} @if($hours > 10) ساعة @elseif($hours > 2) ساعات @elseif($hours == 2) ساعتان @else ساعة @endif
+@endif
+
+@if($minutes > 0)
+    {{ $minutes }} @if($minutes > 10) دقيقة @elseif($minutes > 2) دقائق @elseif($minutes == 2) دقيقتان @else دقيقة @endif
+@endif        
+    @endif
+</td>
+@if(auth()->user()->role === 'admin')
+    <td class="px-3 py-2 text-sm text-center no-print">
+        <div class="flex space-x-2">
+            @if ($request->status === 'pending')
+                <form action="{{ route('admin.chat-client-request.update', [$request->client_id, $request->id]) }}"
+                      method="POST" class="inline-flex gap-2">
+                    @csrf
+                    @method('PUT')
+
+                    <button type="submit" name="status" value="approved"
+                        class="px-3 py-1 bg-green-100 text-green-800 rounded-md text-sm hover:bg-green-200 transition-colors">
+                         قبول
+                    </button>
+
+                    <button type="submit" name="status" value="rejected"
+                        class="px-3 py-1 bg-red-100 text-red-800 rounded-md text-sm hover:bg-red-200 transition-colors">
+                         رفض
+                    </button>
+                </form>
+            @else
+                @if ($request->status === 'approved')
+                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-md text-sm">
+                         مقبول
+                    </span>
+                @elseif ($request->status === 'rejected')
+                    <span class="px-3 py-1 bg-red-100 text-red-800 rounded-md text-sm">
+                         مرفوض
+                    </span>
+                @endif
+            @endif
+        </div>
+    </td>
+@endif
+
+</tr>
+@endforeach
+
                     @foreach($agreementRequests as $request)
                     <tr>
-                        <td>طلب تعديل اتفاقية</td>
-                        <td>
+    <td class="text-center">{{ $request->id }}</td>
+
+<td style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+    {{--
+    <form action="{{ route('admin.agreement-request.destroy', ['agreement' => $request->agreement_id, 'agreement_request' => $request->id]) }}" 
+          method="POST" 
+          onsubmit="return confirm('هل أنت متأكد من حذف هذا الطلب؟');">
+        @csrf
+        @method('DELETE')
+        <button type="submit" style="color: red; background: none; border: none; cursor: pointer;" title="حذف">
+            <i class="fa fa-trash"></i>
+        </button>
+    </form>
+--}}
+
+
+
+    <a href="{{ route('admin.agreement-request.review', ['agreement' => $request->agreement_id, 'agreement_request' => $request->id]) }}"
+       class="text-gray-800 hover:text-primary hover:underline">
+        طلب تعديل اتفاقية
+    </a>
+</td>
+
+                        <td class="text-center">
                             <a href="{{ route('salesrep.agreements.show', ['salesrep' => $request->sales_rep_id, 'agreement' => $request->agreement_id]) }}"
-                                class="text-blue-600 hover:underline" target="_blank">
+                                class="text-blue-600 hover:underline">
                                 اتفاقية #{{ $request->agreement_id }}
                             </a>
                             <div class="text-sm text-gray-500">
@@ -609,59 +868,145 @@
                                 </a>
                             </div>
                         </td>
-                        <td>
+                        <td class="text-center">
                             <a href="{{ route('sales-reps.show', ['sales_rep' => $request->sales_rep_id]) }}"
                                 class="hover:text-indigo-600 hover:underline">
                                 {{ $request->salesRep->name ?? 'مندوب غير معروف' }}
                             </a>
                         </td>
-                        <td>{{ $request->edited_field }}</td>
-                        <td>{{ $request->description }}</td>
-                        <td>
-                            <span
-                                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                {{ $request->status }}
-                            </span>
-                        </td>
-                        <td>{{ $request->created_at->diffForHumans() }}</td>
-                        <td class="no-print">
-                            @if(auth()->user()->role == 'admin' || auth()->id() == $request->sales_rep_id)
-                            <div class="flex space-x-2">
-                                    @php
-                                $route = '#';
-                                if ($request->request_type === 'client_data_change') {
-                                $route = route('admin.client-request.review', [
-                                'client' => $request->client_id,
-                                'client_request' => $request->id,
-                                ]);
-                                } elseif ($request->request_type === 'agreement_data_change') {
-                                $route = route('admin.agreement-request.review', [
-                                'agreement' => $request->agreement_id,
-                                'agreement_request' => $request->id,
-                                ]);
-                                }
-                                @endphp
+ <td class="text-center">
+ @php
+        $editedFieldsTranslation = [
+          'service_id' => 'الخدمة',
+    'signing_date' => 'تاريخ التوقيع',
+    'duration_years' => 'مدة العقد (بالسنوات)',
+    'end_date' => 'تاريخ الانتهاء',
+    'termination_type' => 'نوع الإنهاء',
+    'notice_months' => 'مدة الإشعار (بالأشهر)',
+    'notice_status' => 'حالة الإشعار',
+    'product_quantity' => 'كمية المنتج',
+    'price' => 'السعر',
+    'agreement_status' => 'حالة الاتفاقية',
+    'implementation_date' => 'تاريخ التنفيذ',
+        ];
+        echo $editedFieldsTranslation[$request->edited_field] ?? $request->edited_field;
+    @endphp
+</td>                        <td class="text-center">{{ $request->description }}</td>
+<td class="text-center">
+    <div class="text-gray-600 dark:text-gray-300">
+        {{ $request->created_at->format('Y-m-d H:i') }}
+    </div>
 
-                                <a href="{{ $route }}"
-                                    class="px-3 py-1 bg-green-100 text-green-800 rounded-md text-sm hover:bg-green-200 transition-colors">
-                                    تقييم
-                                </a>
-                            </div>
-                            @endif
+    <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        {{ $request->created_at->diffForHumans() }}
+    </div>
+</td>
+
+<td class="text-center">
+    @if($request->status === 'pending')
+        <div class="text-yellow-600 dark:text-yellow-400">
+            لم تتم استجابة الطلب بعد
+        </div>
+    @else
+        <div class="text-gray-600 dark:text-gray-300">
+            {{ $request->updated_at->format('Y-m-d H:i') }}
+        </div>
+
+        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {{ $request->updated_at->diffForHumans() }}
+        </div>
+    @endif
+</td>
+
+<td class="text-center">
+    @if($request->status === 'pending')
+        لم تتم استجابة الطلب بعد
+    @else
+        @php
+            $diff = $request->created_at->diff($request->updated_at);
+            $hours = $diff->h;
+            $minutes = $diff->i;
+            $days = $diff->d;
+        @endphp
+
+
+@if($days > 0)
+    {{ $days }} @if($days > 10) يومًا @elseif($days > 2) أيام @elseif($days == 2) يومان @else يوم @endif
+@endif
+
+@if($hours > 0)
+    {{ $hours }} @if($hours > 10) ساعة @elseif($hours > 2) ساعات @elseif($hours == 2) ساعتان @else ساعة @endif
+@endif
+
+@if($minutes > 0)
+    {{ $minutes }} @if($minutes > 10) دقيقة @elseif($minutes > 2) دقائق @elseif($minutes == 2) دقيقتان @else دقيقة @endif
+@endif
+    @endif
+</td>
+
+@if(auth()->user()->role == 'admin')
+                        <td class="no-print">
+   <div class="flex space-x-2">
+            @if ($request->status === 'pending')
+
+                                            @php
+                                                $updateRoute = '#';
+                                                if ($request->request_type === 'client_data_change') {
+                                                    $updateRoute = route('admin.client-request.update', [
+                                                        'client' => $request->client_id,
+                                                        'client_request' => $request->id,
+                                                    ]);
+                                                } elseif ($request->request_type === 'agreement_data_change') {
+                                                    $updateRoute = route('admin.agreement-request.update', [
+                                                        'agreement' => $request->agreement_id,
+                                                        'agreement_request' => $request->id,
+                                                    ]);
+                                                }
+                                            @endphp
+
+                                            @if ($updateRoute !== '#')
+                                                <form action="{{ $updateRoute }}" method="POST"
+                                                    class="inline-flex gap-2">
+                                                    @csrf
+                                                    @method('PUT')
+
+                                                    <button type="submit" name="status" value="approved"
+                                                        class="px-3 py-1 bg-green-100 text-green-800 rounded-md text-sm hover:bg-green-200 transition-colors">
+                                                         قبول
+                                                    </button>
+
+                                                    <button type="submit" name="status" value="rejected"
+                                                        class="px-3 py-1 bg-red-100 text-red-800 rounded-md text-sm hover:bg-red-200 transition-colors">
+                                                         رفض
+                                                    </button>
+                                                </form>
+ @endif
+  @else
+                @if ($request->status === 'approved')
+                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-md text-sm">
+                         مقبول
+                    </span>
+                @elseif ($request->status === 'rejected')
+                    <span class="px-3 py-1 bg-red-100 text-red-800 rounded-md text-sm">
+                         مرفوض
+                    </span>
+                @endif
+            @endif
+                                        </div>
                         </td>
+@endif
                     </tr>
                     @endforeach
-                    @if($clientRequests->isEmpty() && $agreementRequests->isEmpty())
-                    <tr>
-                        <td colspan="8" class="empty-state">
-                            <div class="empty-icon">
-                                <i class="fas fa-inbox"></i>
-                            </div>
-                            <div class="empty-text">لا توجد طلبات معلقة في الوقت الحالي</div>
-                        </td>
-                    </tr>
-                    @endif
-                </tbody>
+@if($clientRequests->isEmpty() && $agreementRequests->isEmpty() && $chatClientRequests->isEmpty())
+            <tr>
+                <td colspan="@if(auth()->user()->role == 'admin') 9 @else 8 @endif" class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-inbox"></i>
+                    </div>
+                    <div class="empty-text">لا توجد طلبات معلقة في الوقت الحالي</div>
+                </td>
+            </tr>
+            @endif                </tbody>
             </table>
             <div class="pdf-footer" style="display: none;">
                 <p>جميع الحقوق محفوظة &copy; شركة آفاق الخليج {{ date('Y') }}</p>
@@ -724,26 +1069,65 @@
         });
     });
 
-    function applyFilter() {
-        const filterValue = document.getElementById('filterSelect').value;
-        const rows = document.querySelectorAll('#tableBody tr');
+function applyFilter() {
+    const filterValue = document.getElementById('filterSelect').value;
+    const rows = document.querySelectorAll('#tableBody tr');
 
-        rows.forEach(row => {
-            if (!filterValue) {
-                row.style.display = '';
-                return;
-            }
+    rows.forEach(row => {
+        if (row.classList.contains('empty-state')) {
+            row.style.display = 'none';
+            return;
+        }
 
-            const requestType = row.cells[0].textContent.includes('عميل') ? 'client' : 'agreement';
-            if (filterValue === requestType) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
+        if (!filterValue) {
+            row.style.display = '';
+            return;
+        }
+
+        let shouldShow = false;
+
+        // Check request type filters
+if (filterValue === 'client' || filterValue === 'agreement' || filterValue === 'client_chat') {
+    const cellText = row.cells[0].textContent.trim();
+    const isClientRequest = cellText.includes('طلب تعديل عميل');
+    const isAgreementRequest = cellText.includes('طلب تعديل اتفاقية');
+    const isClientChatRequest = cellText.includes('طلب خاص بالعميل');
+
+    if (filterValue === 'client') {
+        shouldShow = isClientRequest;
+    } else if (filterValue === 'agreement') {
+        shouldShow = isAgreementRequest;
+    } else if (filterValue === 'client_chat') {
+        shouldShow = isClientChatRequest;
     }
+}        // Check status filters
+        else {
+            const statusSpan = row.cells[5].querySelector('span'); // Get the span inside the cell
+            if (statusSpan) {
+                const statusText = statusSpan.textContent.trim().toLowerCase();
+                
+                if (filterValue === 'approved' && statusText.includes('مقبول')) {
+                    shouldShow = true;
+                } else if (filterValue === 'rejected' && statusText.includes('مرفوض')) {
+                    shouldShow = true;
+                } else if (filterValue === 'pending' && statusText.includes('قيد الانتظار')) {
+                    shouldShow = true;
+                }
+            }
+        }
 
-    function approveRequest(type, id) {
+        row.style.display = shouldShow ? '' : 'none';
+    });
+
+    // Handle empty state visibility
+    const visibleRows = Array.from(rows).filter(row =>
+        !row.classList.contains('empty-state') && row.style.display !== 'none'
+    );
+    const emptyState = document.querySelector('.empty-state');
+    if (emptyState) {
+        emptyState.style.display = visibleRows.length === 0 ? '' : 'none';
+    }
+}    function approveRequest(type, id) {
         if (confirm('هل أنت متأكد من قبول هذا الطلب؟')) {
             fetch(`/api/sales-reps/${type}-edit-requests/${id}/approve`, {
                 method: 'POST',
@@ -807,10 +1191,9 @@
         const headers = [
             'نوع الطلب',
             'الجهة',
-            'المندوب',
+            'سفير العلامة التجارية',
             'الحقل المعدل',
             'الوصف',
-            'الحالة',
             'تاريخ الطلب'
         ];
 
@@ -822,7 +1205,6 @@
                 rep: row.cells[2].textContent.trim(),
                 field: row.cells[3].textContent.trim(),
                 description: row.cells[4].textContent.trim(),
-                status: row.cells[5].textContent.trim(),
                 date: row.cells[6].textContent.trim()
             };
         });
@@ -839,7 +1221,6 @@
                     `"${item.rep}"`,
                     `"${item.field}"`,
                     `"${item.description}"`,
-                    `"${item.status}"`,
                     `"${item.date}"`
                 ];
                 csvContent += row.join(',') + '\r\n';

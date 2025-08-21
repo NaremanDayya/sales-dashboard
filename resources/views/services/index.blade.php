@@ -1,5 +1,5 @@
 @extends('layouts.master')
-@section('title', 'All Services')
+@section('title', 'خدمات الشركة')
 @section('content')
 
 <div class="min-h-screen bg-gray-50">
@@ -39,32 +39,53 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th scope="col"
-                                class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                class="px-5 py-3 text-sm font-bold text-black-600 uppercase tracking-wider">
                                 نوع الخدمة</th>
                             <th scope="col"
-                                class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                class="px-6 py-3 text-center text-sm font-bold  text-black-600 uppercase tracking-wider">
                                 التارجت</th>
-                        </tr>
+
+                @if (Auth::user()->hasRole('admin'))
+<th scope="col"
+    class="px-6 py-3 text-center text-sm font-bold  text-black-600 uppercase tracking-wider">
+نسبة العمولة
+</th>
+<th scope="col"
+    class="px-6 py-3 text-center text-sm font-bold  text-black-600 uppercase tracking-wider">
+الإتفاقيات النشطة
+</th>
+<th scope="col"
+    class="px-6 py-3 text-center text-sm font-bold  text-black-600 uppercase tracking-wider">
+الإتفاقيات الغير نشطة
+</th> 
+<th scope="col"
+    class="px-6 py-3 text-center text-sm font-bold text-black-600 uppercase tracking-wider">
+    الاجراءات
+</th>                        
+
+
+@endif
+</tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach ($services as $service)
                         <tr class="hover:bg-gray-50 transition-colors duration-150">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10">
-                                        <div
-                                            class="h-full w-full rounded-full bg-indigo-100 flex items-center justify-center">
-                                            <svg class="h-6 w-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900">{{ $service->name }}</div>
-                                    </div>
-                                </div>
+<div class="flex items-center">
+    <div class="flex-shrink-0 h-10 w-10 mr-4">
+        <div class="h-full w-full rounded-full bg-indigo-100 flex items-center justify-center">
+            <svg class="h-6 w-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01">
+                </path>
+            </svg>
+        </div>
+    </div>
+    <div class="text-sm font-bold text-gray-900 mr-4">
+        {{ $service->name }}
+    </div>
+</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">
@@ -73,7 +94,46 @@
                                     : number_format($service->target_amount) }}
                                 </div>
                             </td>
-                        </tr>
+                @if (Auth::user()->hasRole('admin'))
+<td class="px-6 py-4 text-center whitespace-nowrap">
+    {{ rtrim(rtrim(number_format($service->commission_rate, 2, '.', ''), '0'), '.') }}
+
+</td>
+<td class="px-6 py-4 text-center whitespace-nowrap">
+{{$service->active_agreements_count}}
+</td>
+
+<td class="px-6 py-4 text-center whitespace-nowrap">
+{{$service->inactive_agreements_count}}
+</td>
+
+<td class="px-6 py-4 text-center whitespace-nowrap flex justify-center space-x-2">
+
+    <!-- Edit Button -->
+    <a href="{{ route('services.edit', $service->id) }}"
+       class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <svg class="mr-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536M9 11l6 6m-3-6v6m0-6h6" />
+        </svg>
+        تعديل
+    </a>
+
+    <!-- Delete Button (with form) -->
+    <form action="{{ route('services.destroy', $service->id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذه الخدمة؟');">
+        @csrf
+        @method('DELETE')
+        <button type="submit"
+            class="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+            <svg class="mr-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            حذف
+        </button>
+    </form>
+
+</td>
+@endif
+                   </tr>
                         @endforeach
                     </tbody>
                 </table>
@@ -90,18 +150,6 @@
                         class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                         Next
                     </a>
-                </div>
-                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                    <div>
-                        <p class="text-sm text-gray-700">
-                            Showing <span class="font-medium">{{ $services->firstItem() }}</span> to <span
-                                class="font-medium">{{ $services->lastItem() }}</span> of <span class="font-medium">{{
-                                $services->total() }}</span> results
-                        </p>
-                    </div>
-                    <div>
-                        {{ $services->links() }}
-                    </div>
                 </div>
             </div>
         </div>

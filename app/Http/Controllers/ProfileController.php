@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -58,14 +59,42 @@ class ProfileController extends Controller
         return Redirect::to('/');
     }
 
-    public function show()
-    {
-        $user = Auth::user();
-        $user->load('permissions');
+public function show()
+{
+    $user = Auth::user();
+    $user->load('permissions');
 
-        $translatedPermissions = $user->permissions->map(function ($permission) {
-            return __($permission->name);
-        });
-        return view('profile.show', compact('user','translatedPermissions'));
+    $translatedPermissions = $user->permissions->map(function ($permission) {
+        return __($permission->name);
+    });
+
+    // Check if user is a salesRep and load related model
+    $salesRep = null;
+    if ($user->role === 'salesRep') {
+        $salesRep = $user->salesRep; // assuming hasOne relationship
     }
+
+    return view('profile.show', compact('user', 'salesRep', 'translatedPermissions'));
+}
+
+public function updatePhoto(Request $request)
+{
+    $request->validate([
+        'profile_photo_path' => 'required|image|max:2048',
+    ]);
+
+    $user = Auth::user();
+
+    if ($user->personal_image && Storage::exists('public/' . $user->personal_image)) {
+        Storage::delete('public/' . $user->personal_image);
+    }
+
+    $path = $request->file('profile_photo_path')->store('profile_photos', 'public');
+
+    $user->personal_image = $path;
+    $user->save();
+
+    return redirect()->back()->with('success', 'تم تحديث الصورة الشخصية بنجاح.');
+}
+
 }

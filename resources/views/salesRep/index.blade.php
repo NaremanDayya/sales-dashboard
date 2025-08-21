@@ -1,5 +1,5 @@
-@extends('layouts.table')
-@section('title','جدول المندوبين')
+@extends('layouts.master')
+@section('title','جدول سفراء العلامة التجارية')
 @push('styles')
 <style>
     :root {
@@ -18,6 +18,7 @@
         --gray-800: #1e293b;
         --gray-900: #0f172a;
     }
+    [x-cloak] { display: none !important; }
 
     * {
         box-sizing: border-box;
@@ -32,7 +33,6 @@
         direction: rtl;
         padding: 20px;
     }
-
     .export-btn-group {
         position: relative;
         display: inline-block;
@@ -52,7 +52,25 @@
         font-weight: 500;
         transition: all 0.2s ease;
     }
+#bulkActionsBtn::after {
+  display: none;
+}
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 10;
+    min-width: 180px;
+    margin-top: 4px;
+}
 
+.dropdown.active .dropdown-menu {
+    display: block;
+}
     .export-btn:hover {
         background-color: var(--primary-light);
         transform: translateY(-1px);
@@ -234,7 +252,7 @@
         padding: 5px 10px;
         border-radius: 4px;
         transition: background-color 0.2s;
-    }
+	}
 
     .btn-select-all:hover {
         background-color: var(--gray-100);
@@ -325,6 +343,20 @@
         border-color: #9ca3af;
     }
 
+.btn-dropdown {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        color: #374151;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
     .btn-dropdown svg {
         transition: transform 0.2s;
     }
@@ -413,6 +445,22 @@
         cursor: pointer;
         transition: all 0.2s ease;
         border: none;
+	font-size:14px;
+        font-weight:800;
+    
+}
+.status-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        padding: 8px 12px;
+        text-align: left;
+        color: #374151;
+        font-size: 14px;
+        background: none;
+        border: none;
+        cursor: pointer;
     }
 
     .btn-primary {
@@ -490,12 +538,13 @@
         background-color: var(--gray-100);
         color: var(--gray-600);
         font-weight: 600;
-        padding: 12px 15px;
-        text-align: right;
+        padding: 5px 8px;
+        text-align: center;
         border-bottom: 2px solid var(--gray-200);
         position: sticky;
         top: 0;
-    }
+    	white-space: nowrap;
+	}
 
     .data-table tbody tr {
         transition: background-color 0.2s ease;
@@ -506,11 +555,13 @@
     }
 
     .data-table tbody td {
-        padding: 12px 15px;
+        padding: 5px 8px;
         border-bottom: 1px solid var(--gray-200);
-        text-align: right;
+        text-align: center;
         vertical-align: middle;
-    }
+	font-size:14px;
+	font-weight:800;    
+}
 
     .status-badge {
         display: inline-block;
@@ -537,7 +588,7 @@
 
     .action-btns {
         display: flex;
-        gap: 8px;
+        gap: 5px;
     }
 
     .action-btn {
@@ -602,6 +653,35 @@
     .pagination-btn.disabled {
         opacity: 0.5;
         cursor: not-allowed;
+    }
+
+  .bulk-actions {
+        margin-right: 10px;
+    }
+
+    .rep-checkbox {
+        margin: 0 auto;
+        display: block;
+        width: 16px;
+        height: 16px;
+    }
+
+    #selectAllCheckbox {
+        width: 16px;
+        height: 16px;
+    }
+  .status-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        padding: 8px 12px;
+        text-align: left;
+        color: #374151;
+        font-size: 14px;
+        background: none;
+        border: none;
+        cursor: pointer;
     }
 
     .sidebar {
@@ -790,7 +870,8 @@
             text-align: center;
         }
 
-        #print-area table.data-table thead {
+        #print-area 
+table.data-table thead {
             background-color: #f0f0f0;
         }
 
@@ -819,12 +900,15 @@
 
         .pdf-header {
             display: block !important;
+	    background-color: #ffffff; 
+    box-shadow: none;
         }
 
         /* Optional: remove shadows, rounded borders in print for better clarity */
-        .pdf-header .header-content {
-            box-shadow: none !important;
-            border-radius: 0 !important;
+ .pdf-header .header-content { box-shadow: none !important;
+                -webkit-box-shadow: none !important;
+    filter: none !important;
+		border-radius: 0 !important;
         }
 
         .body {
@@ -838,13 +922,19 @@
     }
 </style>
 @endpush
-
+@section('favicon')
+    <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.jpg') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/img/favicon.jpg') }}">
+@endsection
 <body>
     @section('content')
     <div id="print-area" class="table-container">
         <div class="table-header">
             <h2 id="title" class="table-title">مندوبي المبيعات</h2>
             <div class="table-actions d-flex align-items-center gap-2">
+<button class="btn btn-primary" onclick="window.location.href='/salesreps/credentials'">
+    <i class="fas fa-user-lock"></i> بيانات دخول سفراء العلامة التجارية
+</button>
                 <button class="btn btn-primary no-print" onclick="addNewSalesRep()">
                     <i class="fas fa-plus"></i> إضافة مندوب
                 </button>
@@ -852,7 +942,7 @@
                     <button id="columnsBtn" class="export-btn columns-btn" onclick="openColumnsModal()">
                         <span class="btn-icon"><i class="fas fa-columns"></i></span>
                         <span class="btn-text">اختيار الأعمدة</span>
-                        <span id="columnsBadge" class="columns-badge">9</span>
+                        <span id="columnsBadge" class="columns-badge">10</span>
                     </button>
                 </div>
                 <div class="export-options no-print">
@@ -910,7 +1000,7 @@
                                     <label class="column-checkbox">
                                         <input type="checkbox" value="name" checked>
                                         <span class="checkmark"></span>
-                                        <span class="column-name">اسم المندوب</span>
+                                        <span class="column-name"> سفير العلامة التجارية</span>
                                     </label>
                                 </div>
                                 <div class="column-item">
@@ -931,50 +1021,50 @@
                                     <label class="column-checkbox">
                                         <input type="checkbox" value="target_customers" checked>
                                         <span class="checkmark"></span>
-                                        <span class="column-name">عدد العملاء المستهدفين</span>
+                                        <span class="column-name"> العملاء المستهدفين</span>
                                     </label>
                                 </div>
                                 <div class="column-item">
                                     <label class="column-checkbox">
                                         <input type="checkbox" value="late_customers" checked>
                                         <span class="checkmark"></span>
-                                        <span class="column-name">عدد العملاء المتأخرين</span>
+                                        <span class="column-name"> العملاء المتأخرين</span>
                                     </label>
                                 </div>
                                 <div class="column-item">
                                     <label class="column-checkbox">
                                         <input type="checkbox" value="total_orders" checked>
                                         <span class="checkmark"></span>
-                                        <span class="column-name">عدد الطلبات الإجمالية</span>
+                                        <span class="column-name"> الطلبات الإجمالية</span>
                                     </label>
                                 </div>
                                 <div class="column-item">
                                     <label class="column-checkbox">
                                         <input type="checkbox" value="pending_orders" checked>
                                         <span class="checkmark"></span>
-                                        <span class="column-name">عدد الطلبات المعلقة</span>
+                                        <span class="column-name"> الطلبات المعلقة</span>
                                     </label>
                                 </div>
                                 <div class="column-item">
                                     <label class="column-checkbox">
                                         <input type="checkbox" value="interested_customers" checked>
                                         <span class="checkmark"></span>
-                                        <span class="column-name">عدد العملاء المهتمين والمحتملين</span>
+                                        <span class="column-name"> العملاء المهتمين والمحتملين</span>
                                     </label>
                                 </div>
-                                <div class="column-item">
-                                    <label class="column-checkbox">
-                                        <input type="checkbox" value="achieved_target_percentage" checked>
+                         	<div class="column-item">
+                                        <label class="column-checkbox">
+                                        <input type="checkbox" value="active_agreements_count" checked>
                                         <span class="checkmark"></span>
-                                        <span class="column-name">نسبة التارجت المتحقق</span>
-                                    </label>
+                                        <span class="column-name">  الاتفاقيات النشطة</span>
+                                        </label>
                                 </div>
-                                <div class="column-item">
-                                    <label class="column-checkbox">
-                                        <input type="checkbox" value="achieved_target_amount" checked>
+  				<div class="column-item">
+                                        <label class="column-checkbox">
+                                        <input type="checkbox" value="inactive_agreements_count" checked>
                                         <span class="checkmark"></span>
-                                        <span class="column-name">كمية التارجت المتحقق</span>
-                                    </label>
+                                        <span class="column-name">  الاتفاقيات غير النشطة</span>
+                                        </label>
                                 </div>
                             </div>
                         </div>
@@ -999,30 +1089,136 @@
                 </button>
             </div>
         </div>
-
         <div class="table-filters">
             <div class="search-box">
                 <input type="text" class="search-input" placeholder="بحث..." id="searchInput">
                 <i class="fas fa-search search-icon"></i>
             </div>
 
-            <div>
-                <div class="d-flex align-items-center mb-3 gap-2">
-                    <i class="fas fa-filter text-secondary"></i>
-                    <select id="filterSelect" onchange="applyFilter()" class="form-select w-auto">
-                        <option value="">الكل</option>
-                        <option value="late_customers">عملاء متأخرون</option>
-                        <option value="pending_orders">طلبات معلقة</option>
-                        <option value="interested_customers">عملاء مهتمون</option>
-                    </select>
+
+
+    <div class="d-flex align-items-center gap-2">
+        <!-- Filter Dropdown -->
+        <div class="d-flex align-items-center gap-2">
+            <i class="fas fa-filter text-secondary"></i>
+            <select id="filterSelect" onchange="applyFilter()" class="form-select w-auto">
+                <option value="">الكل</option>
+                <option value="late_customers">عملاء متأخرون</option>
+                <option value="pending_orders">طلبات معلقة</option>
+                <option value="interested_customers">عملاء مهتمون</option>
+            </select>
+        </div>
+
+<div class="bulk-actions no-print ms-2">
+  <div class="dropdown">
+
+    <button 
+      class="btn btn-outline-secondary dropdown-toggle" 
+      id="bulkActionsBtn" 
+      type="button" 
+      data-bs-toggle="dropdown" 
+      aria-expanded="false" 
+      disabled>
+      تنفيذ الإجراء
+      <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+    </button>
+
+
+    <ul class="dropdown-menu" aria-labelledby="bulkActionsBtn" id="bulkActionsDropdown">
+      <li>
+        <button class="status-dropdown-item" data-action="activate">تفعيل الحساب</button> 
+      </li>
+      <li>
+        <button class="status-dropdown-item" data-action="deactivate">تعطيل الحساب</button> 
+      </li>
+    </ul>
+  </div>
+</div>    
+    </div>
+</div>
+            </div>
+        <div id="passwordModal"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">تغيير كلمة المرور</h3>
+                        <button onclick="closePasswordModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <form id="passwordForm" action="{{ route('salesrep.password.change', ['salesrep' => '__ID__']) }}"
+                        method="POST">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" id="salesRepId" name="salesRepId" value="">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">كلمة المرور الجديدة</label>
+                                <input type="password" id="salesrepPassword" name="salesrepPassword" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">تأكيد كلمة المرور</label>
+                                <input type="password" id="confirmPassword" name="confirmPassword" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                            </div>
+ <div class="flex justify-end space-x-3 pt-2">
+                                <button type="button" onclick="closePasswordModal()"
+                                    class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                    إلغاء
+                                </button> &nbsp;&nbsp;&nbsp;
+                                <button type="submit"
+                                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">
+                                    حفظ كلمة المرور
+                                </button>
+                            </div>
+
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
 
+<!-- Delete Modal -->
+ <div id="deleteModal"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 p-4">
+
+<form id="deleteForm" action="{{ route('sales-reps.destroy', ['sales_rep' => '__ID__']) }}" method="POST">
+    @csrf
+            @csrf
+            @method('DELETE')
+            <input type="hidden" id="deleteSalesRepId" name="salesRepId">
+
+            <h3 class="text-lg font-bold text-gray-900 mb-3">تأكيد الحذف</h3>
+            <p id="deleteMessage" class="text-gray-600 mb-5">
+                هل أنت متأكد أنك تريد حذف هذا المستخدم؟ هذا الإجراء لا يمكن التراجع عنه.
+            </p>
+
+<div class="flex justify-end pt-2">
+    <button type="button" onclick="closeDeleteModal()"
+        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 mr-4">
+        إلغاء
+    </button>&nbsp;&nbsp;&nbsp;&nbsp;
+    <button type="submit"
+        class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition">
+        حذف
+    </button>
+</div>
+
+        </form>
+    </div>
+</div>
+
         <div class="table-responsive">
-            <div class="pdf-content">
+            <div class="pdf-content" id="pdf-content">
                 <div class="pdf-header" style="display: none;">
-                    <div
+		<div
                         class="header-content d-flex align-items-center justify-content-between flex-wrap mb-4 p-3 shadow rounded bg-white">
                         <div class="d-flex flex-column align-items-center text-center mx-auto">
                             <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="header-logo mb-2" />
@@ -1032,21 +1228,25 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>اسم المندوب</th>
-                            <th>تاريخ الالتحاق بالعمل</th>
-                            <th>مدة العمل</th>
-                            <th>عدد العملاء المستهدفين</th>
-                            <th>عدد العملاء المتأخرين</th>
-                            <th>عدد الطلبات الإجمالية</th>
-                            <th>عدد الطلبات المعلقة</th>
-                            <th>عدد العملاء المهتمين والمحتملين</th>
-                            <th>نسبة التارجت المتحقق</th>
-                            <th>كمية التارجت المتحقق</th>
-                            <th class="no-print">الإجراءات</th>
+				<th class="no-print">
+                                <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAllReps()">
+                            </th>
+<th data-column="image">الصورة الشخصية</th>
+                        <th data-column="name"> سفير العلامة التجارية</th>
+                        <th data-column="start_work_date">تاريخ الالتحاق بالعمل</th>
+                        <th data-column="work_duration">مدة العمل</th>
+                        <th data-column="target_customers"> العملاء المستهدفين</th>
+                        <th data-column="late_customers"> العملاء المتأخرين</th>
+                        <th data-column="total_orders"> الطلبات الإجمالية</th>
+                        <th data-column="pending_orders"> الطلبات المعلقة</th>
+                        <th data-column="interested_customers"> العملاء المهتمين</th>
+			<th data-column="active_agreements_count"> الاتفاقيات النشطة</th>
+			<th data-column="inactive_agreements_count"> الاتفاقيات غير النشطة</th> 
+                           <th class="no-print">الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        <!-- Data will be inserted here -->
+  <!-- Data will be inserted here -->
                     </tbody>
                 </table>
                 <div class="pdf-footer" style="display: none;">
@@ -1063,11 +1263,14 @@
 
     @endsection
     @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
     <script>
         let salesRepsData = [];
         let currentFilteredReps = [];
         // Initialize column selector
         document.addEventListener('DOMContentLoaded', function() {
+    setupBulkActions();
 
         salesRepsData = @json($salesReps);
         currentFilteredReps = [...salesRepsData];
@@ -1082,8 +1285,8 @@
                 rep.name.toLowerCase().includes(searchTerm) ||
                 rep.start_work_date.toLowerCase().includes(searchTerm)
             );
-            });
             renderTable(currentFilteredReps);
+            });
         });
 // Export dropdown functionality
             const exportBtn = document.getElementById('exportBtn');
@@ -1110,7 +1313,7 @@
                     if (exportType === 'csv') {
                         exportSalesReps('csv', selectedColumns);
                     } else if (exportType === 'pdf') {
-                        exportToPDF(selectedColumns);
+                        exportPDF(selectedColumns);
                     }else{
                         exportSalesReps();
                     }
@@ -1124,7 +1327,32 @@
             dropdown.addEventListener('click', function(e) {
                 e.stopPropagation();
             });
+function setupBulkActions() {
+    document.getElementById('bulkActionsBtn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        this.closest('.dropdown').classList.toggle('active');
+    });
 
+    document.querySelectorAll('#bulkActionsDropdown .status-dropdown-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const action = this.getAttribute('data-action');
+            const selectedIds = Array.from(document.querySelectorAll('.rep-checkbox:checked'))
+                .map(checkbox => checkbox.value);
+
+            if (selectedIds.length === 0) {
+                alert('يرجى تحديد مندوب واحد على الأقل');
+                return;
+            }
+
+            if (confirm(`هل أنت متأكد من أنك تريد ${action === 'activate' ? 'تفعيل' : 'تعطيل'} ${selectedIds.length} مندوب؟`)) {
+                performBulkAction(selectedIds, action);
+            }
+        });
+    });
+}
         // Toggle table columns based on selection
         function toggleTableColumns() {
             Object.keys(selectedColumns).forEach(colId => {
@@ -1164,12 +1392,31 @@
     row.className = 'hover:bg-gray-50';
 
     row.innerHTML = `
-        <td class="col-name px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-700">
-            <span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
-                ${rep.name}
-            </span>
+    <td class="no-print">
+            <input type="checkbox" class="rep-checkbox" value="${rep.id}"
+                   data-status="${rep.account_status}"
+                   onchange="updateBulkActionsButton()">
         </td>
 
+<td class="px-4 py-2 text-center">
+  ${rep.personal_image
+    ? `<img src="${rep.personal_image}" alt="شعار" class="h-16 w-16 mx-auto rounded-full border object-cover" />`
+    : '—'}
+</td>
+<td class="col-name px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-700" x-data="{ deleteModalOpen: false }">
+    <div class="flex flex-col items-start space-y-1">
+        <div class="flex items-center space-x-2">
+            <a href="/sales-reps/${rep.id}" style="text-decoration: none;">
+                <span class="text-base text-blue-800 bg-blue-100 px-3 py-1 rounded-full">
+                    ${rep.name}
+                </span>
+            </a>
+            
+ <span class="text-xs font-medium px-2 py-0.5 rounded-full
+            ${rep.account_status === 'inactive' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">
+            ${rep.account_status === 'inactive' ? 'معطل' : 'نشط'}
+        </span>
+</td>
         <td class="col-start-date font-bold px-6 py-4 whitespace-nowrap text-sm text-gray-800">
             ${formatDateForDisplay(rep.start_work_date)}
         </td>
@@ -1178,54 +1425,66 @@
             ${rep.work_duration}
         </td>
 
-        <td class="col-target-customers px-6 py-4 whitespace-nowrap text-sm text-center">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                ${rep.target_customers}
-            </span>
-        </td>
-
-        <td class="col-late-customers px-4 py-3 whitespace-nowrap text-sm text-center">
-            <span class="${
-                rep.late_customers > 0
-                    ? 'inline-flex items-center px-2 py-0.5 rounded-md bg-red-300 text-red-800 font-semibold'
-                    : 'text-gray-500'
-            }">
-                ${rep.late_customers}
-            </span>
-        </td>
-
-        <td class="col-total-orders px-6 py-4 whitespace-nowrap text-sm text-center">
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-green-100 text-green-800">
-                ${rep.total_orders}
-            </span>
-        </td>
-
-        <td class="col-pending-orders px-4 py-3 whitespace-nowrap text-sm text-center">
-            <span class="${
-                rep.pending_orders > 0
-                    ? 'inline-flex items-center px-2 py-0.5 rounded-md bg-orange-300 text-orange-800 font-semibold'
-                    : 'text-gray-500'
-            }">
-                ${rep.pending_orders}
-            </span>
-        </td>
-
-        <td class="col-interested-customers px-6 py-4 whitespace-nowrap text-sm text-center">
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-100 text-purple-800">
-                ${rep.interested_customers}
-            </span>
-        </td>
-
-       <td class="col-achieved-target-percentage px-6 py-4 whitespace-nowrap text-sm text-center">
-    <span class="${getAchievementClass(rep.achieved_target_percentage)}">
-        ${rep.achieved_target_percentage !== undefined ? rep.achieved_target_percentage + '%' : 'N/A'}
-    </span>
+<td class="col-target-customers px-6 py-4 whitespace-nowrap text-sm text-center">
+    <a href="/sales-reps/${rep.id}/clients" style="text-decoration: none;">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" style="font-size:14px;font-weight:800;">
+            ${rep.target_customers}
+        </span>
+    </a>
 </td>
 
-<td class="col-achieved-target-amount px-6 py-4 whitespace-nowrap text-sm text-center">
-    <span class="${getAchievementClass(rep.achieved_target_percentage)}">
-        ${rep.achieved_target_amount !== undefined ? rep.achieved_target_amount : 'N/A'}
-    </span>
+<td class="col-late-customers px-4 py-3 whitespace-nowrap text-sm text-center">
+    <a href="/sales-reps/${rep.id}/clients" style="text-decoration: none;">
+        <span class="${
+            rep.late_customers > 0
+                ? 'inline-flex items-center px-2 py-0.5 rounded-md bg-red-300 text-red-800 font-semibold'
+                : 'text-gray-500'
+        }">
+            ${rep.late_customers}
+        </span>
+    </a>
+</td>
+<td class="col-total-orders px-6 py-4 whitespace-nowrap text-sm text-center">
+    <a href="/salesrep/${rep.id}/MyRequests" style="text-decoration: none;">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-green-100 text-green-800">
+            ${rep.total_orders}
+        </span>
+    </a>
+</td>
+
+<td class="col-pending-orders px-4 py-3 whitespace-nowrap text-sm text-center">
+    <a href="/salesrep/${rep.id}/MyRequests" style="text-decoration: none;">
+        <span class="${
+            rep.pending_orders > 0
+                ? 'inline-flex items-center px-2 py-0.5 rounded-md bg-orange-300 text-orange-800 font-semibold'
+                : 'text-gray-500'
+        }">
+            ${rep.pending_orders}
+        </span>
+    </a>
+</td>
+
+<td class="col-interested-customers px-6 py-4 whitespace-nowrap text-sm text-center">
+    <a href="/sales-reps/${rep.id}/clients" style="text-decoration: none;">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-100 text-purple-800">
+            ${rep.interested_customers}
+        </span>
+    </a>
+</td>
+<td data-column="active_agreements_count" class="col-interested-customers px-6 py-4 whitespace-nowrap text-sm text-center">
+    <a href="/salesrep/${rep.id}/agreements" style="text-decoration: none;">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-green-100 text-green-800 font-semibold">
+            ${rep.active_agreements_count}
+        </span>
+    </a>
+</td>
+
+<td data-column="inactive_agreements_count" class="col-interested-customers px-6 py-4 whitespace-nowrap text-sm text-center">
+    <a href="/salesrep/${rep.id}/agreements" style="text-decoration: none;">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-orange-100 text-orange-800 font-semibold">
+            ${rep.inactive_agreements_count}
+        </span>
+    </a>
 </td>
 
         <td class="col-actions px-6 py-4 whitespace-nowrap text-sm text-gray-500 no-print">
@@ -1239,6 +1498,13 @@
                 <a href="/sales-rep/${rep.id}/targets" class="action-btn delete" title="التارجت">
                     <i class="fas fa-bullseye"></i>
                 </a>
+              <button onclick="openPasswordModal('${rep.id}')" class="action-btn edit-password">
+    <i class="fas fa-key mr-1"></i>
+</button>
+<button onclick="openDeleteModal('${rep.id}')" class="action-btn delete">
+  <i class="fas fa-trash-alt mr-1"></i>
+</button>
+
             </div>
         </td>
     `;
@@ -1246,7 +1512,6 @@
     tbody.appendChild(row);
 });
 }
-
         // Placeholder functions for buttons
         function addNewSalesRep() {
             window.location.href = "{{ route('sales-reps.create') }}";
@@ -1261,7 +1526,7 @@
         }
 
         function deleteRep(id) {
-            if (confirm('هل أنت متأكد من حذف هذا المندوب؟')) {
+            if (confirm('هل أنت متأكد من حذف هذا سفير العلامة التجارية؟')) {
                 window.location.href = `/sales-reps/${id}/delete`;
             }
         }
@@ -1320,6 +1585,159 @@
             });
         }
 
+function toggleSelectAllReps() {
+    const selectAll = document.getElementById('selectAllCheckbox').checked;
+    document.querySelectorAll('.rep-checkbox').forEach(checkbox => {
+        checkbox.checked = selectAll;
+    });
+    updateBulkActionsButton();
+}
+function updateBulkActionsButton() {
+    const checkedBoxes = document.querySelectorAll('.rep-checkbox:checked');
+    const bulkActionsBtn = document.getElementById('bulkActionsBtn');
+
+    if (checkedBoxes.length > 0) {
+        bulkActionsBtn.disabled = false;
+    } else {
+        bulkActionsBtn.disabled = true;
+    }
+}
+function setupBulkActions() {
+    document.getElementById('bulkActionsBtn').addEventListener('click', function(e) {
+        esetupBulkActions.stopPropagation();
+        this.closest('.dropdown').classList.toggle('active');
+    });
+
+   document.querySelectorAll('#bulkActionsDropdown .status-dropdown-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const action = this.getAttribute('data-action');
+        const selectedIds = Array.from(document.querySelectorAll('.rep-checkbox:checked'))
+            .map(checkbox => checkbox.value);
+
+        if (selectedIds.length === 0) {
+            alert('يرجى تحديد مندوب واحد على الأقل');
+            return;
+        }
+
+        if (confirm(`هل أنت متأكد من أنك تريد ${action === 'activate' ? 'تفعيل' : 'تعطيل'} ${selectedIds.length} مندوب؟`)) {
+            performBulkAction(selectedIds, action);
+        }
+    });
+});
+}
+function openPasswordModal(salesRepId) {
+    document.getElementById('salesRepId').value = salesRepId;
+    const form = document.getElementById('passwordForm');
+    form.action = form.action.replace('__ID__', salesRepId);
+    document.getElementById('passwordModal').classList.remove('hidden');
+}
+
+function closePasswordModal() {
+    document.getElementById('passwordModal').classList.add('hidden');
+    document.getElementById('passwordForm').reset();
+}
+
+function openDeleteModal(salesRepId) {
+    document.getElementById('deleteSalesRepId').value = salesRepId;
+    const form = document.getElementById('deleteForm');
+    form.action = form.action.replace('__ID__', salesRepId);
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+    document.getElementById('deleteForm').reset();
+}
+
+
+document.getElementById('passwordForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const form = this;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const newPassword = document.getElementById('salesrepPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (newPassword !== confirmPassword) {
+        alert('كلمة المرور وتأكيدها غير متطابقين');
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'جاري الحفظ...';
+
+    try {
+        const response = await fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                _method: 'PUT',
+                salesrepPassword: newPassword,
+                salesrepPassword_confirmation: confirmPassword
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            // Handle validation errors
+            if (data.errors) {
+                let errorMessages = [];
+                for (const field in data.errors) {
+                    errorMessages.push(...data.errors[field]);
+                }
+                alert(errorMessages.join('\n'));
+            } else {
+                throw new Error(data.message || 'حدث خطأ أثناء تحديث كلمة المرور');
+            }
+            return;
+        }
+
+        alert(data.message || 'تم تحديث كلمة المرور بنجاح');
+        closePasswordModal();
+        window.location.reload();
+    } catch (error) {
+        console.error('Error:', error);
+        alert(error.message || 'حدث خطأ غير متوقع');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'حفظ كلمة المرور';
+    }
+});
+function performBulkAction(ids, action) {
+    const url = `admin/sales-reps/bulk-${action}`; // Updated endpoint
+    const token = document.querySelector('meta[name="csrf-token"]').content;
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': token,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ ids: ids })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(`تم ${action === 'activate' ? 'تفعيل' : 'تعطيل'} الحسابات المحددة بنجاح`);
+            window.location.reload();
+        } else {
+            alert('حدث خطأ أثناء تنفيذ العملية: ' + (data.message || ''));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('حدث خطأ أثناء تنفيذ العملية');
+    });
+}
         function toggleSelectAll() {
             const checkboxes = document.querySelectorAll('.column-checkbox input');
             const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
@@ -1363,17 +1781,17 @@
         function updateTableColumns(selectedColumns) {
     // Map between checkbox values and column classes/names
     const columnMapping = {
-        'name': 'اسم المندوب',
+        'name': ' سفير العلامة التجارية',
         'start_work_date': 'تاريخ الالتحاق بالعمل',
         'work_duration': 'مدة العمل',
-        'target_customers': 'عدد العملاء المستهدفين',
-        'late_customers': 'عدد العملاء المتأخرين',
-        'total_orders': 'عدد الطلبات الإجمالية',
-        'pending_orders': 'عدد الطلبات المعلقة',
-        'interested_customers': 'عدد العملاء المهتمين والمحتملين',
-        'achieved_target_percentage': 'نسبة التارجت المتحقق',
-        'achieved_target_amount': 'كمية التارجت المتحقق',
-    };
+        'target_customers': ' العملاء المستهدفين',
+        'late_customers': ' العملاء المتأخرين',
+        'total_orders': ' الطلبات الإجمالية',
+        'pending_orders': ' الطلبات المعلقة',
+        'interested_customers': ' العملاء المهتمين والمحتملين',
+  	'active_agreements_count': '  الاتفاقيات النشطة',
+        'inactive_agreements_count': '  الاتفاقيات غير النشطة',	    
+};
 
     // Get all table headers
     const headers = document.querySelectorAll('.data-table thead th');
@@ -1421,16 +1839,16 @@ function exportSalesReps(type = 'csv', selectedColumns = null) {
     }
 
     const columnMap = {
-        'name': 'اسم المندوب',
+        'name': ' سفير العلامة التجارية',
         'start_work_date': 'تاريخ الالتحاق بالعمل',
         'work_duration': 'مدة العمل',
-        'target_customers': 'عدد العملاء المستهدفين',
-        'late_customers': 'عدد العملاء المتأخرين',
-        'total_orders': 'عدد الطلبات الإجمالية',
-        'pending_orders': 'عدد الطلبات المعلقة',
-        'interested_customers': 'عدد العملاء المهتمين والمحتملين',
-        'achieved_target_percentage': 'نسبة التارجت المتحقق',
-        'achieved_target_amount': 'كمية التارجت المتحقق',
+        'target_customers': ' العملاء المستهدفين',
+        'late_customers': ' العملاء المتأخرين',
+        'total_orders': ' الطلبات الإجمالية',
+        'pending_orders': ' الطلبات المعلقة',
+        'interested_customers': ' العملاء المهتمين والمحتملين',
+        'active_agreements_count': '  الاتفاقيات النشطة',
+        'inactive_agreements_count': '  الاتفاقيات غير النشطة',
     };
 
     const headers = selectedColumns.map(key => columnMap[key] || key);
@@ -1471,65 +1889,348 @@ function exportSalesReps(type = 'csv', selectedColumns = null) {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-    } else if (type === 'pdf') {
-        exportToPDF(selectedColumns);
+    } else if (type === 'pdf') {        
+exportPDF(selectedColumns);
     }
 }
+function fixArabicText(text) {
+    return text
+        .replace(/\(/g, '⁽')
+        .replace(/\)/g, '⁾')
+        .replace(/\+/g, '＋');
+}
+
+function exportPDF(selectedColumns) {
+    const originalContent = document.getElementById('pdf-content');
+
+    const clonedHeader = originalContent.querySelector('.pdf-header')?.cloneNode(true);
+    const clonedFooter = originalContent.querySelector('.pdf-footer')?.cloneNode(true);
+const originalTable = originalContent.querySelector('table');
+const clonedTable = originalTable?.cloneNode(true);
+
+    const pdfContainer = document.createElement('div');
+    pdfContainer.classList.add('pdf-export-mode');
+    pdfContainer.style.padding = '10px';
+
+    // Clean header
+    if (clonedHeader) {
+        clonedHeader.style.display = 'block';
+        clonedHeader.style.boxShadow = 'none';
+        pdfContainer.appendChild(clonedHeader);
+    }
+
+    // Filter columns in the cloned table
+if (clonedTable) {
+    const headers = clonedTable.querySelectorAll('thead th');
+    
+    headers.forEach((header, index) => {
+        const columnKey = header.getAttribute('data-column')?.trim();
+
+        // If column is not selected or it's a no-print column, hide it
+        if (!selectedColumns.includes(columnKey) || header.classList.contains('no-print')) {
+            header.style.display = 'none';
+            clonedTable.querySelectorAll(`tbody tr`).forEach(row => {
+                if (row.cells[index]) {
+                    row.cells[index].style.display = 'none';
+                }
+            });
+        }
+    });
+
+    // ✅ Fix Arabic punctuation in all table cells
+    clonedTable.querySelectorAll('td, th').forEach(cell => {
+        if (cell.textContent) {
+            cell.textContent = fixArabicText(cell.textContent);
+        }
+    });
+
+    pdfContainer.appendChild(clonedTable);
+}
+    // Footer
+    if (clonedFooter) {
+        clonedFooter.style.display = 'block';
+        pdfContainer.appendChild(clonedFooter);
+    }        
+        // Handle images - replace with placeholder if CORS issues
+        originalContent.querySelectorAll('img').forEach(img => {
+            if (!img.complete || typeof img.naturalWidth === "undefined" || img.naturalWidth === 0) {
+                img.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Crect fill="%23ddd" width="100" height="100"/%3E%3Ctext fill="%23666" font-family="Arial" font-size="10" dy=".35em" text-anchor="middle" x="50" y="50"%3ENo Image%3C/text%3E%3C/svg%3E';
+            }
+        });
+        
+        // Create a temporary container
+        const container = document.createElement('div');
+container.appendChild(pdfContainer);
+        document.body.appendChild(container);
+        
+        // PDF options
+        const options = {
+            margin: [20, 10, 20, 10], // top, right, bottom, left
+            filename: `مندوبي_المبيعات_${new Date().toISOString().slice(0, 10)}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { 
+                scale: 1,
+                logging: true,
+                useCORS: true,
+                allowTaint: true,
+                scrollX: 0,
+                scrollY: 0
+            },
+            jsPDF: { 
+                unit: 'mm', 
+		format: [594, 420],
+                orientation: 'landscape'
+            },
+            pagebreak: { 
+                mode: ['avoid-all', 'css', 'legacy'] 
+            }
+        };
+        
+        // Generate PDF
+        html2pdf()
+            .set(options)
+            .from(container)
+            .toPdf()
+            .get('pdf')
+            .then(function(pdf) {
+                // Add page numbers
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    pdf.setPage(i);
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(100);
+                    pdf.text(`صفحة ${i} من ${totalPages}`, pdf.internal.pageSize.getWidth() - 20, pdf.internal.pageSize.getHeight() - 10);
+                }
+            })
+            .save()
+            .then(() => {
+                // Clean up
+                document.body.removeChild(container);
+            });
+    }
+
+    function exportNPDF(selectedColumns) {
+
+    const originalContent = document.querySelector('.pdf-content');
+
+    // Temporarily show the header/footer
+    const header = originalContent.querySelector('.pdf-header');
+    const footer = originalContent.querySelector('.pdf-footer');
+    header.style.display = 'block';
+    footer.style.display = 'block';
+
+    // Clone the full content (with table, header, footer)
+    const clonedContent = originalContent.cloneNode(true);
+
+    // Restore visibility (in case clonedContent inherited "none")
+    clonedContent.querySelector('.pdf-header').style.display = 'block';
+    clonedContent.querySelector('.pdf-footer').style.display = 'block';
+
+    // Clone and manipulate the table only (so live UI isn't touched)
+    const table = clonedContent.querySelector('.data-table');
+
+    // Remove checkbox column
+    const selectAllHeader = table.querySelector('thead th:first-child');
+    if (selectAllHeader && selectAllHeader.querySelector('input[type="checkbox"]')) {
+        selectAllHeader.remove();
+        table.querySelectorAll('tbody tr').forEach(row => {
+            if (row.cells[0]?.querySelector('input[type="checkbox"]')) {
+                row.deleteCell(0);
+            }
+        });
+    }
+
+    // Remove action column
+    const headers = table.querySelectorAll('thead th');
+    const actionHeader = Array.from(headers).find(th => th.textContent.trim() === 'الإجراءات');
+    if (actionHeader) {
+        const actionIndex = Array.from(headers).indexOf(actionHeader);
+        actionHeader.remove();
+        table.querySelectorAll('tbody tr').forEach(row => {
+            if (row.cells[actionIndex]) {
+                row.deleteCell(actionIndex);
+            }
+        });
+    }
+
+    // Hide unselected columns
+    table.querySelectorAll('thead th').forEach((header, index) => {
+        const columnName = header.textContent.trim();
+        const columnKey = getRepColumnKey(columnName);
+
+        if (!selectedColumns.includes(columnKey)) {
+            header.style.display = 'none';
+            table.querySelectorAll('tbody tr').forEach(row => {
+                if (row.cells[index]) {
+                    row.cells[index].style.display = 'none';
+                }
+            });
+        }
+    });
+
+    // Wrap the cloned content into a new container
+    const wrapper = document.createElement('div');
+    wrapper.appendChild(clonedContent);
+
+    // Generate PDF
+    html2pdf()
+        .set({
+            margin: 10,
+            filename: `تقرير_سفراء العلامة التجارية_${new Date().toISOString().slice(0, 10)}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' }
+        })
+        .from(wrapper)
+        .save()
+        .then(() => {
+            // Optional: Hide header/footer again
+            header.style.display = 'none';
+            footer.style.display = 'none';
+        });
+}
+
+
+function exportMPDF(selectedColumns) {
+    // Clone the full PDF content (including table, header, footer)
+    const fullContent = document.querySelector('.pdf-content').cloneNode(true);
+
+    // Show the header and footer
+    const header = fullContent.querySelector('.pdf-header');
+    const footer = fullContent.querySelector('.pdf-footer');
+    if (header) header.style.display = 'block';
+    if (footer) footer.style.display = 'block';
+
+    // Reference the table inside the cloned content
+    const table = fullContent.querySelector('.data-table');
+
+    // Remove the select all checkbox column if it exists
+    const selectAllHeader = table.querySelector('thead th:first-child');
+    if (selectAllHeader && selectAllHeader.querySelector('input[type="checkbox"]')) {
+        selectAllHeader.remove();
+        table.querySelectorAll('tbody tr').forEach(row => {
+            if (row.cells[0] && row.cells[0].querySelector('input[type="checkbox"]')) {
+                row.deleteCell(0);
+            }
+        });
+    }
+
+    // Remove the "الإجراءات" column
+    const headers = table.querySelectorAll('thead th');
+    const actionHeader = Array.from(headers).find(th => th.textContent.trim() === 'الإجراءات');
+    if (actionHeader) {
+        const actionIndex = Array.from(headers).indexOf(actionHeader);
+        actionHeader.remove();
+        table.querySelectorAll('tbody tr').forEach(row => {
+            if (row.cells[actionIndex]) {
+                row.deleteCell(actionIndex);
+            }
+        });
+    }
+
+    // Hide columns not in selectedColumns
+    const allHeaders = table.querySelectorAll('thead th');
+    allHeaders.forEach((header, index) => {
+        const columnName = header.textContent.trim();
+        const columnKey = getRepColumnKey(columnName); // You must define this mapping function
+
+        if (!selectedColumns.includes(columnKey)) {
+            header.style.display = 'none';
+            table.querySelectorAll('tbody tr').forEach(row => {
+                if (row.cells[index]) {
+                    row.cells[index].style.display = 'none';
+                }
+            });
+        }
+    });
+
+    // Setup options for html2pdf
+    const options = {
+        margin: 10,
+        filename: `تقرير_سفراء العلامة التجارية_${new Date().toISOString().slice(0, 10)}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' }
+    };
+
+    // Generate and save PDF
+    html2pdf().set(options).from(fullContent).save();
+}
+
+
 
 function exportToPDF(selectedColumns) {
     try {
-        // Clone the print area
-        const element = document.getElementById('print-area').cloneNode(true);
+        // 1. Get the original element and clone it
+        const originalElement = document.getElementById('print-area');
+        const element = originalElement.cloneNode(true);
+        
+        // 2. Temporarily add to DOM (but keep invisible)
+        element.style.position = 'fixed';
+        element.style.left = '-10000px';
+        element.style.top = '0';
+        element.style.width = originalElement.offsetWidth + 'px';
+        document.body.appendChild(element);
 
-        // Hide elements that shouldn't be in PDF
+        // 3. Hide elements that shouldn't be in PDF
         const elementsToHide = element.querySelectorAll('.no-print, .table-actions, .table-filters, .pagination');
         elementsToHide.forEach(el => el.style.display = 'none');
 
-        // Show the PDF header and footer
+        // 4. Show PDF header and footer with proper styling
         const pdfHeader = element.querySelector('.pdf-header');
         const pdfFooter = element.querySelector('.pdf-footer');
-        if (pdfHeader) pdfHeader.style.display = 'block';
-        if (pdfFooter) pdfFooter.style.display = 'block';
+        
+        if (pdfHeader) {
+            pdfHeader.style.display = 'block';
+            pdfHeader.style.visibility = 'visible';
+            pdfHeader.style.width = '100%';
+        }
+        
+        if (pdfFooter) {
+            pdfFooter.style.display = 'block';
+            pdfFooter.style.visibility = 'visible';
+            pdfFooter.style.width = '100%';
+            pdfFooter.style.minHeight = '50px';
+            pdfFooter.style.padding = '10px';
+        }
 
-        // Handle column visibility
+        // 5. Ensure table is visible and properly sized
+        const table = element.querySelector('.data-table');
+        if (table) {
+table.style.width = '100%';
+            table.style.visibility = 'visible';
+            table.style.display = 'table';
+        }
+
+        // 6. Handle column visibility
         const columnMap = {
-            'name': 'اسم المندوب',
+            'name': ' سفير العلامة التجارية',
             'start_work_date': 'تاريخ الالتحاق بالعمل',
             'work_duration': 'مدة العمل',
-            'target_customers': 'عدد العملاء المستهدفين',
-            'late_customers': 'عدد العملاء المتأخرين',
-            'total_orders': 'عدد الطلبات الإجمالية',
-            'pending_orders': 'عدد الطلبات المعلقة',
-            'interested_customers': 'عدد العملاء المهتمين والمحتملين',
-            'achieved_target_percentage': 'نسبة التارجت المتحقق',
-            'achieved_target_amount': 'كمية التارجت المتحقق'
+            'target_customers': ' العملاء المستهدفين',
+            'late_customers': ' العملاء المتأخرين',
+            'total_orders': ' الطلبات الإجمالية',
+            'pending_orders': ' الطلبات المعلقة',
+            'interested_customers': ' العملاء المهتمين والمحتملين',
+            'active_agreements_count': ' الاتفاقيات النشطة',
+            'inactive_agreements_count': ' الاتفاقيات غير النشطة'
         };
 
-        // Get all table headers and cells
-        const table = element.querySelector('.data-table');
         if (table) {
             const headers = table.querySelectorAll('thead th');
             headers.forEach((header, index) => {
                 const headerText = header.textContent.trim();
                 const columnKey = Object.keys(columnMap).find(key => columnMap[key] === headerText);
 
-                // Skip action column
-                if (headerText === 'الإجراءات') {
+                // Skip action and checkbox columns
+                if (headerText === 'الإجراءات' || header.classList.contains('no-print')) {
                     header.style.display = 'none';
                     table.querySelectorAll('tbody tr').forEach(row => {
                         if (row.cells[index]) row.cells[index].style.display = 'none';
                     });
                     return;
                 }
-  if (header.classList.contains('no-print')) {
-                    header.style.display = 'none';
-                    table.querySelectorAll('tbody tr').forEach(row => {
-                        if (row.cells[index]) {
-                            row.cells[index].style.display = 'none';
-                        }
-                    });
-                    return;
-                }
+
                 // Hide if column not selected
                 if (columnKey && !selectedColumns.includes(columnKey)) {
                     header.style.display = 'none';
@@ -1540,34 +2241,54 @@ function exportToPDF(selectedColumns) {
             });
         }
 
-        // PDF options
+        // 7. PDF generation options
         const options = {
-            margin: 10,
+            margin: [15, 10, 20, 10], // top, left, bottom, right
             filename: `مندوبو_المبيعات_${new Date().toISOString().slice(0,10)}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
+            image: { 
+                type: 'jpeg', 
+                quality: 0.98 
+            },
             html2canvas: {
-                scale: 2,
+                scale: 1, // Reduced from 2 to 1 for better rendering
                 scrollX: 0,
                 scrollY: 0,
-                windowWidth: document.documentElement.offsetWidth
+                windowWidth: originalElement.scrollWidth,
+                logging: true, // Enable for debugging
+                useCORS: true,
+                allowTaint: true
             },
             jsPDF: {
                 unit: 'mm',
                 format: 'a3',
                 orientation: 'landscape',
-                compress: true
-
+                compress: true,
+                hotfixes: ['px_scaling'] // Fix pixel scaling issues
             }
         };
 
-        // Generate PDF
-        html2pdf().set(options).from(element).save();
+        // 8. Add small delay before generating PDF
+        setTimeout(() => {
+            html2pdf()
+                .set(options)
+                .from(element)
+                .save()
+                .then(() => {
+                    // Clean up
+                    document.body.removeChild(element);
+                });
+        }, 500);
 
     } catch (error) {
         console.error('PDF generation error:', error);
         alert('حدث خطأ أثناء إنشاء ملف PDF. الرجاء المحاولة مرة أخرى.');
+        
+        // Clean up even if error occurs
+        const elements = document.querySelectorAll('#print-area-clone');
+        elements.forEach(el => el.remove());
     }
 }
+
 function getAchievementClass(percentage) {
     if (percentage === undefined) return 'inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-gray-800 font-semibold';
 
@@ -1585,33 +2306,34 @@ function exportSalesReps(selectedColumns = null) {
     }
 
     const columnMap = {
-        'name': 'اسم المندوب',
+        'name': ' سفير العلامة التجارية',
         'start_work_date': 'تاريخ الالتحاق بالعمل',
         'work_duration': 'مدة العمل',
-        'target_customers': 'عدد العملاء المستهدفين',
-        'late_customers': 'عدد العملاء المتأخرين',
-        'total_orders': 'عدد الطلبات الإجمالية',
-        'pending_orders': 'عدد الطلبات المعلقة',
-        'interested_customers': 'عدد العملاء المهتمين والمحتملين',
-        'achieved_target_percentage': 'نسبة التارجت المتحقق',
-        'achieved_target_amount': 'كمية التارجت المتحقق',
-    };
+        'target_customers': ' العملاء المستهدفين',
+        'late_customers': ' العملاء المتأخرين',
+        'total_orders': ' الطلبات الإجمالية',
+        'pending_orders': ' الطلبات المعلقة',
+        'interested_customers': ' العملاء المهتمين والمحتملين',
+        'active_agreements_count': '  الاتفاقيات النشطة',
+        'inactive_agreements_count': '  الاتفاقيات غير النشطة',    };
 
     const headers = selectedColumns.map(key => columnMap[key] || key);
 
-    const data = currentFilteredReps.map(rep => {
-        const row = {};
-        selectedColumns.forEach(key => {
-        let value = (rep[key] !== undefined && rep[key] !== null) ? rep[key] : '';
-            if (key === 'achieved_target_percentage') {
-                value = rep.achieved_target_percentage + '%';
-            } else if (key === 'start_work_date') {
-                value = formatDateForDisplay(rep.start_work_date);
-            }
-            row[key] = value;
-        });
-        return row;
+const data = currentFilteredReps.map(rep => {
+    const row = {};
+    selectedColumns.forEach(key => {
+        let value = '';
+
+        if (key === 'start_work_date' && rep.start_work_date) {
+            value = formatDateForDisplay(rep.start_work_date);
+        } else if (rep[key] !== undefined && rep[key] !== null) {
+            value = rep[key];
+        }
+
+        row[key] = value;
     });
+    return row;
+});
 
     // Prepare worksheet data: headers + rows
     const wsData = [headers, ...data.map(row => selectedColumns.map(key => row[key]))];
@@ -1634,6 +2356,26 @@ function exportSalesReps(selectedColumns = null) {
     // Trigger file download
     XLSX.writeFile(workbook, `مندوبو_المبيعات_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
+
+function getColumnKey(columnName) {
+const columnMap = {
+    'سفير العلامة التجارية': 'name',
+    'تاريخ الالتحاق بالعمل': 'start_work_date',
+    'مدة العمل': 'work_duration',
+    'العملاء المستهدفين': 'target_customers',
+    'العملاء المتأخرين': 'late_customers',
+    'الطلبات الإجمالية': 'total_orders',
+    'الطلبات المعلقة': 'pending_orders',
+    'العملاء المهتمين والمحتملين': 'interested_customers',
+    'الاتفاقيات النشطة': 'active_agreements_count',
+    'الاتفاقيات غير النشطة': 'inactive_agreements_count',
+};
+
+    return columnMap[columnName] || columnName;
+}
+
+
+
  function formatDateForDisplay(date) {
             if (!date) return "";
             try {

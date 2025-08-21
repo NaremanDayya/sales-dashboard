@@ -1,4 +1,4 @@
-@extends('layouts.table')
+@extends('layouts.master')
 @section('title','جدول العملاء')
 @push('styles')
 <style>
@@ -31,7 +31,44 @@
         direction: rtl;
         padding: 20px;
     }
+   .date-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 
+.date-filter input[type="date"] {
+    height: 38px;
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    padding: 0 12px;
+    font-family: 'Tajawal', sans-serif;
+}
+    .clickable-cell {
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .clickable-cell:hover {
+        background-color: #f1f5f9; /* light hover background */
+        color: #4154f1; /* your brand blue */
+        text-decoration: underline; /* shows it's clickable */
+    }
+
+.date-filter input[type="date"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+ .table-html {
+        width: 100%;
+    }
+.main, #main {
+    flex: 1 0 auto !important;
+    padding-bottom: 80px !important; 
+}
+    .table-html.no-sidebar #main-table {
+        margin-right: 0 !important;
+        width: 100% !important;
+    }
     .export-btn-group {
         position: relative;
         display: inline-block;
@@ -402,8 +439,8 @@
     .btn {
         padding: 8px 16px;
         border-radius: 6px;
-        font-weight: 500;
-        font-size: 14px;
+        font-weight: 800 !important;
+        font-size: 14px !important;
         display: inline-flex;
         align-items: center;
         gap: 8px;
@@ -485,8 +522,8 @@
         background-color: var(--gray-100);
         color: var(--gray-600);
         font-weight: 600;
-        padding: 12px 15px;
-        text-align: right;
+        padding: 5px 8px !important;
+        text-align: center;
         border-bottom: 2px solid var(--gray-200);
         position: sticky;
         top: 0;
@@ -503,9 +540,11 @@
     }
 
     .data-table tbody td {
-        padding: 12px 15px;
+    font-weight: 700;
+    font-size: 14px;    
+    padding: 5px 8px !important;
         border-bottom: 1px solid var(--gray-200);
-        text-align: right;
+        text-align: center;
         vertical-align: middle;
     }
 
@@ -563,6 +602,11 @@
     .action-btn.delete:hover {
         color: var(--danger);
     }
+    .ltr-number {
+    direction: ltr;
+    unicode-bidi: embed;
+    display: inline-block;
+}
 
     .pagination {
         display: flex;
@@ -595,6 +639,7 @@
         color: white;
         border-color: var(--primary);
     }
+[x-cloak] { display: none !important; }
 
     .pagination-btn.disabled {
         opacity: 0.5;
@@ -675,6 +720,10 @@
         color: #222;
     }
 
+.input[type="date"].rtl {
+    direction: rtl;
+    text-align: right;
+}
     .header-text {
         color: #4154f1;
     }
@@ -786,9 +835,14 @@
     }
 </style>
 @endpush
-
+@section('favicon')
+    <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.jpg') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/img/favicon.jpg') }}">
+@endsection
 <body>
     @section('content')
+    <div class="table-html no-sidebar">
+
     <div id="print-area" class="table-container">
         <div class="table-header">
             <h2 id="title" class="table-title">العملاء</h2>
@@ -796,6 +850,11 @@
                 @if(Auth::user()->role == 'salesRep')
                 <a class="btn btn-primary" href="{{ route('sales-reps.clients.create', Auth::user()->salesRep->id) }}">
                     <i class="fas fa-plus"></i> إضافة عميل
+                </a>
+		@endif
+ 		@if(Auth::user()->role == 'admin')
+		<a class="btn btn-primary" href="{{ route('admin.shared-companies') }}">
+                    <i class="fas fa-users"></i> العملاء المشتركين
                 </a>
                 @endif
                 <div class="export-btn-group">
@@ -867,7 +926,7 @@
                                     <label class="column-checkbox">
                                         <input type="checkbox" value="company_name" checked>
                                         <span class="checkmark"></span>
-                                        <span class="column-name">اسم الشركة </span>
+                                        <span class="column-name"> الشركة </span>
                                     </label>
                                 </div>
                                 <div class="column-item">
@@ -881,7 +940,7 @@
                                     <label class="column-checkbox">
                                         <input type="checkbox" value="contact_person" checked>
                                         <span class="checkmark"></span>
-                                        <span class="column-name">اسم الشخص المسؤول</span>
+                                        <span class="column-name"> الشخص المسؤول</span>
                                     </label>
                                 </div>
                                 <div class="column-item">
@@ -912,6 +971,13 @@
                                         <span class="column-name">حالة الاهتمام </span>
                                     </label>
                                 </div>
+<div class="column-item">
+                                    <label class="column-checkbox">
+                                        <input type="checkbox" value="interested_service" checked> 
+                                        <span class="checkmark"></span>
+                                        <span class="column-name">الخدمة المهتم بها</span> 
+                                    </label>
+                                </div>
                                 <div class="column-item">
                                     <label class="column-checkbox">
                                         <input type="checkbox" value="last_contact_date" checked>
@@ -935,23 +1001,9 @@
                                 </div>
                                 <div class="column-item">
                                     <label class="column-checkbox">
-                                        <input type="checkbox" value="has_request" checked>
+                                        <input type="checkbox" value="requests_count" checked>
                                         <span class="checkmark"></span>
-                                        <span class="column-name">حالة وجود طلب </span>
-                                    </label>
-                                </div>
-                                <div class="column-item">
-                                    <label class="column-checkbox">
-                                        <input type="checkbox" value="request_type" checked>
-                                        <span class="checkmark"></span>
-                                        <span class="column-name">نوع الطلب </span>
-                                    </label>
-                                </div>
-                                <div class="column-item">
-                                    <label class="column-checkbox">
-                                        <input type="checkbox" value="response_status" checked>
-                                        <span class="checkmark"></span>
-                                        <span class="column-name">حالة الاستجابة</span>
+                                        <span class="column-name">طلبات العميل </span>
                                     </label>
                                 </div>
                             </div>
@@ -982,17 +1034,68 @@
                 <input type="text" class="search-input" placeholder="بحث..." id="searchInput">
                 <i class="fas fa-search search-icon"></i>
             </div>
+    <!-- Date input with fake Arabic placeholder -->
+<div class="flex items-center gap-2" dir="rtl">
+    <input type="text" id="fromDate" class="form-input"
+        placeholder="من تاريخ" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; direction: rtl; text-align: right; min-width: 150px;">
 
-            <div>
-                <div class="d-flex align-items-center mb-3 gap-2">
+    <input type="text" id="toDate" class="form-input"
+        placeholder="إلى تاريخ" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; direction: rtl; text-align: right; min-width: 150px;">
+
+    <button onclick="filterByDate()" class="btn btn-outline" style="padding: 8px 12px;">🔍 تصفية</button>
+    <button onclick="resetDateFilter()" class="btn btn-outline" style="padding: 8px 12px;">❌ إعادة</button>
+</div>
+                <div class="d-flex align-items-center gap-2">
                     <i class="fas fa-filter text-secondary"></i>
-                    <select id="filterSelect" onchange="applyFilter()" class="form-select w-auto">
+                    <select id="filterSelect" onchange="applyFilter()" class="form-select w-auto" style="font-weight: 700;font-size: 14px;">
                         <option value="">الكل</option>
                         <option value="interested">مهتم</option>
                         <option value="not interested">غير مهتم</option>
-                        <option value="pending">طلبات معلقة</option>
                     </select>
                 </div>
+  <div class="d-flex align-items-center gap-2">
+            <i class="fas fa-cog text-secondary"></i>
+<select id="serviceTypeFilter" onchange="applyFilter()" class="form-select w-auto" style="font-size: 14px; font-weight: 800;">
+    <option value=""> الكل</option>
+    @foreach($services as $service)
+        <option value="{{ $service->id }}">{{ $service->name }}</option>
+    @endforeach
+</select>
+        </div>
+
+                @if(Auth::user()->role == 'admin')
+<div x-data="{ open: false }">
+    <!-- Trigger Button -->
+    <button @click="open = true"
+        class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded shadow">
+        تعديل عدد أيام التأخير
+    </button>
+
+    <!-- Modal -->
+    <div x-show="open" x-cloak class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+        <div @click.away="open = false" class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+
+            <h3 class="text-lg font-bold mb-4">تعديل عدد الأيام لتأخير العميل</h3>
+
+            <form action="{{ route('settings.update') }}" method="POST">
+                @csrf
+                <div class="mb-4">
+                    <label for="late_customer_days" class="block text-sm font-medium text-gray-700">عدد الأيام</label>
+                    <input type="number" name="late_customer_days" id="late_customer_days" min="1" max="30" required
+value="{{ old('late_customer_days', \App\Models\Setting::where('key', 'late_customer_days')->value('value') ?? 3) }}"                       
+  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500">
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" @click="open = false"
+                        class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">إلغاء</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
             </div>
         </div>
 
@@ -1011,19 +1114,18 @@
                     <thead>
                         <tr>
                             <th>شعار شركة العميل</th>
-                            <th>اسم الشركة </th>
+                            <th> الشركة </th>
                             <th>مقر الشركة </th>
-                            <th>اسم الشخص المسؤول </th>
+                            <th> الشخص المسؤول </th>
                             <th>المنصب الوظيفي </th>
                             <th>رقم الجوال </th>
-                            <th>واتس اب مباشر </th>
+                            <th class="no-print">واتس اب مباشر </th>
                             <th>حالة الاهتمام </th>
-                            <th>تاریخ آخر تواصل </th>
+                    	    <th>الخدمة المهتم بها</th>
+		            <th>آخر تواصل </th>
                             <th> آخر تواصل منذ</th>
                             <th>عدد مرات التواصل </th>
-                            <th>حالة وجود طلب </th>
-                            <th>نوع الطلب </th>
-                            <th>حالة الاستجابة </th>
+                            <th>طلبات العميل </th>
                             <th class="no-print">الدردشة</th>
                         </tr>
                     </thead>
@@ -1040,7 +1142,7 @@
 
         <div class="pagination" id="pagination"></div>
     </div>
-
+</div>
     @endsection
     @push('scripts')
     <script>
@@ -1058,8 +1160,8 @@
             renderTable();
 
             // Setup event listeners
-            document.getElementById('searchInput').addEventListener('input', function(e) {
-                const searchTerm = e.target.value.toLowerCase();
+document.getElementById('searchInput').addEventListener('input', function(e) {
+const searchTerm = e.target.value.toLowerCase();
                 const filteredData = currentFilteredClients.filter(client => {
                     return (
                         (client.company_name && client.company_name.toLowerCase().includes(searchTerm)) ||
@@ -1070,8 +1172,7 @@
                     );
                 });
                 renderTable(filteredData);
-            });
-
+});
             // Export dropdown functionality
             const exportBtn = document.getElementById('exportBtn');
             const dropdown = document.getElementById('exportDropdown');
@@ -1112,6 +1213,22 @@
                 e.stopPropagation();
             });
         });
+ function toggleFakePlaceholder(input) {
+        const placeholder = document.getElementById('fakePlaceholder');
+        placeholder.style.display = input.value ? 'none' : 'block';
+    }
+
+    function resetDateFilter() {
+        const input = document.getElementById('dateFilter');
+        input.value = '';
+        toggleFakePlaceholder(input);
+        // add your reset logic here...
+    }
+
+    // Initialize on page load (in case date is pre-filled)
+    window.addEventListener('DOMContentLoaded', () => {
+        toggleFakePlaceholder(document.getElementById('dateFilter'));
+    });
 
         function renderTable(data = currentFilteredClients) {
             const tbody = document.getElementById('tableBody');
@@ -1138,19 +1255,39 @@
             data.forEach(client => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td class="px-4 py-2 text-center no-print">
-                        ${client.company_logo ? `<img src="${client.company_logo}" alt="شعار" class="h-10 mx-auto rounded-full border" />` : '—'}
-                    </td>
+<td class="px-4 py-2 text-center no-print">
+  ${client.company_logo
+    ? `<div class="h-20 w-20 mx-auto border rounded-full p-3 bg-white flex items-center justify-center">
+         <img src="${client.company_logo}" alt="شعار" class="max-h-full max-w-full object-contain" />
+       </div>`
+    : '—'}
+</td>
+
                     <td class="px-4 py-2 text-sm font-semibold text-gray-800">
-                        <a href="/sales-reps/${client.sales_rep_id}/clients/${client.client_id}" class="text-blue-600 hover:underline" target="_blank">
+                        <a href="/sales-reps/${client.sales_rep_id}/clients/${client.client_id}" class="text-blue-600 hover:underline">
                             ${client.company_name || '—'}
                         </a>
                     </td>
-                    <td class="px-4 py-2 text-sm text-gray-600">${client.address || '—'}</td>
-                    <td class="px-4 py-2 text-sm text-gray-700">${client.contact_person || '—'}</td>
-                    <td class="px-4 py-2 text-sm text-gray-700">${client.contact_position || '—'}</td>
-                    <td class="px-4 py-2 text-sm text-blue-700 font-bold">${client.phone || '—'}</td>
-                    <td class="px-4 py-2 text-sm text-center">
+<td class="px-4 py-2 text-sm text-gray-600 cursor-pointer clickable-cell"
+    onclick="window.location.href='/sales-reps/${client.sales_rep_id}/clients/${client.client_id}'">
+    <span>${client.address || '—'}</span>
+</td>
+
+<td class="px-4 py-2 text-sm text-gray-700 cursor-pointer clickable-cell"
+    onclick="window.location.href='/sales-reps/${client.sales_rep_id}/clients/${client.client_id}'">
+    <span>${client.contact_person || '—'}</span>
+</td>
+
+<td class="px-4 py-2 text-sm text-gray-700 cursor-pointer clickable-cell"
+    onclick="window.location.href='/sales-reps/${client.sales_rep_id}/clients/${client.client_id}'">
+    <span>${client.contact_position || '—'}</span>
+</td>
+<td class="px-4 py-2 text-sm text-blue-700 font-bold">
+  <span dir="ltr" class="ltr-number">
+    ${client.phone ? (client.phone.startsWith('+') ? client.phone : '+' + client.phone) : '—'}
+  </span>
+</td>
+<td class="px-4 py-2 text-sm text-center">
                         ${client.whatsapp_link ? `<a href="${client.whatsapp_link}" class="text-green-600 hover:underline" target="_blank">
                             <i class="fab fa-whatsapp"></i> تواصل
                         </a>` : '—'}
@@ -1172,26 +1309,25 @@
                             }
                         </span>
                     </td>
+		     <td class="px-4 py-2 text-sm text-blue-700 font-bold" dir="rtl">${client.interested_service || '—'}</td>
                     <td class="px-4 py-2 text-sm text-center ${ client.is_late_customer ? 'text-red-600 font-bold' : 'text-green-600 font-bold' }">${formatDateForDisplay(client.last_contact_date) || '—'}</td>
-                    <td class="px-4 py-2 text-sm text-center ${ client.is_late_customer ? 'text-red-600 font-bold' : 'text-green-600 font-bold' }">${client.contact_days_left || '—'}أيام</td>
+<td class="px-4 py-2 text-sm text-center ${client.is_late_customer ? 'text-red-600 font-bold' : 'text-green-600 font-bold'}">
+    ${client.contact_days_left ? 
+        `${client.contact_days_left} ${getArabicDaysWord(client.contact_days_left)}` : 
+        '—'
+    }
+</td>
                     <td class="px-4 py-2 text-sm text-center">
                         <span class="inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-blue-800">
                             ${client.contact_count || 0}
                         </span>
                     </td>
-                    <td class="px-4 py-2 text-sm text-center text-${client.has_request === 'يوجد' ? 'green-600 font-semibold' : 'gray-400'}">
-                        ${client.has_request || 'لا يوجد'}
-                    </td>
-                    <td class="px-4 py-2 text-sm text-center text-gray-700">
-                        ${client.request_type === 'client_data_change' ? 'تعديل بيانات العميل' :
-                        client.request_type === 'agreement_data_change' ? 'تعديل بيانات الاتفاقية' :
-                        client.request_type === 'change_last_contact_date' ? 'تعديل تاريخ آخر تواصل' :
-                        client.request_type === 'delete_message' ? 'طلب حذف رسالة' : '—'}
-                    </td>
-                    <td class="px-4 py-2 text-sm text-center text-gray-700">
-                        ${getArabicStatus(client.response_status)}
-                    </td>
-                    <td class="px-4 py-2 text-sm text-center no-print">
+<td class="px-4 py-2 text-sm text-center text-gray-400 cursor-pointer"
+    onclick="window.location.href='/salesrep/' + ${client.sales_rep_id} + '/MyRequests'">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-purple-100 text-blue-800"> 
+        ${client.requests_count || 0} 
+    </span></td>
+			<td class="px-4 py-2 text-sm text-center no-print">
                         <a href="/client/${client.client_id}/message" class="text-blue-600 hover:underline">
                             <i class="fas fa-comments"></i>
                         </a>
@@ -1211,6 +1347,17 @@
 
             window.location.href = "{{ route('sales-reps.clients.create', ['sales_rep' => ':id']) }}".replace(':id', salesRepId);
         }
+function getArabicDaysWord(number) {
+    if (number === 1) {
+        return 'يوم';
+    } else if (number === 2) {
+        return 'يومان';
+    } else if (number > 2 && number <= 10) {
+        return 'أيام';
+    } else {
+        return 'يوماً';
+    }
+}
 
         function getArabicStatus(status) {
             switch (status) {
@@ -1309,23 +1456,22 @@
             });
         }
 
-        function getColumnKey(columnName) {
-            const columnMap = {
-                'شعار شركة العميل': 'client_logo',
-                'اسم الشركة': 'company_name',
-                'مقر الشركة': 'address',
-                'اسم الشخص المسؤول': 'contact_person',
-                'المنصب الوظيفي': 'contact_position',
-                'رقم الجوال': 'phone',
-                'واتس اب مباشر': 'whatsapp_link',
-                'حالة الاهتمام': 'interest_status',
-                'تاریخ آخر تواصل': 'last_contact_date',
-                ' آخر تواصل منذ': 'contact_days_left',
-                'عدد مرات التواصل': 'contact_count',
-                'حالة وجود طلب': 'has_request',
-                'نوع الطلب': 'request_type',
-                'حالة الاستجابة': 'response_status'
-            };
+function getColumnKey(columnName) {
+const columnMap = {
+    'شعار شركة العميل': 'client_logo',
+    'الشركة': 'company_name',
+    'مقر الشركة': 'address',
+    'الشخص المسؤول': 'contact_person',
+    'المنصب الوظيفي': 'contact_position',
+    'رقم الجوال': 'phone',
+  'الخدمة المهتم بها': 'interested_service', 
+  'واتس اب مباشر': 'whatsapp_link',
+    'حالة الاهتمام': 'interest_status',
+    'آخر تواصل': 'last_contact_date',
+    'آخر تواصل منذ': 'contact_days_left',
+    'طلبات العميل': 'requests_count',
+    'عدد مرات التواصل': 'contact_count',
+};
 
             return columnMap[columnName] || columnName.toLowerCase().replace(/\s+/g, '_');
         }
@@ -1340,43 +1486,144 @@
             return Array.from(checkboxes).map(checkbox => checkbox.value);
         }
 
-        function applyFilter() {
-            const criteria = document.getElementById('filterSelect').value;
+function filterByDate() {
+    const fromDate = document.getElementById('fromDate').value;
+    const toDate = document.getElementById('toDate').value;
 
-            if (!criteria) {
-                currentFilteredClients = [...ClientsData];  // reset filter
-                renderTable(currentFilteredClients);
-                return;
-            }
+    if (!fromDate || !toDate) {
+        alert('الرجاء تحديد تاريخ البداية والنهاية');
+        return;
+    }
 
-            switch (criteria) {
-                case 'pending':
-                    currentFilteredClients = ClientsData.filter(client =>
-                        client.response_status === 'pending'
-                    );
-                    break;
+    const filteredClients = ClientsData.filter(client => {
+        const contactDate = client.last_contact_date;
 
-                case 'interested':
-                    currentFilteredClients = ClientsData.filter(client => client.interest_status === 'interested');
-                    break;
+        // تأكد أن التاريخ موجود
+        if (!contactDate) return false;
 
-                case 'not interested':
-                    currentFilteredClients = ClientsData.filter(client => client.interest_status === 'not interested');
-                    break;
+        // المقارنة بنطاق التاريخ
+        return contactDate >= fromDate && contactDate <= toDate;
+    });
 
-                default:
-                    currentFilteredClients = [...ClientsData];
-            }
+    if (filteredClients.length === 0) {
+        alert('لا توجد نتائج في الفترة المحددة');
+        return;
+    }
 
-            if (currentFilteredClients.length === 0) {
-                alert('لا يوجد عملاء يطابقون معايير التصفية.');
-                return;
-            }
+    currentFilteredClients = filteredClients;
+    renderTable(currentFilteredClients);
+}
+function resetDateFilter() {
+    document.getElementById('fromDate').value = '';
+    document.getElementById('toDate').value = '';
+    currentFilteredClients = [...ClientsData];
+    renderTable(currentFilteredClients);
+}
 
-            renderTable(currentFilteredClients);
+function applyServiceFilter() {
+    const serviceId = document.getElementById('serviceTypeFilter').value;
+    
+    if (!serviceId || serviceId === "") {
+        currentFilteredClients = [...ClientsData];
+        renderTable(currentFilteredClients);
+        return;
+    }
+
+    const serviceTypeMap = {
+        @foreach($services as $service)
+            '{{ $service->id }}': '{{ $service->name }}',
+        @endforeach
+    };
+
+    const serviceName = serviceTypeMap[serviceId];
+    
+    currentFilteredClients = ClientsData.filter(client => {
+        if (!client.service_type) return false;
+        
+        const clientService = client.service_type.trim();
+        const targetService = serviceName.trim();
+        
+        return clientService.localeCompare(targetService, undefined, { 
+            sensitivity: 'base',
+            ignorePunctuation: true
+        }) === 0;
+    });
+
+    if (currentFilteredClients.length === 0) {
+        alert('⚠️ لا يوجد عملاء في هذه الخدمة');
+    }
+
+    renderTable(currentFilteredClients);
+}
+function applyFilter() {
+    const criteria = document.getElementById('filterSelect').value;
+    const serviceId = document.getElementById('serviceTypeFilter').value;
+    
+    // Generate service map (assuming services are passed from backend)
+    const serviceTypeMap = {
+        @foreach($services as $service)
+            '{{ $service->id }}': '{{ $service->name }}',
+        @endforeach
+    };
+
+    currentFilteredClients = [...ClientsData];
+
+    // Apply status criteria filter if selected
+    if (criteria && criteria !== "") {
+        switch (criteria.toLowerCase()) {
+            case 'pending':
+                currentFilteredClients = currentFilteredClients.filter(client =>
+                    client.response_status && 
+                    client.response_status.toLowerCase() === 'pending'
+                );
+                break;
+
+            case 'interested':
+                currentFilteredClients = currentFilteredClients.filter(client =>
+                    client.interest_status && 
+                    (client.interest_status.toLowerCase() === 'interested' ||
+                     client.interest_status.toLowerCase() === 'intersted') // Common typo handling
+                );
+                break;
+
+            case 'not interested':
+                currentFilteredClients = currentFilteredClients.filter(client =>
+                    client.interest_status && 
+                    (client.interest_status.toLowerCase() === 'not interested' ||
+                     client.interest_status.toLowerCase() === 'not_interested' ||
+                     client.interest_status.toLowerCase() === 'notinterested')
+                );
+                break;
         }
+    }
 
-        function exportClients(selectedColumns = null) {
+    // Apply service filter if selected (using same robust comparison as agreements)
+    if (serviceId && serviceId !== "") {
+        const serviceName = serviceTypeMap[serviceId];
+        
+        currentFilteredClients = currentFilteredClients.filter(client => {
+            if (!client.interested_service) return false;
+            
+            // Trim and normalize both values
+            const clientService = client.interested_service.trim();
+            const targetService = serviceName.trim();
+            
+            // Case-insensitive Arabic-aware comparison
+            return clientService.localeCompare(targetService, undefined, { 
+                sensitivity: 'base',
+                ignorePunctuation: true
+            }) === 0;
+        });
+    }
+
+    if (currentFilteredClients.length === 0) {
+        alert('⚠️ لا يوجد عملاء يطابقون معايير التصفية');
+    }
+
+    renderTable(currentFilteredClients);
+}
+
+function exportClients(selectedColumns = null) {
     if (!selectedColumns || selectedColumns.length === 0) {
         selectedColumns = Array.from(document.querySelectorAll('.column-checkbox input[type="checkbox"]'))
                               .filter(checkbox => checkbox.checked)
@@ -1385,19 +1632,18 @@
 
     const columnsMap = {
         'client_logo': 'شعار شركة العميل',
-        'company_name': 'اسم الشركة',
+        'company_name': ' الشركة',
         'address': 'مقر الشركة',
-        'contact_person': 'اسم الشخص المسؤول',
+        'contact_person': ' الشخص المسؤول',
         'contact_position': 'المنصب الوظيفي',
         'phone': 'رقم الجوال',
+  'الخدمة المهتم بها': 'interested_service',
         'whatsapp_link': 'واتس اب مباشر',
         'interest_status': 'حالة الاهتمام',
-        'last_contact_date': 'تاريخ آخر تواصل',
+        'last_contact_date': ' آخر تواصل',
         'contact_count': 'عدد مرات التواصل',
         'contact_days_left':' آخر تواصل منذ',
-        'has_request': 'حالة وجود طلب',
-        'request_type': 'نوع الطلب',
-        'response_status': 'حالة الاستجابة'
+	'requests_count':'طلبات العميل',
     };
 
     const headers = selectedColumns
@@ -1444,17 +1690,8 @@
                 case 'contact_count':
                     value = client.contact_count ?? 0;
                     break;
-                case 'has_request':
-                    value = client.has_request ? 'يوجد' : 'لا يوجد';
-                    break;
-                case 'request_type':
-                    value = client.request_type || '-';
-                    break;
-                case 'response_status':
-                    value = client.response_status === 'approved' ? 'تمت الموافقة'
-                           : client.response_status === 'rejected' ? 'مرفوض'
-                           : client.response_status === 'pending' ? 'قيد الانتظار'
-                           : '—';
+                case 'requests_count':
+                    value = client.requests_count ?? 0;
                     break;
                 default:
                     value = '';
@@ -1494,6 +1731,7 @@
             // Show header and footer
             pdfHeader.style.display = 'block';
             pdfFooter.style.display = 'block';
+	    pdfFooter.style.padding = '20px';
 
             // Create a container for the PDF content
             const pdfContainer = document.createElement('div');
@@ -1544,7 +1782,7 @@
                 },
                 jsPDF: {
                     unit: 'mm',
-                    format: 'a3',
+		    format: [594, 420],
                     orientation: 'landscape',
                     compress: true
                 }
@@ -1565,4 +1803,18 @@
             }
         }
     </script>
+<script>
+  flatpickr("#fromDate", {
+        locale: "ar",
+        dateFormat: "Y-m-d",
+        allowInput: true,
+        defaultDate: null,
+    });
+
+    flatpickr("#toDate", {
+        locale: "ar",
+        dateFormat: "Y-m-d",
+        allowInput: true,
+        defaultDate: null,
+    });</script>
     @endpush

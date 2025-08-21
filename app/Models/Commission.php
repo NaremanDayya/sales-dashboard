@@ -19,8 +19,13 @@ class Commission extends Model
         'total_achieved_amount',
         'commission_amount',
         'commission_rate',
+	'payment_status',
+	'calculation_type',
+	'item_fee',
     ];
-
+protected $casts= [
+'payment_status' => 'boolean',
+];
     /**
      * The sales representative who earned this commission.
      */

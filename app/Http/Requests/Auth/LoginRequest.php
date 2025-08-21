@@ -2,6 +2,11 @@
 
 namespace App\Http\Requests\Auth;
 
+use Illuminate\Support\Facades\Hash;
+use App\Models\SalesRepLoginIp;
+use Illuminate\Support\Facades\Request;
+use App\Notifications\BlockedIpLoginAttempt;
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -37,21 +42,99 @@ class LoginRequest extends FormRequest
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function authenticate(): void
-    {
-        $this->ensureIsNotRateLimited();
+public function authenticate()
+{
+    $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+    // Step 1: Get user by email
+    $user = User::where('email', $this->email)->first();
 
-            throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
-            ]);
-        }
-
-        RateLimiter::clear($this->throttleKey());
+    if (!$user) {
+        RateLimiter::hit($this->throttleKey());
+        throw ValidationException::withMessages([
+            'email' => 'المستخدم غير موجود في النظام',
+        ]);
     }
 
+    if ($user->account_status !== 'active') {
+        RateLimiter::hit($this->throttleKey());
+        throw ValidationException::withMessages([
+            'email' => 'حسابك غير مفعل تواصل مع المدير لتفعيله',
+        ]);
+    }
+
+    if (!Hash::check($this->password, $user->password)) {
+        RateLimiter::hit($this->throttleKey());
+        throw ValidationException::withMessages([
+            'email' => 'كلمة المرور غير صحيحة',
+        ]);
+    }
+
+    // Skip IP validation if admin is logging in (from admin IP)
+    $currentIp = Request::ip();
+    $adminIp = '129.208.193.133';
+
+    if ($user->salesRep && $currentIp !== $adminIp) {
+        $isValidIp = $this->validateSalesRepIp($user, $currentIp);
+
+        if (!$isValidIp) {
+            $this->handleInvalidIp($user, $currentIp);
+            RateLimiter::hit($this->throttleKey());
+            throw ValidationException::withMessages([
+                'email' => 'هذا الجهاز غير مصرح له بتسجيل الدخول إلى النظام.',
+            ]);
+        }
+    }
+
+    // Successful login
+    Auth::login($user, $this->boolean('remember'));
+    RateLimiter::clear($this->throttleKey());
+
+    return redirect()->route('dashboard');
+}
+
+protected function validateSalesRepIp($user, $currentIp): bool
+{
+    // Check main IP
+    $mainIp = SalesRepLoginIp::where('sales_rep_id', $user->salesRep->id)
+        ->where('is_allowed', true)
+        ->where('is_temporary', false)
+        ->first();
+
+    if (!$mainIp) {
+        SalesRepLoginIp::create([
+            'sales_rep_id' => $user->salesRep->id,
+            'ip_address' => $currentIp,
+            'is_allowed' => true,
+            'is_temporary' => false,
+        ]);
+        return true;
+    }
+
+    if ($mainIp->ip_address === $currentIp) {
+        return true;
+    }
+
+    // Check temporary IPs
+    return SalesRepLoginIp::where('sales_rep_id', $user->salesRep->id)
+        ->where('ip_address', $currentIp)
+        ->where('is_allowed', true)
+        ->where('is_temporary', true)
+        ->where(function ($q) {
+            $q->whereNull('allowed_until')
+              ->orWhere('allowed_until', '>=', now());
+        })
+        ->exists();
+}
+
+protected function handleInvalidIp($user, $currentIp)
+{
+    User::where('role', 'admin')->get()->each(function ($admin) use ($user, $currentIp) {
+        $admin->notify(new BlockedIpLoginAttempt($user->salesRep, $currentIp));
+    });
+    
+    Auth::logout();
+}
     /**
      * Ensure the login request is not rate limited.
      *

@@ -12,14 +12,17 @@
                 </h3>
                 <div class="action-buttons">
                     <a href="{{ route('admin.client-request.edit', ['client' => $agreement_request->client_id, 'client_request' => $agreement_request->id]) }}"
-                        class="btn btn-sm btn-light-blue" data-bs-toggle="tooltip" title="عرض تفاصيل العميل">
+                        class="btn btn-sm btn-light-blue"    style="--bs-btn-hover-bg: #0d6efd; --bs-btn-hover-color: #fff;"
+
+ data-bs-toggle="tooltip" title="عرض تفاصيل العميل">
                         <i class="bi bi-person-lines-fill me-1"></i> العميل
                     </a>
+@if(auth()->user()->role === 'admin' && $agreement_request->status === 'pending')
                     <a href="{{ route('admin.agreement-request.edit', ['agreement' => $agreement_request->agreement->id, 'agreement_request' => $agreement_request->id]) }}"
                         class="btn btn-primary">
                         <i class="bi bi-pencil-square me-2"></i> تعديل الطلب
                     </a>
-
+@endif
                 </div>
             </div>
         </div>
@@ -61,6 +64,13 @@
                     {{ $agreement_request->description ?? 'لم يتم تقديم وصف' }}
                 </div>
             </div>
+<div class="request-details bg-light p-4 rounded-3 mb-4">
+                <h5 class="text-primary mb-3"><i class="bi bi-chat-square-text me-2"></i>ملاحظات الإدارة</h5>
+                <div class="description-box p-3 bg-white rounded-2 border">
+                    {{ $agreement_request->notes ?? 'لم يتم وضع ملاحظات  إدارية' }}
+                </div>
+            </div>
+
 
             <div class="d-flex justify-content-between mt-5">
                 <a href="{{ url()->previous() }}" class="btn btn-outline-secondary">
@@ -75,8 +85,7 @@
 @section('styles')
 <style>
     .bg-gradient-primary {
-        background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
-    }
+        background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);    }
 
     .btn-light-blue {
         background-color: #e3f2fd;

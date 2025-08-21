@@ -39,4 +39,20 @@ class SalesRepCommissionController extends Controller
         // Authorized via route middleware
         return $commission->exportPdf();
     }
+   public function changePaymentStatus($commissionId)
+{
+    $commission = Commission::findOrFail($commissionId);
+    if(!$commission->payment_status){
+    $commission->payment_status = true;
+    $commission->save();
+return response()->json([
+    'success' => true,
+    'message' => 'تم صرف العمولة بنجاح',
+]);
+    }else
+return response()->json([
+    'success' => false, 
+    'message' => 'تم صرف العمولة مسبقا', 
+]);}
+
 }

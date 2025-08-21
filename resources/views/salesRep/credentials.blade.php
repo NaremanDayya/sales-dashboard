@@ -570,6 +570,33 @@
         padding: 20px;
         border-top: 1px solid var(--gray-200);
     }
+    .search-box {
+        position: relative;
+        width: 300px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 8px 40px 8px 15px;
+        border-radius: 6px;
+        border: 1px solid var(--gray-300);
+        font-size: 14px;
+        transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray-400);
+    }
 
     .pagination-btn {
         width: 36px;
@@ -790,9 +817,19 @@
 <body>
     @section('content')
     <div id="print-area" class="table-container">
-        <div class="table-header">
+        <div class="table-header pt-5">
             <h2 id="title" class="table-title">بيانات الدخول للمندوبين</h2>
             <div class="table-actions d-flex align-items-center gap-2">
+		  <a href="{{ route('admin.sales-rep-ips.index') }}" class="btn btn-primary d-flex align-items-center gap-1">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 4H20V20H4V4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M9 4V20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M15 10H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M15 14H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        أجهزة تسجيل دخول المناديب
+    </a>
                 <div class="export-options">
                     <div class="dropdown">
                         <button class="btn btn-dropdown" id="exportBtn" type="button">
@@ -826,6 +863,10 @@
                 <button class="btn btn-outline" onclick="window.print()" title="طباعة التقرير">
                     <i class="fas fa-print"></i>
                 </button>
+		<div class="search-box">
+                    <input type="text" class="search-input" placeholder="بحث..." id="searchInput">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
             </div>
         </div>
 
@@ -840,48 +881,45 @@
                         </div>
                     </div>
                 </div>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>الاسم</th>
-                            <th>اسم المستخدم</th>
-                            <th>البريد الإلكتروني</th>
-                            <th>كلمة المرور</th>
-                            <th class="no-print">الإجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        @forelse($credentials as $credential)
-                        <tr>
-                            <td>{{ $credential[0] ?? 'N/A' }}</td>
-                            <td>{{ $credential[1] ?? 'N/A' }}</td>
-                            <td>{{ $credential[2] ?? 'N/A' }}</td>
-                            <td>
-                                <span class="password-field">••••••••</span>
-                                <button class="show-password-btn"
-                                    data-password="{{ $credential[3] ?? '' }}">إظهار</button>
-                            </td>
-                            <td class="no-print">
-                                <button
-                                    class="px-3 py-1 bg-blue-100 text-blue-800 rounded-md text-sm hover:bg-blue-200 transition-colors copy-btn"
-                                    data-password="{{ $credential[3] ?? '' }}">
-                                    نسخ كلمة المرور
-                                </button>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="5" class="empty-state">
-                                <div class="empty-icon">
-                                    <i class="fas fa-inbox"></i>
-                                </div>
-                                <div class="empty-text">لا توجد بيانات متاحة حالياً</div>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>الاسم</th>
+            <th>البريد الإلكتروني</th>
+            <th>كلمة المرور</th>
+            <th class="no-print">الإجراءات</th>
+        </tr>
+    </thead>
+    <tbody id="tableBody">
+        @forelse($credentials as $credential)
+        <tr>
+            <td>{{ $credential[0] ?? 'N/A' }}</td> 
+            <td>{{ $credential[1] ?? 'N/A' }}</td> 
+            <td>
+                <span class="password-field">••••••••</span>
+                <button class="show-password-btn"
+                    data-password="{{ $credential[2] ?? '' }}">إظهار</button>
+            </td>
+            <td class="no-print">
+                <button
+                    class="px-3 py-1 bg-blue-100 text-blue-800 rounded-md text-sm hover:bg-blue-200 transition-colors copy-btn"
+                    data-password="{{ $credential[2] ?? '' }}">
+                    نسخ كلمة المرور
+                </button>
+            </td>
+        </tr>
+        @empty
+        <tr>
+            <td colspan="4" class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-inbox"></i>
+                </div>
+                <div class="empty-text">لا توجد بيانات متاحة حالياً</div>
+            </td>
+        </tr>
+        @endforelse
+    </tbody>
+</table>
                 @push('scripts')
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
@@ -958,6 +996,36 @@
             e.stopPropagation();
         });
     });
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const tableBody = document.getElementById('tableBody');
+    const rows = tableBody.getElementsByTagName('tr');
+
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            // Skip the empty state row if it exists
+            if (row.classList.contains('empty-state')) continue;
+            
+            const cells = row.getElementsByTagName('td');
+            let rowMatches = false;
+            
+            // Check each cell (except the last one with buttons)
+            for (let j = 0; j < cells.length - 1; j++) {
+                const cellText = cells[j].textContent.toLowerCase();
+                if (cellText.includes(searchTerm)) {
+                    rowMatches = true;
+                    break;
+                }
+            }
+            
+            // Show/hide the row based on search match
+            row.style.display = rowMatches ? '' : 'none';
+        }
+    });
+});
 
     function exportCredentials(type = 'csv') {
         const rows = Array.from(document.querySelectorAll('#tableBody tr'))
@@ -968,12 +1036,11 @@
             return;
         }
 
-        const headers = ['الاسم', 'اسم المستخدم', 'البريد الإلكتروني', 'كلمة المرور'];
+        const headers = ['الاسم', 'البريد الإلكتروني', 'كلمة المرور'];
         const data = rows.map(row => {
             return {
                 name: row.cells[0].textContent.trim(),
-                username: row.cells[1].textContent.trim(),
-                email: row.cells[2].textContent.trim(),
+                email: row.cells[1].textContent.trim(),
                 password: row.querySelector('.show-password-btn').getAttribute('data-password')
             };
         });
@@ -985,7 +1052,6 @@
             data.forEach(item => {
                 const row = [
                     `"${item.name}"`,
-                    `"${item.username}"`,
                     `"${item.email}"`,
                     `"${item.password}"`
                 ];

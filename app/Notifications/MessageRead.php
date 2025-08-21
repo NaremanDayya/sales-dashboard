@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -21,6 +22,7 @@ class MessageRead extends Notification implements ShouldBroadcast
     {
         //
         $this->conversation_id=$conversation_id;
+	$this->receiverId = Auth::id();
     }
 
     /**
@@ -63,10 +65,8 @@ class MessageRead extends Notification implements ShouldBroadcast
      *
      * @return array<string, mixed>
      */
-    public function toArray(object $notifiable): array
+    public function broadcastOn()
     {
-        return [
-            //
-        ];
+        return new PrivateChannel('chat.' . $this->receiverId);
     }
 }

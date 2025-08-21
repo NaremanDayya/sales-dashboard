@@ -1,3 +1,4 @@
+<div>
 <div x-data="{type:'all',conversation:@entangle('conversation')}" @load.window="Livewire.dispatch('refresh')" x-init="
 
    setTimeout(()=>{
@@ -49,10 +50,23 @@
                 data-name="{{ Str::lower($conversation->getReceiver()->name) }}"
                 data-company="{{ Str::lower($conversation->client->company_name) }}"
                 class="py-3 hover:bg-gray-50 rounded-2xl dark:hover:bg-gray-700/70 transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2 {{$conversation->id==$selectedConversation?->id ? 'bg-gray-100/70':''}}">
-                <a href="{{ route('client.chat', [$conversation->client_id, $conversation->id]) }}" class="shrink-0">
-                    <x-avatar :src="$conversation->getReceiver()->avatar_url"
-                        :name="$conversation->getReceiver()->name" />
-                </a>
+		<!-- User Avatar -->
+		<div class="shrink-0 inline-flex items-center justify-center relative transition overflow-visible text-gray-300 dark:text-[var(--wc-dark-secondary)] text-base h-12 w-12 mx-auto border rounded-full p-2 bg-white dark:bg-[var(--wc-dark-secondary)] dark:border-[var(--wc-dark-secondary)] flex items-center justify-center">
+    @if(!empty($conversation?->client?->company_logo))
+        <img
+            src="{{ asset('storage/' . $conversation->client->company_logo) }}"
+            alt="شعار الشركة"
+            class="max-h-full max-w-full object-contain"
+        />
+    @else
+        <svg class="w-full h-full rounded-full" fill="currentColor" viewBox="0 0 24 24">
+            <path
+                d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z">
+            </path>
+        </svg>
+    @endif
+</div>
+
 
                 <aside class="grid grid-cols-12 w-full">
 
@@ -209,6 +223,7 @@
             @endif
 
         </ul>
+        <div style="min-height: 40vh;"></div>
 
     </main>
 
@@ -216,3 +231,4 @@
 </div>
 
 @vite('resources/js/client-chat.js')
+</div>

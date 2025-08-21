@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use App\Models\SalesRep;
 use Illuminate\Support\Facades\Auth;
+use App\Models\SalesRepLoginIp;
 
 class AuthorizeSalesRep
 {
@@ -25,7 +26,19 @@ class AuthorizeSalesRep
         if (!$salesRep || Auth::id() !== $salesRep->user_id) {
             abort(403);
         }
+	   $ip = $request->ip();
 
+        $loginIp = SalesRepLoginIp::where('sales_rep_id', $salesRep->id)
+            ->where('ip_address', $ip)
+            ->first();
+
+        if ($loginIp && !$loginIp->is_allowed) {
+            Auth::logout();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'تم حظر هذا الجهاز من قبل الإدارة. الرجاء التواصل مع الدعم.',
+            ]);
+        }
         return $next($request);
     }
 }

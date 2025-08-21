@@ -31,5 +31,7 @@ class RunDailyCommandJob implements ShouldQueue
         Artisan::call('notify:late-customers');
         Artisan::call('notify:agreement-notice');
         Artisan::call('notify:pended-request');
+	Artisan::call('notify:birthday');
+
     }
 }

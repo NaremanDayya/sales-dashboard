@@ -16,50 +16,50 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    public function index()
-    {
-        $user = Auth::user();
+public function index()
+{
+    $user = Auth::user();
 
-        if ($user->role == 'admin') {
-            // Admin dashboard
-            $salesReps = SalesRep::all()->map(function ($rep) {
-                return [
-                     'id' => $rep->id,
-                'name' => $rep->name,
-                'start_work_date' => $rep->start_work_date->format('Y-m-d'),
-                'work_duration' => $rep->work_duration,
-                'target_customers' => $rep->clients->count(),
-                'late_customers' => $rep->lateCustomers,
-                'total_orders' => $rep->totalOrders,
-                'pending_orders' => $rep->totalPendedRequests,
-                'interested_customers' => $rep->interestedClients->count(),
-                'achieved_target_percentage' => (int) ($rep->currentMonthAchievedPercentage()),
-                'achieved_target_amount' =>(int) ($rep->currentMonthAchievedAmount())
+    // Admin Role
+    if ($user->role == 'admin') {
+        // Redirect to the sales reps index route
+        return redirect()->route('sales-reps.index');
 
-                ];
-            });
-
-
-            return view('salesRep.index', data: compact('salesReps'));
-
-            // $data = $this->getAdminDashboardData();
-            // return view('dashboards.AdminDashboard', compact('data'));
-        } elseif ($user->role == 'salesRep') {
-            // Sales Rep dashboard
-            $salesRep = SalesRep::where('user_id', Auth::id())->first();
-            $user = $salesRep->user;
-            $user->load('permissions');
-
-            $translatedPermissions = $user->permissions->map(function ($permission) {
-                return __($permission->name);
-            });
-            return view('profile.show', compact('salesRep', 'user','translatedPermissions'));
-            // $data = $this->getSalesRepDashboardData();
-            // return view('dashboards.salesRepDashboard', $data); // Notice: $data is an array, not compact()
-        } else {
-            abort(403, 'Unauthorized');
-        }
+        // OR if you later want to show an admin dashboard instead, comment the above and use:
+        // $data = $this->getAdminDashboardData();
+        // return view('dashboards.AdminDashboard', compact('data'));
     }
+
+    // Sales Representative Role
+    elseif ($user->role == 'salesRep') {
+        $salesRep = SalesRep::where('user_id', $user->id)->first();
+
+        if (!$salesRep) {
+            abort(404, 'Sales Representative not found');
+        }
+
+        // Load user and permissions
+        $user = $salesRep->user;
+        $user->load('permissions');
+
+        // Translate permissions for display
+        $translatedPermissions = $user->permissions->map(function ($permission) {
+            return __($permission->name);
+        });
+
+        return view('profile.show', compact('salesRep', 'user', 'translatedPermissions'));
+
+        // OR if using dashboard view:
+        // $data = $this->getSalesRepDashboardData();
+        // return view('dashboards.salesRepDashboard', $data); // $data is an associative array
+    }
+
+    // Other Roles: Access Denied
+    else {
+        abort(403, 'Unauthorized');
+    }
+}
+
     private function getAdminDashboardData()
     {
         $allSalesReps = SalesRep::count();

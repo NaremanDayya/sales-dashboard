@@ -14,6 +14,7 @@ class Service extends Model
             'description',
             'target_amount',
             'is_flat_price',
+	    'commission_rate',
         ];
     protected $casts = [
         'is_flat_price' => 'boolean',
@@ -34,4 +35,15 @@ class Service extends Model
 {
     return $this->is_flat_price ? 'Flat Price' : 'Per Quantity';
 }
+public function inActiveAgreements()
+{
+    return $this->agreements()->where('agreement_status', 'expired');
+}
+
+public function activeAgreements()
+{
+    return $this->agreements()->where('agreement_status', 'active');
+}
+
+
 }

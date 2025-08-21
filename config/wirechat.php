@@ -77,7 +77,7 @@ return [
     | This can be any valid route or URL in your application.
     |
     */
-    'home_route' => '/',
+    'home_route' => '/chats',
 
     /*
     |--------------------------------------------------------------------------

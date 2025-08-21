@@ -9,7 +9,16 @@ class ServiceController extends Controller
 {
     public function index()
     {
-        $services = Service::paginate(10);
+  $services = Service::withCount([
+        'agreements',
+        'agreements as active_agreements_count' => function ($query) {
+            $query->where('agreement_status', 'active');
+        },
+        'agreements as inactive_agreements_count' => function ($query) {
+            $query->where('agreement_status', 'expired'); 
+        },
+    ])->paginate(10);
+
         return view('services.index', compact('services'));
     }
 
@@ -23,9 +32,9 @@ class ServiceController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'target_amount' => 'nullable|numeric|min:0',
+            'target_amount' => 'required|numeric|min:0',
             'is_flat_price' => 'required|boolean',
-
+	    'commission_rate' => 'required|numeric|min:0.01',
         ]);
 
         Service::create($validated);
@@ -47,8 +56,11 @@ class ServiceController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'target_amount' => 'nullable|numeric|min:0',
-        ]);
+            'target_amount' => 'required|numeric|min:0',
+            'is_flat_price' => 'required|boolean',
+            'commission_rate' => 'required|numeric|min:0.01',
+
+		]);
 
         $service->update($validated);
         return redirect()->route('services.index')->with('success', 'Service updated successfully.');

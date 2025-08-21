@@ -53,7 +53,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => env('APP_URL', 'https://ghg-sales.com'),
 
     /*
     |--------------------------------------------------------------------------
@@ -65,8 +65,9 @@ return [
     | is set to "UTC" by default as it is suitable for most use cases.
     |
     */
+'cron_secret_key' => env('CRON_SECRET_KEY'),
 
-    'timezone' => 'Asia/Gaza',
+    'timezone' => 'Asia/Riyadh',
 
     /*
     |--------------------------------------------------------------------------

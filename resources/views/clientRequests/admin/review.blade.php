@@ -5,7 +5,7 @@
 @section('content')
 <div class="container py-4">
     <div class="max-w-6xl mx-auto">
-        @if(Auth::user()->role == 'admin')
+@if(auth()->user()->role === 'admin' && $client_request->status === 'pending')
         <!-- Header Section -->
         <div class="flex items-center justify-between mb-6">
             <h1 class="text-2xl font-bold text-gray-800 dark:text-white">تفاصيل طلب التعديل</h1>
@@ -33,7 +33,7 @@
                             $client_request->client->company_name ?? '-' }}</p>
                     </div>
                     <div class="space-y-1">
-                        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">المندوب</span>
+                        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">سفير العلامة التجارية</span>
                         <p class="text-lg font-semibold text-gray-800 dark:text-white">{{
                             $client_request->salesRep->name ?? '-' }}</p>
                     </div>
@@ -43,33 +43,48 @@
             <!-- Request Details Section -->
             <div class="p-6 border-b border-gray-100 dark:border-gray-700">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+		@if(isset($editedFieldLabel) && $editedFieldLabel)
                     <div class="space-y-1">
                         <span class="text-sm font-medium text-gray-500 dark:text-gray-400">الحقل المعدل</span>
                         <p class="text-lg font-semibold text-gray-800 dark:text-white">{{ $editedFieldLabel }}</p>
                     </div>
+		@endif
                     <div class="space-y-1">
                         <span class="text-sm font-medium text-gray-500 dark:text-gray-400">حالة الطلب</span>
-                        @php
-                        $statusClasses = [
-                        'pending' => 'bg-yellow-100 text-yellow-800',
-                        'approved' => 'bg-green-100 text-green-800',
-                        'rejected' => 'bg-red-100 text-red-800',
-                        ];
-                        $badgeClass = $statusClasses[$client_request->status] ?? 'bg-gray-100 text-gray-800';
-                        @endphp
-                        <span class="px-3 py-1 rounded-full text-sm font-medium {{ $badgeClass }} capitalize">
-                            {{ $client_request->status }}
-                        </span>
-                    </div>
+@php
+    $statusClasses = [
+        'pending' => 'bg-yellow-100 text-yellow-800',
+        'approved' => 'bg-green-100 text-green-800',
+        'rejected' => 'bg-red-100 text-red-800',
+    ];
+
+    $statusTranslations = [
+        'pending' => 'قيد الانتظار',
+        'approved' => 'تمت الموافقة',
+        'rejected' => 'مرفوض',
+    ];
+
+    $status = $client_request->status;
+    $badgeClass = $statusClasses[$status] ?? 'bg-gray-100 text-gray-800';
+    $translatedStatus = $statusTranslations[$status] ?? $status;
+@endphp
+<span class="px-3 py-1 rounded-full text-sm font-medium {{ $badgeClass }}">
+    {{ $translatedStatus }}
+</span>                    </div>
                 </div>
 
-                <div class="space-y-1 mb-4">
-                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400">وصف الطلب</span>
-                    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <p class="text-gray-800 dark:text-gray-200">{{ $client_request->description }}</p>
-                    </div>
-                </div>
-
+@if($client_request->description || $client_request->message)
+    <div class="space-y-1 mb-4">
+        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
+وصف الطلب
+        </span>
+<div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <p class="text-gray-800 dark:text-gray-200">
+                {{ $client_request->message ?? $client_request->description }}
+            </p>
+        </div>
+    </div>
+@endif
                 <div class="space-y-1">
                     <span class="text-sm font-medium text-gray-500 dark:text-gray-400">ملاحظات الإدارة</span>
                     <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">

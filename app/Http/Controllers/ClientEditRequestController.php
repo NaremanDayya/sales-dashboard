@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Notifications\ClientEditRequestNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\ClientRequest;
 
 class ClientEditRequestController extends Controller
 {
@@ -55,7 +56,15 @@ class ClientEditRequestController extends Controller
             'phone',
             'contact_position',
         ];
-
+ $fieldTranslations = [
+        'company_name' => 'اسم الشركة',
+        'logo' => 'الشعار',
+        'address' => 'العنوان',
+        'contact_person' => 'الشخص المسؤول',
+        'interest_status' => 'حالة الاهتمام',
+        'phone' => 'رقم الهاتف',
+        'contact_position' => 'منصب المسؤول',
+    ];
         $validated = $request->validate([
 
             'update_message' => 'required|string',
@@ -69,33 +78,6 @@ class ClientEditRequestController extends Controller
             'status' => 'pending',
             'edited_field' => $validated['edited_field'],
         ]);
-        $authenticatedUserId = Auth::id();
-        // dd($authenticatedUserId);
-        $conversation = $client->conversations()
-            ->where(function ($query) use ($authenticatedUserId) {
-                $query->where('sender_id', $authenticatedUserId)
-                    ->orWhere('receiver_id', $authenticatedUserId);
-            })->first();
-
-        if (!$conversation) {
-            // Get admin user ID (adjust this query based on your app logic)
-            $adminUserId = User::where('role', 'admin')->first()->id;
-
-            $conversation = Conversation::create([
-                'sender_id' => $authenticatedUserId,
-                'receiver_id' => $adminUserId,
-                'client_id' => $client->id,
-            ]);
-        }
-        // Save message in the conversation
-        Message::create(
-            [
-                'conversation_id' => $conversation->id,
-                'sender_id' => $authenticatedUserId,
-                'receiver_id' => $conversation->sender_id === $authenticatedUserId ? $conversation->receiver_id : $conversation->sender_id,
-                'message' => $request->update_message,
-            ]
-        );
         $user = User::where('role', 'admin')->first();
         $user->notify(new ClientEditRequestNotification($clientEditRequest));
         return redirect()
@@ -130,5 +112,10 @@ class ClientEditRequestController extends Controller
         ];
 
         return $labels[$field] ?? $field;
+    }
+public function showRequest(Client $client, ClientRequest $client_request)
+    {
+        $client_request->load(['client', 'salesRep']);
+        return view('clientRequests.admin.review', compact('client_request'));
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Client;
+use App\Models\ClientRequest;
 use App\Models\ClientEditRequest;
 use App\Models\TemporaryPermission;
 use App\Models\User;
@@ -40,14 +41,12 @@ class ClientEditRequestController extends Controller
     {
         $request->validate([
             'status' => 'required|in:approved,rejected',
-            'notes' => 'nullable|string',
         ]);
 
         $client_request->update([
             'status' => $request->status,
             'response_status' => $request->status,
             'response_date' => now(),
-            'notes' => $request->notes,
         ]);
         $user = User::where('id', $client_request->sales_rep_id)->first();
 
@@ -75,6 +74,12 @@ class ClientEditRequestController extends Controller
         $editedFieldLabel = $this->getFieldLabel($client_request->edited_field);
         return view('clientRequests.admin.review', compact('client_request', 'editedFieldLabel'));
     }
+ public function reviewRequest(Client $client, ClientRequest $client_request)
+    {
+        $client_request->load(['client', 'salesRep']);
+        return view('clientRequests.admin.reviewRequest', compact('client_request'));
+    }
+
     protected function getFieldLabel($field)
     {
         $labels = [
@@ -103,5 +108,14 @@ class ClientEditRequestController extends Controller
             ->latest()
             ->paginate(10);
         return view('clientRequests.admin.pended', compact('pendedRequests'));
+    }
+	   public function destroy(ClientRequest $client_request)
+    {
+
+dd('test');
+        $client_request->delete();
+
+
+        return redirect()->back()->with('success', 'تم حذف طلب تعديل العميل بنجاح.');
     }
 }

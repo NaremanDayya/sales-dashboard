@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('targets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->unsignedInteger('carried_over_amount')->default(0)->after('target_amount');
+            $table->unsignedInteger('carried_over_amount');
             $table->decimal('achieved_percentage', 5, 2)->default(0.00);
             $table->foreignId('service_id')->constrained()->onDelete('cascade');
             $table->unsignedTinyInteger('month');

@@ -20,6 +20,7 @@ class ChatBox extends Component
     protected $listeners = [
         'loadMore',
         'broadcastedNotificationReceived',
+	'save-edit-message' => 'editMessage',
     ];
     public function getListeners()
     {
@@ -39,7 +40,11 @@ class ChatBox extends Component
             $this->last_contact_date = $this->selectedConversation->client->last_contact_date ?? null;
         }
     }
-
+ public function refresh()
+    {
+        $this->loadMessages();
+        $this->dispatch('scroll-bottom');
+    }
     public function loadMore(): void
     {
         $this->paginate_var += 10;
@@ -47,17 +52,60 @@ class ChatBox extends Component
         $this->dispatch('update-chat-height');
     }
 
-    public function loadMessages()
-    {
-        $count = Message::where('conversation_id', $this->selectedConversation->id)->count();
+public function loadMessages()
+{
+    $count = Message::where('conversation_id', $this->selectedConversation->id)->count();
 
-        $this->loadedMessages = Message::where('conversation_id', $this->selectedConversation->id)
-            ->skip($count - $this->paginate_var)
-            ->take($this->paginate_var)
-            ->get();
+    $this->loadedMessages = Message::where('conversation_id', $this->selectedConversation->id)
+        ->skip($count - $this->paginate_var)
+        ->take($this->paginate_var)
+        ->get();
 
-        return $this->loadedMessages;
+    // ✅ Step: Mark messages as read
+    $unreadMessages = Message::where('conversation_id', $this->selectedConversation->id)
+        ->where('receiver_id', Auth::id())
+        ->whereNull('read_at')
+        ->get();
+
+    foreach ($unreadMessages as $msg) {
+        $msg->read_at = now();
+        $msg->save();
+
+        // 🔄 Notify sender of read status
+        $msg->sender->notify(new MessageRead(
+            $this->selectedConversation->id
+        ));
     }
+
+    return $this->loadedMessages;
+}
+
+public function editMessage($data)
+{
+    $messageId = $data['messageId'];
+    $newContent = $data['content'];
+
+    $message = Message::findOrFail($messageId);
+    if ($message->sender_id !== auth()->id()) return;
+
+    $message->update([
+        'message' => $newContent,
+        'edited_at' => now()
+    ]);
+
+    $this->refresh();
+}
+public function deleteMessage($messageId)
+{
+    $message = Message::findOrFail($messageId);
+    
+    if ($message->sender_id !== Auth::id()) {
+        return;
+    }
+
+    $message->delete();
+    $this->refresh();
+}
     public function broadcastedNotificationReceived($event)
     {
         // dd($event); // Now this should work

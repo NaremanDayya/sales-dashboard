@@ -26,14 +26,17 @@ class AgreementEditRequestRejectedNotification extends Notification implements S
 
     public function toDatabase($notifiable)
     {
-        return [
-            'message' => "طلب تعديل الاتفاقية رقم #{$this->agreementEditRequest->id} تم رفضه.",
-            'agreement_edit_request_id' => $this->agreementEditRequest->id,
-            'agreement_id' => $this->agreementEditRequest->agreement_id,
-            'edited_field' => $this->agreementEditRequest->edited_field,
-            'status' => 'rejected',
-            'url' => route('admin.agreement-request.update', ['agreement' => $this->agreementEditRequest->agreement_id, 'agreement_request' => $this->agreementEditRequest->id]),
-        ];
+return [
+    'message' => "تم رفض طلب التعديل على الاتفاقية رقم #{$this->agreementEditRequest->agreement_id} بخصوص الحقل: \"{$this->agreementEditRequest->edited_field}\".",
+    'agreement_edit_request_id' => $this->agreementEditRequest->id,
+    'agreement_id' => $this->agreementEditRequest->agreement_id,
+    'edited_field' => $this->agreementEditRequest->edited_field,
+    'status' => 'rejected',
+    'url' => route('admin.agreement-request.review', [
+        'agreement' => $this->agreementEditRequest->agreement_id,
+        'agreement_request' => $this->agreementEditRequest->id
+    ]),
+];
     }
 
     public function toBroadcast($notifiable)

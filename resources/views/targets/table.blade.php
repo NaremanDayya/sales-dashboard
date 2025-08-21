@@ -32,7 +32,7 @@
         direction: rtl;
         padding: 20px;
     }
-
+[x-cloak] { display: none !important; }
     .table-container {
         background: white;
         border-radius: 0.75rem;
@@ -139,6 +139,7 @@
         width: 100%;
         border-collapse: collapse;
         min-width: 800px;
+        border: 1px solid var(--gray-300);
     }
 
     .data-table thead th {
@@ -147,7 +148,8 @@
         font-weight: 600;
         padding: 12px 15px;
         text-align: center;
-        border-bottom: 2px solid var(--gray-200);
+        border-bottom: 2px solid var(--gray-300);
+        border-right: 1px solid var(--gray-300);
         position: sticky;
         top: 0;
     }
@@ -156,6 +158,7 @@
         transition: background-color 0.2s ease;
         page-break-inside: avoid;
         break-inside: avoid;
+        border-bottom: 1px solid var(--gray-300);
     }
 
     .data-table tbody tr:hover {
@@ -164,13 +167,21 @@
 
 
 
+
     .data-table tbody td {
         padding: 12px 15px;
-        border-bottom: 1px solid var(--gray-200);
+        border-bottom: 1px solid var(--gray-300);
         text-align: center;
         vertical-align: middle;
-    }
+        border-right: 1px solid var(--gray-300);
+	font-size:14px;
+	font-weight:800;    
+}
+.form-select {
+	font-size:14px;
+	    font-weight: 800;
 
+}
     .status-badge {
         display: inline-block;
         padding: 4px 10px;
@@ -212,7 +223,14 @@
         border: none;
         color: var(--gray-500);
     }
-
+      .animate-fadeIn {
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
     .action-btn:hover {
         background-color: var(--gray-200);
         color: var(--gray-700);
@@ -456,16 +474,27 @@
 <body>
     @section('content')
     <div id="print-area" class="table-container">
-        <div class="table-header">
+	<div class="table-header">
             <h2 id="title" class="table-title">التارجت</h2>
             <div class="table-actions d-flex align-items-center gap-2">
-                <select id="exportType" class="form-select" style="width: 150px;">
-                    <option value="excel" selected>Excel (تصدير إكسل)</option>
-                    <option value="pdf">PDF (تصدير PDF)</option>
-                </select>
-                <button class="btn btn-outline" onclick="handleExport()">
-                    <i class="fas fa-download"></i> تصدير
-                </button>
+	 @isset($salesRep)
+            <div class="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-full" style="font-size:14px; font-weight:800;">
+                سفير العلامة التجارية: {{ $salesRep->name }}
+            </div>
+            @endisset
+ 
+   <a href="{{ route('sales-reps.commissions.index',$salesRep->id) }}"
+       class="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm font-semibold rounded hover:bg-blue-700 transition">
+        <i class="fas fa-chart-line mr-1"></i> عرض العمولات
+    </a>
+
+<select id="exportType" class="form-select" style="width: 150px; direction: rtl; text-align: right;">
+    <option value="excel" selected>Excel (تصدير إكسل)</option>
+    <option value="pdf">PDF (تصدير PDF)</option>
+</select>                <button class="btn btn-outline" onclick="handleExport()">
+<span style="font-size:14px; font-weight:800;">
+    <i class="fas fa-download"></i> تصدير
+</span>                </button>
 
                 <button class="btn btn-outline" onclick="window.print()" title="طباعة التقرير">
                     <i class="fas fa-print"></i>
@@ -482,12 +511,62 @@
             <div>
                 <div class="d-flex align-items-center mb-3 gap-2">
                     <i class="fas fa-filter text-secondary"></i>
+
+                    {{-- Commission Status Filter --}}
                     <select id="filterSelect" onchange="applyFilter()" class="form-select w-auto">
                         <option value="">الكل</option>
                         <option value="commission">يستحق العمولة</option>
                         <option value="no commission">لا يستحق العمولة</option>
                     </select>
+
+                    {{-- Year Filter --}}
+                    <select id="yearSelect" class="form-select w-auto" onchange="applyYearFilter()">
+                        @for ($year = now()->year - 4; $year <= now()->year + 2; $year++)
+                            <option value="{{ $year }}" {{ $selectedYear==$year ? 'selected' : '' }}>
+                                السنة: {{ $year }}
+                            </option>
+                            @endfor
+                    </select>
+  @if(Auth::user()->role == 'admin')
+<div x-data="{ open: false }">
+   <!-- Trigger Button -->
+    <button @click="open = true"
+        class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded shadow">
+        تعديل نسبة تحقيق التارجت
+    </button>
+
+    <!-- Modal -->
+    <div x-show="open" x-cloak class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+        <div @click.away="open = false" class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+
+            <h3 class="text-lg font-bold mb-4">   تعديل نسبة تحقيق التارجت </h3>
+
+            <form action="{{ route('settings.updateCommissionThreshold') }}" method="POST">
+                @csrf
+                <div class="mb-4">
+                        <label for="commission_threshold" class="block text-sm font-medium text-gray-700 mb-1">
+        النسبة المئوية المطلوبة لاحتساب العمولة
+    </label>
+ <input type="number" min="0" max="100" step="0.1" name="commission_threshold" id="commission_threshold"
+value="{{ old('commission_threshold', \App\Models\Setting::where('key', 'commission_threshold')->value('value') ?? 90) }}"
+           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+           style="font-size: 14px; font-weight: 700;">
+
                 </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" @click="open = false"
+                        class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">إلغاء</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+
+                </div>
+
             </div>
         </div>
 
@@ -505,12 +584,16 @@
                     <thead>
                         <tr class="text-center">
                             <th>نوع الخدمة</th>
-                            <th>نسبة التارجت</th>
+                            <th>تارجت الخدمة</th>
+                            <th>التارجت المرحل للشهر الحالي</th> 
+                            <th> التارجت المطلوب للشهر الحالي</th>
                             <th colspan="12">نسبة تحقيق التارجت الشهري</th>
                             <th>المجموع الكلي السنوي</th>
-                            <th>حالة العمولة</th>
+                            <th>حالة العمولة للشهر الحالي</th>
                         </tr>
                         <tr class="text-center">
+                            <th></th>
+                            <th></th>
                             <th></th>
                             <th></th>
                             <th>1</th>
@@ -529,11 +612,12 @@
                             <th></th>
                         </tr>
                     </thead>
+
                     <tbody id="tableBody">
                         <!-- Data will be inserted here -->
                     </tbody>
                 </table>
-                <div class="pdf-footer" style="display: none;">
+<div class="pdf-footer" style="display: none;">
                     <p>جميع الحقوق محفوظة &copy; شركة آفاق الخليج {{ date('Y') }}</p>
                 </div>
             </div>
@@ -543,6 +627,81 @@
 
     </div>
 
+
+<!-- Modern Commission Modal -->
+<div id="commissionModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-900 bg-opacity-75 backdrop-blur-sm"></div>
+        </div>
+
+        <!-- Modal box -->
+        <div class="inline-block align-bottom bg-white rounded-2xl text-right overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <!-- Header -->
+<div class="bg-gray-900 px-6 py-4">
+    <h3 class="text-lg font-semibold text-gray-50 tracking-tight">إدارة العمولة</h3>
+</div>
+            <!-- Body -->
+            <div class="px-6 py-5">
+
+                <form method="POST" id="commissionForm">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="type" id="commission_type_input">
+                    <input type="hidden" name="item_fee" id="item_fee_input">
+
+                    <label style="font-size: 14px; font-weight: 700;" class="block text-gray-700 mb-3">اختر نوع العمولة:</label>
+
+                    <div class="grid grid-cols-1 gap-3 mb-4">
+                        <!-- Percentage option -->
+                        <button type="button" onclick="setCommissionType('rate')"
+                            class="flex items-center justify-between px-4 py-3 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg transition-colors">
+                            <span style="font-size: 14px; font-weight: 700;" class="text-green-800">نسبة مئوية</span>
+                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </button>
+
+                        <!-- Unit option -->
+                        <button type="button" onclick="showFeeInput()"
+                            class="flex items-center justify-between px-4 py-3 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-lg transition-colors">
+                            <span style="font-size: 14px; font-weight: 700;" class="text-yellow-800">حسب عدد الوحدات</span>
+                            <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Fee input -->
+                    <div id="feeInputSection" class="mt-4 hidden animate-fadeIn">
+                        <label for="fee" style="font-size: 14px; font-weight: 700;" class="block mb-1 text-gray-700">أدخل سعر الوحدة:</label>
+                        <div class="flex">
+                            <input type="number" step="0.01" min="0" id="fee" name="fee"
+                                class="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="مثال: 400.00">
+                            <button type="button" onclick="submitItemCommission()"
+                                style="font-size: 14px; font-weight: 700;"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-r-lg transition-colors">
+                                تأكيد
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-gray-50 px-6 py-4 flex justify-end">
+                <button onclick="closeCommissionModal()"
+                    style="font-size: 14px; font-weight: 700;"
+                    class="px-4 py-2 text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-100 border border-gray-300 rounded-lg transition-colors">
+                    إغلاق
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
     @endsection
     @push('scripts')
     <script>
@@ -550,28 +709,82 @@
     const targetsData = @json($Targets);
 
     // Render table function
-    function renderTable(data = targetsData) {
-        console.log("Rendering table with data:", data); // Debug log
-        const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
+function renderTable(data = targetsData) {
+    console.log("Rendering table with data:", data);
+    const tbody = document.getElementById('tableBody');
+    if (!tbody) {
+        console.error("Table body element not found!");
+        return;
+    }
+    tbody.innerHTML = '';
 
-        if (!data || data.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="16" class="empty-state text-center">
-                        <div class="empty-icon">
-                            <i class="fas fa-users-slash"></i>
-                        </div>
-                        <div class="empty-text">لا توجد بيانات متاحة</div>
-                    </td>
-                </tr>
-            `;
-            return;
-        }
+    if (!data || data.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="18" class="empty-state text-center">
+                    <div class="empty-icon">
+                        <i class="fas fa-users-slash"></i>
+                    </div>
+                    <div class="empty-text">لا توجد بيانات متاحة</div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
 
-        data.forEach(target => {
+    const isAdmin = @json(Auth::user()->role === 'admin');
+    const currentMonth = new Date().getMonth() + 1; // JavaScript months are 0-11, so +1 for 1-12
+
+    data.forEach(target => {
+        try {
             const row = document.createElement('tr');
             row.className = 'hover:bg-gray-50 text-center';
+
+            // Get current month's achievement
+            const currentMonthRawValue = target[`month_achieved_${currentMonth}`] || '-';
+            const isDash = currentMonthRawValue === '-';
+            const currentMonthValue = isDash ? 0 : parseFloat(String(currentMonthRawValue).replace(/,/g, '')) || 0;
+
+            // Determine commission status for current month
+            let commissionStatusText = 'لا تصرف';
+            let commissionStatusColor = 'bg-gray-100 text-gray-800';
+
+if (!isDash) {
+    const threshold = target.needed_achieved_percentage || 90;
+    
+    if (currentMonthValue >= threshold) {
+        commissionStatusText = 'تصرف';
+        commissionStatusColor = 'bg-green-100 text-green-800';
+    } else if (currentMonthValue >= (threshold - 20)) {
+        commissionStatusText = 'تحت المراجعة';
+        commissionStatusColor = 'bg-orange-100 text-orange-800';
+    }
+}
+            const monthlyCellsHTML = Array.from({ length: 12 }, (_, i) => {
+                const monthIndex = i + 1;
+                const rawMonthValue = target[`month_achieved_${monthIndex}`];
+                const isDash = rawMonthValue === '-';
+                const monthValue = isDash ? 0 : parseFloat(String(rawMonthValue).replace(/,/g, '')) || 0;
+
+let monthClass = 'text-gray-800';
+if (!isDash) {
+    const threshold = target.needed_achieved_percentage || 90; // Fallback to 90 if null
+    
+    if (monthValue >= threshold) {
+        monthClass = 'text-green-600 font-semibold';
+    } else if (monthValue >= (threshold - 20)) {
+        monthClass = 'text-orange-600 font-semibold';
+    } else {
+        monthClass = 'text-red-600 font-semibold';
+    }
+}
+                return `
+                    <td class="px-2 py-3 text-sm ${monthClass}">
+                        <div>${isDash ? '-' : monthValue + '%'}</div>
+                    </td>
+                `;
+            }).join('');
+
             row.innerHTML = `
                 <td class="px-6 py-4 text-sm font-bold text-blue-700">
                     <span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
@@ -581,36 +794,50 @@
                 <td class="px-6 py-4 text-sm text-gray-800">
                     ${target.target_amount || 0}
                 </td>
-                ${Array.from({length: 12}, (_, i) => {
-                    const monthValue = target[`month_achieved_${i+1}`] || 0;
-                    let monthClass = 'text-gray-800';
-                    if (monthValue < 70) {
-                        monthClass = 'text-red-600 font-semibold';
-                    } else if (monthValue < 100) {
-                        monthClass = 'text-orange-600 font-semibold';
-                    } else if (monthValue >= 100) {
-                        monthClass = 'text-green-600 font-semibold';
-                    }
-                    return `<td class="px-2 py-3 text-sm ${monthClass}">${monthValue}%</td>`;
-                }).join('')}
-                <td class="px-4 py-3 text-sm font-semibold text-center ${
-                    (target.year_achieved_target || 0) < 70 ? 'text-red-600' :
-                    (target.year_achieved_target || 0) < 100 ? 'text-orange-600' : 'text-green-600'
-                }">
-                    ${target.year_achieved_target || 0}%
+                <td class="px-6 py-4 text-sm text-gray-800">
+                    ${target.carried_over_amount || 0}
                 </td>
-                <td class="px-4 py-3 text-sm text-center">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium">
-                        ${target.commission_status || 'N/A'}
-                    </span>
+ <td class="px-6 py-4 text-sm text-gray-800">
+                    ${target.actual_target_amount || 0}
                 </td>
+
+                ${monthlyCellsHTML}
+<td class="px-4 py-3 text-sm font-semibold text-center ${
+    (target.year_achieved_target || 0) >= (target.needed_achieved_percentage || 90)
+        ? 'text-green-600'
+        : (target.year_achieved_target || 0) >= ((target.needed_achieved_percentage || 90) - 20)  // 20% below threshold
+        ? 'text-orange-600'
+        : 'text-red-600'
+}">
+    ${target.year_achieved_target || 0}%
+</td>
+
+		<td class="px-4 py-3 text-sm text-center">
+    <div class="flex flex-col items-center">
+        <!-- Status Badge -->
+        <span style="font-size:14px; font-weight:800;"
+            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${commissionStatusColor}">
+            ${commissionStatusText}
+        </span>
+        
+        ${!isDash && currentMonthValue >= 90 && window.isAdmin ? `
+            <button
+                onclick="openCommissionModal(${target.commission_id}, ${target.month_achieved_amount})"
+                class="bg-blue-500 hover:bg-blue-600 text-white text-xs py-1 px-3 rounded-full mt-1">
+                تحديد طريقة العمولة
+            </button>
+        ` : ''}
+    </div>
+</td>
             `;
+
             tbody.appendChild(row);
-        });
-    }
-
-
-    // Filter functionality
+        } catch (error) {
+            console.error("Error rendering row:", error, target);
+        }
+    });
+}
+//Filter function
     let currentFilteredReps = [...targetsData]; // Initially show all
 function applyFilter() {
     const criteria = document.getElementById('filterSelect').value;
@@ -639,6 +866,21 @@ function applyFilter() {
     }
 
     renderTable(currentFilteredTargets);
+}
+function applyYearFilter() {
+  const year = document.getElementById('yearSelect').value;
+  const url = new URL(window.location.href);
+  url.searchParams.set('year', year);
+
+
+  const commissionFilter = document.getElementById('filterSelect').value;
+  if (commissionFilter) {
+    url.searchParams.set('commission', commissionFilter);
+  } else {
+    url.searchParams.delete('commission');
+  }
+
+  window.location.href = url.toString();
 }
 function handleExport() {
         const exportType = document.getElementById('exportType').value;
@@ -730,9 +972,20 @@ function exportTargets() {
             (target.month_achieved_11 || 0) / 100,
             (target.month_achieved_12 || 0) / 100,
             (target.year_achieved_target || 0) / 100,
-            target.commission_status || 'N/A'
+            target.commission_value_month_1 || 0,
+            target.commission_value_month_2 || 0,
+            target.commission_value_month_3 || 0,
+            target.commission_value_month_4 || 0,
+            target.commission_value_month_5 || 0,
+            target.commission_value_month_6 || 0,
+            target.commission_value_month_7 || 0,
+            target.commission_value_month_8 || 0,
+            target.commission_value_month_9 || 0,
+            target.commission_value_month_10 || 0,
+            target.commission_value_month_11 || 0,
+            target.commission_value_month_12 || 0,
+            target.commission_status || 'N/A',
         ]);
-
         // Create worksheet
         const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
 
@@ -800,6 +1053,52 @@ function exportTargets() {
         if (footer) footer.style.display = 'none';
     });
 }
+      let commissionId = null;
+    let achievedAmount = 0;
+
+   function openCommissionModal(id, achieved) {
+    commissionId = id;
+    achievedAmount = achieved;
+    document.getElementById('commissionModal').classList.remove('hidden');
+}
+
+    function closeCommissionModal() {
+        document.getElementById('commissionModal').classList.add('hidden');
+        document.getElementById('feeInputSection').classList.add('hidden');
+        document.getElementById('fee').value = '';
+    }
+
+    function setCommissionType(type) {
+        const form = document.getElementById('commissionForm');
+        document.getElementById('commission_type_input').value = type;
+
+        form.action = `/admin/commissions/${commissionId}/update-type`;
+
+        form.submit();
+    }
+
+    function showFeeInput() {
+        document.getElementById('feeInputSection').classList.remove('hidden');
+    }
+
+    function submitItemCommission() {
+        const fee = parseFloat(document.getElementById('fee').value);
+
+        if (isNaN(fee) || fee <= 0) {
+            alert('يرجى إدخال قيمة صحيحة للرسوم.');
+            return;
+        }
+
+        document.getElementById('commission_type_input').value = 'item';
+        document.getElementById('item_fee_input').value = fee;
+
+        const form = document.getElementById('commissionForm');
+        form.action = `/admin/commissions/${commissionId}/update-type`;
+
+        form.submit();
+    }
+
+
  function printSection(id) {
         const content = document.getElementById(id).innerHTML;
         const original = document.body.innerHTML;
@@ -809,5 +1108,11 @@ function exportTargets() {
         document.body.innerHTML = original;
         location.reload();
     }
+
     </script>
-    @endpush
+    <script>
+        window.isAdmin = @json(auth()->user()->role === 'admin');
+    </script>
+
+ @endpush
+

@@ -8,6 +8,7 @@
 
     <!-- Bootstrap 5 RTL CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
+<link rel="preload" href="https://ghg-sales.com/assets/img/background-sales3.webp" as="image">
 
     <!-- Tajawal Arabic Font -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet" />
@@ -37,7 +38,7 @@
         }
 
         .navbar-brand img {
-            height: 40px;
+	    max-height: 60px;
             margin-left: 10px;
         }
 
@@ -49,18 +50,26 @@
             align-items: center;
             text-align: center;
             padding: 0 20px;
+	    background-image: url("{{ asset('assets/img/background-sales3.webp') }}");            ;
+background-color: rgba(184, 12, 12, 0.3);            
+background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-blend-mode: overlay;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         .welcome-container h1 {
             font-size: 3rem;
-            color: #BB2128;
+            color: #f7f7f7;
             font-weight: 700;
             margin-bottom: 0.5rem;
         }
 
         .welcome-container p {
             font-size: 1.25rem;
-            color: #4a5568;
+            color: #f5f5f5;
             max-width: 600px;
             margin-bottom: 2rem;
             line-height: 1.5;
@@ -122,7 +131,7 @@
                     @if (Route::has('login'))
                     @auth
                     <li class="nav-item">
-                        <a href="{{ url('/dashboard') }}" class="nav-link">لوحة التحكم</a>
+                        <a href="{{ url('/dashboard') }}" class="btn btn-primary">لوحة التحكم</a>
                     </li>
                     @else
                     <li class="nav-item me-2">

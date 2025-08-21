@@ -1,22 +1,18 @@
+
 @extends('layouts.master')
 
 @section('content')
-<div class="pagetitle">
-    <h1 class="text-gradient">
+<div class="pagetitle text-center">
+    <h1 class="text-gradient mb-0">
         @if($user->role == 'salesRep')
-        الملف الشخصي لمندوب المبيعات
+        أهلا وسهلا بك سفير العلامة التجارية العزيز <span class="fw-bold" style="font-size: 1.2em; color: #4f46e5;">{{ $user->name
+            }}</span> نتمنى لك عمل موفق ويوم جميل
         @else
-        الملف الشخصي للادمن
+        أهلا وسهلا بك أستاذ <span class="fw-bold" style="font-size: 1.2em; color: #4f46e5;">{{ $user->name
+            }}</span> العزيز نتمنى لك عمل موفق ويوم جميل
         @endif
     </h1>
-    <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">الرئيسية</a></li>
-            <li class="breadcrumb-item active">الملف الشخصي</li>
-        </ol>
-    </nav>
 </div>
-
 <section class="section profile">
     <div class="row justify-content-center">
         <div class="col-xl-10">
@@ -24,26 +20,112 @@
             <div class="card profile-header shadow-lg">
                 <div class="cover-photo" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
                 <div class="profile-avatar">
-                    <div class="avatar-wrapper">
-                        <img src="{{ $user->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=random' }}"
-                            alt="Profile" class="rounded-circle">
+                    <div class="avatar-edit-container text-center">
+                        <div class="avatar-wrapper mb-2 position-relative">
+<img src="{{ $user->personal_image
+    ? asset('storage/' . $user->personal_image)
+    : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=random' }}"
+    alt="صورة الملف الشخصي"
+    class="rounded-circle"
+    width="120"
+    id="profileImage">                        </div>
+
+@if (
+    request()->is('showProfile') || 
+    (request()->routeIs('sales-reps.show') && Auth::id() === $user->id)
+)
+    <form id="avatarUploadForm"
+          action="{{ request()->is('showProfile') 
+              ? route('admin.updatePhoto') 
+              : route('sales-reps.updatePhoto', $user->salesRep) }}"
+          method="POST"
+          enctype="multipart/form-data">
+        @csrf
+        <input type="file" id="profilePhotoInput" name="profile_photo_path"
+               accept="image/jpeg,image/png,image/gif" style="display: none;">
+        <button type="button" class="btn btn-sm btn-light avatar-edit-btn"
+                onclick="document.getElementById('profilePhotoInput').click()">
+            <i class="bi bi-pencil-fill"></i>
+        </button>
+    </form>
+@endif
                     </div>
                 </div>
-
                 <div class="card-body pt-5 mt-4 text-center">
                     <h3 class="profile-name">{{ $user->name }}</h3>
                     @php
                     $roles = [
-                    'salesRep' => 'مندوب مبيعات',
+                    'salesRep' => 'سفير العلامة التجارية',
                     'admin' => 'المدير',
                     ];
 
                     $roleText = $roles[$user->role] ?? 'غير معروف';
                     @endphp
-                    <p class="profile-title text-muted">{{ $roleText}}
-                    </p>
+<p class="profile-title text-muted font-bold d-flex align-items-center justify-content-center gap-2">
+    {{ $roleText }}
+    @if(Auth::user()->role === 'admin')
+<div x-data="{ showAdminPasswordModal: false }">
+    <!-- Trigger Button -->
+    <button @click="showAdminPasswordModal = true" class="btn btn-primary">
+        <i class="bi bi-key"></i> تغيير كلمة المرور
+    </button>
+
+    <!-- Modal -->
+    <div x-show="showAdminPasswordModal" 
+        x-cloak 
+	x-transition.opacity
+         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div @click.away="showAdminPasswordModal = false" 
+             class="bg-white rounded-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">تغيير كلمة مرور المدير</h3>
+                <button @click="showAdminPasswordModal = false" class="text-gray-500 hover:text-gray-700">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <form action="{{ route('admin.password.update') }}" method="POST">
+                @csrf
+                @method('PUT')
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block mb-1">كلمة المرور الحالية</label>
+                        <input type="password" name="current_password" required 
+                               class="w-full p-2 border rounded">
+                    </div>
+                    
+                    <div>
+                        <label class="block mb-1">كلمة المرور الجديدة</label>
+                        <input type="password" name="new_password" required 
+                               class="w-full p-2 border rounded">
+                    </div>
+                    
+                    <div>
+                        <label class="block mb-1">تأكيد كلمة المرور</label>
+                        <input type="password" name="new_password_confirmation" required 
+                               class="w-full p-2 border rounded">
+                    </div>
+                    
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" @click="showAdminPasswordModal = false"
+                                class="px-4 py-2 border rounded hover:bg-gray-50">
+                            إلغاء
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            حفظ التغييرات
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+    @endif
+</p>
                     <div class="profile-status mb-3">
-                        @if($user->account_status === 'active')
+ @if($user->account_status === 'active')
                         <span class="badge bg-success rounded-pill px-3 py-1">نشط</span>
                         @elseif($user->account_status === 'inactive')
                         <span class="badge bg-secondary rounded-pill px-3 py-1">غير نشط</span>
@@ -66,7 +148,6 @@
                     @endif
                 </div>
             </div>
-
             <!-- Main Profile Content -->
             <div class="row mt-4">
                 <!-- Left Column - Personal Info -->
@@ -82,12 +163,10 @@
                                 <div class="info-label"><i class="bi bi-person-circle me-2"></i>الإسم الكامل</div>
                                 <div class="info-value">{{ $user->name }}</div>
                             </div>
-
-                            <div class="info-item">
-                                <div class="info-label"><i class="bi bi-at me-2"></i>إسم المستخدم</div>
-                                <div class="info-value">{{ $user->username ?? '-' }}</div>
+				<div class="info-item">
+                                <div class="info-label"><i class="bi bi-person-circle me-2"></i>رقم الجوال </div>
+                                <div class="info-value">{{ json_decode($user->contact_info, true)['phone'] ?? '' }}</div>
                             </div>
-
                             <div class="info-item">
                                 <div class="info-label"><i class="bi bi-envelope me-2"></i>البريد الإلكتروني</div>
                                 <div class="info-value">{{ $user->email }}</div>
@@ -97,15 +176,12 @@
                                 <div class="info-label"><i class="bi bi-shield-check me-2"></i>الدور الوظيفي</div>
                                 @php
                                 $roles = [
-                                'salesRep' => 'مندوب مبيعات',
+                                'salesRep' => 'سفير العلامة التجارية',
                                 'admin' => 'المدير',
                                 ];
-
                                 $roleText = $roles[$user->role] ?? 'غير معروف';
                                 @endphp
-
                                 <div class="info-value">{{ $roleText }}</div>
-
                             </div>
 
                             @if($user->role === 'salesRep' && $user->salesRep)
@@ -122,17 +198,36 @@
                                 <div class="info-value">{{
                                     $user->salesRep->translateDurationToArabic($user->salesRep->work_duration) }}</div>
                             </div>
+<div class="info-item">
+    <div class="info-label">
+        <i class="bi bi-calendar-event me-2 text-blue-600"></i>تاريخ الميلاد
+    </div>
+    <div class="info-value">
+        {{ \Carbon\Carbon::parse($user->birthday)->translatedFormat('d F Y') }} — {{ $user->getAge() }} عامًا
+    </div>
+</div>
+@php
+    $genderLabel = match($salesRep->user?->gender ?? '') {
+        'male' => 'ذكر',
+        'female' => 'أنثى',
+        default => 'غير محدد',
+    };
+@endphp
+                            <div class="info-item">
+                                <div class="info-label"><i class="bi bi-gender-ambiguous me-2"></i>الجنس</div>
+<div class="info-value">{{ $genderLabel }}</div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label"><i class="bi bi-credit-card-2-front me-2"></i>رقم الهوية</div>
+                                <div class="info-value">{{ $user->id_card }}</div>
+                            </div>
                             @endif
 
                             @if(is_array($user->contact_info) && count($user->contact_info) > 0)
                             <div class="info-item">
                                 <div class="info-label"><i class="bi bi-telephone me-2"></i>رقم الجوال</div>
                                 <div class="info-value">{{ $user->contact_info['phone'] ?? '-' }}</div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-label"><i class="bi bi-geo-alt me-2"></i>العنوان</div>
-                                <div class="info-value">{{ $user->contact_info['address'] ?? '-' }}</div>
                             </div>
                             @endif
                         </div>
@@ -148,99 +243,100 @@
                             <h5 class="section-title"><i class="bi bi-speedometer2 me-2"></i> الأداء</h5>
                         </div>
                         <div class="card-body">
-                            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+                                {{-- العملاء المستهدفين --}}
                                 <div class="col">
-                                    <div class="card metric-card h-100">
-                                        <div class="card-body text-center">
+                                    <div class="card metric-card h-100 text-center">
+                                        <div class="card-body">
                                             <div class="metric-icon bg-primary-light">
                                                 <i class="bi bi-bullseye text-primary"></i>
                                             </div>
-                                            <h6 class="metric-title">العملاءالمستهدفين</h6>
-                                            <p class="metric-value">{{ $user->salesRep->clients->count() }}</p>
+<a href="{{ route('sales-reps.clients.index', $user->salesRep->id) }}" class="block no-underline text-gray-800 hover:text-blue-600">
+    <h6 class="metric-title">العملاء المستهدفين</h6>
+    <p class="metric-value">{{ $user->salesRep->clients->count() }}</p>
+</a>
                                         </div>
                                     </div>
-                                </div>
+                                </div>{{-- العملاء المتأخرين --}}
                                 <div class="col">
-                                    <div class="card metric-card h-100">
-                                        <div class="card-body text-center">
+                                    <div class="card metric-card h-100 text-center">
+                                        <div class="card-body">
                                             <div class="metric-icon bg-danger-light">
                                                 <i class="bi bi-exclamation-triangle-fill text-danger"></i>
                                             </div>
-                                            <h6 class="metric-title">العملاء المتأخرين</h6>
-                                            <p class="metric-value text-danger">{{ $user->salesRep->lateCustomers }}</p>
+<a href="{{ route('sales-reps.clients.index', $user->salesRep->id) }}?filter=late" class="block no-underline text-gray-800 hover:text-red-600">
+    <h6 class="metric-title">العملاء المتأخرين</h6>
+    <p class="metric-value text-danger">{{ $user->salesRep->lateCustomers }}</p>
+</a>
                                         </div>
                                     </div>
                                 </div>
+
+                                {{-- الطلبات الكلية --}}
                                 <div class="col">
-                                    <div class="card metric-card h-100">
-                                        <div class="card-body text-center">
+                                    <div class="card metric-card h-100 text-center">
+                                        <div class="card-body">
                                             <div class="metric-icon bg-success-light">
                                                 <i class="bi bi-cart-check text-success"></i>
                                             </div>
-                                            <h6 class="metric-title">الطلبات الكلية</h6>
-                                            <p class="metric-value">{{ $user->salesRep->totalOrders }}</p>
-                                        </div>
+<a href="{{ route('admin.allRequests') }}" class="block no-underline text-gray-800 hover:text-indigo-600"> 
+    <h6 class="metric-title">الطلبات الكلية</h6>
+    <p class="metric-value">{{ $user->salesRep->totalOrders }}</p>
+</a>                                        </div>
                                     </div>
                                 </div>
+
+                                {{-- الطلبات المعلقة --}}
                                 <div class="col">
-                                    <div class="card metric-card h-100">
-                                        <div class="card-body text-center">
+                                    <div class="card metric-card h-100 text-center">
+                                        <div class="card-body">
                                             <div class="metric-icon bg-warning-light">
                                                 <i class="bi bi-hourglass-split text-warning"></i>
                                             </div>
-                                            <h6 class="metric-title">الطلبات المعلقة</h6>
+<a href="{{ route('admin.allRequests') }}" class="block no-underline text-gray-800 hover:text-indigo-600"> 
+<h6 class="metric-title">الطلبات المعلقة</h6>
                                             <p class="metric-value text-warning">{{ $user->salesRep->totalPendedRequests
                                                 }}</p>
-                                        </div>
+ </a>                                        </div>
                                     </div>
                                 </div>
+
+                                {{-- العملاء المهتمين --}}
                                 <div class="col">
-                                    <div class="card metric-card h-100">
-                                        <div class="card-body text-center">
+                                    <div class="card metric-card h-100 text-center">
+                                        <div class="card-body">
                                             <div class="metric-icon bg-info-light">
                                                 <i class="bi bi-star-fill text-info"></i>
                                             </div>
-                                            <h6 class="metric-title">العملاء المهتمين</h6>
+<a href="{{ route('sales-reps.clients.index', $user->salesRep->id) }}?filter=late" class="block no-underline text-gray-800 hover:text-red-600">
+     <h6 class="metric-title">العملاء المهتمين</h6>
                                             <p class="metric-value">{{ $user->salesRep->interestedClients->count() }}
                                             </p>
-                                        </div>
+
+</a>                                        </div>
                                     </div>
                                 </div>
+
+                                {{-- عدد الاتفاقيات --}}
                                 <div class="col">
-                                    <div class="card metric-card h-100">
-                                        <div class="card-body text-center">
+                                    <div class="card metric-card h-100 text-center">
+                                        <div class="card-body">
                                             <div class="metric-icon bg-primary-light">
                                                 <i class="bi bi-file-earmark-text-fill text-primary"></i>
                                             </div>
-                                            <h6 class="metric-title">عدد الاتفاقيات</h6>
+<a href="{{ route('salesrep.agreements.index', $user->salesRep->id) }}" class="block no-underline text-gray-800 hover:text-red-600">
+     <h6 class="metric-title">عدد الاتفاقيات</h6>
                                             <p class="metric-value">{{ $user->salesRep->agreements->count() }}</p>
-                                        </div>
+
+
+</a>                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="col-sm-6 col-lg-4">
-                                    <div class="card metric-card h-100">
-                                        <div class="card-body text-center">
-                                            <div class="metric-icon bg-info-light">
-                                                <i class="bi bi-clipboard-data text-info"></i>
-                                            </div>
-                                            <h6 class="metric-title">هدف الشهر الحالي</h6>
-                                            <p class="metric-value">
-                                                {{ round($user->salesRep->currentMonthAchievedPercentage()) }}%
-                                            </p>
-                                            <small class="text-muted">
-                                                الكمية المتحققة:
-                                                {{ number_format($user->salesRep->currentMonthAchievedAmount()) }}/{{
-                                                number_format($user->salesRep->currentMonthTargetAmount()) }}
-
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-sm-6 col-lg-4">
-                                    <div class="card metric-card h-100">
-                                        <div class="card-body text-center">
+                                {{-- العمولات المستحقة --}}
+                                <div class="col">
+                                    <div class="card metric-card h-100 text-center">
+                                        <div class="card-body">
                                             <div class="metric-icon bg-success-light">
                                                 <i class="bi bi-cash-coin text-success"></i>
                                             </div>
@@ -252,125 +348,195 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                {{-- معدل القبول --}}
                                 <div class="col">
-                                    <div class="card metric-card h-100">
-                                        <div class="card-body text-center">
+                                    <div class="card metric-card h-100 text-center">
+                                        <div class="card-body">
                                             <div class="metric-icon bg-success-light">
                                                 <i class="bi bi-graph-up-arrow text-success"></i>
                                             </div>
                                             <h6 class="metric-title">معدل القبول</h6>
-                                            <p class="metric-value">
-                                                @php
-                                                $rate = $user->salesRep->totalOrders > 0
-                                                ? round(($user->salesRep->totalOrders -
-                                                $user->salesRep->totalPendedRequests) /
-                                                $user->salesRep->totalOrders * 100)
-                                                : 0;
-                                                @endphp
-                                                {{ $rate }}%
-                                            </p>
+                                            @php
+                                            $rate = $user->salesRep->totalOrders > 0
+                                            ? round(($user->salesRep->totalOrders -
+                                            $user->salesRep->totalPendedRequests) / $user->salesRep->totalOrders * 100)
+                                            : 0;
+                                            @endphp
+                                            <p class="metric-value">{{ $rate }}%</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                     </div>
                     @endif
-                </div>
-            </div>
+@php
+    use App\Models\Client;
+    use App\Models\Agreement;
+    use App\Models\ClientRequest;
+    use App\Models\SalesRep;
+    use App\Models\Target;
+    use Carbon\Carbon;
 
-            <!-- Action Buttons -->
-            <div class="text-center mt-4">
-                <a href="{{ route('profile.edit') }}" class="btn btn-primary btn-lg px-4 me-3">
-                    <i class="bi bi-pencil-square me-2"></i> تعديل الملف الشخصي
+$currentYear = Carbon::now()->year;
+$currentMonth = Carbon::now()->month;
 
-                @if($user->role === 'admin')
-                <a href="#" class="btn btn-outline-danger btn-lg px-4" data-bs-toggle="modal"
-                    data-bs-target="#deleteAccountModal">
-                    <i class="bi bi-trash me-2"></i> حذف حساب المندوب
-                </a>
-                @endif
-            </div>
-        </div>
+$achievedTargetsCount = Target::where('is_achieved', true)
+    ->where('year', $currentYear)
+    ->where('month', $currentMonth)
+    ->count();
+    $clientsCount = Client::count();
+    $agreementsCount = Agreement::count();
+    $clientRequestsCount = ClientRequest::count();
+    $salesRepsCount = SalesRep::count();
+    $pendingRequestsCount = ClientRequest::where('status', 'pending')->count();
+@endphp
+                    @if($user->role === 'admin')
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-6 text-right">
+
+<div class="bg-white p-6 rounded-2xl shadow flex items-center justify-between">
+    <div>
+        <a href="{{ route('allClients') }}" class="block text-gray-800 no-underline hover:underline transition">
+            <p class="mb-1" style="font-size:14px; font-weight:700;">إجمالي العملاء</p>
+            <h2 class="text-2xl font-bold">{{ $clientsCount }}</h2>
+        </a>
     </div>
-</section>
-
-@if($user->role === 'admin')
-<!-- Delete Account Modal -->
-<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="deleteAccountModalLabel">Confirm Account Deletion</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-danger" role="alert">
-                    <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill me-2"></i>Warning</h5>
-                    <p>Deleting your account will permanently remove all your data. This action cannot be undone.</p>
-                </div>
-                <p>Are you sure you want to delete account?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form action="{{ route('profile.destroy') }}" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Delete Account</button>
-                </form>
-            </div>
-        </div>
+    <div class="bg-blue-100 text-blue-600 p-3 rounded-full">
+        {{-- أيقونة مختلفة: أيقونة أشخاص بثلاث رؤوس --}}
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M17 20h5v-2a4 4 0 00-3-3.87M2 20h5v-2a4 4 0 013-3.87M12 4a4 4 0 110 8a4 4 0 010-8z"/>
+        </svg>
     </div>
 </div>
+
+<div class="bg-white p-6 rounded-2xl shadow flex items-center justify-between">
+    <div>
+        <a href="{{ route('allAgreements') }}" class="block text-gray-800 no-underline hover:underline transition">
+            <p class="mb-1" style="font-size:14px; font-weight:700;">إجمالي الاتفاقيات</p>
+            <h2 class="text-2xl font-bold text-gray-800">{{ $agreementsCount }}</h2>
+        </a>
+    </div>
+    <div class="bg-green-100 text-green-600 p-3 rounded-full">
+        {{-- أيقونة جديدة: رمز وثيقة (document icon) --}}
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 12l2 2l4-4M12 22a10 10 0 100-20 10 10 0 000 20z"/>
+        </svg>
+    </div>
+</div>
+
+    {{-- إجمالي الطلبات --}}
+<div class="bg-white p-6 rounded-2xl shadow flex items-center justify-between">
+    <div>
+        <a href="/admin/allRequests" class="block text-gray-800 no-underline hover:underline transition">
+            <p class="mb-1" style="font-size:14px; font-weight:700;">طلبات العملاء</p>
+            <h2 class="text-2xl font-bold text-gray-800">{{ $clientRequestsCount }}</h2>
+        </a>
+    </div>
+    <div class="bg-yellow-100 text-yellow-600 p-3 rounded-full">
+        {{-- أيقونة جديدة: رمز قائمة (list icon) --}}
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3 7h18M3 12h18M3 17h18"/>
+        </svg>
+    </div>
+</div>
+
+    {{-- عدد المندوبين --}}
+<div class="bg-white p-6 rounded-2xl shadow flex items-center justify-between">
+    <div>
+        <a href="{{ url('/sales-reps') }}" class="block text-gray-800 no-underline hover:underline transition">
+            <p class="mb-1" style="font-size:14px; font-weight:700;">عدد مندوبي المبيعات</p>
+            <h2 class="text-2xl font-bold text-gray-800">{{ $salesRepsCount }}</h2>
+        </a>
+    </div>
+    <div class="bg-indigo-100 text-indigo-600 p-3 rounded-full">
+        {{-- أيقونة جديدة: رمز شخص مع إشارة ترس (ممثل المبيعات) --}}
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14v7m-6 0h12"/>
+        </svg>
+    </div>
+</div>
+
+    {{-- الأهداف المحققة --}}
+    <div class="bg-white p-6 rounded-2xl shadow flex items-center justify-between">
+        <div>
+            <p class="text-sm text-gray-500 mb-1"  style="font-size:14px; font-weight:700;">أهداف الشهر المتحققة</p> 
+            <h2 class="text-2xl font-bold text-gray-800">{{ $achievedTargetsCount }}</h2>
+        </div>
+        <div class="bg-purple-100 text-purple-600 p-3 rounded-full">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0a9 9 0 0118 0z"/>
+            </svg>
+        </div>
+    </div>
+
+    {{-- الطلبات المعلقة --}}
+<div class="bg-white p-6 rounded-2xl shadow flex items-center justify-between">
+    <div>
+        <a href="/admin/allRequests" class="block text-gray-800 no-underline hover:underline transition">
+            <p class="mb-1" style="font-size:14px; font-weight:700;">الطلبات المعلقة</p>
+            <h2 class="text-2xl font-bold text-gray-800">{{ $pendingRequestsCount }}</h2>
+        </a>
+    </div>
+    <div class="bg-red-100 text-red-600 p-3 rounded-full">
+        {{-- أيقونة جديدة: رمز علامة إلغاء (x) --}}
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728"/>
+        </svg>
+    </div>
+</div>
+</div>
+
 @endif
 
-@if($user->role === 'salesRep')
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const generateBtn = document.getElementById('generateReportBtn');
-        const spinner = document.getElementById('spinner');
-
-        if (generateBtn) {
-            generateBtn.addEventListener('click', function() {
-                spinner.classList.remove('d-none');
-                generateBtn.disabled = true;
-
-                fetch(`{{ route('sales-reps.generate-report', $user->salesRep->id) }}`)
-                    .then(response => {
-                        if (!response.ok) throw new Error('Network error');
-                        return response.blob();
-                    })
-                    .then(blob => {
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `SalesRep_Report_${new Date().toISOString().slice(0,10)}.pdf`;
-                        document.body.appendChild(a);
-                        a.click();
-                        URL.revokeObjectURL(url);
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        toastr.error('Failed to generate report');
-                    })
-                    .finally(() => {
-                        spinner.classList.add('d-none');
-                        generateBtn.disabled = false;
-                    });
-            });
-        }
-    });
-</script>
-@endpush
-@endif
+                </div>
+            </div>
+        </div>
+</section>
 
 <style>
-    /* Custom Styles for Modern Profile */
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap');
+
+    :root {
+        --font-primary: 'Tajawal', sans-serif;
+        --font-secondary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        --text-dark: #2c3e50;
+        --text-muted: #7f8c8d;
+        --text-light: #f8f9fa;
+    }
+
+    body {
+        font-family: var(--font-primary);
+        color: var(--text-dark);
+        line-height: 1.6;
+    }
+
+    .pagetitle {
+        padding: 20px 0;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+        border-radius: 10px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+	
     .text-gradient {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #121214 0%, #121113 100%);
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -400,12 +566,13 @@
     }
 
     .avatar-wrapper {
-        width: 100px;
-        height: 100px;
+        width: 120px;
+        height: 120px;
         border-radius: 50%;
         border: 4px solid white;
         overflow: hidden;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        position: relative;
     }
 
     .avatar-wrapper img {
@@ -440,9 +607,65 @@
     }
 
     .info-label {
-        font-size: 0.85rem;
-        color: #7f8c8d;
+        font-size: 1rem;
+        font-weight: 1000;
+        color: #0f1010;
         margin-bottom: 0.3rem;
+    }
+
+    .avatar-edit-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .avatar-wrapper {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid white;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .avatar-edit-btn {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: white;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        border: 1px solid #e2e8f0;
+        z-index: 3;
+        transition: all 0.3s ease;
+    }
+
+    .avatar-edit-btn:hover {
+        background-color: #f1f5f9;
+        transform: translateY(-2px) scale(1.05);
+    }
+
+    .avatar-edit-btn[disabled] {
+        opacity: 0.7;
+        cursor: wait;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .bi-arrow-clockwise {
+        animation: spin 1s linear infinite;
     }
 
     .info-value {
@@ -530,7 +753,8 @@
 
     .metric-title {
         font-size: 0.9rem;
-        color: #6c757d;
+        font-weight: 500;
+        color: #111213;
         margin-bottom: 0.5rem;
     }
 
@@ -540,4 +764,39 @@
         margin-bottom: 0;
     }
 </style>
+<script>
+    document.getElementById('profilePhotoInput').addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            // Client-side validation
+            const file = this.files[0];
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+            if (!validTypes.includes(file.type)) {
+                alert('الرجاء اختيار صورة بصيغة JPEG أو PNG أو GIF');
+                return;
+            }
+
+            if (file.size > 2048 * 1024) { // 2MB
+                alert('حجم الملف يجب أن لا يتجاوز 2MB');
+                return;
+            }
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('profileImage').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+
+            // Submit form
+            document.getElementById('avatarUploadForm').submit();
+
+            // Show loading state
+            const editBtn = document.querySelector('.avatar-edit-btn');
+            editBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>';
+            editBtn.disabled = true;
+        }
+    });
+</script>
 @endsection
+

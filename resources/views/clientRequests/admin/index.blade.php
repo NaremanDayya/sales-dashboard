@@ -21,7 +21,7 @@
                                 <tr>
                                     <th class="text-end">#</th>
                                     <th class="text-end">العميل</th>
-                                    <th class="text-end">المندوب</th>
+                                    <th class="text-end">سفير العلامة التجارية</th>
                                     <th class="text-end">نوع الطلب</th>
                                     <th class="text-end">الوصف</th>
                                     <th class="text-end">الحقل المعدل</th>

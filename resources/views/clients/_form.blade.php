@@ -27,20 +27,19 @@
         <div class="space-y-6">
             <div>
                 <label for="company_name" class="block text-sm font-medium text-gray-700 mb-1">اسم الشركة</label>
-                <input type="text" id="company_name" name="company_name" x-model="form.company_name"
+                <input type="text" id="company_name" name="company_name" value="{{ old('client_name') }}" x-model="form.company_name"
                     @input="unlockStep()" required
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border">
             </div>
             <div class="flex justify-end">
-                <button type="button" @click="nextStep()" x-show="canContinue"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+ <button type="button" @click="nextStep()" x-show="canContinue"
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 foc>
                     :class="{'opacity-50 cursor-not-allowed': !canContinue}">
-                    التالي <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-5 w-5" viewBox="0 0 20 20"
-                        fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clip-rule="evenodd" />
-                    </svg>
+                    التالي <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+    <path fill-rule="evenodd" 
+          d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" 
+          clip-rule="evenodd" />
+</svg>
                 </button>
             </div>
         </div>
@@ -52,20 +51,19 @@
         <div class="space-y-6">
             <div>
                 <label for="address" class="block text-sm font-medium text-gray-700 mb-1">عنوان الشركة</label>
-                <input type="text" id="address" name="address" x-model="form.address" @input="unlockStep()" required
+                <input type="text" id="address" name="address" x-model="form.address" @input="unlockStep()" value="{{ old('address') }}"  required
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border">
             </div>
             <div class="flex justify-between">
 
-                <button type="button" @click="nextStep()" x-show="canContinue"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+ <button type="button" @click="nextStep()" x-show="canContinue"
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 foc>
                     :class="{'opacity-50 cursor-not-allowed': !canContinue}">
-                    التالي <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-5 w-5" viewBox="0 0 20 20"
-                        fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clip-rule="evenodd" />
-                    </svg>
+                    التالي <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+    <path fill-rule="evenodd" 
+          d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" 
+          clip-rule="evenodd" />
+</svg>
                 </button>
             </div>
         </div>
@@ -76,21 +74,20 @@
         <div class="space-y-6">
             <div>
                 <label for="contact_person" class="block text-sm font-medium text-gray-700 mb-1">الشخص المسؤول</label>
-                <input type="text" id="contact_person" name="contact_person" x-model="form.contact_person"
+                <input type="text" id="contact_person" name="contact_person" value="{{ old('contact_person') }}"  x-model="form.contact_person"
                     @input="unlockStep()" required
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border">
             </div>
             <div class="flex justify-between">
 
-                <button type="button" @click="nextStep()" x-show="canContinue"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+ <button type="button" @click="nextStep()" x-show="canContinue"
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 foc>
                     :class="{'opacity-50 cursor-not-allowed': !canContinue}">
-                    التالي <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-5 w-5" viewBox="0 0 20 20"
-                        fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clip-rule="evenodd" />
-                    </svg>
+                    التالي <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+    <path fill-rule="evenodd" 
+          d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" 
+          clip-rule="evenodd" />
+</svg>
                 </button>
             </div>
         </div>
@@ -102,21 +99,20 @@
             <div>
                 <label for="contact_position" class="block text-sm font-medium text-gray-700 mb-1">
                     المنصب الوظيفي</label>
-                <input type="text" id="contact_position" name="contact_position" x-model="form.contact_position"
+                <input type="text" id="contact_position" name="contact_position" value="{{ old('contact_position') }}"  x-model="form.contact_position"
                     @input="unlockStep()"
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border"
                     placeholder="Manager, Owner, etc.">
             </div>
             <div class="flex justify-between">
-                <button type="button" @click="nextStep()" x-show="canContinue"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+ <button type="button" @click="nextStep()" x-show="canContinue"
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 foc>
                     :class="{'opacity-50 cursor-not-allowed': !canContinue}">
-                    اتالي <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-5 w-5" viewBox="0 0 20 20"
-                        fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clip-rule="evenodd" />
-                    </svg>
+                    التالي <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+    <path fill-rule="evenodd" 
+          d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" 
+          clip-rule="evenodd" />
+</svg>
                 </button>
             </div>
         </div>
@@ -127,20 +123,19 @@
         <div class="space-y-6">
             <div>
                 <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">رقم الجوال</label>
-                <input type="tel" id="phone" name="phone" x-model="form.phone" @input="unlockStep()" required
+                <input type="tel" id="phone" name="phone" value="{{ old('') }}"  x-model="form.phone" @input="unlockStep()" required
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border">
             </div>
             <div class="flex justify-between">
 
-                <button type="button" @click="nextStep()" x-show="canContinue"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+ <button type="button" @click="nextStep()" x-show="canContinue"
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 foc>
                     :class="{'opacity-50 cursor-not-allowed': !canContinue}">
-                    التالي <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-5 w-5" viewBox="0 0 20 20"
-                        fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clip-rule="evenodd" />
-                    </svg>
+                    التالي <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+    <path fill-rule="evenodd" 
+          d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" 
+          clip-rule="evenodd" />
+</svg>
                 </button>
             </div>
         </div>
@@ -149,19 +144,23 @@
     <!-- Step 7: Interest Status -->
     <template x-if="step === 6">
         <div class="space-y-6">
-            <div>
-                <label for="interest_status" class="block text-sm font-medium text-gray-700 mb-1">Interest
-                    Status</label>
-                <select id="interest_status" name="interest_status" x-model="form.interest_status"
-                    @change="unlockStep()" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border">
-                    <option value="" disabled selected>حالة الاهتمام</option>
-                    <option value="interested">مهتم</option>
-                    <option value="not interested">غير مهتم</option>
-                    <option value="neutral">مؤجل</option>
-                </select>
-            </div>
-            <div class="flex justify-between">
+@php
+    $selectedStatus = old('interest_status', $client->interest_status ?? '');
+@endphp
+
+<div>
+    <label for="interest_status" class="block text-sm font-medium text-gray-700 mb-1">Interest Status</label>
+    <select id="interest_status" name="interest_status" 
+            x-model="form.interest_status"
+            @change="unlockStep()" required
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border">
+        <option value="" disabled {{ $selectedStatus == '' ? 'selected' : '' }}>حالة الاهتمام</option>
+        <option value="interested" {{ $selectedStatus == 'interested' ? 'selected' : '' }}>مهتم</option>
+        <option value="not interested" {{ $selectedStatus == 'not interested' ? 'selected' : '' }}>غير مهتم</option>
+        <option value="neutral" {{ $selectedStatus == 'neutral' ? 'selected' : '' }}>مؤجل</option>
+    </select>
+</div>
+<div class="flex justify-between">
 
                 <button type="submit" x-show="canContinue"
                     class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
@@ -173,8 +172,7 @@
                     </svg>
                     {{ $button_label ?? 'إضافة العميل' }}
                 </button>
-            </div>
-        </div>
+            </div>        </div>
     </template>
 </div>
 
@@ -193,22 +191,29 @@ function clientWizard() {
             phone: '',
             interest_status: '',
         },
+init() {
+    this.canContinue = false;
+    
+    // Initialize form values - prioritize old input, then existing client, then empty
+    this.form = {
+        company_name: '{{ old('company_name', isset($client) ? $client->company_name : '') }}',
+        address: '{{ old('address', isset($client) ? $client->address : '') }}',
+        contact_person: '{{ old('contact_person', isset($client) ? $client->contact_person : '') }}',
+        contact_position: '{{ old('contact_position', isset($client) ? $client->contact_position : '') }}',
+        phone: '{{ old('phone', isset($client) ? $client->phone : '') }}',
+        interest_status: '{{ old('interest_status', isset($client) ? $client->interest_status : '') }}',
+    };
 
-        init() {
-            this.canContinue = false;
-            // Initialize form values if editing existing client
-            @if(isset($client))
-                this.form = {
-                    company_name: '{{ $client->company_name }}',
-                    address: '{{ $client->address }}',
-                    contact_person: '{{ $client->contact_person }}',
-                    contact_position: '{{ $client->contact_position }}',
-                    phone: '{{ $client->phone }}',
-                    interest_status: '{{ $client->interest_status }}',
-                };
-                this.previewLogo = '{{ $client->company_logo ? asset('storage/' . $client->company_logo) : '' }}';
-            @endif
-        },
+    // Handle logo preview - prioritize old input, then existing client
+    @if(old('company_logo') || (isset($client) && $client->company_logo))
+        this.previewLogo = '{{ old('company_logo') ? 
+                            old('company_logo') : 
+                            (isset($client) ? asset('storage/' . $client->company_logo) : '') }}';
+    @endif
+
+    // Set the current step based on which fields have errors
+    this.setInitialStep();
+},
 
         handleLogoUpload(event) {
             const file = event.target.files[0];
@@ -232,7 +237,30 @@ function clientWizard() {
             const value = this.currentFieldValue();
             this.canContinue = value !== '' && value !== null;
         },
-
+setInitialStep() {
+    const errors = @json($errors->keys() ?? []);
+    
+    if (errors.includes('company_name')) {
+        this.step = 1;
+    } else if (errors.includes('address')) {
+        this.step = 2;
+    } else if (errors.includes('contact_person')) {
+        this.step = 3;
+    } else if (errors.includes('contact_position')) {
+        this.step = 4;
+    } else if (errors.includes('phone')) {
+        this.step = 5;
+    } else if (errors.includes('interest_status')) {
+        this.step = 6;
+    } else {
+        this.step = 1;
+    }
+    
+    // Unlock the step if we're returning to a step with existing data
+    if (this.currentFieldValue()) {
+        this.canContinue = true;
+    }
+}
         currentFieldValue() {
             switch (this.step) {
                 case 1: return this.form.company_name;

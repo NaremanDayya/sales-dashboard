@@ -105,12 +105,12 @@
                     <div class="space-y-2">
                         <p><span class="font-medium">الخدمة:</span> {{ $agreement->service->name }}</p>
                         <p><span class="font-medium">الكمية:</span> {{ $agreement->product_quantity }}</p>
-                        <p><span class="font-medium">التسعيرة:</span>{{ config('app.currency', 'ريال') }}{{
-                            number_format($agreement->price) }}
+                        <p><span class="font-medium">التسعيرة:</span>{{
+                            number_format($agreement->price) }}{{ config('app.currency', 'ريال') }}
                         </p>
-                        <p><span class="font-medium">السعر الكلي:</span> {{ config('app.currency', 'ريال') }}{{
+                        <p><span class="font-medium">السعر الكلي:</span> {{
                             number_format($agreement->total_amount)
-                            }}</p>
+                            }}{{ config('app.currency', 'ريال') }}</p>
                     </div>
                 </div>
 
@@ -124,12 +124,12 @@
                         </svg>مندوب العميل
                     </h3>
                     <div class="space-y-2">
-                        <p><span class="font-medium">اسم المندوب:</span> {{ $agreement->salesRep->name }}</p>
+                        <p><span class="font-medium">اسم سفير العلامة التجارية:</span> {{ $agreement->salesRep->name }}</p>
                         <p><span class="font-medium">البريد الإلكتروني:</span> {{ $agreement->salesRep->user->email }}
                         </p>
                         <p><span class="font-medium">رقم الجوال:</span> {{
                             $agreement->salesRep->user->contact_info['phone']
-                            ?? 'N/A' }}</p>
+                            ?? '-' }}</p>
                     </div>
                 </div>
             </div>
@@ -246,7 +246,7 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('agreement-edit-requests.store', $agreement) }}">
+            <form method="POST" class="prevent-multi-submit" action="{{ route('agreement-edit-requests.store', $agreement) }}">
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="mb-4">
@@ -292,20 +292,22 @@
             <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
                 @forelse($agreement->editRequests()->take(3)->latest()->get()  as $request)
                 <form method="GET"
-                    action="{{ route('admin.agreement-request.edit', ['agreement' => $request->agreement_id, 'agreement_request' => $request->id]) }}">
+                    action="{{ route(
+        Auth::user()->role === 'admin' ? 'admin.agreement-request.edit' : 'admin.agreement-request.review',
+        ['agreement' => $request->agreement_id, 'agreement_request' => $request->id]
+    ) }}">
                     @csrf
                     <button type="submit" class="w-full text-left">
                         <div class="border rounded-lg p-3 bg-gray-50 hover:bg-gray-100 transition cursor-pointer">
                             <div class="flex justify-between items-start">
                                 <span class="font-medium text-sm text-gray-700">
-                                    {{ $request->request_type }}
-                                </span>
-                                <span
-                                    class="px-2 py-1 rounded-full text-xs font-semibold
-                                {{ $request->status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                   ($request->status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800') }}">
-                                    {{ ucfirst($request->status) }}
-                                </span>
+طلب تعديل إتفاقية                                </span>
+<span
+    class="px-2 py-1 rounded-full text-xs font-semibold
+        {{ $request->status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+           ($request->status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800') }}">
+    {{ $request->status === 'pending' ? 'قيد المراجعة' : ($request->status === 'approved' ? 'تمت الموافقة' : 'مرفوض') }}
+</span>
                             </div>
                             <p class="text-sm mt-1 text-gray-600 line-clamp-2">{{ $request->description }}</p>
                             <div class="flex justify-between items-center mt-2">
@@ -425,7 +427,7 @@
 
                 <div class="space-y-3">
                     @if($agreement->notice_status === 'not_sent' && $withinNoticePeriod)
-                    <form action="{{ route('agreements.updateNoticeStatus', [$salesrep, $agreement]) }}" method="POST">
+                    <form class="prevent-multi-submit" action="{{ route('agreements.updateNoticeStatus', [$salesrep, $agreement]) }}" method="POST">
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="notice_status" value="sent">
@@ -464,5 +466,11 @@
             textarea.placeholder = `أضف رسالة حول سبب تغيير ${selectedLabel}...`;
         });
     });
+document.querySelectorAll(".prevent-multi-submit").forEach(form => {
+    form.addEventListener("submit", function(e) {
+        let button = form.querySelector("button[type=submit]");
+        button.disabled = true;
+    });
+});
 </script>
 @endpush

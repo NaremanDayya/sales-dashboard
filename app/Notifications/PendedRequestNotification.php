@@ -46,7 +46,7 @@ class PendedRequestNotification extends Notification
         return [
             'message' => 'يوجد طلبات تعديل معلقة منذ أكثر من 3 أيام. الرجاء مراجعتها.',
             'type' => 'pended_requests',
-            'url' => route('admin.allPendingRequests'), // adjust the route
+            'url' => route('admin.allRequests'), // adjust the route
         ];
     }
     public function toBroadcast($notifiable)

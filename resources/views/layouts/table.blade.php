@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="table-html">
-
+<html lang="ar" dir="rtl" class="table-html no-sidebar" style='width:100%'>
 @include('partials.head')
-
+@section('favicon')
+    <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.jpg') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/img/favicon.jpg') }}">
+@endsection
 <body class="table-body bg-gray-100" style="display: flex; flex-direction: column; min-height: 100vh; margin: 0; padding: 0;">
 
     <!-- ======= Header ======= -->
-    @include('partials.table.header')
+    @include('partials.header')
     <!-- End Header -->
 
     <main id="main-table" class="main w-full" style="flex: 1;">
@@ -24,7 +26,21 @@
             </div>
         </div>
         @endif
-        <div class="w-full max-w-full overflow-x-auto px-4">
+@if (session('warning'))
+        <div class="toast-container position-fixed" style="top: 100px; right: 20px; z-index: 1300;">
+            <div class="toast show align-items-center text-bg-warning border-0" role="alert" aria-live="assertive"
+                aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{ session('warning') }}
+                    </div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        @endif
+        <div class="w-full max-w-full px-4">
             @if ($errors->any())
             <div class="toast-container position-fixed" style="top: 100px; right: 20px; z-index: 1300;">
                 <div class="toast show align-items-center text-bg-warning border-0" role="alert" aria-live="assertive"
@@ -59,6 +75,8 @@
     <script src="{{ asset('assets/vendor/php-email-form/validate.js') }}"></script>
     <script src="//unpkg.com/alpinejs" defer></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ar.js"></script>
 
     <!-- Template Main JS File -->
     <script src="{{ asset('assets/js/main.js') }}"></script>
@@ -68,6 +86,7 @@
     <script>
         window.userId = {{ Auth::id() }};
     </script>
+
     @stack('scripts')
 </body>
 

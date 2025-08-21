@@ -19,10 +19,8 @@ class Kernel extends HttpKernel
      */
 
 
-    protected function schedule(Schedule $schedule)
-    {
-        $schedule->job('RunDailyCommandJob')->dailyAt('09:00');
-    }
+ 
+        
     protected $middleware = [
         \Illuminate\Http\Middleware\HandleCors::class,
         \App\Http\Middleware\TrustProxies::class,

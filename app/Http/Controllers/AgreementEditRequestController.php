@@ -59,7 +59,19 @@ class AgreementEditRequestController extends Controller
             'agreement_status',
             'implementation_date',
         ];
-
+ $fieldTranslations = [
+        'service_id' => 'الخدمة',
+        'signing_date' => 'تاريخ التوقيع',
+        'duration_years' => 'مدة العقد (بالسنوات)',
+        'end_date' => 'تاريخ الانتهاء',
+        'termination_type' => 'نوع الإنهاء',
+        'notice_months' => 'عدد أشهر الإشعار',
+        'notice_status' => 'حالة الإشعار',
+        'product_quantity' => 'الكمية',
+        'price' => 'السعر',
+        'agreement_status' => 'حالة الاتفاقية',
+        'implementation_date' => 'تاريخ التنفيذ',
+    ];
         $validated = $request->validate([
             'update_message' => 'required|string',
             'edited_field' => ['required', 'in:' . implode(',', $columns)],
@@ -74,31 +86,6 @@ class AgreementEditRequestController extends Controller
             'status' => 'pending',
             'edited_field' => $validated['edited_field'],
         ]);
-        $authenticatedUserId = Auth::id();
-        // dd($authenticatedUserId);
-        $conversation = $agreement->client->conversations()
-            ->where(function ($query) use ($authenticatedUserId) {
-                $query->where('sender_id', $authenticatedUserId)
-                    ->orWhere('receiver_id', $authenticatedUserId);
-            })->first();
-
-        if (!$conversation) {
-            $adminUserId = User::where('role', 'admin')->first()->id;
-
-            $conversation = Conversation::create([
-                'sender_id' => $authenticatedUserId,
-                'receiver_id' => $adminUserId,
-                'client_id' => $agreement->client->id,
-            ]);
-        }
-        Message::create(
-            [
-                'conversation_id' => $conversation->id,
-                'sender_id' => $authenticatedUserId,
-                'receiver_id' => $conversation->sender_id === $authenticatedUserId ? $conversation->receiver_id : $conversation->sender_id,
-                'message' => $request->update_message,
-            ]
-        );
 
         $admins = User::where('role', 'admin')->get();
         Notification::send($admins, new NewAgreementEditRequestNotification($agreement_edit_request));
@@ -117,8 +104,8 @@ class AgreementEditRequestController extends Controller
 
     public function show(Agreement $agreement, AgreementEditRequest $agreement_request)
     {
-        abort_unless($agreement_request->sales_rep_id === Auth::user()->salesRep->id, 403);
-
-        return view('agreementRequests.salesRep.show', ['request' => $agreement_request]);
-    }
+ $agreement_request->load(['client','agreement', 'salesRep']);
+        $editedFieldLabel = $this->getFieldLabel($agreement_request->edited_field);
+        return view('agreementRequests.admin.review', compact('agreement_request', 'editedFieldLabel'));
+     }
 }

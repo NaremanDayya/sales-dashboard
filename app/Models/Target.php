@@ -21,6 +21,7 @@ class Target extends Model
         'commission_due',
         'carried_over_amount',
         'achieved_percentage',
+	'needed_achieved_percentage',
     ];
 
     protected $casts = [
@@ -65,6 +66,35 @@ class Target extends Model
     public function getCommissionStatusAttribute()
     {
         return $this->commission_due ? 'تصرف' : 'لا تصرف';
+    }
+public function commission() {
+    return $this->belongsTo(Commission::class); 
+}
+public function getCommissionStatusByMonth($month)
+{
+    // First check loaded commissions
+    if ($this->relationLoaded('commissions')) {
+        $commission = $this->commissions
+            ->where('month', $month)
+            ->where('year', $this->year ?? now()->year)
+            ->first();
+            
+        return $commission?->payment_status ?? 0;
+    }
+
+    // Fallback to query if not loaded
+    return $this->commissions()
+        ->where('month', $month)
+        ->where('year', $this->year ?? now()->year)
+        ->value('payment_status') ?? 0;
+}
+
+ public function getCommissionValueByMonth($month)
+    {
+    return $this->commissions()
+    ->where('month', $month)
+    ->where('year', $this->year ?? now()->year)
+    ->first()?->commission_amount ?? 0;
     }
 
 }

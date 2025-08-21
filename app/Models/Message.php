@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Message extends Model
 {
 
-    protected $fillable = ['receiver_id', 'sender_id', 'message', 'is_admin', 'conversation_id', 'read_at', 'receiver_deleted_at', 'sender_deleted_at'];
+    protected $fillable = ['receiver_id', 'edited_at',  'sender_id', 'message', 'is_admin', 'conversation_id', 'read_at', 'receiver_deleted_at', 'sender_deleted_at'];
     protected $dates = [
         'read_at',
         'receiver_deleted_at',
         'sender_deleted_at',
-
+	'edited_at',
     ];
 
     /* relationship */
@@ -31,4 +31,24 @@ class Message extends Model
 
         return $this->read_at != null;
     }
+    
+    
+public function isEdited()
+{
+    return !is_null($this->edited_at);
+}
+
+public function canBeEdited()
+{
+    if (auth()->user()->isAdmin()) {
+        return true;
+    }
+    
+    return $this->created_at->diffInHours(now()) <= 1 && 
+           $this->sender_id === auth()->id();
+}
+public function getIsAdminAttribute()
+{
+    return $this->sender->isAdmin();
+}
 }

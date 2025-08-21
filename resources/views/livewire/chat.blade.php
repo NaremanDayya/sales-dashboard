@@ -1,4 +1,7 @@
 @vite(['resources/css/app.css', 'resources/js/app.js'])
+<script>
+    document.title = "محادثات العملاء";
+</script>
 
 <meta name="user-id" content="{{ Auth::id() }}">
 @php
@@ -32,7 +35,7 @@ $salesRepId = Auth::user()->salesRep->id;
                                 d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                     </span>
-                    <span class="nav-text">المندوبين</span>
+                    <span class="nav-text">سفراء العلامة التجارية</span>
                 </a>
                 @elseif(Auth::user()->role == 'salesRep')
                 <a href="{{ route('sales-rep.targets.index',$salesRepId) }}"
@@ -105,14 +108,14 @@ $salesRepId = Auth::user()->salesRep->id;
                 </a>
 
                 <a @if(Auth::user()->hasRole('admin'))
-                    href="{{ route('admin.allPendingRequests') }}"
+                    href="{{ route('admin.allRequests') }}"
                     @elseif(Auth::user()->role('salesRep'))
-                    href="{{ route('myPendingRequests',$salesRepId) }}"
+                    href="{{ route('myRequests',$salesRepId) }}"
                     @endif
                     class="nav-link px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors
                     duration-200 {{
-                    request()->routeIs('admin.allPendingRequests') ||
-                    request()->routeIs('myPendingRequests',$salesRepId) ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600
+                    request()->routeIs('admin.allRequests') ||
+                    request()->routeIs('myRequests',$salesRepId) ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600
                     dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800'
                     }}">
                     <span class="nav-icon">
@@ -122,7 +125,7 @@ $salesRepId = Auth::user()->salesRep->id;
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </span>
-                    <span class="nav-text">الطلبات المعلقة</span>
+                    <span class="nav-text">الطلبات</span>
                 </a>
             </nav>
 
@@ -132,12 +135,11 @@ $salesRepId = Auth::user()->salesRep->id;
                 <div x-data="{ chatDropdownOpen: false }" class="relative">
                     <button @click="chatDropdownOpen = !chatDropdownOpen"
                         class="p-2 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors duration-200 relative">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
-                    </button>
+<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M8 3h8a5 5 0 0 1 5 5v6a5 5 0 0 1-5 5h-4l-4 4v-4H8a5 5 0 0 1-5-5V8a5 5 0 0 1 5-5z" />
+                                 </svg>                    </button>
                     <div x-show="chatDropdownOpen" @click.away="chatDropdownOpen=false"
                         x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1"
                         x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="ease-in duration-150"
@@ -193,8 +195,9 @@ $salesRepId = Auth::user()->salesRep->id;
 
                         <div
                             class="relative h-10 w-10 rounded-full overflow-hidden border-2 border-white/30 group-hover:border-white/50 transition-all duration-300">
-                            <img class="h-full w-full object-cover" src="{{ Auth::user()->profile_photo_url }}"
-                                alt="Profile photo">
+ <img class="h-full w-full object-cover"
+                            src="{{ Auth::user()->personal_image ? asset('storage/' . Auth::user()->personal_image) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=random' }}"
+                            alt="{{ Auth::user()->name }}">
                             <div
                                 class="absolute inset-0 bg-white/10 group-hover:bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             </div>
@@ -222,7 +225,7 @@ $salesRepId = Auth::user()->salesRep->id;
                         </div>
 
                         <div class="py-1">
-                            <a href="{{ route('profile.show') }}"
+                            <a href="{{ route('profile.show.custom') }}"
                                 class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-neutral-700 transition-colors duration-200">
                                 <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -258,11 +261,11 @@ $salesRepId = Auth::user()->salesRep->id;
         <div class="pt-24"></div>
         <!-- Main Chat Layout -->
         <div
-            class="fixed pt-20 h-full flex bg-white border lg:shadow-sm overflow-hidden inset-0  lg:inset-x-2 lg:inset-y-2 m-auto lg:h-[100%] rounded-t-lg">
+            class=" fixed pt-20 h-full flex bg-white border lg:shadow-sm overflow-hidden inset-0  lg:inset-x-2 lg:inset-y-2 m-auto lg:h-[100%] rounded-t-lg">
             <div class="relative w-full md:w-[320px] xl:w-[400px] overflow-y-auto shrink-0 h-full border">
                 <livewire:chat-list :selectedConversation="$selectedConversation" :conversation="$conversation">
             </div>
-            <div class="hidden md:grid w-full border-l h-full relative overflow-y-auto" style="contain:content">
+            <div class="rtl hidden md:grid w-full border-l h-full relative overflow-y-auto" style="contain:content">
                 <livewire:chat-box :selectedConversation="$selectedConversation">
             </div>
         </div>
@@ -273,4 +276,161 @@ $salesRepId = Auth::user()->salesRep->id;
     document.getElementById('userMenuButton').addEventListener('click', function () {
         document.getElementById('userDropdown').classList.toggle('hidden');
     });
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Common normalization function for Arabic and English text
+    function normalizeText(text) {
+        if (!text) return '';
+        return text.toString()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u064B-\u065F]/g, '') // Remove Arabic diacritics
+            .replace(/[أإآءئ]/g, 'ا') // Normalize Arabic alef variants
+            .replace(/ة/g, 'ه') // Normalize ta marbuta
+            .replace(/[^\w\u0600-\u06FF]/g, '') // Remove special chars
+            .trim();
+    }
+
+    // Client Selection Modal Functionality
+    const clientSelectionModal = document.getElementById("clientSelectionModal");
+    const clientList = document.getElementById("clientList");
+    let clientsData = [];
+
+    // Chat List Functionality
+    const conversationsList = document.getElementById("conversationsList");
+
+    // Initialize search functionality for modal
+    const modalSearchInput = document.getElementById("modalSearchInput");
+    if (modalSearchInput) {
+        modalSearchInput.addEventListener('input', handleModalSearch);
+    }
+
+    // Initialize search functionality for chat list
+    const chatListSearchInput = document.getElementById("searchInput");
+    if (chatListSearchInput) {
+        chatListSearchInput.addEventListener('input', handleChatListSearch);
+    }
+
+    function handleModalSearch(e) {
+        const searchTerm = normalizeText(e.target.value);
+        filterClients(searchTerm);
+    }
+
+    function handleChatListSearch(e) {
+        const searchTerm = normalizeText(e.target.value);
+        filterConversations(searchTerm);
+    }
+
+    async function fetchClients() {
+        try {
+            const response = await fetch('/chat-clients');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            clientsData = await response.json();
+            renderClients(clientsData);
+        } catch (error) {
+            console.error('Error fetching clients:', error);
+            showError("فشل في تحميل العملاء");
+        }
+    }
+
+    function filterClients(searchTerm) {
+        if (!clientList) return;
+
+        const filtered = searchTerm
+            ? clientsData.filter(client => {
+                const companyMatch = normalizeText(client.company_name).includes(searchTerm);
+                const repMatch = normalizeText(client.sales_rep_name).includes(searchTerm);
+                return companyMatch || repMatch;
+            })
+            : clientsData;
+
+        renderClients(filtered);
+    }
+
+    function filterConversations(searchTerm) {
+        if (!conversationsList) return;
+
+        const items = Array.from(conversationsList.querySelectorAll('li[data-name]'));
+        let visibleCount = 0;
+
+        items.forEach(item => {
+            const name = normalizeText(item.dataset.name);
+            const company = normalizeText(item.dataset.company);
+            const matches = !searchTerm || name.includes(searchTerm) || company.includes(searchTerm);
+
+            item.classList.toggle('hidden', !matches);
+            if (matches) visibleCount++;
+        });
+
+        // Show/hide empty state if exists
+        const emptyState = document.getElementById('noConvoMsg');
+        if (emptyState) emptyState.classList.toggle('hidden', visibleCount > 0);
+    }
+
+    function renderClients(clients) {
+        if (!clientList) return;
+
+        clientList.innerHTML = clients.length === 0
+            ? '<li class="px-3 py-4 text-center text-gray-500">لا يوجد عملاء</li>'
+            : clients.map(client => {
+                const avatarInitial = client.company_name?.charAt(0).toUpperCase() || '?';
+                return `
+                    <li class="p-3 hover:bg-gray-100 cursor-pointer flex items-center"
+                        onclick="window.location.href='/client/${client.id}/message'">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-purple-600 font-medium mr-3">
+                            ${avatarInitial}
+                        </div>
+                        <div>
+                            <div class="font-medium">${client.company_name || 'Unknown Company'}</div>
+                            <div class="text-sm text-gray-500">${client.sales_rep_name || 'غير محدد'}</div>
+                        </div>
+                    </li>
+                `;
+            }).join('');
+    }
+
+    // Modal open/close functionality
+    const newChatBtn = document.getElementById("newChatBtn");
+    const closeClientModal = document.getElementById("closeClientModal");
+
+    if (newChatBtn) {
+        newChatBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            openModal();
+        });
+    }
+
+    if (closeClientModal) {
+        closeClientModal.addEventListener("click", function (e) {
+            e.preventDefault();
+            closeModal();
+        });
+    }
+
+    function openModal() {
+        if (clientSelectionModal) {
+            clientSelectionModal.classList.remove("hidden");
+            document.body.style.overflow = "hidden";
+            fetchClients();
+            // Focus search input if exists
+            if (modalSearchInput) {
+                modalSearchInput.value = "";
+                modalSearchInput.focus();
+            }
+        }
+    }
+
+    function closeModal() {
+        if (clientSelectionModal) {
+            clientSelectionModal.classList.add("hidden");
+            document.body.style.overflow = "";
+        }
+    }
+
+    function showError(message) {
+        // Implement your error display logic here
+        console.error(message);
+    }
+});
 </script>

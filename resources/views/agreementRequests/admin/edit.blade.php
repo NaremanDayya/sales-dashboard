@@ -41,7 +41,7 @@
                             <i class="bi bi-person text-blue"></i>
                         </div>
                         <div>
-                            <h6 class="mb-0 text-muted">تم تقديم الطلب من قبل المندوب:</h6>
+                            <h6 class="mb-0 text-muted">تم تقديم الطلب من قبل سفير العلامة التجارية:</h6>
                             <p class="mb-0 fw-bold">
                                 {{ $agreement_request->salesRep?->user?->name }}
                                 <span class="text-muted small d-block">
@@ -125,7 +125,7 @@
                     <div class="col-md-6 mb-3">
                         <label for="notes" class="form-label text-blue">ملاحظات الإدارة</label>
                         <textarea class="form-control border-blue-soft" name="notes" id="notes" rows="5"
-                            placeholder="Add any additional notes for the sales representative...">{{ old('notes', $agreement_request->notes) }}</textarea>
+                            placeholder="أضف أي ملاحظات للمندوب...">{{ old('notes', $agreement_request->notes) }}</textarea>
                     </div>
                 </div>
 

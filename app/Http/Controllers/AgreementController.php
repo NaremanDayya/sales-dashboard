@@ -13,6 +13,7 @@ use App\Models\Target;
 use App\Models\User;
 use App\Notifications\AgreementNoticePeriodStarted;
 use App\Notifications\AgreementRenewed;
+use App\Services\TargetService;
 use App\Notifications\NewAgreementCreated;
 use App\Notifications\TargetAchievedNotification;
 use Carbon\Carbon;
@@ -55,10 +56,12 @@ class AgreementController extends Controller
                 'agreement_id' => $agreement->id,
                 'is_notice_at_time' => $agreement->isNoticedAtTime(),
                 'required_notice_date' => $agreement->getRequiredNoticeDate()->format('Y-m-d'),
-
+		'sales_Rep_name' => $agreement->salesRep->name,
             ];
         });
-        return view('agreements.table', data: compact('Agreements'));
+                $services = Service::all();
+
+        return view('agreements.table', data: compact('Agreements','services'));
     }
     public function index(SalesRep $salesrep)
     {
@@ -85,11 +88,14 @@ class AgreementController extends Controller
                 'agreement_id' => $agreement->id,
                 'is_notice_at_time' => $agreement->isNoticedAtTime(),
                 'required_notice_date' => $agreement->getRequiredNoticeDate()->format('Y-m-d'),
+		                'sales_Rep_name' => $agreement->salesRep->name,
 
 
             ];
         });
-        return view('agreements.table', data: compact('Agreements'));
+ $services = Service::all();
+
+        return view('agreements.table', data: compact('Agreements','services'));
     }
 
     public function create(SalesRep $salesrep)
@@ -101,20 +107,20 @@ class AgreementController extends Controller
 
         return view('agreements.create', compact('clients', 'services', 'salesrep', 'agreement'));
     }
-    public function store(Request $request)
+    public function store(Request $request,SalesRep $salesrep)
     {
-        $validated = $this->validateAgreementRequest($request);
+        $validated = $this->validateAgreementRequest($request, $salesrep);
 
         $agreement = $this->createAgreement($validated);
         $adminUser = User::where('role', 'admin')->first();
 
         $adminUser?->notify(new NewAgreementCreated($agreement));
-        $this->handleTargetUpdates($agreement);
+        app(TargetService::class)->handleAgreement($agreement);
         return redirect()->route('salesrep.agreements.index', [
             'salesrep' => $agreement->sales_rep_id,
         ])->with('success', 'Agreement saved successfully.');
     }
-    protected function validateAgreementRequest(Request $request): array
+    protected function validateAgreementRequest(Request $request,SalesRep $salesRep): array
     {
         $service = Service::find($request->input('service_id'));
 
@@ -124,8 +130,20 @@ class AgreementController extends Controller
             'agreement_id' => 'nullable|exists:agreements,id',
             'client_id' => 'required|exists:clients,id',
             'service_id' => 'required|exists:services,id',
-            'signing_date' => 'required|date',
-            'implementation_date' => 'required|date|after_or_equal:signing_date',
+    'signing_date' => [
+        'required',
+        'date',
+        function ($attribute, $value, $fail) use ($salesRep) {
+            $date = \Carbon\Carbon::parse($value);
+            if ($date->month !== now()->month || $date->year !== now()->year) {
+                $fail('تاريخ التوقيع يجب أن يكون ضمن الشهر الحالي.');
+            }
+
+            if ($salesRep->start_work_at && $date->lt($salesRep->start_work_at)) {
+                $fail('تاريخ التوقيع يجب أن يكون بعد أو يساوي تاريخ بداية عمل المندوب.');
+            }
+        }
+    ],
             'duration_years' => 'required|integer|min:1',
             'termination_type' => 'required|in:returnable,non_returnable',
             'notice_months' => 'required|integer|min:0',
@@ -138,6 +156,24 @@ class AgreementController extends Controller
             'price' => 'required|numeric|min:0',
             'total_amount' => 'numeric|min:0',
             'status' => 'required|in:active,terminated,expired',
+ 'implementation_date' => [
+        'required',
+        'date',
+        'after_or_equal:signing_date',
+        function ($attribute, $value, $fail) use ($salesRep) {
+            $date = \Carbon\Carbon::parse($value);
+            if ($date->month !== now()->month || $date->year !== now()->year) {
+                $fail('تاريخ التنفيذ يجب أن يكون ضمن الشهر الحالي.');
+            }
+
+            if ($salesRep->start_work_at && $date->lt($salesRep->start_work_at)) {
+                $fail('تاريخ التنفيذ يجب أن يكون بعد أو يساوي تاريخ بداية عمل المندوب.');
+            }
+        }
+    ],
+
+], [
+    'implementation_date.after_or_equal' => 'تاريخ التنفيذ يجب أن يكون بعد أو يساوي تاريخ التوقيع.',
         ]);
     }
 
@@ -149,7 +185,7 @@ class AgreementController extends Controller
         $service = Service::find($validated['service_id']);
         $isFlatPrice = optional($service)->is_flat_price ?? false;
 
-        $productQuantity = $isFlatPrice ? null : $validated['product_quantity'];
+        $productQuantity = $isFlatPrice ? 1 : $validated['product_quantity'];
         $totalAmount = $isFlatPrice
             ? $validated['price']
             : $validated['price'] * $validated['product_quantity'];
@@ -609,10 +645,10 @@ class AgreementController extends Controller
 
         // Notify admins
         $adminUser = User::where('role', 'admin')->first();
-        $adminUser->notify( new AgreementRenewed($oldAgreementData, $agreement));
+        $adminUser->notify( new AgreementRenewed($agreement));
 
         if ($salesRepUser = $agreement->salesRep->user ?? null) {
-            $salesRepUser->notify(new AgreementRenewed($oldAgreementData, $agreement));
+            $salesRepUser->notify(new AgreementRenewed($agreement));
         }
     }
 

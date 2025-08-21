@@ -15,13 +15,11 @@ class AgreementRenewed extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public $oldAgreement;
-    public $newAgreement;
+    public $agreement;
 
-    public function __construct(Agreement $oldAgreement, Agreement $newAgreement)
+    public function __construct(Agreement $agreement)
     {
-        $this->oldAgreement = $oldAgreement;
-        $this->newAgreement = $newAgreement;
+        $this->agreement = $agreement;
     }
 
     public function via($notifiable)
@@ -32,39 +30,41 @@ class AgreementRenewed extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->subject('تم تجديد الاتفاقية')
-            ->line('تم تجديد الاتفاقية للعميل: ' . $this->oldAgreement->client_name)
-            ->line('الاتفاقية السابقة تنتهي في: ' . $this->oldAgreement->end_date)
-            ->line('الاتفاقية الجديدة تبدأ من: ' . $this->newAgreement->implementation_date)
-            ->action('عرض الاتفاقية', url('/salesreps/' . $this->newAgreement->sales_rep_id . '/agreements/' . $this->newAgreement->id))
-            ->line('شكراً لاستخدامكم نظامنا');
+            ->subject('🔄 تم تجديد الاتفاقية')
+            ->greeting('مرحباً!')
+            ->line('تم تجديد الاتفاقية الخاصة بالعميل: **' . $this->agreement->client->company_name . '**')
+            ->line('📅 تاريخ التجديد: ' . $this->agreement->signing_date->format('Y-m-d'))
+            ->line('🆕 تنتهي الاتفاقية الجديدة في: ' . $this->agreement->end_date->format('Y-m-d'))
+            ->action('عرض الاتفاقية', route('salesrep.agreements.show', [
+                'salesrep' => $this->agreement->sales_rep_id,
+                'agreement' => $this->agreement->id,
+            ]))
+            ->line('شكراً لاستخدامكم نظام إدارة المبيعات.');
     }
 
     public function toDatabase($notifiable)
     {
         return [
-            'message' => 'تم تجديد الاتفاقية للعميل ' . $this->oldAgreement->client_name,
-            'old_agreement_id' => $this->oldAgreement->id,
-            'new_agreement_id' => $this->newAgreement->id,
+            'message' => '🔄 تم تجديد الاتفاقية الخاصة بالعميل "' . $this->agreement->client->company_name . '" حتى تاريخ ' . $this->agreement->end_date->format('Y-m-d') . '.',
+            'agreement_id' => $this->agreement->id,
             'url' => route('salesrep.agreements.show', [
-                'salesrep' => $this->newAgreement->sales_rep_id,
-                'agreement' => $this->newAgreement->id,
-            ], true),
-            'icon' => 'fas fa-file-contract', // Font Awesome icon
-            'type' => 'agreement_renewed',   // Notification type for filtering
+                'salesrep' => $this->agreement->sales_rep_id,
+                'agreement' => $this->agreement->id,
+            ]),
+            'icon' => 'fas fa-file-contract',
+            'type' => 'agreement_renewed',
         ];
     }
 
     public function toBroadcast($notifiable)
     {
         return new BroadcastMessage([
-            'message' => 'تم تجديد الاتفاقية للعميل ' . $this->oldAgreement->client_name,
-            'old_agreement_id' => $this->oldAgreement->id,
-            'new_agreement_id' => $this->newAgreement->id,
+            'message' => '🔄 تم تجديد الاتفاقية الخاصة بالعميل "' . $this->agreement->client->company_name . '" حتى تاريخ ' . $this->agreement->end_date->format('Y-m-d') . '.',
+            'agreement_id' => $this->agreement->id,
             'url' => route('salesrep.agreements.show', [
-                'salesrep' => $this->newAgreement->sales_rep_id,
-                'agreement' => $this->newAgreement->id,
-            ], true),
+                'salesrep' => $this->agreement->sales_rep_id,
+                'agreement' => $this->agreement->id,
+            ]),
             'icon' => 'fas fa-file-contract',
             'type' => 'agreement_renewed',
             'created_at' => now()->toDateTimeString(),
@@ -76,7 +76,7 @@ class AgreementRenewed extends Notification implements ShouldQueue
     {
         return [
             new PrivateChannel('agreement.renewed.admin'),
-            new PrivateChannel('agreement.renewed.' . $this->newAgreement->sales_rep_id)
+            new PrivateChannel('agreement.renewed.' . $this->agreement->sales_rep_id),
         ];
     }
 }

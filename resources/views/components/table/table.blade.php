@@ -346,7 +346,7 @@
     <tr>
         <!-- اسم المندوب -->
         <th class="px-4 py-2 text-sm font-bold text-gray-700 dark:text-gray-200 text-right">
-            اسم المندوب
+            اسم سفير العلامة التجارية
         </th>
 
         <!-- تاريخ الالتحاق بالعمل -->

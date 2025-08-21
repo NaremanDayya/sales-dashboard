@@ -52,10 +52,9 @@
                     </path>
                 </svg>
             </label>
-
-            <input id="clientSearch" name="chats_search" maxlength="100" type="search"
-                wire:model.live.debounce="search" placeholder="Search" autocomplete="off"
-                class="col-span-11 bg-inherit text-sm border-none dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-0 focus:outline-none w-full">
+<input id="searchInput" name="chats_search" maxlength="100" type="search"
+    wire:model.live.debounce="search" placeholder="Search" autocomplete="off"
+    class="col-span-11 bg-inherit text-sm border-none dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-0 focus:outline-none w-full">
         </div>
     </section>
 </div>

@@ -12,6 +12,7 @@ use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use Namu\WireChat\Traits\Chatable;
 use Spatie\Permission\Traits\HasRoles;
+use Carbon\Carbon;
 
 class User extends Authenticatable
 {
@@ -39,6 +40,12 @@ class User extends Authenticatable
         'privileges',
         'account_status',
         'contact_info',
+	'birthday',
+                'age',
+                'id_card',
+                'nationality',
+                'gender',
+                'personal_image',
     ];
 
     /**
@@ -63,6 +70,7 @@ class User extends Authenticatable
     ];
     protected $casts = [
         'contact_info' => 'array',
+	'birthday' => 'date',
     ];
     /**
      * Get the attributes that should be cast.
@@ -85,6 +93,7 @@ class User extends Authenticatable
     {
         return $this->hasOne(SalesRep::class, 'user_id');
     }
+
     public function receivesBroadcastNotificationsOn(): array
     {
         $channels = [
@@ -107,7 +116,8 @@ class User extends Authenticatable
                 'new-agreement.' . $this->id,
                 'agreement-renewed.' . $this->id,
                 'pended-request.notice.'. $this->id,
-
+		'salesrep-login-ip.'. $this->id,
+		'birthday'. $this->id,
             ];
         }
 
@@ -155,4 +165,21 @@ class User extends Authenticatable
     {
         return $this->hasMany(Conversation::class, 'sender_id')->orWhere('receiver_id', $this->id)->whereNotDeleted();
     }
+
+    public function getAge()
+    {
+        if (!$this->birthday) {
+            return null;
+        }
+
+        return Carbon::parse($this->birthday)->age;
+    }
+	
+	public function isAdmin()
+{
+	    return $this->role === 'admin';
+
+}
+
+
 }

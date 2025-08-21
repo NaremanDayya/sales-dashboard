@@ -1,5 +1,5 @@
 @extends('layouts.master')
-@section('title', 'Client Details')
+@section('title', 'تفاصيل العميل')
 @section('content')
 @php use Illuminate\Support\Str; @endphp
 
@@ -27,15 +27,16 @@
                     <p class="text-gray-600">{{ $client->contact_person }}</p>
 
                     @if(Auth::user()->role == 'salesRep')
-                    <a href="{{ route('salesrep.agreements.create', ['salesrep' => $client->salesRep->id, 'client_id' => $client->id]) }}"
-                        class="inline-flex items-center mt-4 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all shadow hover:shadow-md">
-                        <i class="fas fa-file-contract mr-2"></i> إنشاء اتفاقية
-                    </a>
-                    @endif
-                    <a href="{{ route('client.message',$client->id) }}" class="text-blue-600 hover:underline">
-                        <i class="fas fa-comments"></i>
-                    </a>
-                </div>
+<a href="{{ route('salesrep.agreements.create', ['salesrep' => $client->salesRep->id, 'client_id' => $client->id]) }}"
+   class="inline-flex items-center mt-4 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all shadow hover:shadow-md">
+   <i class="fas fa-file-contract mr-2"></i> إنشاء اتفاقية
+</a>
+
+@endif
+
+<a href="{{ route('client.message',$client->id) }}" class="inline-flex items-center mt-4 ml-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all shadow hover:shadow-md">
+   <i class="fas fa-comments mr-2"></i> مراسلة
+</a>                </div>
 
                 <!-- Quick Stats -->
                 <div class="p-6 border-b">
@@ -60,15 +61,16 @@
 
                 <!-- Recent Requests -->
                 <div class="p-6">
-                    <h3 class="flex items-center text-lg font-semibold text-gray-700 mb-4">
-                        <i class="fas fa-history text-blue-500 mr-2"></i>
-                        طلبات التعديل الأخيرة
-                    </h3>
-
+<h3 class="flex items-center space-x-2 rtl:space-x-reverse text-lg font-semibold text-gray-700 mb-4">
+    <i class="fas fa-history text-blue-500"></i>
+    <span>طلبات التعديل الأخيرة</span>
+</h3>
                     <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
                         @forelse($client->clientEditRequests()->take(3)->latest()->get() as $request)
-                        <a href="{{ route('admin.client-request.edit', ['client' => $request->client_id, 'client_request' => $request->id]) }}"
-                            class="block border rounded-lg p-4 hover:bg-gray-50 transition cursor-pointer">
+<a href="{{ route(
+    Auth::user()->role === 'admin' ? 'admin.client-request.edit' : 'admin.client-request.review',
+    ['client' => $request->client_id, 'client_request' => $request->id]
+) }}"                            class="block border rounded-lg p-4 hover:bg-gray-50 transition cursor-pointer">
                             <div class="flex justify-between items-start">
                                 <span class="font-medium text-gray-800">
                                     تعديل بيانات العميل
@@ -108,7 +110,7 @@
                     </div>
 
                     @if($client->clientEditRequests()->count() > 3)
-                    <a href="#all-requests"
+                    <a href="{{route('myRequests',$client->sales_rep_id)}}"
                         class="mt-4 inline-flex items-center text-blue-600 hover:text-blue-800 text-sm">
                         <i class="fas fa-arrow-down mr-1"></i> عرض كل {{ $client->clientEditRequests()->count() }} طلب
                     </a>
@@ -121,20 +123,22 @@
         <div class="w-full lg:w-2/3">
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <!-- Tab Navigation -->
-                <div class="border-b border-gray-200">
-                    <nav class="flex -mb-px">
-                        <button class="tab-button active" data-tab="overview">
-                            <i class="fas fa-info-circle mr-2"></i> نظرة عامة
-                        </button>
+		<div class="border-b border-gray-200 mb-4">
+    <nav class="flex justify-start space-x-4 rtl:space-x-reverse pt-3 -mb-px mb-4 mr-3">
+        <button class="tab-button active flex items-center space-x-2 rtl:space-x-reverse" data-tab="overview">
+            <i class="fas fa-info-circle"></i>
+            <span>نظرة عامة</span>
+        </button>
 
-                        @php $canEdit = Auth::user()->hasActiveEditPermission($client,$editableField); @endphp
-                        @if($editableField !== 'last_contact_date' && $canEdit)
-                        <button class="tab-button" data-tab="edit">
-                            <i class="fas fa-edit mr-2"></i> تعديل البيانات
-                        </button>
-                        @endif
-                    </nav>
-                </div>
+        @php $canEdit = Auth::user()->hasActiveEditPermission($client, $editableField); @endphp
+        @if($editableField !== 'last_contact_date' && $canEdit)
+            <button class="tab-button flex items-center space-x-2 rtl:space-x-reverse" data-tab="edit">
+                <i class="fas fa-edit"></i>
+                <span>تعديل البيانات</span>
+            </button>
+        @endif
+    </nav>
+</div>
 
                 <!-- Tab Content -->
                 <div class="p-6">
@@ -164,10 +168,12 @@
 
                                     <div>
                                         <div class="text-gray-500 mb-1">رقم الهاتف</div>
-                                        <a href="tel:{{ $client->phone }}"
-                                            class="text-blue-600 font-semibold hover:underline">
-                                            <i class="fas fa-phone-alt mr-1"></i> {{ $client->phone }}
-                                        </a>
+  <a href="tel:{{ $client->phone }}"
+           class="ltr-number flex items-center gap-1"
+           dir="ltr">
+            <i class="fas fa-phone-alt"></i>
+            {{ Str::startsWith($client->phone, '+') ? $client->phone : '+' . $client->phone }}
+        </a>
                                     </div>
                                 </div>
 
@@ -175,18 +181,21 @@
                                 <div class="space-y-5">
                                     <div>
                                         <div class="text-gray-500 mb-1">واتساب</div>
-                                        <a href="{{ $client->whatsapp_link }}" target="_blank"
-                                            class="text-green-600 font-semibold hover:underline flex items-center">
-                                            <i class="fab fa-whatsapp text-lg mr-2"></i> تواصل الآن
-                                        </a>
-                                    </div>
+<a href="{{ $client->whatsapp_link }}" target="_blank"
+   class="text-green-600 font-semibold hover:underline flex items-center space-x-2 rtl:space-x-reverse">
+    <i class="fab fa-whatsapp text-lg"></i>
+    <span>تواصل الآن</span>
+</a>                                    </div>
 
                                     <div>
-                                        <div class="text-gray-500 mb-1">المندوب</div>
-                                        <div class="flex items-center font-semibold">
-                                            <i class="fas fa-user-tie text-blue-500 mr-2"></i>
-                                            {{ $client->salesRep->name }}
-                                        </div>
+<div class="text-gray-500 mb-1">سفير العلامة التجارية</div>
+<div class="flex items-center space-x-2 rtl:space-x-reverse">
+    <i class="fas fa-user-tie text-blue-500"></i>
+    <a href="{{ route('sales-reps.show', $client->salesRep->id) }}"
+       class="text-blue-600 hover:underline font-semibold">
+        {{ $client->salesRep->name }}
+    </a>
+</div>
                                     </div>
 
                                     <div>
@@ -228,7 +237,7 @@
                                 <i class="fas fa-edit text-blue-500 mr-2"></i> طلب تعديل بيانات العميل
                             </h3>
 
-                            <form method="POST" action="{{ route('client-edit-requests.store', $client) }}">
+                            <form class="prevent-multi-submit" method="POST" action="{{ route('client-edit-requests.store', $client) }}">
                                 @csrf
                                 <div class="space-y-4">
                                     <div>
@@ -250,7 +259,7 @@
                                             placeholder="أضف رسالة توضح سبب التعديل..."></textarea>
                                     </div>
 
-                                    <button type="submit"
+                                    <button type="submit" id="submitBtn"
                                         class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition">
                                         إرسال طلب التعديل
                                     </button>
@@ -264,7 +273,7 @@
                                 <i class="fas fa-comment-dots text-purple-500 mr-2"></i> تسجيل طلب العميل
                             </h3>
 
-                            <form method="POST" action="{{ route('client-requests.store', $client) }}">
+                            <form class="prevent-multi-submit" method="POST" action="{{ route('client-requests.store', $client) }}">
                                 @csrf
                                 <div class="space-y-4">
                                     <div>
@@ -290,7 +299,7 @@
                         <h2 class="text-xl font-bold text-gray-800 mb-6">تعديل بيانات العميل</h2>
 
                         <form action="{{ route('clients.update', $client->id) }}" method="POST"
-                            enctype="multipart/form-data">
+                            enctype="multipart/form-data" class="prevent-multi-submit">
                             @csrf
                             @method('PUT')
 
@@ -340,6 +349,17 @@
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg" {{ $editableField
                                         !=='whatsapp_link' ? 'disabled' : '' }}>
                                 </div>
+				 <div">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1"> درجة
+                                                الإهتمام</label>
+                                            <select name="interest_status"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                                {{ $editableField !== 'interest_status' ? 'disabled' : '' }}>
+                                                <option value="interested">مهتم</option>
+                                                <option value="not interested">غير مهتم</option>
+                                                <option value="neutral">محايد</option>
+                                            </select>
+                                        </div>
 
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">شعار الشركة</label>
@@ -379,7 +399,7 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ route('clients.update-last-contact', $client->id) }}">
+            <form method="POST" class="prevent-multi-submit" action="{{ route('clients.update-last-contact', $client->id) }}">
                 @csrf
                 @method('PUT')
 
@@ -419,6 +439,12 @@
     .detail-item {
         @apply flex justify-between items-start py-2 border-b border-gray-100;
     }
+	  .ltr-number {
+    direction: ltr;
+    unicode-bidi: embed;
+    display: inline-block;
+color:blue;
+}
 
     .detail-label {
         @apply text-gray-600 font-medium w-1/3;
@@ -497,5 +523,15 @@
             });
         }
     });
+
+</script>
+<script>
+document.querySelectorAll(".prevent-multi-submit").forEach(form => {
+    form.addEventListener("submit", function(e) {
+        let button = form.querySelector("button[type=submit]");
+        button.disabled = true;
+      
+    });
+});
 </script>
 @endpush

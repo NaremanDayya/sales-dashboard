@@ -32,18 +32,28 @@
         direction: rtl;
         padding: 20px;
     }
+.table-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 1rem;
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
 
-    .table-container {
-        background: white;
-        border-radius: 0.75rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        margin: 1rem;
-    }
+.main {
+    max-width: 100%;
+}
+.w-full {
+    padding-left: 0;
+    padding-right: 0;
+}
 
-    .dropdown-container {
-        position: relative;
-        display: inline-block;
-        font-family: Arial, sans-serif;
+    .dropdown-container { position: relative; display: inline-block; font-family: Arial, sans-serif;
     }
 
     .nice-button {
@@ -346,7 +356,7 @@
     .btn {
         padding: 8px 16px;
         border-radius: 6px;
-        font-weight: 500;
+        font-weight: 800;
         font-size: 14px;
         display: inline-flex;
         align-items: center;
@@ -413,27 +423,28 @@
         color: var(--gray-400);
     }
 
-    .table-responsive {
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
+.table-responsive {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 auto;
+}
     .data-table {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 800px;
+width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    border-collapse: collapse;
     }
 
     .data-table thead th {
         background-color: var(--gray-100);
         color: var(--gray-600);
         font-weight: 600;
-        padding: 12px 15px;
-        text-align: right;
+        padding: 5px 8px;
+        text-align: center;
         border-bottom: 2px solid var(--gray-200);
         position: sticky;
         top: 0;
+	white-space: nowrap;
     }
 
     .data-table tbody tr {
@@ -447,9 +458,12 @@
     }
 
     .data-table tbody td {
-        padding: 12px 15px;
+        padding: 5px 8px !important;
         border-bottom: 1px solid var(--gray-200);
-        text-align: right;
+        text-align: center;
+	font-size: 14px;
+        font-weight: 800;
+
         vertical-align: middle;
     }
 
@@ -644,7 +658,7 @@
         border-radius: 6px;
         color: #374151;
         font-size: 14px;
-        font-weight: 500;
+        font-weight: 800;
         cursor: pointer;
         transition: all 0.2s;
     }
@@ -825,7 +839,7 @@
             <div class="export-options">
                 <div class="dropdown">
                     <button class="btn btn-dropdown" id="exportBtn" type="button">
-                        Export Data
+                                تصدير البيانات
                         <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                         </svg>
@@ -837,8 +851,7 @@
                                 <path d="M4 6H20M4 12H20M4 18H11" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" />
                             </svg>
-                            Export as Excel
-                        </button>
+تصدير كملف Excel                        </button>
                         <button class="dropdown-item" data-type="pdf">
                             <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
@@ -846,7 +859,7 @@
                                     d="M4 7V17C4 18.1046 4.89543 19 6 19H18C19.1046 19 20 18.1046 20 17V7M4 7H20M4 7L6 4H18L20 7"
                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                             </svg>
-                            Export as PDF
+                                    تصدير كملف PDF
                         </button>
                     </div>
                 </div>
@@ -883,56 +896,64 @@
                                 <label class="column-checkbox">
                                     <input type="checkbox" value="client_name" checked>
                                     <span class="checkmark"></span>
-                                    <span class="column-name">اسم العميل</span>
+                                    <span class="column-name"> العميل</span>
                                 </label>
                             </div>
+			    <div class="column-item">
+                                <label class="column-checkbox">
+                                    <input type="checkbox" value="sales_Rep_name" checked> 
+                                    <span class="checkmark"></span>
+                                    <span class="column-name"> سفير العلامة التجارية</span> 
+                                </label>
+                            </div>
+
                             <div class="column-item">
                                 <label class="column-checkbox">
                                     <input type="checkbox" value="signing_date" checked>
                                     <span class="checkmark"></span>
-                                    <span class="column-name">تاريخ توقيع الاتفاقية</span>
+                                    <span class="column-name"> توقيع الاتفاقية</span>
                                 </label>
                             </div>
                             <div class="column-item">
                                 <label class="column-checkbox">
                                     <input type="checkbox" value="duration_years" checked>
                                     <span class="checkmark"></span>
-                                    <span class="column-name">مدة الاتفاقية بالسنوات</span>
+                                    <span class="column-name">مدة الاتفاقية </span>
                                 </label>
                             </div>
                             <div class="column-item">
                                 <label class="column-checkbox">
                                     <input type="checkbox" value="termination_type" checked>
                                     <span class="checkmark"></span>
-                                    <span class="column-name">نوع إنهاء الاتفاقية</span>
+                                    <span class="column-name"> إنهاء الاتفاقية</span>
                                 </label>
                             </div>
                             <div class="column-item">
                                 <label class="column-checkbox">
                                     <input type="checkbox" value="implementation_date" checked>
                                     <span class="checkmark"></span>
-                                    <span class="column-name">تاريخ تنفيذ الاتفاقية</span>
+                                    <span class="column-name"> تنفيذ الاتفاقية</span>
                                 </label>
                             </div>
                             <div class="column-item">
                                 <label class="column-checkbox">
                                     <input type="checkbox" value="end_date" checked>
                                     <span class="checkmark"></span>
-                                    <span class="column-name">تاريخ انتهاء الاتفاقية</span>
+                                    <span class="column-name"> انتهاء الاتفاقية</span>
                                 </label>
                             </div>
                             <div class="column-item">
                                 <label class="column-checkbox">
                                     <input type="checkbox" value="notice_months" checked>
                                     <span class="checkmark"></span>
-                                    <span class="column-name">أشهر الإخطار قبل الإنهاء</span>
+                                    <span class="column-name">أشهر الإخطار </span>
                                 </label>
                             </div>
                             <div class="column-item">
                                 <label class="column-checkbox">
                                     <input type="checkbox" value="required_notice_date" checked>
                                     <span class="checkmark"></span>
-                                    <span class="column-name">تاريخ الإخطار المتوقع</span>
+                                    <span class="column-name"> الإخطار المتوقع</span>
                                 </label>
                             </div>
                             <div class="column-item">
@@ -946,7 +967,7 @@
                                 <label class="column-checkbox">
                                     <input type="checkbox" value="service_type" checked>
                                     <span class="checkmark"></span>
-                                    <span class="column-name">نوع الخدمة</span>
+                                    <span class="column-name"> الخدمة</span>
                                 </label>
                             </div>
                             <div class="column-item">
@@ -996,27 +1017,37 @@
         </div>
     </div>
 
-    <div class="table-filters">
-        <div class="search-box">
-            <input type="text" class="search-input" placeholder="بحث..." id="searchInput">
-            <i class="fas fa-search search-icon"></i>
-        </div>
-
-        <div>
-            <div class="d-flex align-items-center mb-3 gap-2">
-                <i class="fas fa-filter text-secondary"></i>
-                <select id="filterSelect" onchange="applyFilter()" class="form-select w-auto">
-                    <option value="">الكل</option>
-                    <option value="sent">تم الاخطار</option>
-                    <option value="not sent"> لم يتم الاخطار</option>
-                    <option value="returnable">مشروطة بمقابل</option>
-                    <option value="non returnable">غير مشروطة بمقابل </option>
-                </select>
-            </div>
-        </div>
+<div class="table-filters">
+    <div class="search-box mb-3">
+        <input type="text" class="search-input" placeholder="بحث..." id="searchInput">
+        <i class="fas fa-search search-icon"></i>
     </div>
 
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fas fa-filter text-secondary"></i>
+            <select id="filterSelect" onchange="applyFilter()" class="form-select w-auto" style="font-size: 14px; font-weight: 800;">
+                <option value="">الكل</option>
+                <option value="sent">تم الإخطار</option>
+                <option value="not sent">لم يتم الإخطار</option>
+                <option value="returnable">مشروطة بمقابل</option>
+                <option value="non returnable">غير مشروطة بمقابل</option>
+            </select>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <i class="fas fa-cog text-secondary"></i>
+<select id="serviceTypeFilter" onchange="applyFilter()" class="form-select w-auto" style="font-size: 14px; font-weight: 800;">
+    <option value=""> الخدمة</option>
+    @foreach($services as $service)
+        <option value="{{ $service->id }}">{{ $service->name }}</option>
+    @endforeach
+</select>
+        </div>
+    </div>
+</div>
     <div class="table-responsive">
+
         <div class="pdf-content">
             <div class="pdf-header" style="display: none;">
                 <div
@@ -1026,20 +1057,22 @@
                     </div>
                 </div>
             </div>
-            <table class="data-table">
+<div class="w-full">
+            <table class="data-table min-w-full">
                 <thead>
                     <tr>
                         <th>شعار العميل</th>
-                        <th>اسم العميل</th>
-                        <th>تاريخ توقيع الاتفاقية</th>
-                        <th>مدة الاتفاقية بالسنوات</th>
-                        <th>نوع إنهاء الاتفاقية</th>
-                        <th>تاريخ تنفيذ الاتفاقية</th>
-                        <th>تاريخ انتهاء الاتفاقية</th>
-                        <th>أشهر الإخطار قبل الإنهاء</th>
-                        <th>تاريخ الإخطار المتوقع</th>
+                        <th> العميل</th>
+                        <th> سفير العلامة التجارية</th>                 
+        		<th> توقيع الاتفاقية</th>
+                        <th>مدة الاتفاقية </th>
+                        <th> إنهاء الاتفاقية</th>
+                        <th> تنفيذ الاتفاقية</th>
+                        <th> انتهاء الاتفاقية</th>
+                        <th>أشهر الإخطار </th>
+                        <th> الإخطار المتوقع</th>
                         <th>حالة الإخطار</th>
-                        <th>نوع الخدمة</th>
+                        <th> الخدمة</th>
                         <th>عدد المنتج</th>
                         <th>التسعيرة</th>
                         <th>المجموع</th>
@@ -1049,6 +1082,7 @@
                     <!-- Data will be inserted here -->
                 </tbody>
             </table>
+</div>
             <div class="pdf-footer" style="display: none;">
                 <p>جميع الحقوق محفوظة &copy; شركة آفاق الخليج {{ date('Y') }}</p>
             </div>
@@ -1081,7 +1115,8 @@
             const filteredData = currentFilteredAgreements.filter(agreement => {
                 return (
                     (agreement.client_name && agreement.client_name.toLowerCase().includes(searchTerm)) ||
-                    (agreement.termination_type && agreement.termination_type.toLowerCase().includes(searchTerm)) ||
+                                        (agreement.sales_Rep_name && agreement.sales_Rep_name.toLowerCase().includes(searchTerm)) ||
+		    (agreement.termination_type && agreement.termination_type.toLowerCase().includes(searchTerm)) ||
                     (agreement.service_type && agreement.service_type.toLowerCase().includes(searchTerm))
                 );
             });
@@ -1152,45 +1187,77 @@
                 <td class="px-4 py-2 text-center">
                     ${agreement.client_logo ? `<img src="${agreement.client_logo}" alt="شعار" class="h-10 mx-auto rounded-full border" />` : '—'}
                 </td>
-                <td class="px-4 py-2 text-sm font-semibold text-gray-800 hover:text-blue-600 hover:underline cursor-pointer">
+                <td class="px-4 py-2 text-sm font-semibold text-gray-800 hover:text-blue-600 hover:underline cursor-pointer whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis">
                     <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="block w-full h-full">
                         ${agreement.client_name || '—'}
                     </a>
                 </td>
-                <td class="px-4 py-2 text-sm text-gray-700">${formatDateForDisplay(agreement.signing_date) || '—'}</td>
-                <td class="px-4 py-2 text-sm text-gray-700">${agreement.duration_years || '—'} سنوات</td>
-                <td class="px-4 py-2 text-sm text-gray-700">
-                    ${
-                        agreement.termination_type === 'returnable'
-                        ? `مشروطة بمقابل (${agreement.return_value ?? '—'})`
-                        : agreement.termination_type === 'non_returnable'
-                            ? 'غير مشروطة بمقابل'
-                            : '—'
-                    }
+ <td class="px-4 py-2 text-sm font-semibold text-gray-800 hover:text-blue-600 hover:underline cursor-pointer whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis">
+                    <a href="/sales-reps/${agreement.sales_rep_id}" class="block w-full h-full">
+                        ${agreement.sales_Rep_name || '—'}
+                    </a>
                 </td>
-                <td class="px-4 py-2 text-sm text-gray-700">${formatDateForDisplay(agreement.implementation_date) || '—'}</td>
-                <td class="px-4 py-2 text-sm text-gray-700">${formatDateForDisplay(agreement.end_date) || '—'}</td>
-                <td class="px-4 py-2 text-sm text-gray-700">${agreement.notice_months || '—'}</td>
-                <td class="px-4 py-2 text-sm text-center ${ agreement.is_notice_at_time ? 'text-red-600 font-bold' : 'text-green-600 font-bold' }">
+
+<td class="px-4 py-2 text-sm text-gray-700">
+    <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
+        ${formatDateForDisplay(agreement.signing_date) || '—'}
+    </a>
+</td>
+
+<td class="whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis px-4 py-2 text-sm text-gray-700">
+    <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
+        ${agreement.duration_years || '—'} سنوات
+    </a>
+</td>
+
+<td class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis">
+    <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
+        ${
+            agreement.termination_type === 'returnable'
+                ? `مشروطة بمقابل `
+                : agreement.termination_type === 'non_returnable'
+                    ? 'غير مشروطة بمقابل'
+                    : '—'
+        }
+    </a>
+</td>
+
+<td class="px-4 py-2 text-sm text-gray-700">
+    <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
+        ${formatDateForDisplay(agreement.implementation_date) || '—'}
+    </a>
+</td>
+
+<td class="px-4 py-2 text-sm text-gray-700">
+    <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
+        ${formatDateForDisplay(agreement.end_date) || '—'}
+    </a>
+</td>
+
+<td class="px-4 py-2 text-sm text-gray-700">
+    <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
+        ${agreement.notice_months || '—'}
+    </a>
+ <td class="px-4 py-2 text-sm text-center ${ agreement.is_notice_at_time ? 'text-red-600 font-bold' : 'text-green-600 font-bold' }">
                 ${formatDateForDisplay(agreement.required_notice_date) || '—'}</td>
-                <td class="px-4 py-2 text-sm text-center">
-                    <span class="inline-block px-2 py-0.5 rounded-full ${
-                        agreement.notice_status === 'sent'
-                            ? 'bg-green-100 text-green-800'
-                            : (agreement.notice_status === 'not_sent' || agreement.notice_status === 'not sent')
-                                ? 'bg-red-100 text-red-800'
-                                : 'bg-gray-100 text-gray-700'
-                    }">
-                        ${
-                            agreement.notice_status === 'sent'
-                                ? 'تم الإخطار'
-                                : (agreement.notice_status === 'not_sent' || agreement.notice_status === 'not sent')
-                                    ? 'لم يتم الإخطار'
-                                    : '—'
-                        }
-                    </span>
-                </td>
-                <td class="px-4 py-2 text-sm text-gray-700">${agreement.service_type || '—'}</td>
+
+<td class="px-4 py-2 text-center whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis">
+    <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-semibold ${
+        agreement.notice_status === 'sent'
+            ? 'bg-green-100 text-green-600'
+            : (agreement.notice_status === 'not_sent' || agreement.notice_status === 'not sent')
+                ? 'bg-red-100 text-red-600'
+                : 'bg-gray-100 text-gray-600'
+    }">
+        ${
+            agreement.notice_status === 'sent'
+                ? 'تم الإخطار'
+                : (agreement.notice_status === 'not_sent' || agreement.notice_status === 'not sent')
+                    ? 'لم يتم الإخطار'
+                    : '—'
+        }
+    </span>
+</td>                <td dir="rtl" class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis">${agreement.service_type || '—'}</td>
                 <td class="px-4 py-2 text-sm text-gray-700">${agreement.product_quantity || '—'}</td>
                 <td class="px-4 py-2 text-sm text-gray-700">${agreement.price || '—'}</td>
                 <td class="px-4 py-2 text-sm text-gray-700">${agreement.total_amount || '—'}</td>
@@ -1298,23 +1365,24 @@
     }
 
     function getColumnKey(columnName) {
-        const columnMap = {
-            'شعار العميل': 'client_logo',
-            'اسم العميل': 'client_name',
-            'تاريخ توقيع الاتفاقية': 'signing_date',
-            'مدة الاتفاقية بالسنوات': 'duration_years',
-            'نوع إنهاء الاتفاقية': 'termination_type',
-            'تاريخ تنفيذ الاتفاقية': 'implementation_date',
-            'تاريخ انتهاء الاتفاقية': 'end_date',
-            'أشهر الإخطار قبل الإنهاء': 'notice_months',
-            'تاريخ الإخطار المتوقع': 'required_notice_date',
-            'حالة الإخطار': 'notice_status',
-            'نوع الخدمة': 'service_type',
-            'عدد المنتج': 'product_quantity',
-            'التسعيرة': 'price',
-            'المجموع': 'total_amount'
-        };
-
+        const columnMap =
+{
+    'شعار العميل': 'client_logo',
+    'العميل': 'client_name',
+    'سفير العلامة التجارية': 'sales_Rep_name',
+    'توقيع الاتفاقية': 'signing_date',
+    'مدة الاتفاقية': 'duration_years',
+    'إنهاء الاتفاقية': 'termination_type',
+    'تنفيذ الاتفاقية': 'implementation_date',
+    'انتهاء الاتفاقية': 'end_date',
+    'أشهر الإخطار': 'notice_months',
+    'الإخطار المتوقع': 'required_notice_date',
+    'حالة الإخطار': 'notice_status',
+    'الخدمة': 'service_type',
+    'عدد المنتج': 'product_quantity',
+    'التسعيرة': 'price',
+    'المجموع': 'total_amount'
+}
         return columnMap[columnName] || columnName.toLowerCase().replace(/\s+/g, '_');
     }
 
@@ -1344,24 +1412,30 @@
         updateColumnsBadge();
     });
 
-    function applyFilter() {
-        const criteria = document.getElementById('filterSelect').value;
+function applyFilter() {
+    const criteria = document.getElementById('filterSelect').value;
+    const serviceTypeKey = document.getElementById('serviceTypeFilter').value;
+    
+    // Generate the service type map from PHP (using name_ar if available, otherwise name)
+    const serviceTypeMap = {
+        @foreach($services as $service)
+            '{{ $service->id }}': '{{ $service->name }}',
+        @endforeach
+    };
 
-        if (!criteria || criteria === "") {
-            currentFilteredAgreements = [...AgreementsData];
-            renderTable();
-            return;
-        }
+    currentFilteredAgreements = [...AgreementsData];
 
+    // Apply criteria filter if selected
+    if (criteria && criteria !== "") {
         switch (criteria) {
             case 'sent':
-                currentFilteredAgreements = AgreementsData.filter(agreement =>
+                currentFilteredAgreements = currentFilteredAgreements.filter(agreement =>
                     agreement.notice_status && agreement.notice_status.toLowerCase() === 'sent'
                 );
                 break;
 
             case 'not sent':
-                currentFilteredAgreements = AgreementsData.filter(agreement =>
+                currentFilteredAgreements = currentFilteredAgreements.filter(agreement =>
                     agreement.notice_status &&
                     (agreement.notice_status.toLowerCase() === 'not sent' ||
                      agreement.notice_status.toLowerCase() === 'not_sent')
@@ -1369,26 +1443,43 @@
                 break;
 
             case 'returnable':
-                currentFilteredAgreements = AgreementsData.filter(agreement =>
+                currentFilteredAgreements = currentFilteredAgreements.filter(agreement =>
                     agreement.termination_type &&
                     agreement.termination_type.toLowerCase() === 'returnable'
                 );
                 break;
 
             case 'non returnable':
-                currentFilteredAgreements = AgreementsData.filter(agreement =>
+                currentFilteredAgreements = currentFilteredAgreements.filter(agreement =>
                     agreement.termination_type &&
                     agreement.termination_type.toLowerCase() === 'non_returnable'
                 );
                 break;
-
-            default:
-                currentFilteredAgreements = [...AgreementsData];
         }
-
-        renderTable();
     }
 
+    // Apply service type filter if selected
+    if (serviceTypeKey && serviceTypeKey !== "") {
+        const serviceName = serviceTypeMap[serviceTypeKey];
+        
+        currentFilteredAgreements = currentFilteredAgreements.filter(agreement => {
+            if (!agreement.service_type) return false;
+            
+            // Trim and normalize both values for comparison
+            const agreementService = agreement.service_type.trim();
+            const targetService = serviceName.trim();
+            
+            // Case-insensitive comparison for Arabic text
+            return agreementService.localeCompare(targetService, undefined, { sensitivity: 'base' }) === 0;
+        });
+    }
+
+    if (currentFilteredAgreements.length === 0) {
+        alert('⚠️ لا يوجد إتفاقيات تطابق معايير التصفية');
+    }
+
+    renderTable();
+}
     function getSelectedColumns() {
         const checkboxes = document.querySelectorAll('.column-checkbox input:checked');
         const selectedColumns = Array.from(checkboxes).map(checkbox => checkbox.value);
@@ -1406,16 +1497,17 @@
     // Column names in Arabic
     const columnsMap = {
         client_logo: "شعار العميل",
-        client_name: "اسم العميل",
-        signing_date: "تاريخ توقيع الاتفاقية",
-        duration_years: "مدة الاتفاقية بالسنوات",
-        termination_type: "نوع إنهاء الاتفاقية",
-        implementation_date: "تاريخ تنفيذ الاتفاقية",
-        end_date: "تاريخ انتهاء الاتفاقية",
-        notice_months: "أشهر الإخطار قبل الإنهاء",
-        required_notice_date: "تاريخ الإخطار المتوقع",
+        client_name: " العميل",
+                sales_Rep_name: " سفير العلامة التجارية", 
+	signing_date: " توقيع الاتفاقية",
+        duration_years: "مدة الاتفاقية ",
+        termination_type: " إنهاء الاتفاقية",
+        implementation_date: " تنفيذ الاتفاقية",
+        end_date: " انتهاء الاتفاقية",
+        notice_months: "أشهر الإخطار ",
+        required_notice_date: " الإخطار المتوقع",
         notice_status: "حالة الإخطار",
-        service_type: "نوع الخدمة",
+        service_type: " الخدمة",
         product_quantity: "عدد المنتج",
         price: "التسعيرة",
         total_amount: "المجموع"
@@ -1436,6 +1528,9 @@
                 case 'client_name':
                     row[key] = agreement.client_name || '';
                     break;
+		 case 'sales_Rep_name':
+                    row[key] = agreement.sales_Rep_name || '';
+                    break;
                 case 'signing_date':
                     row[key] = formatDateForDisplay(agreement.signing_date);
                     break;
@@ -1444,7 +1539,7 @@
                     break;
                 case 'termination_type':
                     row[key] = agreement.termination_type === 'returnable'
-                        ? `مشروطة بمقابل (${agreement.return_value ?? '—'})`
+                        ? `مشروطة بمقابل `
                         : agreement.termination_type === 'non_returnable'
                             ? 'غير مشروطة بمقابل'
                             : '—';
@@ -1533,51 +1628,76 @@
     }
 
     // PDF Export function using html2pdf
-    function exportToPDF(selectedColumns) {
-        // Clone the table to modify for PDF export
-        const table = document.querySelector('.data-table').cloneNode(true);
-        const pdfHeader = document.querySelector('.pdf-header').cloneNode(true);
-        const pdfFooter = document.querySelector('.pdf-footer').cloneNode(true);
+function exportToPDF(selectedColumns) {
+    // Clone the table to modify for PDF export
+    const table = document.querySelector('.data-table').cloneNode(true);
+    const pdfHeader = document.querySelector('.pdf-header').cloneNode(true);
+    const pdfFooter = document.querySelector('.pdf-footer').cloneNode(true);
 
-        // Show header and footer
-        pdfHeader.style.display = 'block';
-        pdfFooter.style.display = 'block';
+    // Style adjustments for header and footer
+    pdfHeader.style.display = 'block';
+    pdfHeader.style.width = '100%';
+    pdfHeader.style.padding = '10px';
 
-        // Create a container for the PDF content
-        const pdfContainer = document.createElement('div');
-        pdfContainer.style.padding = '20px';
-        pdfContainer.appendChild(pdfHeader);
-        pdfContainer.appendChild(table);
-        pdfContainer.appendChild(pdfFooter);
+    pdfFooter.style.display = 'block';
+    pdfFooter.style.width = '100%';
+    pdfFooter.style.padding = '15px'; // Increased padding
+    pdfFooter.style.minHeight = '80px'; // Minimum height guarantee
+    pdfFooter.style.boxSizing = 'border-box';
 
-        // Hide columns that are not selected
-        const headers = table.querySelectorAll('thead th');
-        headers.forEach((header, index) => {
-            const columnName = header.textContent.trim();
-            const columnKey = getColumnKey(columnName);
+    // Create a container for the PDF content
+    const pdfContainer = document.createElement('div');
+    pdfContainer.style.padding = '20px';
+    pdfContainer.style.width = '100%';
+pdfContainer.style.direction = 'rtl';
+pdfContainer.style.textAlign = 'right';
+pdfContainer.style.fontFamily = `'Cairo', 'Tajawal', 'Arial', sans-serif'`;
+    pdfContainer.appendChild(pdfHeader);
+    pdfContainer.appendChild(table);
+    pdfContainer.appendChild(pdfFooter);
 
-            if (!selectedColumns.includes(columnKey)) {
-                header.style.display = 'none';
-                table.querySelectorAll('tbody tr').forEach(row => {
-                    if (row.cells[index]) {
-                        row.cells[index].style.display = 'none';
-                    }
-                });
+    // Hide columns that are not selected
+    const headers = table.querySelectorAll('thead th');
+    headers.forEach((header, index) => {
+        const columnName = header.textContent.trim();
+        const columnKey = getColumnKey(columnName);
+
+        if (!selectedColumns.includes(columnKey)) {
+            header.style.display = 'none';
+            table.querySelectorAll('tbody tr').forEach(row => {
+                if (row.cells[index]) {
+                    row.cells[index].style.display = 'none';
+                row.cells[index].direction = 'rtl';
+row.cells[index].style.textAlign = 'right';
+}
+            });
+        }
+    });
+    // Options for html2pdf
+    const options = {
+        margin: [15, 10, 20, 10], // [top, left, bottom, right] - increased bottom margin
+        filename: `تقرير_اتفاقيات_الشركة_${new Date().toISOString().slice(0,10)}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+            scale: 2,
+            ignoreElements: (element) => {
+                // Ignore elements that might interfere with layout
+                return element.classList.contains('ignore-pdf');
             }
-        });
+        },
+        jsPDF: {
+            unit: 'mm',
+            format: [594, 420],
+            orientation: 'landscape',
+            // Add more space for footer
+            putOnlyUsedFonts: true,
+            compress: true
+        }
+    };
 
-        // Options for html2pdf
-        const options = {
-            margin: 10,
-            filename: `تقرير_اتفاقيات_الشركة_${new Date().toISOString().slice(0,10)}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' }
-        };
-
-        // Generate PDF
-        html2pdf().set(options).from(pdfContainer).save();
-    }
+    // Generate PDF
+    html2pdf().set(options).from(pdfContainer).save();
+}
 
     // Helper functions
     function getNoticeStatus(status) {

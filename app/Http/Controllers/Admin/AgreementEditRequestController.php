@@ -40,14 +40,12 @@ class AgreementEditRequestController extends Controller
     {
         $request->validate([
             'status' => 'required|in:approved,rejected',
-            'notes' => 'nullable|string',
         ]);
 
         $agreement_request->update([
             'status' => $request->status,
             'response_status' => $request->status,
             'response_date' => now(),
-            'notes' => $request->notes,
         ]);
         $user = User::where('id', $agreement_request->sales_rep_id)->first();
 

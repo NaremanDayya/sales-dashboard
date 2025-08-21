@@ -2,15 +2,17 @@
 @section('title', 'Add Sales Representative')
 @section('content')
 <div class="container">
-    <h1> Add Sales Representative</h1>
+    <div class="mb-6">
+        <h1 class="text-center text-2xl font-bold">أضف مندوب جديد</h1>
+    </div>
+
     <form action="{{ route('sales-reps.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
-        @include('salesRep._form', [
+@include('salesRep._form', [
         'button_label' => __('إضافة مندوب '),
         'allPermissions' => $allPermissions ?? collect(),
         'selectedPermission' => [],
-
-        ])
+])
     </form>
 </div>
 @endsection
