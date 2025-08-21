@@ -1,0 +1,265 @@
+@extends('layouts.master')
+@section('title', 'أضف عميل')
+@section('content')
+<div class="container">
+<div class="mb-6">
+        <h1 class="text-center text-2xl font-bold">أضف عميل جديد</h1>
+    </div>
+    <form action="{{ route('sales-reps.clients.store', Auth::user()->salesRep->id) }}" method="POST"
+        enctype="multipart/form-data">
+        @csrf
+
+        <!-- Logo Section -->
+        <div class="mb-8 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h3 class="text-lg font-medium text-gray-800 mb-4">شعار الشركة</h3>
+            <div class="flex items-center space-x-6">
+                @if(session('temp_company_logo'))
+                <div class="shrink-0">
+                    <img src="{{ asset('storage/' . session('temp_company_logo')) }}"
+                        class="h-16 w-16 object-cover rounded-full border border-gray-200">
+                    <input type="hidden" name="company_logo_temp" value="{{ session('temp_company_logo') }}">
+                </div>
+                @endif
+
+                <div class="w-full">
+<label class="block">
+    <span class="sr-only">إختر شعار الشركة</span>
+    <input 
+        type="file" 
+        name="company_logo" 
+        class="block w-full text-sm text-gray-500
+               file:mr-4 file:py-2 file:px-4
+               file:rounded-md file:border-0
+               file:text-sm file:font-semibold
+               file:bg-blue-50 file:text-blue-700
+               hover:file:bg-blue-100" 
+        accept="image/jpg,image/jpeg,image/png,image/gif,image/bmp,image/webp,image/svg+xml,image/tiff,image/x-icon"
+        {{ session('temp_company_logo') ? '' : 'required' }}
+    >
+</label>
+                    @if(session('temp_company_logo'))
+                    <p class="mt-2 text-sm text-green-600">✓ تم تحميل الشعار</p>
+                    @endif
+
+                    @error('company_logo')
+                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+        </div>
+
+        <!-- Client Form Fields -->
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
+            <!-- Company Name -->
+            <div>
+                <label for="company_name" class="block text-sm font-medium text-gray-700 mb-1">اسم الشركة</label>
+                <input type="text" id="company_name" name="company_name" value="{{ old('company_name') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+                              {{ $errors->has('company_name') ? 'border-red-500' : '' }}" {{ old('company_name') &&
+                    !$errors->has('company_name') ? 'readonly' : '' }}
+                required>
+                <ul id="companySuggestions"
+                    class="absolute z-50 bg-white shadow rounded w-full border border-gray-200 hidden"></ul>
+
+                @if(old('company_name') && !$errors->has('company_name'))
+                <p class="mt-2 text-sm text-green-600">✓ تم إدخال الاسم</p>
+                @endif
+                <p class="mt-1 text-sm text-blue-500">
+                    🔍 إذا كنت تتعامل مع شركة سبق إضافتها، يرجى اختيار اسم الشركة من الاقتراحات لتفادي التكرار.
+                </p>
+                @error('company_name')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Address -->
+            <div>
+                <label for="address" class="block text-sm font-medium text-gray-700 mb-1">عنوان الشركة</label>
+                <input type="text" id="address" name="address" value="{{ old('address') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+                              {{ $errors->has('address') ? 'border-red-500' : '' }}" {{ old('address') &&
+                    !$errors->has('address') ? 'readonly' : '' }}
+                required>
+                @if(old('address') && !$errors->has('address'))
+                <p class="mt-2 text-sm text-green-600">✓ تم إدخال العنوان</p>
+                @endif
+                @error('address')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+		<!-- Interested Service -->
+<div class="mt-4">
+    <label for="interested_service" class="block text-sm font-medium text-gray-700 mb-1">الخدمة المهتم بها</label>
+    <select id="interested_service" name="interested_service"
+        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+        {{ $errors->has('interested_service') ? 'border-red-500' : '' }}">
+        <option value="">-- اختر الخدمة --</option>
+        @foreach($services as $service)
+            <option value="{{ $service->id }}" {{ old('interested_service') == $service->id ? 'selected' : '' }}>
+                {{ $service->name }}
+            </option>
+        @endforeach
+    </select>
+
+    @error('interested_service')
+    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+    @enderror
+</div>
+            <!-- Contact Person -->
+            <div>
+                <label for="contact_person" class="block text-sm font-medium text-gray-700 mb-1">الشخص المسؤول</label>
+                <input type="text" id="contact_person" name="contact_person" value="{{ old('contact_person') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+                              {{ $errors->has('contact_person') ? 'border-red-500' : '' }}" {{ old('contact_person') &&
+                    !$errors->has('contact_person') ? 'readonly' : '' }}
+                required>
+                @if(old('contact_person') && !$errors->has('contact_person'))
+                <p class="mt-2 text-sm text-green-600">✓ تم إدخال المسؤول</p>
+                @endif
+                @error('contact_person')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Contact Position -->
+            <div>
+                <label for="contact_position" class="block text-sm font-medium text-gray-700 mb-1">المنصب
+                    الوظيفي</label>
+                <input type="text" id="contact_position" name="contact_position" value="{{ old('contact_position') }}"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+                              {{ $errors->has('contact_position') ? 'border-red-500' : '' }}" {{
+                    old('contact_position') && !$errors->has('contact_position') ? 'readonly' : '' }}
+                placeholder="Manager, Owner, etc.">
+                @if(old('contact_position') && !$errors->has('contact_position'))
+                <p class="mt-2 text-sm text-green-600">✓ تم إدخال المنصب</p>
+                @endif
+                @error('contact_position')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+            <!-- Last Contact Date -->
+            <div>
+                @php
+                use Carbon\Carbon;
+
+                $date = old('last_contact_date');
+                $formattedDate = null;
+
+                if ($date) {
+                $carbonDate = Carbon::parse($date);
+                $carbonDate->locale('ar');
+
+                $formattedDate = $carbonDate->isoFormat('D MMMM YYYY');
+                }
+                @endphp
+                <label for="last_contact_date" class="block text-sm font-medium text-gray-700 mb-1">تاريخ آخر
+                    تواصل</label>
+                <div class="relative">
+<input type="text" id="last_contact_date" name="last_contact_date" dir="rtl"
+    value="{{ old('last_contact_date') }}"
+    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border text-right">                </div>
+
+                @if(old('last_contact_date') && !$errors->has('last_contact_date'))
+                <p class="mt-2 text-sm text-green-600">{{ $formattedDate }} ✓ تم إدخال تاريخ آخر تواصل</p>
+                @endif
+
+                @error('last_contact_date')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+
+            <!-- Phone -->
+            <div>
+                <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">رقم الجوال</label>
+                <input type="tel" id="phone" name="phone" value="{{ old('phone') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+                              {{ $errors->has('phone') ? 'border-red-500' : '' }}" {{ old('phone') &&
+                    !$errors->has('phone') ? 'readonly' : '' }}
+                required>
+                @if(old('phone') && !$errors->has('phone'))
+                <p class="mt-2 text-sm text-green-600">
+                    ✓ تم إدخال الرقم: {{ old('phone') }}
+                </p>
+                @endif
+                @error('phone')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Interest Status -->
+            <div>
+                <label for="interest_status" class="block text-sm font-medium text-gray-700 mb-1">حالة الاهتمام</label>
+                <select id="interest_status" name="interest_status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+                              {{ $errors->has('interest_status') ? 'border-red-500' : '' }}" {{ old('interest_status')
+                    && !$errors->has('interest_status') ? 'readonly' : '' }}
+                    required>
+                    <option value="" {{ !old('interest_status') ? 'selected' : '' }}>اختر حالة الاهتمام</option>
+                    <option value="interested" {{ old('interest_status')=='interested' ? 'selected' : '' }}>مهتم
+                    </option>
+                    <option value="not interested" {{ old('interest_status')=='not interested' ? 'selected' : '' }}>غير
+                        مهتم</option>
+                    <option value="neutral" {{ old('interest_status')=='neutral' ? 'selected' : '' }}>مؤجل</option>
+                </select>
+                @if(old('interest_status') && !$errors->has('interest_status'))
+                <p class="mt-2 text-sm text-green-600">✓ تم تحديد الحالة</p>
+                @endif
+                @error('interest_status')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Submit Button -->
+<div class="flex justify-end pt-6">
+<button type="submit" 
+        class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+        style="position: relative; z-index: 999"> <!-- Force above other elements -->
+    {{ $button_label ?? 'إضافة العميل' }}
+</button>
+        </div>
+</div>
+    </form>
+</div>
+@endsection
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById('company_name');
+    const suggestionBox = document.getElementById('companySuggestions');
+
+    input.addEventListener('input', function () {
+        const query = this.value;
+        if (query.length < 2) {
+            suggestionBox.innerHTML = '';
+            suggestionBox.classList.add('hidden');
+            return;
+        }
+
+        fetch(`/company-name-suggestions?term=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(suggestions => {
+                suggestionBox.innerHTML = '';
+                if (suggestions.length > 0) {
+                    suggestionBox.classList.remove('hidden');
+                    suggestions.forEach(name => {
+                        const item = document.createElement('li');
+                        item.textContent = name;
+                        item.className = 'px-4 py-2 cursor-pointer hover:bg-gray-100';
+                        item.onclick = () => {
+                            input.value = name;
+                            suggestionBox.classList.add('hidden');
+                        };
+                        suggestionBox.appendChild(item);
+                    });
+                } else {
+                    suggestionBox.classList.add('hidden');
+                }
+            });
+    });
+});
+flatpickr("#last_contact_date", {
+        dateFormat: "Y-m-d",
+        locale: "ar",
+        disableMobile: true,
+        defaultDate: "{{ old('last_contact_date') }}"
+    });
+
+</script>
+@endpush
+
