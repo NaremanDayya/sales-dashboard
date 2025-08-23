@@ -1267,7 +1267,7 @@ const searchTerm = e.target.value.toLowerCase();
     <a href="/sales-reps/${client.sales_rep_id}/clients/${client.client_id}" class="text-blue-600 hover:underline">
         ${client.company_name || '—'}
         ${client.agreements_count > 0 ?
-                    `<a href="/salesrep/agreements" class="ml-2 bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full hover:bg-blue-200">
+                    `<a href="/agreements" class="ml-2 bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full hover:bg-blue-200">
                 ${client.agreements_count}
             </a>`
                     : ''
