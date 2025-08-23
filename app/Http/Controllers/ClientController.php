@@ -47,10 +47,11 @@ class ClientController extends Controller
                 'sales_rep_id' => $client->sales_rep_id,
                 'contact_days_left' => $client->late_days,
 'interested_service' => Service::where('id', $client->interested_service)->value('name'),
+                'agreements_count' => $client->agreements()->count(),
             ];
         });
 	  $services = Service::all();
-	
+
         return view('clients.table', data: compact('Clients','services'));
 
     }
@@ -181,7 +182,7 @@ $message = "طلب خاص بالعميل {$client->company_name}، يريد: {$r
                 ->where('contact_person', $validated['contact_person'])
                 ->where('contact_position', $validated['contact_position'])
                 ->where('phone', $this->generateSaudiNumber($request->phone))
-		->where('interested_service', $validated['interested_service']) 
+		->where('interested_service', $validated['interested_service'])
 
                 ->exists();
 
@@ -202,7 +203,7 @@ if ($serviceConflict) {
 return back()
                     ->withInput()
                     ->withErrors(['duplicate' => 'هذا العميل مهتم بخدمة مسبقا.']);
-       
+
 }
             if ($hasTempLogo) {
                 $tempPath = $request->input('company_logo_temp');
@@ -218,7 +219,7 @@ return back()
             // Create client
             $validated['sales_rep_id'] = Auth::user()->salesRep->id;
             $validated['phone'] = $this->generateSaudiNumber($request->phone);
-	    $validated['whatsapp_link'] = 'https://wa.me/+' . preg_replace('/\D/', '', $validated['phone']);		
+	    $validated['whatsapp_link'] = 'https://wa.me/+' . preg_replace('/\D/', '', $validated['phone']);
 	    $validated['contact_count'] = 1;
             $client = Client::create($validated);
 
@@ -253,7 +254,7 @@ $conversation = $client->conversations()
                 'client_id' => $client->id,
             ]);
         }
-$message = "📌 تم إضافة عميل جديد إلى النظام: 
+$message = "📌 تم إضافة عميل جديد إلى النظام:
 🏢 الشركة: {$client->company_name}
 ✉️ التفاصيل: {$request->contact_details}";
         Message::create(
@@ -439,7 +440,7 @@ $message = "📌 تم إضافة عميل جديد إلى النظام:
         }
   $date = \Carbon\Carbon::parse($request->last_contact_date)->format('Y-m-d');
     $reason = $request->update_message;
-$message = "📞 تحديث بيانات التواصل مع العميل $client->company_name: 
+$message = "📞 تحديث بيانات التواصل مع العميل $client->company_name:
 📅 آخر تواصل: {$date}
 📝: {$reason}";
         Message::create(

@@ -63,7 +63,7 @@
     }
 .main, #main {
     flex: 1 0 auto !important;
-    padding-bottom: 80px !important; 
+    padding-bottom: 80px !important;
 }
     .table-html.no-sidebar #main-table {
         margin-right: 0 !important;
@@ -541,7 +541,7 @@
 
     .data-table tbody td {
     font-weight: 700;
-    font-size: 14px;    
+    font-size: 14px;
     padding: 5px 8px !important;
         border-bottom: 1px solid var(--gray-200);
         text-align: center;
@@ -973,9 +973,9 @@
                                 </div>
 <div class="column-item">
                                     <label class="column-checkbox">
-                                        <input type="checkbox" value="interested_service" checked> 
+                                        <input type="checkbox" value="interested_service" checked>
                                         <span class="checkmark"></span>
-                                        <span class="column-name">الخدمة المهتم بها</span> 
+                                        <span class="column-name">الخدمة المهتم بها</span>
                                     </label>
                                 </div>
                                 <div class="column-item">
@@ -1082,7 +1082,7 @@
                 <div class="mb-4">
                     <label for="late_customer_days" class="block text-sm font-medium text-gray-700">عدد الأيام</label>
                     <input type="number" name="late_customer_days" id="late_customer_days" min="1" max="30" required
-value="{{ old('late_customer_days', \App\Models\Setting::where('key', 'late_customer_days')->value('value') ?? 3) }}"                       
+value="{{ old('late_customer_days', \App\Models\Setting::where('key', 'late_customer_days')->value('value') ?? 3) }}"
   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500">
                 </div>
                 <div class="flex justify-end space-x-2">
@@ -1263,11 +1263,17 @@ const searchTerm = e.target.value.toLowerCase();
     : '—'}
 </td>
 
-                    <td class="px-4 py-2 text-sm font-semibold text-gray-800">
-                        <a href="/sales-reps/${client.sales_rep_id}/clients/${client.client_id}" class="text-blue-600 hover:underline">
-                            ${client.company_name || '—'}
-                        </a>
-                    </td>
+<td class="px-4 py-2 text-sm font-semibold text-gray-800">
+    <a href="/sales-reps/${client.sales_rep_id}/clients/${client.client_id}" class="text-blue-600 hover:underline">
+        ${client.company_name || '—'}
+        ${client.agreements_count > 0 ?
+                    `<a href="/salesrep/agreements" class="ml-2 bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full hover:bg-blue-200">
+                ${client.agreements_count}
+            </a>`
+                    : ''
+                }
+    </a>
+</td>
 <td class="px-4 py-2 text-sm text-gray-600 cursor-pointer clickable-cell"
     onclick="window.location.href='/sales-reps/${client.sales_rep_id}/clients/${client.client_id}'">
     <span>${client.address || '—'}</span>
@@ -1312,8 +1318,8 @@ const searchTerm = e.target.value.toLowerCase();
 		     <td class="px-4 py-2 text-sm text-blue-700 font-bold" dir="rtl">${client.interested_service || '—'}</td>
                     <td class="px-4 py-2 text-sm text-center ${ client.is_late_customer ? 'text-red-600 font-bold' : 'text-green-600 font-bold' }">${formatDateForDisplay(client.last_contact_date) || '—'}</td>
 <td class="px-4 py-2 text-sm text-center ${client.is_late_customer ? 'text-red-600 font-bold' : 'text-green-600 font-bold'}">
-    ${client.contact_days_left ? 
-        `${client.contact_days_left} ${getArabicDaysWord(client.contact_days_left)}` : 
+    ${client.contact_days_left ?
+        `${client.contact_days_left} ${getArabicDaysWord(client.contact_days_left)}` :
         '—'
     }
 </td>
@@ -1324,8 +1330,8 @@ const searchTerm = e.target.value.toLowerCase();
                     </td>
 <td class="px-4 py-2 text-sm text-center text-gray-400 cursor-pointer"
     onclick="window.location.href='/salesrep/' + ${client.sales_rep_id} + '/MyRequests'">
-<span class="inline-flex items-center px-2 py-0.5 rounded bg-purple-100 text-blue-800"> 
-        ${client.requests_count || 0} 
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-purple-100 text-blue-800">
+        ${client.requests_count || 0}
     </span></td>
 			<td class="px-4 py-2 text-sm text-center no-print">
                         <a href="/client/${client.client_id}/message" class="text-blue-600 hover:underline">
@@ -1464,7 +1470,7 @@ const columnMap = {
     'الشخص المسؤول': 'contact_person',
     'المنصب الوظيفي': 'contact_position',
     'رقم الجوال': 'phone',
-  'الخدمة المهتم بها': 'interested_service', 
+  'الخدمة المهتم بها': 'interested_service',
   'واتس اب مباشر': 'whatsapp_link',
     'حالة الاهتمام': 'interest_status',
     'آخر تواصل': 'last_contact_date',
@@ -1522,7 +1528,7 @@ function resetDateFilter() {
 
 function applyServiceFilter() {
     const serviceId = document.getElementById('serviceTypeFilter').value;
-    
+
     if (!serviceId || serviceId === "") {
         currentFilteredClients = [...ClientsData];
         renderTable(currentFilteredClients);
@@ -1536,14 +1542,14 @@ function applyServiceFilter() {
     };
 
     const serviceName = serviceTypeMap[serviceId];
-    
+
     currentFilteredClients = ClientsData.filter(client => {
         if (!client.service_type) return false;
-        
+
         const clientService = client.service_type.trim();
         const targetService = serviceName.trim();
-        
-        return clientService.localeCompare(targetService, undefined, { 
+
+        return clientService.localeCompare(targetService, undefined, {
             sensitivity: 'base',
             ignorePunctuation: true
         }) === 0;
@@ -1558,7 +1564,7 @@ function applyServiceFilter() {
 function applyFilter() {
     const criteria = document.getElementById('filterSelect').value;
     const serviceId = document.getElementById('serviceTypeFilter').value;
-    
+
     // Generate service map (assuming services are passed from backend)
     const serviceTypeMap = {
         @foreach($services as $service)
@@ -1573,14 +1579,14 @@ function applyFilter() {
         switch (criteria.toLowerCase()) {
             case 'pending':
                 currentFilteredClients = currentFilteredClients.filter(client =>
-                    client.response_status && 
+                    client.response_status &&
                     client.response_status.toLowerCase() === 'pending'
                 );
                 break;
 
             case 'interested':
                 currentFilteredClients = currentFilteredClients.filter(client =>
-                    client.interest_status && 
+                    client.interest_status &&
                     (client.interest_status.toLowerCase() === 'interested' ||
                      client.interest_status.toLowerCase() === 'intersted') // Common typo handling
                 );
@@ -1588,7 +1594,7 @@ function applyFilter() {
 
             case 'not interested':
                 currentFilteredClients = currentFilteredClients.filter(client =>
-                    client.interest_status && 
+                    client.interest_status &&
                     (client.interest_status.toLowerCase() === 'not interested' ||
                      client.interest_status.toLowerCase() === 'not_interested' ||
                      client.interest_status.toLowerCase() === 'notinterested')
@@ -1600,16 +1606,16 @@ function applyFilter() {
     // Apply service filter if selected (using same robust comparison as agreements)
     if (serviceId && serviceId !== "") {
         const serviceName = serviceTypeMap[serviceId];
-        
+
         currentFilteredClients = currentFilteredClients.filter(client => {
             if (!client.interested_service) return false;
-            
+
             // Trim and normalize both values
             const clientService = client.interested_service.trim();
             const targetService = serviceName.trim();
-            
+
             // Case-insensitive Arabic-aware comparison
-            return clientService.localeCompare(targetService, undefined, { 
+            return clientService.localeCompare(targetService, undefined, {
                 sensitivity: 'base',
                 ignorePunctuation: true
             }) === 0;
