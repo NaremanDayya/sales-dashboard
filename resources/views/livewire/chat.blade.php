@@ -1,4 +1,6 @@
 @vite(['resources/css/app.css', 'resources/js/app.js'])
+@livewireScripts()
+@livewireStyles()
 <script>
     document.title = "محادثات العملاء";
 </script>
