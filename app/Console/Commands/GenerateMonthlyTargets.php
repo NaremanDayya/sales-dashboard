@@ -52,7 +52,12 @@ if ($trainingEnd->gt($date)) {
             continue;
         }
 
-        $previousDate = $date->copy()->subMonthNoOverflow();
+        $firstEligibleMonth = $rep->start_work_date->copy()->addMonth()->startOfMonth();
+
+        $carryoverMonths = 0;
+        $missingCarryover = 0;
+
+        $previousDate = $date->copy()->subMonthNoOverflow(); // last month
         $previousTarget = Target::where([
             'sales_rep_id' => $rep->id,
             'service_id' => $service->id,
@@ -60,9 +65,20 @@ if ($trainingEnd->gt($date)) {
             'year' => $previousDate->year,
         ])->first();
 
-        $previousCarryover = $previousTarget?->carried_over_amount ?? 0;
+        if ($previousTarget) {
+            $missingCarryover = $previousTarget->carried_over_amount;
+        } else {
+            $periodStart = $firstEligibleMonth->copy();
+            $periodEnd   = $date->copy()->subMonthNoOverflow();
+            $carryoverMonths = $periodEnd->diffInMonths($periodStart) + 1;
+
+            if ($carryoverMonths > 0) {
+                $missingCarryover = $carryoverMonths * $service->target_amount;
+            }
+        }
+
         $baseTarget = $service->target_amount;
-        $actualTarget = $baseTarget + $previousCarryover;
+        $actualTarget = $baseTarget + $missingCarryover;
 
         Target::create([
             'sales_rep_id' => $rep->id,
