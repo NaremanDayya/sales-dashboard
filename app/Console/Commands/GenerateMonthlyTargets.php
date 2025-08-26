@@ -85,7 +85,7 @@ class GenerateMonthlyTargets extends Command
                     'needed_achieved_percentage' => Setting::where('key', 'commission_threshold')->value('value') ?? 90,
                 ]);
 
-                $log[] = "✅ Created: Rep {$rep->id}, Service {$service->id}, Month $month/$year, Target: $actualTarget (Base: $baseTarget + Total Carry: $totalCarryover)";
+                $log[] = "✅ Created: SalesRep {$rep->id}, Service {$service->id}, Month $month/$year, Target: $actualTarget (Base: $baseTarget + Total Carry: $totalCarryover)";
             }
         }
 
