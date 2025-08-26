@@ -15,88 +15,79 @@ class GenerateMonthlyTargets extends Command
 
     public function handle()
     {
+        $salesReps = SalesRep::whereHas('user', function ($query) {
+            $query->where('account_status', 'active');
+        })->get();
 
-$salesReps = SalesRep::whereHas('user', function ($query) {
-    $query->where('account_status', 'active');
-})->get();
+        $services = Service::all();
 
-$services = Service::all();
+        $now = Carbon::now();
+        $month = $now->month;
+        $year = $now->year;
+        $date = Carbon::create($year, $month, 1);
 
-$now = Carbon::now();
-$month = $now->month;
-$year = $now->year;
-$date = Carbon::create($year, $month, 1);
+        $log = [];
 
-$log = [];
+        foreach ($salesReps as $rep) {
+            $trainingEnd = $rep->start_work_date->copy()->addMonth()->startOfMonth();
 
-foreach ($salesReps as $rep) {
+            if ($trainingEnd->gt($date)) {
+                $log[] = "⏩ Skipped Rep ID {$rep->id} for $month/$year: still in training (Started: {$rep->start_work_date->format('Y-m-d')})";
+                continue;
+            }
 
-$trainingEnd = $rep->start_work_date->copy()->addMonth()->startOfMonth();
+            foreach ($services as $service) {
+                $existing = Target::where([
+                    'sales_rep_id' => $rep->id,
+                    'service_id' => $service->id,
+                    'month' => $month,
+                    'year' => $year,
+                ])->first();
 
-if ($trainingEnd->gt($date)) {
-    $log[] = "⏩ Skipped Rep ID {$rep->id} for $month/$year: still in training (Started: {$rep->start_work_date->format('Y-m-d')})";
-    continue;
+                if ($existing) {
+                    $log[] = "🔁 Exists: Rep {$rep->id} - Service {$service->id} - $month/$year";
+                    continue;
+                }
 
-    }
+                $totalCarryover = 0;
+                $currentPeriod = $trainingEnd->copy();
 
-    foreach ($services as $service) {
-        $existing = Target::where([
-            'sales_rep_id' => $rep->id,
-            'service_id' => $service->id,
-            'month' => $month,
-            'year' => $year,
-        ])->first();
+                while ($currentPeriod->lt($date)) {
+                    $previousTarget = Target::where([
+                        'sales_rep_id' => $rep->id,
+                        'service_id' => $service->id,
+                        'month' => $currentPeriod->month,
+                        'year' => $currentPeriod->year,
+                    ])->first();
 
-        if ($existing) {
-            $log[] = "🔁 Exists: Rep {$rep->id} - Service {$service->id} - $month/$year";
-            continue;
-        }
+                    if ($previousTarget) {
+                        $totalCarryover += $previousTarget->carried_over_amount;
+                    } else {
+                        $totalCarryover += $service->target_amount;
+                    }
 
-        $firstEligibleMonth = $rep->start_work_date->copy()->addMonth()->startOfMonth();
+                    $currentPeriod->addMonthNoOverflow();
+                }
 
-        $carryoverMonths = 0;
-        $missingCarryover = 0;
+                $baseTarget = $service->target_amount;
+                $actualTarget = $baseTarget + $totalCarryover;
 
-        $previousDate = $date->copy()->subMonthNoOverflow(); // last month
-        $previousTarget = Target::where([
-            'sales_rep_id' => $rep->id,
-            'service_id' => $service->id,
-            'month' => $previousDate->month,
-            'year' => $previousDate->year,
-        ])->first();
+                Target::create([
+                    'sales_rep_id' => $rep->id,
+                    'service_id' => $service->id,
+                    'month' => $month,
+                    'year' => $year,
+                    'target_amount' => $actualTarget,
+                    'achieved_amount' => 0,
+                    'carried_over_amount' => $actualTarget,
+                    'is_achieved' => false,
+                    'commission_due' => 0,
+                    'needed_achieved_percentage' => Setting::where('key', 'commission_threshold')->value('value') ?? 90,
+                ]);
 
-        if ($previousTarget) {
-            $missingCarryover = $previousTarget->carried_over_amount;
-        } else {
-            $periodStart = $firstEligibleMonth->copy();
-            $periodEnd   = $date->copy()->subMonthNoOverflow();
-            $carryoverMonths = $periodEnd->diffInMonths($periodStart) + 1;
-
-            if ($carryoverMonths > 0) {
-                $missingCarryover = $carryoverMonths * $service->target_amount;
+                $log[] = "✅ Created: Rep {$rep->id}, Service {$service->id}, Month $month/$year, Target: $actualTarget (Base: $baseTarget + Total Carry: $totalCarryover)";
             }
         }
-
-        $baseTarget = $service->target_amount;
-        $actualTarget = $baseTarget + $missingCarryover;
-
-        Target::create([
-            'sales_rep_id' => $rep->id,
-            'service_id' => $service->id,
-            'month' => $month,
-            'year' => $year,
-            'target_amount' => $actualTarget,
-            'achieved_amount' => 0,
-            'carried_over_amount' => $actualTarget,
-            'is_achieved' => false,
-            'commission_due' => 0,
-	    'needed_achieved_percentage' => Setting::where('key', 'commission_threshold')->value('value') ?? 90 ,
-        ]);
-
-        $log[] = "✅ Created: Rep {$rep->id}, Service {$service->id}, Month $month/$year, Target: $actualTarget (Base: $baseTarget + Carry: $previousCarryover)";
-    }
-}
-
 
     }
 }
