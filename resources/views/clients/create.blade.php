@@ -24,15 +24,15 @@
                 <div class="w-full">
 <label class="block">
     <span class="sr-only">إختر شعار الشركة</span>
-    <input 
-        type="file" 
-        name="company_logo" 
+    <input
+        type="file"
+        name="company_logo"
         class="block w-full text-sm text-gray-500
                file:mr-4 file:py-2 file:px-4
                file:rounded-md file:border-0
                file:text-sm file:font-semibold
                file:bg-blue-50 file:text-blue-700
-               hover:file:bg-blue-100" 
+               hover:file:bg-blue-100"
         accept="image/jpg,image/jpeg,image/png,image/gif,image/bmp,image/webp,image/svg+xml,image/tiff,image/x-icon"
         {{ session('temp_company_logo') ? '' : 'required' }}
     >
@@ -86,23 +86,39 @@
                 @enderror
             </div>
 		<!-- Interested Service -->
-<div class="mt-4">
-    <label for="interested_service" class="block text-sm font-medium text-gray-700 mb-1">الخدمة المهتم بها</label>
-    <select id="interested_service" name="interested_service"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
-        {{ $errors->has('interested_service') ? 'border-red-500' : '' }}">
-        <option value="">-- اختر الخدمة --</option>
-        @foreach($services as $service)
-            <option value="{{ $service->id }}" {{ old('interested_service') == $service->id ? 'selected' : '' }}>
-                {{ $service->name }}
-            </option>
-        @endforeach
-    </select>
+            <div class="mt-4">
+                <label for="interested_service" class="block text-sm font-medium text-gray-700 mb-1">
+                    الخدمة المهتم بها
+                </label>
 
-    @error('interested_service')
-    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-    @enderror
-</div>
+                <div class="flex gap-3 items-center">
+                    <!-- خدمة -->
+                    <select id="interested_service" name="interested_service"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+            {{ $errors->has('interested_service') ? 'border-red-500' : '' }}">
+                        <option value="">-- اختر الخدمة --</option>
+                        @foreach($services as $service)
+                            <option value="{{ $service->id }}" {{ old('interested_service') == $service->id ? 'selected' : '' }}>
+                                {{ $service->name }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <!-- عدد الخدمات المهتم بها -->
+                    <div class="w-32">
+                        <label for="interested_service_count" class="block text-sm font-medium text-gray-700 mb-1">العدد المهتم به</label>
+                        <input type="number" id="interested_service_count" name="interested_service_count"
+                               value="{{ old('interested_service_count', $client->interested_service_count ?? 0) }}"
+                               min="0"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                @error('interested_service')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Contact Person -->
             <div>
                 <label for="contact_person" class="block text-sm font-medium text-gray-700 mb-1">الشخص المسؤول</label>
@@ -164,7 +180,7 @@
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
-		
+
 <div>
     <label for="contact_details" class="block text-sm font-medium text-gray-700 mb-1">تفاصيل التواصل</label>
     <textarea id="contact_details" name="contact_details"
@@ -182,22 +198,53 @@
 </div>
 
 
-            <!-- Phone -->
-            <div>
-                <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">رقم الجوال</label>
-                <input type="tel" id="phone" name="phone" value="{{ old('phone') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
-                              {{ $errors->has('phone') ? 'border-red-500' : '' }}" {{ old('phone') &&
-                    !$errors->has('phone') ? 'readonly' : '' }}
-                required>
-                @if(old('phone') && !$errors->has('phone'))
-                <p class="mt-2 text-sm text-green-600">
-                    ✓ تم إدخال الرقم: {{ old('phone') }}
-                </p>
-                @endif
-                @error('phone')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
+            <div x-data="{ countryCode: '{{ old('country_code', '') }}' }" class="flex items-start gap-2"> <!-- قللنا الفجوة من 4 إلى 2 -->
+
+                <!-- كود الدولة -->
+                <div>
+                    <label for="country_code" class="block text-sm font-medium text-gray-700 mb-1">
+                        كود الدولة (واتساب)
+                    </label>
+                    <div class="flex items-center gap-1"> <!-- أضفنا gap-1 بين +code و input -->
+                        <span class="text-gray-700 font-bold text-lg">+<span x-text="countryCode"></span></span>
+                        <input type="text" id="country_code" name="country_code"
+                               x-model="countryCode"
+                               class="mt-1 block w-28 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+            {{ $errors->has('country_code') ? 'border-red-500' : '' }}"
+                               placeholder="971" required>
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">
+                        ⚠️ أدخل الكود بدون (+)
+                    </p>
+                    @error('country_code')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- رقم الهاتف -->
+                <div class="flex-1">
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
+                        رقم الجوال
+                    </label>
+                    <input type="tel" id="phone" name="phone" value="{{ old('phone') }}"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+        {{ $errors->has('phone') ? 'border-red-500' : '' }}"
+                           placeholder="501234567" required>
+                    <p class="mt-1 text-xs text-gray-500">
+                        ⚠️ أدخل الرقم بدون الصفر في البداية إذا كان يبدأ بـ 0.
+                    </p>
+                    @if(old('phone') && !$errors->has('phone'))
+                        <p class="mt-2 text-sm text-green-600">
+                            ✓ تم إدخال الرقم: {{ old('phone') }}
+                        </p>
+                    @endif
+                    @error('phone')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
             </div>
+
 
             <!-- Interest Status -->
             <div>
@@ -223,7 +270,7 @@
 
             <!-- Submit Button -->
 <div class="flex justify-end pt-6">
-<button type="submit" 
+<button type="submit"
         class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
         style="position: relative; z-index: 999"> <!-- Force above other elements -->
     {{ $button_label ?? 'إضافة العميل' }}

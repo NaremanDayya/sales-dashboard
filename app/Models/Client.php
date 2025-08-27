@@ -23,7 +23,9 @@ class Client extends Model
         'sales_rep_id',
         'last_contact_date',
         'contact_count',
-	'interested_service',
+        'interested_service',
+        'interested_service_count',
+        'country_code',
     ];
     protected $casts = [
         'last_contact_date' => 'date',

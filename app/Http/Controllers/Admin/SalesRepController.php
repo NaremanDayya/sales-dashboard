@@ -286,7 +286,7 @@ if ($salesRep->user->personal_image && Storage::exists('public/' . $salesRep->us
 $image = $request->file('personal_image');
 $imageName = time() . '_' . $image->getClientOriginalName();
 $path = $request->personal_image->storeAs('profile-images', $imageName, 'public');
-$validated['personal_image'] = $path; 
+$validated['personal_image'] = $path;
     }
 
     // Prepare user data
@@ -539,15 +539,15 @@ Storage::put($csvPath, implode("\n", $newContent));
     public function allRequests()
     {
         $clientRequests = ClientEditRequest::with(['client', 'salesRep'])
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->get();
 
         $agreementRequests = AgreementEditRequest::with(['agreement', 'client', 'salesRep'])
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->get();
 
-  $chatClientRequests =ClientRequest::with(['client', 'salesRep'])
-            ->latest()
+        $chatClientRequests = ClientRequest::with(['client', 'salesRep'])
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return view('salesRep.pendedRequests', compact('clientRequests', 'agreementRequests','chatClientRequests'));
@@ -560,16 +560,17 @@ Storage::put($csvPath, implode("\n", $newContent));
 
         $clientRequests = ClientEditRequest::with(['client', 'salesRep'])
             ->where('sales_rep_id', $userId)
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->get();
 
         $agreementRequests = AgreementEditRequest::with(['agreement', 'client', 'salesRep'])
             ->where('sales_rep_id', $userId)
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->get();
-$chatClientRequests =ClientRequest::with(['client', 'salesRep'])
+
+        $chatClientRequests = ClientRequest::with(['client', 'salesRep'])
             ->where('sales_rep_id', $userId)
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return view('salesRep.pendedRequests', compact('clientRequests','chatClientRequests', 'agreementRequests', 'salesRep'));

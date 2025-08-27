@@ -31,18 +31,35 @@ class ChatList extends Component
     {
         $user = Auth::user();
 
-        $conversations = Conversation::where(function ($query) use ($user) {
-            $query->where('sender_id', $user->id)
-                ->orWhere('receiver_id', $user->id);
-        })
+        $conversations = Conversation::with([
+            'client',
+            'messages' => function($query) {
+                $query->latest()->limit(1);
+            }
+        ])
+            ->where(function ($query) use ($user) {
+                $query->where('sender_id', $user->id)
+                    ->orWhere('receiver_id', $user->id);
+            })
             ->when($this->client_id, function ($query) {
                 $query->where('client_id', $this->client_id);
             })
-            ->latest('updated_at')
+            ->withCount([
+                'messages as unread_messages_count' => function($query) use ($user) {
+                    $query->where('receiver_id', $user->id)
+                        ->whereNull('read_at');
+                }
+            ])
+            ->orderByRaw("
+        CASE WHEN unread_messages_count > 0 THEN 0 ELSE 1 END
+    ")
+            ->orderBy('updated_at', 'desc')
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return view('livewire.chat-list', [
             'conversations' => $conversations,
         ]);
+
     }
 }

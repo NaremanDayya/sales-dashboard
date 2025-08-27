@@ -64,10 +64,7 @@ class AgreementEditRequestController extends Controller
         }
 
         return redirect()
-            ->route('salesrep.agreements.show', [
-                'salesrep' => $agreement->sales_rep_id,
-                'agreement' => $agreement->id,
-            ])
+            ->route('admin.allRequests')
             ->with('success', 'تمت مراجعة طلب التعديل بنجاح.');
     }
     public function review(Agreement $agreement, AgreementEditRequest $agreement_request)
