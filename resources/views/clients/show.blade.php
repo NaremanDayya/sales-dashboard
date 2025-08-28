@@ -335,11 +335,30 @@
                                         !=='address' ? 'disabled' : '' }}>
                                 </div>
 
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
-                                    <input type="tel" name="phone" value="{{ old('phone', $client->phone) }}"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg" {{ $editableField
-                                        !=='phone' ? 'disabled' : '' }}>
+                                <div class="flex gap-3 items-start">
+                                    <!-- country code -->
+                                    <div class="w-28">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">كود الدولة</label>
+                                        <input type="text" name="country_code"
+                                               value="{{ old('country_code', $client->country_code) }}"
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                            {{ $editableField !== 'phone' ? 'disabled' : '' }}>
+                                        <p class="mt-1 text-xs text-gray-500">
+                                            ⚠️ أدخل الكود بدون (+)
+                                        </p>
+                                    </div>
+
+                                    <!-- phone -->
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
+                                        <input type="tel" name="phone"
+                                               value="{{ old('phone', $client->phone) }}"
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                            {{ $editableField !== 'phone' ? 'disabled' : '' }}>
+                                        <p class="mt-1 text-xs text-gray-500">
+                                            ⚠️ أدخل الرقم بدون الصفر إذا بدأ بـ 0
+                                        </p>
+                                    </div>
                                 </div>
 
                                 <div>
@@ -349,7 +368,7 @@
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg" {{ $editableField
                                         !=='whatsapp_link' ? 'disabled' : '' }}>
                                 </div>
-				 <div">
+				 <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1"> درجة
                                                 الإهتمام</label>
                                             <select name="interest_status"
@@ -530,7 +549,7 @@ document.querySelectorAll(".prevent-multi-submit").forEach(form => {
     form.addEventListener("submit", function(e) {
         let button = form.querySelector("button[type=submit]");
         button.disabled = true;
-      
+
     });
 });
 </script>
