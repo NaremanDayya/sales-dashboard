@@ -26,6 +26,7 @@ class Client extends Model
         'interested_service',
         'interested_service_count',
         'country_code',
+        'contact_details',
     ];
     protected $casts = [
         'last_contact_date' => 'date',

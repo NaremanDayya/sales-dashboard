@@ -125,8 +125,7 @@ class ChatBox extends Component
             'message' => $this->message
         ]);
 
-        $this->reset('message');
-
+        $this->message = '';
         #scroll to bottom
         $this->dispatch('scroll-bottom');
 
@@ -149,6 +148,25 @@ class ChatBox extends Component
             $this->selectedConversation,
             $messageReceiver,
         ));
+    }
+    public function deleteConversation($conversationId)
+    {
+        dd('test');
+        if (!auth()->user()->isAdmin()) {
+            return;
+        }
+
+        $conversation = Conversation::find($conversationId);
+
+        if ($conversation) {
+            Message::where('conversation_id', $conversationId)->delete();
+
+            $conversation->delete();
+
+            session()->flash('message', "تم حذف المحادثة الخاصة بالعميل $conversation->client->company_name");
+
+            return redirect()->route('chat.index');
+        }
     }
 
     public function editMessage($messageId, $newMessage)

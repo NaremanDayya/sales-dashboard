@@ -4,6 +4,8 @@
     editingMessageId: null,
     editMessageText: '',
     deleteMessageId: null,
+        deleteConversationId: null,
+
     init() {
         this.conversationElement = document.getElementById('conversation');
         this.height = this.conversationElement.scrollHeight;
@@ -71,7 +73,7 @@
     <div class="flex flex-col w-full h-full py-1">
 
         <!-- Header Section -->
-        <header class="w-full sticky inset-x-0 top-0 z-10 bg-white border border-gray-200 rounded-lg mb-2">
+        <header class="w-full sticky inset-x-0 top-0 pt-2 z-10 bg-white border border-gray-200 rounded-lg mb-2">
             <div class="flex w-full items-center gap-2 md:gap-5 justify-between bg-[#f5f5fa] p-3">
                 <div class="flex items-center gap-2 md:gap-5 cursor-pointer">
                     <!-- Mobile Back Button -->
@@ -84,14 +86,19 @@
                     </a>
 
                     <!-- User Avatar -->
+                    @php
+                        $client = $selectedConversation->client;
+                    @endphp
                     <div
                         class="shrink-0 inline-flex items-center justify-center relative transition overflow-visible rounded-full border border-[var(--wc-light-secondary)] text-gray-300 bg-[#f5f5fa] dark:bg-[var(--wc-dark-secondary)] dark:border-[var(--wc-dark-secondary)] text-base h-8 w-8 lg:w-10 lg:h-10">
                         @if(!empty($selectedConversation?->client?->company_logo))
-                            <img
-                                src="{{ asset('storage/' . $selectedConversation->client->company_logo) }}"
-                                alt="شعار الشركة"
-                                class="max-h-full max-w-full object-contain bg-white rounded-full"
-                            >
+                            <a href="{{ route('sales-reps.clients.show', ['sales_rep' => $client->sales_rep_id, 'client' => $client->id]) }}">
+                                <img
+                                    src="{{ asset('storage/' . $client->company_logo) }}"
+                                    alt="شعار الشركة"
+                                    class="max-h-full max-w-full object-contain bg-white rounded-full"
+                                >
+                            </a>
                         @else
                             <svg class="w-full h-full rounded-full" fill="currentColor" viewBox="0 0 24 24">
                                 <path
@@ -99,7 +106,6 @@
                                 </path>
                             </svg>
                         @endif
-
                     </div>
 
                     <!-- User Info -->
@@ -107,11 +113,32 @@
                         <h6 class="truncate font-medium tracking-wider text-gray-900">
                             {{ $selectedConversation->getReceiver()->name ?? $selectedConversation->getReceiver()->email }}
                         </h6>
-                        <span class="text-xs text-gray-500 truncate">
-                            {{ $selectedConversation->client->company_name }}
-                        </span>
+                        <a href="{{ route('sales-reps.clients.show', ['sales_rep' => $client->sales_rep_id, 'client' => $client->id]) }}"
+                           class="text-xs text-gray-500 truncate hover:underline">
+                            {{ $client->company_name }}
+                        </a>
                     </div>
                 </div>
+
+                <!-- Admin Dropdown for Conversation Actions -->
+                @if(auth()->user()->isAdmin())
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="p-2 text-gray-500 hover:text-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                            </svg>
+                        </button>
+
+                        <div x-show="open" x-cloak @click.away="open = false"
+                             class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                            <button wire:click="deleteConversation({{ $selectedConversation->id }})"
+                                    @click="open = false; $wire.deleteConversation({{ $selectedConversation->id }})"
+                                    class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                حذف المحادثة
+                            </button>
+                        </div>
+                    </div>
+                @endif
             </div>
         </header>
 
@@ -131,7 +158,7 @@
         height = newHeight;
     "
               id="conversation"
-              class="flex flex-col gap-3 p-5 overflow-y-auto flex-grow overscroll-contain overflow-x-hidden w-full my-auto" dir="rtl">
+              class="flex flex-col gap-3 pb-10 p-5 overflow-y-auto flex-grow overscroll-contain overflow-x-hidden w-full my-auto" dir="rtl">
 
             @if ($loadedMessages)
                 @php
@@ -199,7 +226,7 @@
                                     {{ $message->created_at->format('h:i A') }}
 
                                     @if($message->isEdited())
-                                        <span class="ml-2 text-xs italic">(تم التعديل)</span>
+                                        <span class="ml-2 text-xs italic">|تم التعديل</span>
                                     @endif
                                 </p>
 
@@ -220,8 +247,7 @@
                             </div>
                         </div>
 
-                        <!-- Message Actions Dropdown (only for user's own messages and not likes) -->
-                        @if ($message->sender_id === Auth::id() && $message->message !== 'like')
+                        @if (($message->sender_id === Auth::id() && $message->message !== 'like') || auth()->user()->isAdmin())
                             <div class="relative">
                                 <button @click="showMenu = !showMenu" class="p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -231,12 +257,17 @@
 
                                 <div x-show="showMenu" x-cloak class="absolute right-0 z-10 w-40 mt-2 bg-white rounded-md shadow-lg">
                                     <div class="py-1">
-                                        <button @click="openEditModal('{{ $message->id }}', '{{ $message->message }}')" class="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100">
-                                            تعديل
-                                        </button>
-                                        <button @click="openDeleteModal('{{ $message->id }}')" class="block w-full px-4 py-2 text-sm text-left text-red-600 hover:bg-gray-100">
-                                            حذف
-                                        </button>
+                                        @if($message->canBeEdited() || auth()->user()->isAdmin())
+                                            <button @click="openEditModal('{{ $message->id }}', '{{ $message->message }}')" class="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100">
+                                                تعديل
+                                            </button>
+                                        @endif
+
+                                        @if(auth()->user()->isAdmin() || $message->sender_id === Auth::id())
+                                            <button @click="openDeleteModal('{{ $message->id }}')" class="block w-full px-4 py-2 text-sm text-left text-red-600 hover:bg-gray-100">
+                                                حذف
+                                            </button>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -257,7 +288,9 @@
                     <!-- Message Input -->
                     <div class="flex gap-2 sm:px-2 w-full">
                         <input wire:model="message" wire:loading.attr="disabled" autofocus type="text"
-                               placeholder="Type a message" id="message" maxlength="1700" rows="1"
+                               placeholder="Type a message" id="message"
+                               wire:key="message-input-{{ time() }}"
+                               maxlength="1700" rows="1"
                                @keydown.enter.prevent="$event.shiftKey || $wire.call('sendMessage').then(() => {
            $nextTick(() => conversationElement.scrollTop = conversationElement.scrollHeight);
        })"

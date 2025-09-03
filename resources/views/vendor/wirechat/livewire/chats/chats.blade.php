@@ -52,5 +52,26 @@
             </div>
         @endif
     </main>
-
+    @php
+        $auth = Auth::user();
+            $unreadCount = collect($conversations)->filter(function ($conv) use ($auth, $selectedConversationId) {
+                $lastMessage = $conv->lastMessage;
+                return $lastMessage &&
+                       !$lastMessage->ownedBy($auth) &&
+                       !$conv->readBy($conv->auth_participant ?? $auth) &&
+                       $selectedConversationId != $conv->id;
+            })->count();
+    @endphp
+    <span
+        x-data
+        x-init="$watch('$wire.conversations', () => {
+        // This will automatically update when conversations change
+        setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('chat-unread-count', {
+                detail: { count: {{ $this->unreadCount }} }
+            }));
+        }, 100);
+    })"
+        class="hidden"
+    ></span>
 </div>

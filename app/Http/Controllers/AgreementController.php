@@ -56,12 +56,13 @@ class AgreementController extends Controller
                 'agreement_id' => $agreement->id,
                 'is_notice_at_time' => $agreement->isNoticedAtTime(),
                 'required_notice_date' => $agreement->getRequiredNoticeDate()->format('Y-m-d'),
-		'sales_Rep_name' => $agreement->salesRep->name,
+		        'sales_Rep_name' => $agreement->salesRep->name,
             ];
         });
                 $services = Service::all();
+        $isAdmin = auth()->user()->role === 'admin';
 
-        return view('agreements.table', data: compact('Agreements','services'));
+        return view('agreements.table', data: compact('Agreements','services','isAdmin'));
     }
     public function index(SalesRep $salesrep)
     {
@@ -94,8 +95,10 @@ class AgreementController extends Controller
             ];
         });
  $services = Service::all();
+        $isAdmin = auth()->user()->role === 'admin';
 
-        return view('agreements.table', data: compact('Agreements','services'));
+
+        return view('agreements.table', data: compact('Agreements','services','salesrep','isAdmin'));
     }
 
     public function create(SalesRep $salesrep)
@@ -651,7 +654,58 @@ class AgreementController extends Controller
             $salesRepUser->notify(new AgreementRenewed($agreement));
         }
     }
+    public function inlineUpdate(Request $request, Agreement $agreement)
+    {
+        $validated = $request->validate([
+            'client_name' => 'sometimes|nullable|string|max:255',
+            'signing_date' => 'sometimes|nullable|date',
+            'duration_years' => 'sometimes|nullable|integer|min:1',
+            'termination_type' => 'sometimes|nullable|in:returnable,non_returnable',
+            'implementation_date' => 'sometimes|nullable|date',
+            'end_date' => 'sometimes|nullable|date',
+            'notice_months' => 'sometimes|nullable|integer|min:0',
+            'required_notice_date' => 'sometimes|nullable|date',
+            'notice_status' => 'sometimes|nullable|in:sent,not_sent',
+            'service_type' => 'sometimes|nullable|string|max:255',
+            'product_quantity' => 'sometimes|nullable|integer|min:0',
+            'price' => 'sometimes|nullable|numeric|min:0',
+            'total_amount' => 'sometimes|nullable|numeric|min:0',
+        ]);
 
+        try {
+            // تحقق من وجود البيانات المطلوبة للتحديث
+            if (empty($validated)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'لا توجد بيانات للتحديث'
+                ], 400);
+            }
+
+            // تسجيل البيانات قبل التحديث لأغراض debugging
+            \Log::info('Updating agreement:', [
+                'agreement_id' => $agreement->id,
+                'data' => $validated
+            ]);
+
+            // تحديث السجل
+            $agreement->update($validated);
+
+            // إعادة تحميل البيانات المحدثة من قاعدة البيانات
+            $agreement->refresh();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم تحديث البيانات بنجاح',
+                'data' => $agreement->toArray()
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Agreement update error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء التحديث: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
 
 }
