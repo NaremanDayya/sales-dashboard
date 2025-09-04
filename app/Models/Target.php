@@ -56,19 +56,61 @@ class Target extends Model
             ->where('service_id', $service->id)
             ->sum('achieved_percentage');
     }
-    public function yearAchievedAmount(Service $service, SalesRep $salesRep): int
+
+    public function yearAchievedAmountValue(Service $service, SalesRep $salesRep): float
     {
-        return $this->where('sales_rep_id', $salesRep->id)
+        $currentYear = now()->year;
+
+        $totalAchievedAmount = $this->where('sales_rep_id', $salesRep->id)
             ->where('service_id', $service->id)
-            ->where('year', now()->year)
-            ->sum('achieved_percentage') / 12;
+            ->where('year', $currentYear)
+            ->sum('achieved_amount');
+
+        return (float) $totalAchievedAmount;
     }
+
+    public function yearAchievedAmount(Service $service, SalesRep $salesRep): float
+    {
+        $currentYear = now()->year;
+        $currentMonth = now()->month;
+
+        $startDate = optional($salesRep->start_work_date)->startOfMonth();
+
+        if (!$startDate) {
+            $monthsWorked = $currentMonth;
+        } elseif ($startDate->year > $currentYear) {
+            $monthsWorked = 0;
+        } elseif ($startDate->year == $currentYear) {
+            $startMonth = $startDate->month + 1;
+            $monthsWorked = 12 - $startMonth + 1;
+            $monthsWorked = max(0, $monthsWorked);
+        } else {
+            $monthsWorked = $currentMonth;
+        }
+
+        if ($monthsWorked === 0) {
+            return 0.0;
+        }
+
+        $totalAchievedAmount = $this->where('sales_rep_id', $salesRep->id)
+            ->where('service_id', $service->id)
+            ->where('year', $currentYear)
+            ->sum('achieved_amount');
+
+        $targetAmount = ($service->target_amount) * $monthsWorked ?: 1;
+
+        $yearAchieved = $totalAchievedAmount / $targetAmount *100;
+//        dd($totalAchievedAmount ,$targetAmount,$yearAchieved);
+
+        return (int) $yearAchieved;
+    }
+
     public function getCommissionStatusAttribute()
     {
         return $this->commission_due ? 'تصرف' : 'لا تصرف';
     }
 public function commission() {
-    return $this->belongsTo(Commission::class); 
+    return $this->belongsTo(Commission::class);
 }
 public function getCommissionStatusByMonth($month)
 {
@@ -78,7 +120,7 @@ public function getCommissionStatusByMonth($month)
             ->where('month', $month)
             ->where('year', $this->year ?? now()->year)
             ->first();
-            
+
         return $commission?->payment_status ?? 0;
     }
 

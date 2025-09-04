@@ -33,12 +33,7 @@
         padding: 20px;
     }
 
-    .table-container {
-        background: white;
-        border-radius: 0.75rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        margin: 1rem;
-    }
+    .table-container
 data-table th,
 data-table td {
     text-align: center;
@@ -515,7 +510,7 @@ font-size: 14px;
                 <option value="">الكل</option>
                 <option value="client">طلبات تعديل  العملاء</option>
                 <option value="agreement">طلبات تعديل  الاتفاقيات</option>
-<option value="client_chat">طلبات العملاء </option>                 
+<option value="client_chat">طلبات العملاء </option>
 <option value="approved">مقبولة</option>
                 <option value="rejected">مرفوضة</option>
                 <option value="pending">معلقة</option>
@@ -538,7 +533,7 @@ font-size: 14px;
                 <thead>
                     <tr>
         <th class="text-center">ID</th>
-                 
+
        <th class="text-center">نوع الطلب</th>
                         <th class="text-center">الجهة</th>
                         <th class="text-center">سفير العلامة التجارية</th>
@@ -556,7 +551,7 @@ font-size: 14px;
                 <tbody id="tableBody" class="text-center">
                     @foreach($clientRequests as $request)
                     <tr>
-    
+
 <td class="text-center">{{ $request->id }}</td>
 
 <td style="font-size: 14px; font-weight: 700; white-space: nowrap;">
@@ -577,7 +572,7 @@ font-size: 14px;
            class="text-gray-800 hover:text-primary hover:underline">
             طلب تعديل عميل
         </a>
-  
+
   </div>
 </td>
 
@@ -597,7 +592,7 @@ font-size: 14px;
  @php
         $editedFieldsTranslation = [
             'company_name' => 'اسم الشركة',
-    'logo' => 'الشعار', 
+    'logo' => 'الشعار',
     'address' => 'العنوان',
     'contact_person' => 'الشخص المسؤول',
     'interest_status' => 'حالة الاهتمام',
@@ -644,7 +639,7 @@ font-size: 14px;
             $days = $diff->d;
         @endphp
 
-        
+
 @if($days > 0)
     {{ $days }} @if($days > 10) يومًا @elseif($days > 2) أيام @elseif($days == 2) يومان @else يوم @endif
 @endif
@@ -693,7 +688,7 @@ font-size: 14px;
                                                         class="px-3 py-1 bg-red-100 text-red-800 rounded-md text-sm hover:bg-red-200 transition-colors">
                                                          رفض
                                                     </button>
-          
+
                                       </form>
  @endif
   @else
@@ -749,7 +744,7 @@ font-size: 14px;
     <div class="text-gray-600 dark:text-gray-300">
         {{ $request->created_at->format('Y-m-d H:i') }}
     </div>
-    
+
     <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
         {{ $request->created_at->diffForHumans() }}
     </div>
@@ -764,7 +759,7 @@ font-size: 14px;
         <div class="text-gray-600 dark:text-gray-300">
             {{ $request->updated_at->format('Y-m-d H:i') }}
         </div>
-        
+
         <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
             {{ $request->updated_at->diffForHumans() }}
         </div>
@@ -791,7 +786,7 @@ font-size: 14px;
 
 @if($minutes > 0)
     {{ $minutes }} @if($minutes > 10) دقيقة @elseif($minutes > 2) دقائق @elseif($minutes == 2) دقيقتان @else دقيقة @endif
-@endif        
+@endif
     @endif
 </td>
 @if(auth()->user()->role === 'admin')
@@ -837,8 +832,8 @@ font-size: 14px;
 
 <td style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
     {{--
-    <form action="{{ route('admin.agreement-request.destroy', ['agreement' => $request->agreement_id, 'agreement_request' => $request->id]) }}" 
-          method="POST" 
+    <form action="{{ route('admin.agreement-request.destroy', ['agreement' => $request->agreement_id, 'agreement_request' => $request->id]) }}"
+          method="POST"
           onsubmit="return confirm('هل أنت متأكد من حذف هذا الطلب؟');">
         @csrf
         @method('DELETE')
@@ -1105,7 +1100,7 @@ if (filterValue === 'client' || filterValue === 'agreement' || filterValue === '
             const statusSpan = row.cells[5].querySelector('span'); // Get the span inside the cell
             if (statusSpan) {
                 const statusText = statusSpan.textContent.trim().toLowerCase();
-                
+
                 if (filterValue === 'approved' && statusText.includes('مقبول')) {
                     shouldShow = true;
                 } else if (filterValue === 'rejected' && statusText.includes('مرفوض')) {

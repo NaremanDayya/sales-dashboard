@@ -51,7 +51,7 @@ Route::get('/kernel-test', function() {
     $kernel = app()->make(\App\Console\Kernel::class);
     return response()->json(['status' => 'Kernel loaded successfully']);
 });
-Route::middleware(['auth', \App\Http\Middleware\AuthorizeSalesRep::class])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\AuthorizeSalesRep::class])->group(callback: function () {
     Route::resource('sales-reps.clients', ClientController::class)->except(['edit', 'update']);
 });
 Route::middleware(['auth'])->group(function () {
@@ -280,14 +280,14 @@ Route::middleware('auth')->group(function () {
 });
         Route::post('/sales-reps/{salesRep}/update-photo', [SalesRepController::class, 'updatePhoto'])->name('sales-reps.updatePhoto');
 Route::delete('/admin/client-edit-request/delete/{client_request}', [AdminClientEditRequestController::class, 'destroy'])->name('admin.client-request.delete');
-Route::get('/admin/client-edit-requests/{client}/edit/{client_request}', [AdminClientEditRequestController::class, 'edit'])->name('admin.client-request.edit'); 
-Route::put('/admin/client-edit-requests/{client}/update/{client_request}', [AdminClientEditRequestController::class, 'update'])->name('admin.client-request.update'); 
-Route::get('/admin/client-edit-requests/{client}/review/{client_request}', [AdminClientEditRequestController::class, 'review'])->name('admin.client-request.review'); 
+Route::get('/admin/client-edit-requests/{client}/edit/{client_request}', [AdminClientEditRequestController::class, 'edit'])->name('admin.client-request.edit');
+Route::put('/admin/client-edit-requests/{client}/update/{client_request}', [AdminClientEditRequestController::class, 'update'])->name('admin.client-request.update');
+Route::get('/admin/client-edit-requests/{client}/review/{client_request}', [AdminClientEditRequestController::class, 'review'])->name('admin.client-request.review');
 Route::get('/admin/client-pended-edit-requests', [AdminClientEditRequestController::class, 'pendedRequests'])->name('admin.client-edit-requests.pended');
 Route::get('/admin/client-requests/{client}/edit/{client_request}', [ClientRequestController::class, 'edit'])->name('admin.chat-client-request.edit');
-Route::delete('/admin/client-requests/{client}/delete/{client_request}', [ClientRequestController::class, 'destroy'])->name('admin.chat-client-request.destroy'); 
-Route::put('/admin/client-requests/{client}/update/{client_request}', [ClientRequestController::class, 'update'])->name('admin.chat-client-request.update'); 
-Route::get('/admin/client-requests/{client}/review/{client_request}', [ClientRequestController::class, 'review'])->name('admin.chat-client-request.review'); 
+Route::delete('/admin/client-requests/{client}/delete/{client_request}', [ClientRequestController::class, 'destroy'])->name('admin.chat-client-request.destroy');
+Route::put('/admin/client-requests/{client}/update/{client_request}', [ClientRequestController::class, 'update'])->name('admin.chat-client-request.update');
+Route::get('/admin/client-requests/{client}/review/{client_request}', [ClientRequestController::class, 'review'])->name('admin.chat-client-request.review');
 Route::get('/client-edit-requests/{clientEditRequest}', [ClientEditRequestController::class, 'review'])
     ->name('client-edit-requests.show')
     ->middleware('auth');

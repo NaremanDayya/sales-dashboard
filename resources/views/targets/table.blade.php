@@ -175,7 +175,7 @@
         vertical-align: middle;
         border-right: 1px solid var(--gray-300);
 	font-size:14px;
-	font-weight:800;    
+	font-weight:800;
 }
 .form-select {
 	font-size:14px;
@@ -226,7 +226,7 @@
       .animate-fadeIn {
         animation: fadeIn 0.3s ease-out;
     }
-    
+
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(-10px); }
         to { opacity: 1; transform: translateY(0); }
@@ -482,7 +482,7 @@
                 سفير العلامة التجارية: {{ $salesRep->name }}
             </div>
             @endisset
- 
+
    <a href="{{ route('sales-reps.commissions.index',$salesRep->id) }}"
        class="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm font-semibold rounded hover:bg-blue-700 transition">
         <i class="fas fa-chart-line mr-1"></i> عرض العمولات
@@ -510,6 +510,11 @@
 
             <div>
                 <div class="d-flex align-items-center mb-3 gap-2">
+                    <a href="{{ route('salesrep.agreements.index', $salesRep->id) }}"
+                       class="text-blue-600 hover:text-blue-800"
+                       title="عرض الاتفاقيات">
+                        <i class="fas fa-file-contract text-lg"></i>
+                    </a>
                     <i class="fas fa-filter text-secondary"></i>
 
                     {{-- Commission Status Filter --}}
@@ -517,6 +522,15 @@
                         <option value="">الكل</option>
                         <option value="commission">يستحق العمولة</option>
                         <option value="no commission">لا يستحق العمولة</option>
+                    </select>
+                    {{-- Month Filter --}}
+                    <select id="monthSelect" class="form-select w-auto" onchange="applyMonthFilter()">
+                        <option value="">الشهر: الكل</option>
+                        @for ($m = 1; $m <= 12; $m++)
+                            <option value="{{ $m }}" {{ $selectedMonth == $m ? 'selected' : '' }}>
+                                {{ \Carbon\Carbon::create()->month($m)->format('F') }}
+                            </option>
+                        @endfor
                     </select>
 
                     {{-- Year Filter --}}
@@ -585,10 +599,11 @@ value="{{ old('commission_threshold', \App\Models\Setting::where('key', 'commiss
                         <tr class="text-center">
                             <th>نوع الخدمة</th>
                             <th>تارجت الخدمة</th>
-                            <th>التارجت المرحل للشهر الحالي</th> 
+                            <th>التارجت المرحل للشهر الحالي</th>
                             <th> التارجت المطلوب للشهر الحالي</th>
                             <th colspan="12">نسبة تحقيق التارجت الشهري</th>
-                            <th>المجموع الكلي السنوي</th>
+                            <th>النسبة السنوية</th>
+                            <th>المجموع السنوي</th>
                             <th>حالة العمولة للشهر الحالي</th>
                         </tr>
                         <tr class="text-center">
@@ -610,6 +625,8 @@ value="{{ old('commission_threshold', \App\Models\Setting::where('key', 'commiss
                             <th>12</th>
                             <th></th>
                             <th></th>
+                            <th></th>
+
                         </tr>
                     </thead>
 
@@ -721,7 +738,7 @@ function renderTable(data = targetsData) {
     if (!data || data.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="18" class="empty-state text-center">
+                <td colspan="19" class="empty-state text-center">
                     <div class="empty-icon">
                         <i class="fas fa-users-slash"></i>
                     </div>
@@ -751,7 +768,7 @@ function renderTable(data = targetsData) {
 
 if (!isDash) {
     const threshold = target.needed_achieved_percentage || 90;
-    
+
     if (currentMonthValue >= threshold) {
         commissionStatusText = 'تصرف';
         commissionStatusColor = 'bg-green-100 text-green-800';
@@ -769,7 +786,7 @@ if (!isDash) {
 let monthClass = 'text-gray-800';
 if (!isDash) {
     const threshold = target.needed_achieved_percentage || 90; // Fallback to 90 if null
-    
+
     if (monthValue >= threshold) {
         monthClass = 'text-green-600 font-semibold';
     } else if (monthValue >= (threshold - 20)) {
@@ -797,9 +814,13 @@ if (!isDash) {
                 <td class="px-6 py-4 text-sm text-gray-800">
                     ${target.carried_over_amount || 0}
                 </td>
- <td class="px-6 py-4 text-sm text-gray-800">
-                    ${target.actual_target_amount || 0}
-                </td>
+<td class="px-6 py-4 text-sm">
+    <span class="font-bold ${target.current_month_achieved_amount >= target.actual_target_amount ? 'text-green-600' : (target.current_month_achieved_amount / target.actual_target_amount >= 0.7 ? 'text-yellow-600' : 'text-red-600')}">
+        ${target.current_month_achieved_amount || 0}
+    </span>
+    /
+    <span class="text-gray-600">${target.actual_target_amount || 0}</span>
+</td>
 
                 ${monthlyCellsHTML}
 <td class="px-4 py-3 text-sm font-semibold text-center ${
@@ -812,6 +833,11 @@ if (!isDash) {
     ${target.year_achieved_target || 0}%
 </td>
 
+<td class="px-4 py-3 text-sm font-semibold text-center text-gray-700">
+    ${target.year_achieved_amount || 0}
+</td>
+
+
 		<td class="px-4 py-3 text-sm text-center">
     <div class="flex flex-col items-center">
         <!-- Status Badge -->
@@ -819,7 +845,7 @@ if (!isDash) {
             class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${commissionStatusColor}">
             ${commissionStatusText}
         </span>
-        
+
         ${!isDash && currentMonthValue >= 90 && window.isAdmin ? `
             <button
                 onclick="openCommissionModal(${target.commission_id}, ${target.month_achieved_amount})"
@@ -882,6 +908,35 @@ function applyYearFilter() {
 
   window.location.href = url.toString();
 }
+        function applyMonthFilter() {
+            const month = document.getElementById('monthSelect').value;
+            const url = new URL(window.location.href);
+
+            // Set the month parameter
+            if (month) {
+                url.searchParams.set('month', month);
+            } else {
+                url.searchParams.delete('month');
+            }
+
+
+            const year = document.getElementById('yearSelect').value;
+            if (year) {
+                url.searchParams.set('year', year);
+            }
+
+            const commissionFilter = document.getElementById('filterSelect')?.value;
+            if (commissionFilter) {
+                url.searchParams.set('commission', commissionFilter);
+            } else {
+                url.searchParams.delete('commission');
+            }
+
+            // Redirect
+            window.location.href = url.toString();
+        }
+
+
 function handleExport() {
         const exportType = document.getElementById('exportType').value;
     if (exportType === 'excel') {

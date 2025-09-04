@@ -9,84 +9,105 @@ use Illuminate\Http\Request;
 
 class AdminCommissionController extends Controller
 {
-public function index(SalesRep $salesRep)
-{
-    $selectedYear = request('year', now()->year);
-    $services = Service::all();
+    public function index(SalesRep $salesRep)
+    {
+        $selectedYear = request('year', now()->year);
+        $services = Service::all();
 
-    // Get the sales rep's start date
-    $startDate = $salesRep->start_work_date;
-    $startYear = $startDate?->year;
-    $startMonth = $startDate?->month;
+        // Get the sales rep's start date
+        $startDate = $salesRep->start_work_date;
+        $startYear = $startDate?->year;
+        $startMonth = $startDate?->month;
 
-    // Fetch commissions for the selected year
-$commissionsByServiceAndMonth = $salesRep->commissions()
-    ->where('year', $selectedYear)
-    ->with(['service', 'target'])
-    ->get()
-    ->groupBy(['service_id', 'month']); // Group by both service and month
+        // Fetch commissions for the selected year
+        $commissionsByServiceAndMonth = $salesRep->commissions()
+            ->where('year', $selectedYear)
+            ->with(['service', 'target'])
+            ->get()
+            ->groupBy(['service_id', 'month']); // Group by both service and month
 
-$data = $services->map(function ($service) use ($salesRep, $commissionsByServiceAndMonth, $selectedYear, $startYear, $startMonth) {
-    // Get current month
-    $currentMonth = date('n');
-    
-    // Get the current month's commission specifically
-    $currentMonthCommission = $commissionsByServiceAndMonth
-        ->get($service->id)
-        ?->get($currentMonth)
-        ?->first();
+        // Fetch targets directly (so we can always show totals even without commissions)
+        $targetsByService = $salesRep->targets()
+            ->where('year', $selectedYear)
+            ->get()
+            ->groupBy('service_id');
 
-    // Calculate yearly totals
-    $yearCommissions = $commissionsByServiceAndMonth->get($service->id) ?? collect();
-$yearAchievedAmount = $yearCommissions->flatten()->sum(fn($c) => $c->target?->achieved_amount ?? 0);
-    $totalTargetAmount = $yearCommissions->flatten()->sum(fn ($c) => $c->target?->target_amount ?? 0);
-    
-    $achievedPercentage = $totalTargetAmount > 0 
-        ? ($yearAchievedAmount / $totalTargetAmount) * 100 
-        : 0;
+        $data = $services->map(function ($service) use (
+            $salesRep,
+            $commissionsByServiceAndMonth,
+            $targetsByService,
+            $selectedYear,
+            $startYear,
+            $startMonth
+        ) {
+            // Get current month
+            $currentMonth = date('n');
 
-    $row = [
-        'service_type' => $service->name,
-        'total_achieved_amount' => $yearAchievedAmount,
-        'achieved_percentage' => $achievedPercentage,
-        'commission_rate' => $service?->commission_rate ?? 0,
+            // Get the current month's commission specifically
+            $currentMonthCommission = $commissionsByServiceAndMonth
+                ->get($service->id)
+                ?->get($currentMonth)
+                ?->first();
 
-        'total_commission' => $yearCommissions->flatten()->sum('commission_amount'),
-        'id' => $currentMonthCommission?->id ?? 0, // Use current month's commission ID
-	'item_fee' => $currentMonthCommission?->item_fee ?? 0,
-	'calculation_type' => $currentMonthCommission?->calculation_type ?? 'rate',
-	'commission_amount' => $currentMonthCommission?->commission_amount ?? 0,
-	'month_achieved_amount' => $currentMonthCommission?->target?->achieved_amount ?? 0,
-    ];
+            // Yearly totals from targets (not dependent on commissions)
+            $yearTargets = $targetsByService->get($service->id) ?? collect();
 
-    // Add monthly commission data
-    for ($month = 1; $month <= 12; $month++) {
-        if ($startYear && $startMonth) {
-            if ($selectedYear < $startYear || ($selectedYear == $startYear && $month < $startMonth)) {
-                $row["month_commission_$month"] = '-';
-                $row["payment_status_month_$month"] = 0;
-                continue;
+            $yearAchievedAmount = $yearTargets->sum('achieved_amount');
+            $totalTargetAmount  = $yearTargets->sum('target_amount');
+
+            // Calculate yearly achieved %
+            $achievedPercentage = $totalTargetAmount > 0
+                ? ($yearAchievedAmount / $totalTargetAmount) * 100
+                : 0;
+
+            // Build row data
+            $row = [
+                'service_type'         => $service->name,
+                'total_achieved_amount'=> $yearAchievedAmount,   // ✅ always available
+                'total_target_amount'  => $totalTargetAmount,
+                'achieved_percentage'  => $achievedPercentage,
+                'commission_rate'      => $service?->commission_rate ?? 0,
+
+                'total_commission'     => ($commissionsByServiceAndMonth->get($service->id) ?? collect())
+                    ->flatten()
+                    ->sum('commission_amount'),
+
+                'id'                   => $currentMonthCommission?->id ?? 0,
+                'item_fee'             => $currentMonthCommission?->item_fee ?? 0,
+                'calculation_type'     => $currentMonthCommission?->calculation_type ?? 'rate',
+                'commission_amount'    => $currentMonthCommission?->commission_amount ?? 0,
+                'month_achieved_amount'=> $currentMonthCommission?->target?->achieved_amount ?? 0,
+            ];
+
+            // Add monthly commission data
+            for ($month = 1; $month <= 12; $month++) {
+                if ($startYear && $startMonth) {
+                    if ($selectedYear < $startYear || ($selectedYear == $startYear && $month < $startMonth)) {
+                        $row["month_commission_$month"] = '-';
+                        $row["payment_status_month_$month"] = 0;
+                        continue;
+                    }
+                }
+
+                $monthCommission = $commissionsByServiceAndMonth
+                    ->get($service->id)
+                    ?->get($month)
+                    ?->first();
+
+                $row["month_commission_$month"] = $monthCommission?->commission_amount ?? 0;
+                $row["payment_status_month_$month"] = $monthCommission?->payment_status ?? 0;
             }
-        }
 
-        $monthCommission = $commissionsByServiceAndMonth
-            ->get($service->id)
-            ?->get($month)
-            ?->first();
+            return $row;
+        });
 
-        $row["month_commission_$month"] = $monthCommission?->commission_amount ?? 0;
-        $row["payment_status_month_$month"] = $monthCommission?->payment_status ?? 0;
+        return view('salesRep.commissions', [
+            'Commissions'  => $data,
+            'selectedYear' => $selectedYear,
+            'salesRep'     => $salesRep
+        ]);
     }
 
-    return $row;
-    });
-//dd($data);
-    return view('salesRep.commissions', [
-        'Commissions' => $data,
-        'selectedYear' => $selectedYear,
-        'salesRep' => $salesRep
-    ]);
-}
 public function show(Commission $commission)
 {
     $commission->load(['salesRep', 'service', 'target']);
@@ -114,8 +135,8 @@ public function updateCommissionType(Request $request, Commission $commission)
         ]);
     } else {
         $commissionRate = $commission->target->service->commission_rate;
-        
-        $commissionAmount = ($commissionRate / 100) * $commission->total_achieved_amount; 
+
+        $commissionAmount = ($commissionRate / 100) * $commission->total_achieved_amount;
 
         $commission->update([
             'commission_amount' => $commissionAmount,
@@ -126,7 +147,7 @@ public function updateCommissionType(Request $request, Commission $commission)
 
     }
 
-    return redirect()->back()->with('success', 'تم حساب العمولة بنجاح'); 
+    return redirect()->back()->with('success', 'تم حساب العمولة بنجاح');
 }
 
 

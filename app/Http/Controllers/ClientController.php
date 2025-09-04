@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use App\Models\Service;
+use Illuminate\Support\Facades\Validator;
 
 class ClientController extends Controller
 {
@@ -36,6 +37,7 @@ class ClientController extends Controller
                 'company_name' => $client->company_name,
                 'address' => $client->address,
                 'contact_person' => $client->contact_person,
+                'client_created_at' => $client->created_at,
                 'contact_position' => $client->contact_position,
                 'phone' => $client->phone,
                 'whatsapp_link' => $client->whatsapp_link,
@@ -47,11 +49,18 @@ class ClientController extends Controller
                 'sales_rep_id' => $client->sales_rep_id,
                 'contact_days_left' => $client->late_days,
 'interested_service' => Service::where('id', $client->interested_service)->value('name'),
+                'agreements_count' => $client->agreements()->count(),
+                'interested_service_count' => $client->interested_service_count,
+                'sales_rep_name' => $client->salesRep->name,
+
             ];
         });
 	  $services = Service::all();
-	
-        return view('clients.table', data: compact('Clients','services'));
+        $isAdmin = auth()->user()->role === 'admin';
+        $sales_rep_names = SalesRep::pluck('name');
+        $userRole = Auth::user()->role;
+//dd($isAdmin);
+        return view('clients.table', data: compact('Clients','services','isAdmin','sales_rep_names','userRole'));
 
     }
     public function index(SalesRep $salesRep)
@@ -66,6 +75,7 @@ class ClientController extends Controller
                 'client_id' => $client->id,
                 'company_logo' => $client->company_logo ? asset('storage/' . $client->company_logo) : null,
                 'company_name' => $client->company_name,
+                'client_created_at' => $client->created_at,
                 'address' => $client->address,
                 'contact_person' => $client->contact_person,
                 'contact_position' => $client->contact_position,
@@ -77,15 +87,20 @@ class ClientController extends Controller
                 'contact_count' => $client->contact_count,
                 'requests_count' => $client->allEditRequests()->count(),
                 'sales_rep_id' => $client->sales_rep_id,
-'interested_service' => Service::where('id', $client->interested_service)->value('name'),
+                'interested_service' => Service::where('id', $client->interested_service)->value('name'),
                 'contact_days_left' => $client->late_days,
+                'agreements_count' => $client->agreements()->count(),
+                'interested_service_count' => $client->interested_service_count,
+                'sales_rep_name' => $client->salesRep->name,
 
             ];
         });
+        $isAdmin = auth()->user()->role === 'admin';
+        $services = Service::all();
+        $sales_rep_names = SalesRep::pluck('name');
+        $userRole = Auth::user()->role;
 
- $services = Service::all();
-
-        return view('clients.table', data: compact('Clients','services'));
+        return view('clients.table', data: compact('Clients','services','isAdmin','sales_rep_names','userRole'));
 
     }
 
@@ -156,10 +171,13 @@ $message = "طلب خاص بالعميل {$client->company_name}، يريد: {$r
                 'address' => 'required|string',
 		'contact_person' => 'required|string|max:255',
                 'contact_position' => 'nullable|string|max:255',
-                'phone' => 'required|string|digits:10',
+                'country_code' => 'required|digits_between:1,5',
+                'phone' => 'required|digits_between:6,12',
                 'interest_status' => 'required|in:interested,not interested,neutral',
                 'last_contact_date' => 'required|date|before_or_equal:today',
-		'interested_service' => 'required|exists:services,id'
+		'interested_service' => 'required|exists:services,id',
+                'interested_service_count' => 'required|integer|min:0',
+                'contact_details' => 'required|string|max:255',
             ], [
                 'phone.digits' => 'يجب أن يتكون رقم الجوال من 10 أرقام',
                 'company_logo.required' => 'يجب اختيار شعار للشركة',
@@ -180,8 +198,8 @@ $message = "طلب خاص بالعميل {$client->company_name}، يريد: {$r
             $exists = Client::where('company_name', $validated['company_name'])
                 ->where('contact_person', $validated['contact_person'])
                 ->where('contact_position', $validated['contact_position'])
-                ->where('phone', $this->generateSaudiNumber($request->phone))
-		->where('interested_service', $validated['interested_service']) 
+                ->where('phone', $this->generateWhatsappNumber($request->country_code, $request->phone))
+		->where('interested_service', $validated['interested_service'])
 
                 ->exists();
 
@@ -194,7 +212,7 @@ $message = "طلب خاص بالعميل {$client->company_name}، يريد: {$r
 $serviceConflict = Client::where('company_name', $validated['company_name'])
     ->where('contact_person', $validated['contact_person'])
     ->where('contact_position', $validated['contact_position'])
-    ->where('phone', $this->generateSaudiNumber($request->phone))
+    ->where('phone', $this->generateWhatsappNumber($request->country_code, $request->phone))
     ->where('interested_service', '!=', $validated['interested_service'])
     ->exists();
 
@@ -202,7 +220,7 @@ if ($serviceConflict) {
 return back()
                     ->withInput()
                     ->withErrors(['duplicate' => 'هذا العميل مهتم بخدمة مسبقا.']);
-       
+
 }
             if ($hasTempLogo) {
                 $tempPath = $request->input('company_logo_temp');
@@ -217,8 +235,8 @@ return back()
             }
             // Create client
             $validated['sales_rep_id'] = Auth::user()->salesRep->id;
-            $validated['phone'] = $this->generateSaudiNumber($request->phone);
-	    $validated['whatsapp_link'] = 'https://wa.me/+' . preg_replace('/\D/', '', $validated['phone']);		
+            $validated['phone'] = $this->generateWhatsappNumber($request->country_code,$request->phone);
+	    $validated['whatsapp_link'] =$this->generateWhatsappLink($request->country_code,$request->phone); ;
 	    $validated['contact_count'] = 1;
             $client = Client::create($validated);
 
@@ -253,7 +271,7 @@ $conversation = $client->conversations()
                 'client_id' => $client->id,
             ]);
         }
-$message = "📌 تم إضافة عميل جديد إلى النظام: 
+$message = "📌 تم إضافة عميل جديد إلى النظام:
 🏢 الشركة: {$client->company_name}
 ✉️ التفاصيل: {$request->contact_details}";
         Message::create(
@@ -265,20 +283,30 @@ $message = "📌 تم إضافة عميل جديد إلى النظام:
             ]
         );
     }
-    private function generateSaudiNumber($phone)
+    private function generateWhatsappNumber($countryCode, $phone)
     {
         $digits = preg_replace('/\D/', '', $phone);
+        $countryCode = preg_replace('/\D/', '', $countryCode);
 
-        if (Str::startsWith($digits, '05')) {
-            $digits = '966' . substr($digits, 1);
-        } elseif (Str::startsWith($digits, '5')) {
-            $digits = '966' . $digits;
-        } elseif (!Str::startsWith($digits, '966')) {
-            $digits = '966' . ltrim($digits, '0');
-        }
+        $digits = ltrim($digits, '0');
 
-        return '+' . $digits;
+        $fullNumber = $countryCode . $digits;
+
+        return '+' . $fullNumber;
     }
+    private function generateWhatsappLink($countryCode, $phone)
+    {
+        $digits = preg_replace('/\D/', '', $phone);
+        $countryCode = preg_replace('/\D/', '', $countryCode);
+
+        $digits = ltrim($digits, '0');
+
+
+        $fullNumber = $countryCode . $digits;
+
+        return "https://wa.me/" . $fullNumber;
+    }
+
 
     // Show a single client
     public function show(SalesRep $salesRep, Client $client)
@@ -343,7 +371,8 @@ $message = "📌 تم إضافة عميل جديد إلى النظام:
                 $rules[$editableField] = 'nullable|image|mimes:jpg,jpeg,png';
                 break;
             case 'phone':
-                $rules[$editableField] = 'required|string|max:20';
+                $rules['phone'] = 'required|string|max:20';
+                $rules['country_code'] = 'required|digits_between:1,5';
                 break;
 	    case 'interest_status':
                 $rules[$editableField] = 'nullable|in:interested,not interested,neutral';
@@ -366,8 +395,11 @@ $message = "📌 تم إضافة عميل جديد إلى النظام:
 
         // Special case for phone: generate whatsapp link
         if ($editableField === 'phone') {
-            $validated['whatsapp_link'] = 'https://wa.me/+' . preg_replace('/\D/', '', $validated['phone']);
-        }
+
+            $validated['phone'] = $this->generateWhatsappNumber($request->country_code,$request->phone);
+            $validated['whatsapp_link'] = $this->generateWhatsappLink($request->country_code,$request->phone);
+            }
+
 
         $client->update($validated);
         $permission = $client->salesRep->myLastPermission($client, $editableField);
@@ -439,7 +471,7 @@ $message = "📌 تم إضافة عميل جديد إلى النظام:
         }
   $date = \Carbon\Carbon::parse($request->last_contact_date)->format('Y-m-d');
     $reason = $request->update_message;
-$message = "📞 تحديث بيانات التواصل مع العميل $client->company_name: 
+$message = "📞 تحديث بيانات التواصل مع العميل $client->company_name:
 📅 آخر تواصل: {$date}
 📝: {$reason}";
         Message::create(
@@ -514,4 +546,52 @@ $message = "📞 تحديث بيانات التواصل مع العميل $clien
 
         return response()->json($suggestions);
     }
-}
+
+
+    public function inlineUpdate(Request $request, Client $client)
+    {
+        $validated = $request->validate([
+            'company_name'     => 'sometimes|required|string|max:255',
+            'address'          => 'sometimes|nullable|string|max:500',
+            'contact_person'   => 'sometimes|nullable|string|max:255',
+            'contact_position' => 'sometimes|nullable|string|max:255',
+            'phone'            => 'sometimes|nullable|string|max:20',
+            'interest_status'  => 'sometimes|nullable|string|in:interested,not interested,neutral',
+            'country_code'     => 'sometimes|nullable|string|max:10',
+        ]);
+
+        try {
+            $phoneChanged = $request->has('phone') && $request->filled('phone');
+            $countryCodeChanged = $request->has('country_code') && $request->filled('country_code');
+
+            if ($phoneChanged || $countryCodeChanged) {
+                $countryCode = $countryCodeChanged
+                    ? $request->country_code
+                    : $client->country_code;
+
+                $phone = $phoneChanged
+                    ? $request->phone
+                    : $client->phone;
+
+                if ($phone && $countryCode) {
+                    $validated['phone'] = $this->generateWhatsappNumber($countryCode, $phone);
+                    $validated['whatsapp_link'] = $this->generateWhatsappLink($countryCode, $phone);
+                }
+            }
+
+            $client->update($validated);
+
+            // Return the complete updated client data
+            return response()->json([
+                'success' => true,
+                'message' => 'تم تحديث البيانات بنجاح',
+                'data'    => $client->fresh()->toArray() // Make sure this includes all relationships
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Client update error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء التحديث'
+            ], 500);
+        }
+    }}
