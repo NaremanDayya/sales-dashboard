@@ -707,7 +707,7 @@ value="{{ old('commission_threshold', \App\Models\Setting::where('key', 'commiss
                 </form>
             </div>
 
-            <!-- Footer -->
+            <!-- Footer. -->
             <div class="bg-gray-50 px-6 py-4 flex justify-end">
                 <button onclick="closeCommissionModal()"
                     style="font-size: 14px; font-weight: 700;"

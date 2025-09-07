@@ -119,6 +119,12 @@ Route::prefix('admin/sales-rep-ips')->group(function () {
     Route::post('block/{ip}', [SalesRepLoginIpController::class, 'block'])->name('admin.sales-rep-ips.block');
     Route::post('unblock/{ip}', [SalesRepLoginIpController::class, 'unblock'])->name('admin.sales-rep-ips.unblock');
     Route::post('add-temp-ip/{salesRep}', [SalesRepLoginIpController::class, 'addTemporaryIp'])->name('admin.sales-rep-ips.add-temp-ip');
+    Route::delete('/delete/{ip}', [SalesRepLoginIpController::class, 'destroy'])
+        ->name('admin.sales-rep-ips.destroy')
+        ->middleware(['auth']);
+    Route::post('/{ip}/allow', [SalesRepLoginIpController::class, 'allow'])
+        ->name('admin.sales-rep-ips.allow')
+        ->middleware(['auth']);
 });
 
 Route::get('/run-scheduled-tasks', function () {

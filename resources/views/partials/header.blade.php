@@ -27,7 +27,7 @@
     }
 @endphp
 
-
+{{--test--}}
 <header dir="rtl" class="sticky top-0 z-40">
     <div class="header-container flex items-center justify-between h-24 px-6 py-4 bg-white dark:bg-neutral-900 shadow-sm border-b border-gray-200 dark:border-neutral-700 w-full">
         <!-- Logo - Larger and more prominent -->

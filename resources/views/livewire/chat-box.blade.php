@@ -247,24 +247,34 @@
                             </div>
                         </div>
 
-                        @if (($message->sender_id === Auth::id() && $message->message !== 'like') || auth()->user()->isAdmin())
-                            <div class="relative">
-                                <button @click="showMenu = !showMenu" class="p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                        @php
+                            $canEdit = $message->canBeEdited() || auth()->user()->isAdmin();
+                            $canDelete = auth()->user()->isAdmin() && $message->sender_id === Auth::id();
+                        @endphp
+
+                        @if($canEdit || $canDelete)
+                            <div class="relative" x-data="{ showMenu: false }">
+                                <button @click="showMenu = !showMenu"
+                                        class="p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                                     </svg>
                                 </button>
 
-                                <div x-show="showMenu" x-cloak class="absolute right-0 z-10 w-40 mt-2 bg-white rounded-md shadow-lg">
+                                <div x-show="showMenu" x-cloak
+                                     class="absolute right-0 z-10 w-40 mt-2 bg-white rounded-md shadow-lg">
                                     <div class="py-1">
-                                        @if($message->canBeEdited() || auth()->user()->isAdmin())
-                                            <button @click="openEditModal('{{ $message->id }}', '{{ $message->message }}')" class="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100">
+                                        @if($canEdit)
+                                            <button @click="openEditModal('{{ $message->id }}', '{{ $message->message }}')"
+                                                    class="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100">
                                                 تعديل
                                             </button>
                                         @endif
 
-                                        @if(auth()->user()->isAdmin() || $message->sender_id === Auth::id())
-                                            <button @click="openDeleteModal('{{ $message->id }}')" class="block w-full px-4 py-2 text-sm text-left text-red-600 hover:bg-gray-100">
+                                        @if($canDelete)
+                                            <button @click="openDeleteModal('{{ $message->id }}')"
+                                                    class="block w-full px-4 py-2 text-sm text-left text-red-600 hover:bg-gray-100">
                                                 حذف
                                             </button>
                                         @endif
@@ -272,6 +282,7 @@
                                 </div>
                             </div>
                         @endif
+
                     </div>
                 @endforeach
             @endif

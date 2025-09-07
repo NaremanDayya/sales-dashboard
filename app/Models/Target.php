@@ -48,7 +48,7 @@ class Target extends Model
             ->where('service_id', $service->id)
             ->value('achieved_amount') ?? 0;
     }
-
+//dd('test');
     public function commissions()
     {
         return $this->hasMany(Commission::class, 'target_id');

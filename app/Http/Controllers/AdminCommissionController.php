@@ -12,7 +12,7 @@ class AdminCommissionController extends Controller
     public function index(SalesRep $salesRep)
     {
         $selectedYear = request('year', now()->year);
-        $selectedMonth = request('month'); // Add month filter
+        $selectedMonth = request('month');
 
         $services = Service::all();
 

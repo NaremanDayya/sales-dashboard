@@ -197,7 +197,7 @@ class ClientController extends Controller
              $validated['company_logo'] = $request->input('company_logo_temp');
          }
 
-         // Check for duplicate client
+         // Check for duplicate client info
          $exists = Client::where('company_name', $validated['company_name'])
              ->where('contact_person', $validated['contact_person'])
              ->where('contact_position', $validated['contact_position'])

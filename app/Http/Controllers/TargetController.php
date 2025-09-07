@@ -90,6 +90,7 @@ class TargetController extends Controller
             }
 
             return $row;
+//            dd('test')
         });
 
         return view('targets.table', [
