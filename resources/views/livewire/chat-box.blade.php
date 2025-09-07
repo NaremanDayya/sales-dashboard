@@ -209,7 +209,7 @@
                                 </div>
                             @else
                                 <p class="whitespace-normal text-sm md:text-base tracking-wide lg:tracking-normal">
-                                    {{ $message->message }}
+                                    {!! nl2br(e($message->message)) !!}
                                 </p>
                             @endif
 

@@ -2,7 +2,7 @@
 @extends('layouts.master')
 
 @section('content')
-<div class="pagetitle text-center">
+<div class="pagetitle text-center ">
     <h1 class="text-gradient mb-0">
         @if($user->role == 'salesRep')
         أهلا وسهلا بك سفير العلامة التجارية العزيز <span class="fw-bold" style="font-size: 1.2em; color: #4f46e5;">{{ $user->name
@@ -31,12 +31,12 @@
     id="profileImage">                        </div>
 
 @if (
-    request()->is('showProfile') || 
+    request()->is('showProfile') ||
     (request()->routeIs('sales-reps.show') && Auth::id() === $user->id)
 )
     <form id="avatarUploadForm"
-          action="{{ request()->is('showProfile') 
-              ? route('admin.updatePhoto') 
+          action="{{ request()->is('showProfile')
+              ? route('admin.updatePhoto')
               : route('sales-reps.updatePhoto', $user->salesRep) }}"
           method="POST"
           enctype="multipart/form-data">
@@ -69,50 +69,57 @@
     <button @click="showAdminPasswordModal = true" class="btn btn-primary">
         <i class="bi bi-key"></i> تغيير كلمة المرور
     </button>
+    <div class="mt-2">
+        <a href="{{ url('/admin/impersonate/' . $salesRep->user->id) }}"
+           class="btn btn-warning">
+            <i class="bi bi-person-check-fill"></i> الدخول كـ {{ $salesRep->user->name }}
+        </a>
+    </div>
 
     <!-- Modal -->
-    <div x-show="showAdminPasswordModal" 
-        x-cloak 
+    <div x-show="showAdminPasswordModal"
+        x-cloak
 	x-transition.opacity
          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div @click.away="showAdminPasswordModal = false" 
+        <div @click.away="showAdminPasswordModal = false"
              class="bg-white rounded-lg p-6 w-full max-w-md">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-bold">تغيير كلمة مرور المدير</h3>
                 <button @click="showAdminPasswordModal = false" class="text-gray-500 hover:text-gray-700">
                     <i class="bi bi-x-lg"></i>
                 </button>
+
             </div>
 
             <form action="{{ route('admin.password.update') }}" method="POST">
                 @csrf
                 @method('PUT')
-                
+
                 <div class="space-y-4">
                     <div>
                         <label class="block mb-1">كلمة المرور الحالية</label>
-                        <input type="password" name="current_password" required 
+                        <input type="password" name="current_password" required
                                class="w-full p-2 border rounded">
                     </div>
-                    
+
                     <div>
                         <label class="block mb-1">كلمة المرور الجديدة</label>
-                        <input type="password" name="new_password" required 
+                        <input type="password" name="new_password" required
                                class="w-full p-2 border rounded">
                     </div>
-                    
+
                     <div>
                         <label class="block mb-1">تأكيد كلمة المرور</label>
-                        <input type="password" name="new_password_confirmation" required 
+                        <input type="password" name="new_password_confirmation" required
                                class="w-full p-2 border rounded">
                     </div>
-                    
+
                     <div class="flex justify-end gap-2 pt-2">
                         <button type="button" @click="showAdminPasswordModal = false"
                                 class="px-4 py-2 border rounded hover:bg-gray-50">
                             إلغاء
                         </button>
-                        <button type="submit" 
+                        <button type="submit"
                                 class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                             حفظ التغييرات
                         </button>
@@ -165,7 +172,7 @@
                             </div>
 				<div class="info-item">
                                 <div class="info-label"><i class="bi bi-person-circle me-2"></i>رقم الجوال </div>
-                                <div class="info-value">{{ json_decode($user->contact_info, true)['phone'] ?? '' }}</div>
+                    <div class="info-value">{{ $user->contact_info['phone'] ?? '' }}</div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label"><i class="bi bi-envelope me-2"></i>البريد الإلكتروني</div>
@@ -279,7 +286,7 @@
                                             <div class="metric-icon bg-success-light">
                                                 <i class="bi bi-cart-check text-success"></i>
                                             </div>
-<a href="{{ route('admin.allRequests') }}" class="block no-underline text-gray-800 hover:text-indigo-600"> 
+<a href="{{ route('admin.allRequests') }}" class="block no-underline text-gray-800 hover:text-indigo-600">
     <h6 class="metric-title">الطلبات الكلية</h6>
     <p class="metric-value">{{ $user->salesRep->totalOrders }}</p>
 </a>                                        </div>
@@ -293,7 +300,7 @@
                                             <div class="metric-icon bg-warning-light">
                                                 <i class="bi bi-hourglass-split text-warning"></i>
                                             </div>
-<a href="{{ route('admin.allRequests') }}" class="block no-underline text-gray-800 hover:text-indigo-600"> 
+<a href="{{ route('admin.allRequests') }}" class="block no-underline text-gray-800 hover:text-indigo-600">
 <h6 class="metric-title">الطلبات المعلقة</h6>
                                             <p class="metric-value text-warning">{{ $user->salesRep->totalPendedRequests
                                                 }}</p>
@@ -469,7 +476,7 @@ $achievedTargetsCount = Target::where('is_achieved', true)
     {{-- الأهداف المحققة --}}
     <div class="bg-white p-6 rounded-2xl shadow flex items-center justify-between">
         <div>
-            <p class="text-sm text-gray-500 mb-1"  style="font-size:14px; font-weight:700;">أهداف الشهر المتحققة</p> 
+            <p class="text-sm text-gray-500 mb-1"  style="font-size:14px; font-weight:700;">أهداف الشهر المتحققة</p>
             <h2 class="text-2xl font-bold text-gray-800">{{ $achievedTargetsCount }}</h2>
         </div>
         <div class="bg-purple-100 text-purple-600 p-3 rounded-full">
@@ -534,7 +541,7 @@ $achievedTargetsCount = Target::where('is_achieved', true)
         font-weight: 500;
     }
 
-	
+
     .text-gradient {
         background: linear-gradient(135deg, #121214 0%, #121113 100%);
         -webkit-background-clip: text;

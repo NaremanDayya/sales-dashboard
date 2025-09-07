@@ -9,6 +9,15 @@
         line-height: 1.25rem;
         /*display: none !important;*/
     }
+    .nav {
+        display: flex !important;
+        gap: 5px;
+    }
+
+    .nav-link {
+        padding: 8px 12px !important;
+        font-size: 14px !important;
+    }
 </style>
 
 @php

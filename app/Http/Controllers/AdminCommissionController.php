@@ -12,6 +12,8 @@ class AdminCommissionController extends Controller
     public function index(SalesRep $salesRep)
     {
         $selectedYear = request('year', now()->year);
+        $selectedMonth = request('month'); // Add month filter
+
         $services = Service::all();
 
         // Get the sales rep's start date
@@ -19,64 +21,51 @@ class AdminCommissionController extends Controller
         $startYear = $startDate?->year;
         $startMonth = $startDate?->month;
 
-        // Fetch commissions for the selected year
-        $commissionsByServiceAndMonth = $salesRep->commissions()
-            ->where('year', $selectedYear)
+        // Fetch commissions for the selected year with month filter
+        $commissionsQuery = $salesRep->commissions()
+            ->where('year', $selectedYear);
+
+        // Apply month filter if selected
+        if ($selectedMonth) {
+            $commissionsQuery->where('month', $selectedMonth);
+        }
+
+        $commissionsByServiceAndMonth = $commissionsQuery
             ->with(['service', 'target'])
             ->get()
-            ->groupBy(['service_id', 'month']); // Group by both service and month
+            ->groupBy(['service_id', 'month']);
 
-        // Fetch targets directly (so we can always show totals even without commissions)
-        $targetsByService = $salesRep->targets()
-            ->where('year', $selectedYear)
-            ->get()
-            ->groupBy('service_id');
+        $data = $services->map(function ($service) use ($salesRep, $commissionsByServiceAndMonth, $selectedYear, $selectedMonth, $startYear, $startMonth) {
+            // Use selected month or current month
+            $displayMonth = $selectedMonth ?: date('n');
 
-        $data = $services->map(function ($service) use (
-            $salesRep,
-            $commissionsByServiceAndMonth,
-            $targetsByService,
-            $selectedYear,
-            $startYear,
-            $startMonth
-        ) {
-            // Get current month
-            $currentMonth = date('n');
-
-            // Get the current month's commission specifically
-            $currentMonthCommission = $commissionsByServiceAndMonth
+            // Get the display month's commission specifically
+            $displayMonthCommission = $commissionsByServiceAndMonth
                 ->get($service->id)
-                ?->get($currentMonth)
+                ?->get($displayMonth)
                 ?->first();
 
-            // Yearly totals from targets (not dependent on commissions)
-            $yearTargets = $targetsByService->get($service->id) ?? collect();
+            // Calculate yearly totals
+            $yearCommissions = $commissionsByServiceAndMonth->get($service->id) ?? collect();
+            $yearAchievedAmount = $yearCommissions->flatten()->sum(fn($c) => $c->target?->achieved_amount ?? 0);
+            $totalTargetAmount = $yearCommissions->flatten()->sum(fn ($c) => $c->target?->target_amount ?? 0);
 
-            $yearAchievedAmount = $yearTargets->sum('achieved_amount');
-            $totalTargetAmount  = $yearTargets->sum('target_amount');
-
-            // Calculate yearly achieved %
             $achievedPercentage = $totalTargetAmount > 0
                 ? ($yearAchievedAmount / $totalTargetAmount) * 100
                 : 0;
 
-            // Build row data
             $row = [
-                'service_type'         => $service->name,
-                'total_achieved_amount'=> $yearAchievedAmount,   // ✅ always available
-                'total_target_amount'  => $totalTargetAmount,
-                'achieved_percentage'  => $achievedPercentage,
-                'commission_rate'      => $service?->commission_rate ?? 0,
-
-                'total_commission'     => ($commissionsByServiceAndMonth->get($service->id) ?? collect())
-                    ->flatten()
-                    ->sum('commission_amount'),
-
-                'id'                   => $currentMonthCommission?->id ?? 0,
-                'item_fee'             => $currentMonthCommission?->item_fee ?? 0,
-                'calculation_type'     => $currentMonthCommission?->calculation_type ?? 'rate',
-                'commission_amount'    => $currentMonthCommission?->commission_amount ?? 0,
-                'month_achieved_amount'=> $currentMonthCommission?->target?->achieved_amount ?? 0,
+                'service_type' => $service->name,
+                'total_achieved_amount' => $yearAchievedAmount,
+                'achieved_percentage' => $achievedPercentage,
+                'commission_rate' => $service?->commission_rate ?? 0,
+                'total_commission' => $yearCommissions->flatten()->sum('commission_amount'),
+                'id' => $displayMonthCommission?->id ?? 0,
+                'item_fee' => $displayMonthCommission?->item_fee ?? 0,
+                'calculation_type' => $displayMonthCommission?->calculation_type ?? 'rate',
+                'commission_amount' => $displayMonthCommission?->commission_amount ?? 0,
+                'month_achieved_amount' => $displayMonthCommission?->target?->achieved_amount ?? 0,
+                'display_month' => $displayMonth, // Add display month for reference
             ];
 
             // Add monthly commission data
@@ -96,18 +85,19 @@ class AdminCommissionController extends Controller
 
                 $row["month_commission_$month"] = $monthCommission?->commission_amount ?? 0;
                 $row["payment_status_month_$month"] = $monthCommission?->payment_status ?? 0;
+                $row["commission_id_month_$month"] = $monthCommission?->id ?? null; // Add commission ID for each month
             }
 
             return $row;
         });
 
         return view('salesRep.commissions', [
-            'Commissions'  => $data,
+            'Commissions' => $data,
             'selectedYear' => $selectedYear,
-            'salesRep'     => $salesRep
+            'selectedMonth' => $selectedMonth, // Pass selected month to view
+            'salesRep' => $salesRep
         ]);
     }
-
 public function show(Commission $commission)
 {
     $commission->load(['salesRep', 'service', 'target']);

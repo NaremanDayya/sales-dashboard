@@ -70,6 +70,8 @@ Route::prefix('sales-reps')->group(function () {
     Route::get('{id}/export-pdf', [pdfController::class, 'exportSalesRepPdf'])->name('salesreps.export.pdf');
     Route::get('{id}/p4review-pdf', [pdfController::class, 'previewSalesRepPdf'])->name('salesreps.preview.pdf');
 });
+Route::get('/admin/impersonate/stop', [SalesRepController::class, 'stopImpersonate'])
+    ->middleware('auth');
 /*
 |--------------------------------------------------------------------------
 | Core Features: Clients, Services, Agreements, Targets
@@ -102,6 +104,11 @@ Route::middleware([
         return view('salesRep.credentials', compact('credentials'));
     })->name('salesreps.credentials');
 Route::get('/admin/shared-companies', [ClientController::class, 'sharedCompanies'])->name('admin.shared-companies');
+
+    Route::get('/admin/impersonate/{salesRep}', [SalesRepController::class, 'impersonate'])
+        ->middleware(['auth']); // admin middleware
+
+
 Route::put('/admin/commissions/{commission}/update-type', [AdminCommissionController::class, 'updateCommissionType'])
     ->name('admin.commissions.updateType');
 Route::put('/admin/password/update',[AuthenticatedSessionController::class, 'updatePassword'])

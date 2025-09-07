@@ -140,7 +140,10 @@ class ClientController extends Controller
                 'client_id' => $client->id,
             ]);
         }
-$message = "طلب خاص بالعميل {$client->company_name}، يريد: {$request->request_message}";         Message::create(
+        $message = "طلب خاص بالعميل:\n"
+            . "🏢 الشركة: {$client->company_name}\n"
+            . "📝 الطلب: {$request->request_message}";
+        Message::create(
             [
                 'conversation_id' => $conversation->id,
                 'sender_id' => $authenticatedUserId,
@@ -156,133 +159,138 @@ $message = "طلب خاص بالعميل {$client->company_name}، يريد: {$r
         ]);
     }
  public function store(Request $request)
-    {
-        try {
-            if ($request->hasFile('company_logo')) {
-                $tempPath = $request->file('company_logo')->store('temp', 'public');
-                session()->put('temp_company_logo', $tempPath);
-                $request->merge(['company_logo_temp' => $tempPath]);
-            }
-            $hasTempLogo = $request->filled('company_logo_temp');
+ {
+     try {
+         if ($request->hasFile('company_logo')) {
+             $tempPath = $request->file('company_logo')->store('temp', 'public');
+             session()->put('temp_company_logo', $tempPath);
+             $request->merge(['company_logo_temp' => $tempPath]);
+         }
+         $hasTempLogo = $request->filled('company_logo_temp');
 
-            $validated = $request->validate([
-                'company_name' => 'required|string|max:255',
-                'company_logo' => [$hasTempLogo ? 'nullable' : 'required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
-                'address' => 'required|string',
-		'contact_person' => 'required|string|max:255',
-                'contact_position' => 'nullable|string|max:255',
-                'country_code' => 'required|digits_between:1,5',
-                'phone' => 'required|digits_between:6,12',
-                'interest_status' => 'required|in:interested,not interested,neutral',
-                'last_contact_date' => 'required|date|before_or_equal:today',
-		'interested_service' => 'required|exists:services,id',
-                'interested_service_count' => 'required|integer|min:0',
-                'contact_details' => 'required|string|max:255',
-            ], [
-                'phone.digits' => 'يجب أن يتكون رقم الجوال من 10 أرقام',
-                'company_logo.required' => 'يجب اختيار شعار للشركة',
-                'last_contact_date.required' => 'يرجى إدخال تاريخ آخر تواصل.',
-                'last_contact_date.before_or_equal' => 'لا يمكن اختيار تاريخ في المستقبل.',
-            ]);
+         $validated = $request->validate([
+             'company_name' => 'required|string|max:255',
+             'company_logo' => [$hasTempLogo ? 'nullable' : 'required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+             'address' => 'required|string',
+             'contact_person' => 'required|string|max:255',
+             'contact_position' => 'nullable|string|max:255',
+             'country_code' => 'required|digits_between:1,5',
+             'phone' => 'required|digits_between:6,12',
+             'interest_status' => 'required|in:interested,not interested,neutral',
+             'last_contact_date' => 'required|date|before_or_equal:today',
+             'interested_service' => 'required|exists:services,id',
+             'interested_service_count' => 'required|integer|min:0',
+             'contact_details' => 'required|string|max:255',
+         ], [
+             'phone.digits' => 'يجب أن يتكون رقم الجوال من 10 أرقام',
+             'company_logo.required' => 'يجب اختيار شعار للشركة',
+             'last_contact_date.required' => 'يرجى إدخال تاريخ آخر تواصل.',
+             'last_contact_date.before_or_equal' => 'لا يمكن اختيار تاريخ في المستقبل.',
+         ]);
 
-            // Handle file upload
-            if ($request->hasFile('company_logo')) {
-                $tempPath = $request->file('company_logo')->store('temp', 'public');
-                $validated['company_logo'] = $tempPath;
-                session()->put('temp_company_logo', $tempPath);
-            } elseif ($hasTempLogo) {
-                $validated['company_logo'] = $request->input('company_logo_temp');
-            }
+         // Handle file upload
+         if ($request->hasFile('company_logo')) {
+             $tempPath = $request->file('company_logo')->store('temp', 'public');
+             $validated['company_logo'] = $tempPath;
+             session()->put('temp_company_logo', $tempPath);
+         } elseif ($hasTempLogo) {
+             $validated['company_logo'] = $request->input('company_logo_temp');
+         }
 
-            // Check for duplicate client
-            $exists = Client::where('company_name', $validated['company_name'])
-                ->where('contact_person', $validated['contact_person'])
-                ->where('contact_position', $validated['contact_position'])
-                ->where('phone', $this->generateWhatsappNumber($request->country_code, $request->phone))
-		->where('interested_service', $validated['interested_service'])
+         // Check for duplicate client
+         $exists = Client::where('company_name', $validated['company_name'])
+             ->where('contact_person', $validated['contact_person'])
+             ->where('contact_position', $validated['contact_position'])
+             ->where('phone', $this->generateWhatsappNumber($request->country_code, $request->phone))
+             ->where('interested_service', $validated['interested_service'])
+             ->exists();
 
-                ->exists();
+         if ($exists) {
+             return back()
+                 ->withInput()
+                 ->withErrors(['duplicate' => 'هذا العميل موجود مسبقًا بنفس البيانات.']);
+         }
 
-            if ($exists) {
-                return back()
-                    ->withInput()
-                    ->withErrors(['duplicate' => 'هذا العميل موجود مسبقًا بنفس البيانات.']);
-            }
+         $serviceConflict = Client::where('company_name', $validated['company_name'])
+             ->where('contact_person', $validated['contact_person'])
+             ->where('contact_position', $validated['contact_position'])
+             ->where('phone', $this->generateWhatsappNumber($request->country_code, $request->phone))
+             ->where('interested_service', '!=', $validated['interested_service'])
+             ->exists();
 
-$serviceConflict = Client::where('company_name', $validated['company_name'])
-    ->where('contact_person', $validated['contact_person'])
-    ->where('contact_position', $validated['contact_position'])
-    ->where('phone', $this->generateWhatsappNumber($request->country_code, $request->phone))
-    ->where('interested_service', '!=', $validated['interested_service'])
-    ->exists();
+         if ($serviceConflict) {
+             return back()
+                 ->withInput()
+                 ->withErrors(['duplicate' => 'هذا العميل مهتم بخدمة مسبقا.']);
 
-if ($serviceConflict) {
-return back()
-                    ->withInput()
-                    ->withErrors(['duplicate' => 'هذا العميل مهتم بخدمة مسبقا.']);
+         }
+         if ($hasTempLogo) {
+             $tempPath = $request->input('company_logo_temp');
+             $filename = basename($tempPath);
+             $newPath = 'company_logos/' . $filename;
 
-}
-            if ($hasTempLogo) {
-                $tempPath = $request->input('company_logo_temp');
-                $filename = basename($tempPath);
-                $newPath = 'company_logos/' . $filename;
+             if (Storage::exists('public/' . $tempPath)) {
+                 Storage::move('public/' . $tempPath, 'public/' . $newPath);
+                 $validated['company_logo'] = $newPath;
+             }
+             session()->forget('temp_company_logo');
+         }
+         // Create client
+         $validated['sales_rep_id'] = Auth::user()->salesRep->id;
+         $validated['phone'] = $this->generateWhatsappNumber($request->country_code, $request->phone);
+         $validated['whatsapp_link'] = $this->generateWhatsappLink($request->country_code, $request->phone);;
+         $validated['contact_count'] = 1;
+         $client = Client::create($validated);
 
-                if (Storage::exists('public/' . $tempPath)) {
-                    Storage::move('public/' . $tempPath, 'public/' . $newPath);
-                    $validated['company_logo'] = $newPath;
-                }
-                session()->forget('temp_company_logo');
-            }
-            // Create client
-            $validated['sales_rep_id'] = Auth::user()->salesRep->id;
-            $validated['phone'] = $this->generateWhatsappNumber($request->country_code,$request->phone);
-	    $validated['whatsapp_link'] =$this->generateWhatsappLink($request->country_code,$request->phone); ;
-	    $validated['contact_count'] = 1;
-            $client = Client::create($validated);
+         // Notify admin
+         $admin = User::where('role', 'admin')->first();
+         if ($admin) {
+             $admin->notify(new NewClientNotification($client));
+         }
+         $authenticatedUserId = Auth::id();
 
-            // Notify admin
-            $admin = User::where('role', 'admin')->first();
-            if ($admin) {
-                $admin->notify(new NewClientNotification($client));
-            }
+         // Find or create conversation between sales rep (sender) and admin (receiver)
+         $conversation = $client->conversations()
+             ->where(function ($query) use ($authenticatedUserId) {
+                 $query->where('sender_id', $authenticatedUserId)
+                     ->orWhere('receiver_id', $authenticatedUserId);
+             })->first();
 
-            return redirect()
-                ->route('sales-reps.clients.index', $client->sales_rep_id)
-                ->with('success', 'تمت إضافة العميل بنجاح.');
+         if (!$conversation) {
+             // Get admin user ID (adjust this query based on your app logic)
+             $adminUserId = User::where('role', 'admin')->first()->id;
 
-        } catch (ValidationException $e) {
-            return redirect()
-                ->back()
-                ->withInput()
-                ->withErrors($e->validator);
-        }
-	        $authenticatedUserId = Auth::id();
-$conversation = $client->conversations()
-            ->where(function ($query) use ($authenticatedUserId) {
-                $query->where('sender_id', $authenticatedUserId)
-                    ->orWhere('receiver_id', $authenticatedUserId);
-            })->first();
+             $conversation = Conversation::create([
+                 'sender_id' => $authenticatedUserId,
+                 'receiver_id' => $adminUserId,
+                 'client_id' => $client->id,
+             ]);
+         }
 
-        if (!$conversation) {
-            $adminUserId = User::where('role', 'admin')->first()->id;
-            $conversation = Conversation::create([
-                'sender_id' => $authenticatedUserId,
-                'receiver_id' => $adminUserId,
-                'client_id' => $client->id,
-            ]);
-        }
-$message = "📌 تم إضافة عميل جديد إلى النظام:
-🏢 الشركة: {$client->company_name}
-✉️ التفاصيل: {$request->contact_details}";
-        Message::create(
-            [
-                'conversation_id' => $conversation->id,
-                'sender_id' => $authenticatedUserId,
-                'receiver_id' => $conversation->sender_id === $authenticatedUserId ? $conversation->receiver_id : $conversation->sender_id,
-                'message' => $message,
-            ]
-        );
-    }
+         $message = "📌 تم إضافة عميل جديد إلى النظام:\n"
+             . "🏢 الشركة: {$client->company_name}\n"
+             . "✉️ التفاصيل: {$request->contact_details}";
+
+          Message::create(
+             [
+                 'conversation_id' => $conversation->id,
+                 'sender_id' => $authenticatedUserId,
+                 'receiver_id' => $conversation->sender_id === $authenticatedUserId ? $conversation->receiver_id : $conversation->sender_id,
+                 'message' => $message,
+             ]
+         );
+
+         return redirect()
+             ->route('sales-reps.clients.index', $client->sales_rep_id)
+             ->with('success', 'تمت إضافة العميل بنجاح.');
+
+     } catch (ValidationException $e) {
+         return redirect()
+             ->back()
+             ->withInput()
+             ->withErrors($e->validator);
+     }
+ }
     private function generateWhatsappNumber($countryCode, $phone)
     {
         $digits = preg_replace('/\D/', '', $phone);
@@ -471,9 +479,11 @@ $message = "📌 تم إضافة عميل جديد إلى النظام:
         }
   $date = \Carbon\Carbon::parse($request->last_contact_date)->format('Y-m-d');
     $reason = $request->update_message;
-$message = "📞 تحديث بيانات التواصل مع العميل $client->company_name:
-📅 آخر تواصل: {$date}
-📝: {$reason}";
+        $message = "📞 تحديث بيانات التواصل مع العميل:\n"
+            . "🏢 الشركة: {$client->company_name}\n"
+            . "📅 آخر تواصل: {$date}\n"
+            . "📝 السبب: {$reason}";
+
         Message::create(
             [
                 'conversation_id' => $conversation->id,

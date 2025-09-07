@@ -48,6 +48,11 @@ class Target extends Model
             ->where('service_id', $service->id)
             ->value('achieved_amount') ?? 0;
     }
+
+    public function commissions()
+    {
+        return $this->hasMany(Commission::class, 'target_id');
+    }
     public function monthAchievedAmount($month, Service $service, SalesRep $salesRep)
     {
         return $this->where('sales_rep_id', $salesRep->id)

@@ -602,8 +602,8 @@ value="{{ old('commission_threshold', \App\Models\Setting::where('key', 'commiss
                             <th>التارجت المرحل للشهر الحالي</th>
                             <th> التارجت المطلوب للشهر الحالي</th>
                             <th colspan="12">نسبة تحقيق التارجت الشهري</th>
-                            <th>النسبة السنوية</th>
-                            <th>المجموع السنوي</th>
+                            <th>النسبة السنوية المحققة للخدمة</th>
+                            <th>المجموع السنوي المحقق للخدمة</th>
                             <th>حالة العمولة للشهر الحالي</th>
                         </tr>
                         <tr class="text-center">
@@ -726,17 +726,17 @@ value="{{ old('commission_threshold', \App\Models\Setting::where('key', 'commiss
     const targetsData = @json($Targets);
 
     // Render table function
-function renderTable(data = targetsData) {
-    console.log("Rendering table with data:", data);
-    const tbody = document.getElementById('tableBody');
-    if (!tbody) {
-        console.error("Table body element not found!");
-        return;
-    }
-    tbody.innerHTML = '';
+        function renderTable() {
+            console.log("Rendering table with data:", targetsData);
+            const tbody = document.getElementById('tableBody');
+            if (!tbody) {
+                console.error("Table body element not found!");
+                return;
+            }
+            tbody.innerHTML = '';
 
-    if (!data || data.length === 0) {
-        tbody.innerHTML = `
+            if (!targetsData || targetsData.length === 0) {
+                tbody.innerHTML = `
             <tr>
                 <td colspan="19" class="empty-state text-center">
                     <div class="empty-icon">
@@ -746,63 +746,76 @@ function renderTable(data = targetsData) {
                 </td>
             </tr>
         `;
-        return;
-    }
+                return;
+            }
 
-    const isAdmin = @json(Auth::user()->role === 'admin');
-    const currentMonth = new Date().getMonth() + 1; // JavaScript months are 0-11, so +1 for 1-12
+            const isAdmin = @json(Auth::user()->role === 'admin');
 
-    data.forEach(target => {
-        try {
-            const row = document.createElement('tr');
-            row.className = 'hover:bg-gray-50 text-center';
+            // Get the selected month from the URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const selectedMonth = urlParams.get('month') ? parseInt(urlParams.get('month')) : null;
 
-            // Get current month's achievement
-            const currentMonthRawValue = target[`month_achieved_${currentMonth}`] || '-';
-            const isDash = currentMonthRawValue === '-';
-            const currentMonthValue = isDash ? 0 : parseFloat(String(currentMonthRawValue).replace(/,/g, '')) || 0;
 
-            // Determine commission status for current month
-            let commissionStatusText = 'لا تصرف';
-            let commissionStatusColor = 'bg-gray-100 text-gray-800';
+            targetsData.forEach(target => {
+                try {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50 text-center';
 
-if (!isDash) {
-    const threshold = target.needed_achieved_percentage || 90;
+                    const threshold = target.needed_achieved_percentage || 90;
 
-    if (currentMonthValue >= threshold) {
-        commissionStatusText = 'تصرف';
-        commissionStatusColor = 'bg-green-100 text-green-800';
-    } else if (currentMonthValue >= (threshold - 20)) {
-        commissionStatusText = 'تحت المراجعة';
-        commissionStatusColor = 'bg-orange-100 text-orange-800';
-    }
-}
-            const monthlyCellsHTML = Array.from({ length: 12 }, (_, i) => {
-                const monthIndex = i + 1;
-                const rawMonthValue = target[`month_achieved_${monthIndex}`];
-                const isDash = rawMonthValue === '-';
-                const monthValue = isDash ? 0 : parseFloat(String(rawMonthValue).replace(/,/g, '')) || 0;
+                    // Get the selected month's commission status if a month is selected
+                    let commissionStatus = 'غير مستحق';
+                    let commissionStatusColor = 'bg-gray-100 text-gray-800';
+                    let commissionId = null;
+                    let selectedMonthValue = 0;
+                    let isDash = true;
 
-let monthClass = 'text-gray-800';
-if (!isDash) {
-    const threshold = target.needed_achieved_percentage || 90; // Fallback to 90 if null
+                    if (selectedMonth) {
+                        const rawMonthValue = target[`month_achieved_${selectedMonth}`] || '-';
+                        isDash = rawMonthValue === '-';
+                        selectedMonthValue = isDash ? 0 : parseFloat(String(rawMonthValue).replace(/,/g, '')) || 0;
 
-    if (monthValue >= threshold) {
-        monthClass = 'text-green-600 font-semibold';
-    } else if (monthValue >= (threshold - 20)) {
-        monthClass = 'text-orange-600 font-semibold';
-    } else {
-        monthClass = 'text-red-600 font-semibold';
-    }
-}
-                return `
-                    <td class="px-2 py-3 text-sm ${monthClass}">
-                        <div>${isDash ? '-' : monthValue + '%'}</div>
+                        // ✅ بدلنا من commission_status → منطق month_achieved
+                        if (selectedMonthValue >= threshold) {
+                            commissionStatus = 'مستحق';
+                            commissionStatusColor = 'bg-green-100 text-green-800';
+                        } else {
+                            commissionStatus = 'غير مستحق';
+                            commissionStatusColor = 'bg-gray-100 text-gray-800';
+                        }
+
+                        commissionId = target[`commission_id_month_${selectedMonth}`] || null;
+                    }
+
+                    const monthlyCellsHTML = Array.from({ length: 12 }, (_, i) => {
+                        const monthIndex = i + 1;
+                        const rawMonthValue = target[`month_achieved_${monthIndex}`];
+                        const isMonthDash = rawMonthValue === '-';
+                        const monthValue = isMonthDash ? 0 : parseFloat(String(rawMonthValue).replace(/,/g, '')) || 0;
+
+                        let monthClass = 'text-gray-800';
+                        if (!isMonthDash) {
+                            if (monthValue >= threshold) {
+                                monthClass = 'text-green-600 font-semibold';
+                            } else if (monthValue >= (threshold - 20)) {
+                                monthClass = 'text-orange-600 font-semibold';
+                            } else {
+                                monthClass = 'text-red-600 font-semibold';
+                            }
+                        }
+
+                        // Highlight the selected month if one is selected
+                        const isSelectedMonth = selectedMonth && monthIndex === selectedMonth;
+                        const selectedMonthStyle = isSelectedMonth ? 'border-2 border-blue-500 bg-blue-50' : '';
+
+                        return `
+                    <td class="px-2 py-3 text-sm ${monthClass} ${selectedMonthStyle}">
+                        <div>${isMonthDash ? '-' : monthValue + '%'}</div>
                     </td>
                 `;
-            }).join('');
+                    }).join('');
 
-            row.innerHTML = `
+                    row.innerHTML = `
                 <td class="px-6 py-4 text-sm font-bold text-blue-700">
                     <span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
                         ${target.service_type || 'N/A'}
@@ -814,57 +827,62 @@ if (!isDash) {
                 <td class="px-6 py-4 text-sm text-gray-800">
                     ${target.carried_over_amount || 0}
                 </td>
-<td class="px-6 py-4 text-sm">
-    <span class="font-bold ${target.current_month_achieved_amount >= target.actual_target_amount ? 'text-green-600' : (target.current_month_achieved_amount / target.actual_target_amount >= 0.7 ? 'text-yellow-600' : 'text-red-600')}">
-        ${target.current_month_achieved_amount || 0}
-    </span>
-    /
-    <span class="text-gray-600">${target.actual_target_amount || 0}</span>
-</td>
+                <td class="px-6 py-4 text-sm">
+                    <span class="font-bold ${target.current_month_achieved_amount >= target.actual_target_amount ? 'text-green-600' : (target.current_month_achieved_amount / target.actual_target_amount >= 0.7 ? 'text-yellow-600' : 'text-red-600')}">
+                        ${target.current_month_achieved_amount || 0}
+                    </span>
+                    /
+                    <span class="text-gray-600">${target.actual_target_amount || 0}</span>
+                </td>
 
                 ${monthlyCellsHTML}
-<td class="px-4 py-3 text-sm font-semibold text-center ${
-    (target.year_achieved_target || 0) >= (target.needed_achieved_percentage || 90)
-        ? 'text-green-600'
-        : (target.year_achieved_target || 0) >= ((target.needed_achieved_percentage || 90) - 20)  // 20% below threshold
-        ? 'text-orange-600'
-        : 'text-red-600'
-}">
-    ${target.year_achieved_target || 0}%
-</td>
 
-<td class="px-4 py-3 text-sm font-semibold text-center text-gray-700">
-    ${target.year_achieved_amount || 0}
-</td>
+                <td class="px-4 py-3 text-sm font-semibold text-center ${
+                        (target.year_achieved_target || 0) >= threshold
+                            ? 'text-green-600'
+                            : (target.year_achieved_target || 0) >= (threshold - 20)
+                                ? 'text-orange-600'
+                                : 'text-red-600'
+                    }">
+                    ${target.year_achieved_target || 0}%
+                </td>
 
+                <td class="px-4 py-3 text-sm font-semibold text-center text-gray-700">
+                    ${target.year_achieved_amount || 0}
+                </td>
 
-		<td class="px-4 py-3 text-sm text-center">
-    <div class="flex flex-col items-center">
-        <!-- Status Badge -->
-        <span style="font-size:14px; font-weight:800;"
-            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${commissionStatusColor}">
-            ${commissionStatusText}
-        </span>
+                <td class="px-4 py-3 text-sm text-center">
+                    <div class="flex flex-col items-center">
+                        <!-- Status Badge -->
+                        <span style="font-size:14px; font-weight:800;"
+                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${commissionStatusColor}">
+                            ${commissionStatus}
+                        </span>
 
-        ${!isDash && currentMonthValue >= 90 && window.isAdmin ? `
-            <button
-                onclick="openCommissionModal(${target.commission_id}, ${target.month_achieved_amount})"
-                class="bg-blue-500 hover:bg-blue-600 text-white text-xs py-1 px-3 rounded-full mt-1">
-                تحديد طريقة العمولة
-            </button>
-        ` : ''}
-    </div>
-</td>
+                        ${selectedMonth && !isDash && selectedMonthValue >= threshold && window.isAdmin ? `
+    <button
+        onclick="openCommissionModal(${commissionId || 'null'}, ${selectedMonthValue})"
+        class="bg-blue-500 hover:bg-blue-600 text-white text-xs py-1 px-3 rounded-full mt-1">
+        تحديد طريقة العمولة
+    </button>
+` : ''}
+                    </div>
+                </td>
             `;
 
-            tbody.appendChild(row);
-        } catch (error) {
-            console.error("Error rendering row:", error, target);
+                    tbody.appendChild(row);
+                } catch (error) {
+                    console.error("Error rendering row:", error, target);
+                }
+            });
         }
-    });
-}
-//Filter function
-    let currentFilteredReps = [...targetsData]; // Initially show all
+
+        // Initialize table when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTable();
+        });
+
+            let currentFilteredReps = [...targetsData]; // Initially show all
 function applyFilter() {
     const criteria = document.getElementById('filterSelect').value;
 
@@ -893,38 +911,43 @@ function applyFilter() {
 
     renderTable(currentFilteredTargets);
 }
-function applyYearFilter() {
-  const year = document.getElementById('yearSelect').value;
-  const url = new URL(window.location.href);
-  url.searchParams.set('year', year);
+        function updateTableWithoutReload() {
+            // Get current filter values
+            const month = document.getElementById('monthSelect').value;
+            const year = document.getElementById('yearSelect').value;
+            const commissionFilter = document.getElementById('filterSelect')?.value;
 
+            // Filter data based on selections (you'll need to implement this)
+            const filteredData = filterData(targetsData, month, year, commissionFilter);
 
-  const commissionFilter = document.getElementById('filterSelect').value;
-  if (commissionFilter) {
-    url.searchParams.set('commission', commissionFilter);
-  } else {
-    url.searchParams.delete('commission');
-  }
+            // Re-render table with filtered data
+            renderTable(filteredData);
+        }
 
-  window.location.href = url.toString();
-}
+        // Then update your filter functions to use this instead of redirecting
         function applyMonthFilter() {
             const month = document.getElementById('monthSelect').value;
+            const year = document.getElementById('yearSelect').value;
+
+
+            // Create URL with query parameters
             const url = new URL(window.location.href);
 
-            // Set the month parameter
+            // Set month parameter
             if (month) {
                 url.searchParams.set('month', month);
             } else {
                 url.searchParams.delete('month');
             }
 
-
-            const year = document.getElementById('yearSelect').value;
+            // Set year parameter
             if (year) {
                 url.searchParams.set('year', year);
+            } else {
+                url.searchParams.delete('year');
             }
 
+            // Set commission filter parameter if exists
             const commissionFilter = document.getElementById('filterSelect')?.value;
             if (commissionFilter) {
                 url.searchParams.set('commission', commissionFilter);
@@ -932,9 +955,74 @@ function applyYearFilter() {
                 url.searchParams.delete('commission');
             }
 
-            // Redirect
+            // Redirect to the new URL to let server handle the filtering
             window.location.href = url.toString();
         }
+
+        function applyYearFilter() {
+            const year = document.getElementById('yearSelect').value;
+            const month = document.getElementById('monthSelect').value;
+
+            // Create URL with query parameters
+            const url = new URL(window.location.href);
+
+            // Set year parameter
+            if (year) {
+                url.searchParams.set('year', year);
+            } else {
+                url.searchParams.delete('year');
+            }
+
+            // Set month parameter
+            if (month) {
+                url.searchParams.set('month', month);
+            } else {
+                url.searchParams.delete('month');
+            }
+
+            // Set commission filter parameter if exists
+            const commissionFilter = document.getElementById('filterSelect')?.value;
+            if (commissionFilter) {
+                url.searchParams.set('commission', commissionFilter);
+            } else {
+                url.searchParams.delete('commission');
+            }
+
+            // Redirect to the new URL to let server handle the filtering
+            window.location.href = url.toString();
+        }
+
+        function readUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // Get month from URL
+            const month = urlParams.get('month');
+            if (month) {
+                const monthSelect = document.getElementById('monthSelect');
+                if (monthSelect) {
+                    monthSelect.value = month;
+                }
+            }
+
+            // Get year from URL
+            const year = urlParams.get('year');
+            if (year) {
+                const yearSelect = document.getElementById('yearSelect');
+                if (yearSelect) {
+                    yearSelect.value = year;
+                }
+            }
+
+            // Get commission filter from URL
+            const commission = urlParams.get('commission');
+            if (commission) {
+                const filterSelect = document.getElementById('filterSelect');
+                if (filterSelect) {
+                    filterSelect.value = commission;
+                }
+            }
+        }
+
 
 
 function handleExport() {

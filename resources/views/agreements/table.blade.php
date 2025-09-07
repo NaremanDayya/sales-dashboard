@@ -1,4 +1,4 @@
-@extends('layouts.table')
+@extends('layouts.master')
 @section('title','جدول الاتفاقيات')
 @push('styles')
     <style>

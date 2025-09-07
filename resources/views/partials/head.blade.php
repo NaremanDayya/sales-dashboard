@@ -169,7 +169,7 @@ h6 {
 
 #main {
     flex: 1 0 auto;
-    margin-top: 90px;
+    margin-top: 90px !important;
     margin-right:50 px;
     padding: 1rem;
     transition: all var(--transition-speed);

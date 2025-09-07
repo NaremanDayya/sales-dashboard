@@ -16,7 +16,7 @@ class TargetController extends Controller
     public function index(SalesRep $salesRep)
     {
         $selectedYear = request('year', now()->year);
-        $selectedMonth = request('month');
+        $selectedMonth = request('month'); // Remove default to show all months
 
         $services = Service::all();
 
@@ -27,6 +27,7 @@ class TargetController extends Controller
 
         // Fetch targets once (grouped by service)
         $targetsByService = Target::where('sales_rep_id', $salesRep->id)
+            ->with('commissions') // eager load commissions
             ->get()
             ->keyBy('service_id');
 
@@ -35,42 +36,56 @@ class TargetController extends Controller
             $target = $targetsByService->get($service->id);
             $carriedOver = $target ? number_format($target->target_amount - $service->target_amount) : 0;
 
+            // Determine commission according to month filter
+            $commissionForMonth = null;
+            if ($selectedMonth) {
+                $commissionForMonth = $target?->commissions?->where('month', $selectedMonth)?->first();
+            }
+
             $row = [
                 'service_type' => $service->name,
                 'target_amount' => number_format($service->target_amount),
                 'current_month_achieved_amount' => (int)$target?->currentMonthAchievedAmount($service, $salesRep, $selectedMonth) ?? 0,
                 'year_achieved_target' => $target?->yearAchievedAmount($service, $salesRep) ?? 0,
                 'year_achieved_amount' => $target?->yearAchievedAmountValue($service, $salesRep) ?? 0,
-                'commission_status' => $target?->commission_status ?? 'غير مستحق',
-                'commission_value' => $target->commission_value ?? 0,
-                'commission_id' => $target->commission?->id ?? null,
+                'commission_status' => $commissionForMonth?->commission_status ?? 'غير مستحق',
+                'commission_value' => $commissionForMonth?->commission_amount ?? 0,
+                'commission_id' => $commissionForMonth?->id ?? null,
                 'needed_achieved_percentage' => $target->needed_achieved_percentage ?? 0,
                 'actual_target_amount' =>  number_format($target?->target_amount) ?? 0,
                 'carried_over_amount' => $carriedOver,
                 'achieved_target_percentage_needed' => Setting::where('key', 'commission_threshold')->value('value') ?? 90,
             ];
 
-            // Monthly values (filtered by selected month)
+            // Monthly values - show ALL months by default
             for ($month = 1; $month <= 12; $month++) {
 
-                if ($startYear && $startMonth && ($selectedYear < $startYear || ($selectedYear == $startYear && $month < $startMonth))) {
+                // Check if this month is before the sales rep's start date
+                $isBeforeStartDate = $startYear && $startMonth &&
+                    ($selectedYear < $startYear ||
+                        ($selectedYear == $startYear && $month < $startMonth));
+
+                if ($isBeforeStartDate) {
                     $row["month_achieved_$month"] = '-';
                     $row["commission_value_month_$month"] = 0;
                     $row["commission_payment_status_month_$month"] = 0;
-                    continue;
-                }
-
-                // Only fill data if no month filter or month matches selected
-                if (!$selectedMonth || $selectedMonth == $month) {
-                    $row["month_achieved_$month"] = number_format($target?->monthAchievedAmount($month, $service, $salesRep) ?? 0);
-
-                    $commission = $target?->commissions?->where('month', $month)?->first();
-                    $row["commission_value_month_$month"] = $commission?->commission_amount ?? 0;
-                    $row["commission_payment_status_month_$month"] = $commission?->payment_status ?? 0;
+                    $row["commission_status_month_$month"] = 'غير مستحق';
+                    $row["commission_id_month_$month"] = null;
                 } else {
-                    $row["month_achieved_$month"] = '-';
-                    $row["commission_value_month_$month"] = 0;
-                    $row["commission_payment_status_month_$month"] = 0;
+                    // Always show the month value, regardless of selected month filter
+                    $monthAchievedAmount = $target?->monthAchievedAmount($month, $service, $salesRep) ?? 0;
+                    $row["month_achieved_$month"] = number_format($monthAchievedAmount);
+
+                    $monthCommission = $target?->commissions?->where('month', $month)?->first();
+                    $row["commission_value_month_$month"] = $monthCommission?->commission_amount ?? 0;
+                    $row["commission_payment_status_month_$month"] = $monthCommission?->payment_status ?? 0;
+
+                    // Use the commission_due column from the TARGET table
+                    $commissionDue = $target?->commission_due ?? false;
+
+                    // Store commission status for each month
+                    $row["commission_status_month_$month"] = $commissionDue ? 'مستحق' : 'غير مستحق';
+                    $row["commission_id_month_$month"] = $monthCommission?->id ?? null;
                 }
             }
 
@@ -84,7 +99,6 @@ class TargetController extends Controller
             'salesRep' => $salesRep
         ]);
     }
-
     public function create(SalesRep $sales_rep)
     {
         $services = Service::all();
