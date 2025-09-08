@@ -447,7 +447,7 @@
         border: none;
 	font-size:14px;
         font-weight:800;
-    
+
 }
 .status-dropdown-item {
         display: flex;
@@ -529,39 +529,98 @@
     .data-table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 800px;
-        padding-top: 60px;
-        padding-bottom: 60px;
+        font-family: 'Tajawal', sans-serif;
     }
 
     .data-table thead th {
-        background-color: var(--gray-100);
-        color: var(--gray-600);
-        font-weight: 600;
-        padding: 5px 8px;
+        background: linear-gradient(135deg, #4154f1 0%, #6a7ef9 100%);
+        color: white;
+        font-weight: bold;
+        padding: 12px 8px;
         text-align: center;
-        border-bottom: 2px solid var(--gray-200);
-        position: sticky;
-        top: 0;
-    	white-space: nowrap;
-	}
-
-    .data-table tbody tr {
-        transition: background-color 0.2s ease;
-    }
-
-    .data-table tbody tr:hover {
-        background-color: var(--gray-100);
+        border: 1px solid #2d3db8;
+        font-size: 14px;
     }
 
     .data-table tbody td {
-        padding: 5px 8px;
-        border-bottom: 1px solid var(--gray-200);
+        padding: 10px 8px;
+        border: 1px solid #dee2e6;
         text-align: center;
         vertical-align: middle;
-	font-size:14px;
-	font-weight:800;    
-}
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .data-table tbody tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    .data-table tbody tr:hover {
+        background-color: #e9ecef;
+    }
+
+    /* Status badges for PDF */
+    .status-badge-pdf {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .status-active-pdf {
+        background-color: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+    }
+
+    .status-inactive-pdf {
+        background-color: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    /* Count badges for PDF */
+    .count-badge-pdf {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        min-width: 30px;
+    }
+
+    .badge-blue-pdf {
+        background-color: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+    }
+
+    .badge-green-pdf {
+        background-color: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+    }
+
+    .badge-red-pdf {
+        background-color: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .badge-orange-pdf {
+        background-color: #ffedd5;
+        color: #9a3412;
+        border: 1px solid #fed7aa;
+    }
+
+    .badge-purple-pdf {
+        background-color: #f3e8ff;
+        color: #7e22ce;
+        border: 1px solid #e9d5ff;
+    }
 
     .status-badge {
         display: inline-block;
@@ -772,29 +831,63 @@
     }
 
     /* Show only in print/PDF */
-    .pdf-header,
-    .pdf-footer {
-        display: block;
+    .pdf-header {
+        display: none;
         width: 100%;
         text-align: center;
-        font-weight: bold;
-        font-size: 18px;
-        padding: 10px 0;
-        border-bottom: 2px solid #333;
-        border-top: 2px solid #333;
-        background-color: #f5f5f5;
-        color: #222;
-        position: relative;
+        padding: 20px 0;
+        background: linear-gradient(135deg, #4154f1 0%, #6a7ef9 100%);
+        color: white;
         margin-bottom: 20px;
-        margin-top: 20px;
-        font-family: "Arial", sans-serif;
+        border-bottom: 3px solid #2d3db8;
+    }
+
+    .pdf-header .header-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .pdf-header .header-logo {
+        max-height: 80px;
+        width: auto;
+        filter: brightness(0) invert(1);
+    }
+
+    .pdf-header .header-text {
+        font-size: 24px;
+        font-weight: bold;
+        color: white;
+        margin: 0;
+    }
+
+    .pdf-header .report-info {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        font-size: 14px;
+        margin-top: 10px;
+    }
+
+    .pdf-header .report-date {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 5px 15px;
+        border-radius: 20px;
     }
 
     .pdf-footer {
-        border-top: 2px solid #333;
-        border-bottom: none;
-        margin-top: 40px;
+        display: none;
+        width: 100%;
+        text-align: center;
+        padding: 15px 0;
+        background: #f8f9fa;
+        color: #6c757d;
+        margin-top: 30px;
+        border-top: 2px solid #dee2e6;
+        font-size: 12px;
     }
+
 
     .header-content {
         direction: rtl;
@@ -870,7 +963,7 @@
             text-align: center;
         }
 
-        #print-area 
+        #print-area
 table.data-table thead {
             background-color: #f0f0f0;
         }
@@ -900,7 +993,7 @@ table.data-table thead {
 
         .pdf-header {
             display: block !important;
-	    background-color: #ffffff; 
+	    background-color: #ffffff;
     box-shadow: none;
         }
 
@@ -1112,12 +1205,12 @@ table.data-table thead {
 <div class="bulk-actions no-print ms-2">
   <div class="dropdown">
 
-    <button 
-      class="btn btn-outline-secondary dropdown-toggle" 
-      id="bulkActionsBtn" 
-      type="button" 
-      data-bs-toggle="dropdown" 
-      aria-expanded="false" 
+    <button
+      class="btn btn-outline-secondary dropdown-toggle"
+      id="bulkActionsBtn"
+      type="button"
+      data-bs-toggle="dropdown"
+      aria-expanded="false"
       disabled>
       تنفيذ الإجراء
       <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1128,14 +1221,14 @@ table.data-table thead {
 
     <ul class="dropdown-menu" aria-labelledby="bulkActionsBtn" id="bulkActionsDropdown">
       <li>
-        <button class="status-dropdown-item" data-action="activate">تفعيل الحساب</button> 
+        <button class="status-dropdown-item" data-action="activate">تفعيل الحساب</button>
       </li>
       <li>
-        <button class="status-dropdown-item" data-action="deactivate">تعطيل الحساب</button> 
+        <button class="status-dropdown-item" data-action="deactivate">تعطيل الحساب</button>
       </li>
     </ul>
   </div>
-</div>    
+</div>
     </div>
 </div>
             </div>
@@ -1218,12 +1311,22 @@ table.data-table thead {
         <div class="table-responsive">
             <div class="pdf-content" id="pdf-content">
                 <div class="pdf-header" style="display: none;">
-		<div
-                        class="header-content d-flex align-items-center justify-content-between flex-wrap mb-4 p-3 shadow rounded bg-white">
-                        <div class="d-flex flex-column align-items-center text-center mx-auto">
-                            <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="header-logo mb-2" />
+                    <div class="header-content">
+                        <div class="d-flex flex-column align-items-center text-center">
+                            <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="header-logo mb-3" />
+                            <h2 class="header-text">تقرير سفراء العلامة التجارية</h2>
+                        </div>
+                        <div class="report-info">
+            <span class="report-date">
+                تاريخ التقرير: {{ date('Y-m-d') }}
+            </span>
+                            <span class="report-time">
+                الوقت: {{ date('H:i') }}
+            </span>
                         </div>
                     </div>
+                </div>
+
                 </div>
                 <table class="data-table">
                     <thead>
@@ -1241,7 +1344,7 @@ table.data-table thead {
                         <th data-column="pending_orders"> الطلبات المعلقة</th>
                         <th data-column="interested_customers"> العملاء المهتمين</th>
 			<th data-column="active_agreements_count"> الاتفاقيات النشطة</th>
-			<th data-column="inactive_agreements_count"> الاتفاقيات غير النشطة</th> 
+			<th data-column="inactive_agreements_count"> الاتفاقيات غير النشطة</th>
                            <th class="no-print">الإجراءات</th>
                         </tr>
                     </thead>
@@ -1398,32 +1501,38 @@ function setupBulkActions() {
                    onchange="updateBulkActionsButton()">
         </td>
 
-<td class="px-4 py-2 text-center">
+<td class="px-4 py-2 text-center no-print">
   ${rep.personal_image
     ? `<img src="${rep.personal_image}" alt="شعار" class="h-16 w-16 mx-auto rounded-full border object-cover" />`
     : '—'}
 </td>
-<td class="col-name px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-700" x-data="{ deleteModalOpen: false }">
+<td class="col-name px-6 py-4 whitespace-nowrap text-lg font-bold text-blue-700" x-data="{ deleteModalOpen: false }">
     <div class="flex flex-col items-start space-y-1">
-        <div class="flex items-center space-x-2">
-            <a href="/sales-reps/${rep.id}" style="text-decoration: none;">
-                <span class="text-base text-blue-800 bg-blue-100 px-3 py-1 rounded-full">
-                    ${rep.name}
-                </span>
-            </a>
-            
- <span class="text-xs font-medium px-2 py-0.5 rounded-full
+        <!-- Name -->
+        <a href="/sales-reps/${rep.id}" style="text-decoration: none;">
+            <span class="text-lg font-bold text-blue-800 bg-blue-100 px-3 py-1 rounded-full">
+                ${rep.name}
+            </span>
+        </a>
+
+        <!-- Status under the name -->
+        <span class="text-xs font-medium px-2 py-0.5 rounded-full
             ${rep.account_status === 'inactive' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">
             ${rep.account_status === 'inactive' ? 'معطل' : 'نشط'}
         </span>
+    </div>
 </td>
-        <td class="col-start-date font-bold px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-            ${formatDateForDisplay(rep.start_work_date)}
-        </td>
 
-        <td class="col-work-duration px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-            ${rep.work_duration}
-        </td>
+
+     <td class="col-start-date px-6 py-4 whitespace-nowrap text-lg font-bold text-gray-800">
+    ${formatDateForDisplay(rep.start_work_date)}
+</td>
+
+<td class="col-work-duration px-6 py-4 whitespace-nowrap text-lg font-bold text-gray-800">
+    ${rep.work_duration}
+</td>
+
+
 
 <td class="col-target-customers px-6 py-4 whitespace-nowrap text-sm text-center">
     <a href="/sales-reps/${rep.id}/clients" style="text-decoration: none;">
@@ -1433,7 +1542,7 @@ function setupBulkActions() {
     </a>
 </td>
 
-<td class="col-late-customers px-4 py-3 whitespace-nowrap text-sm text-center">
+<td class="col-late-customers px-4 py-3 whitespace-nowrap text-lg text-center">
     <a href="/sales-reps/${rep.id}/clients" style="text-decoration: none;">
         <span class="${
             rep.late_customers > 0
@@ -1446,7 +1555,7 @@ function setupBulkActions() {
 </td>
 <td class="col-total-orders px-6 py-4 whitespace-nowrap text-sm text-center">
     <a href="/salesrep/${rep.id}/MyRequests" style="text-decoration: none;">
-        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-green-100 text-green-800">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-green-100 text-green-800 font-semibold">
             ${rep.total_orders}
         </span>
     </a>
@@ -1455,10 +1564,10 @@ function setupBulkActions() {
 <td class="col-pending-orders px-4 py-3 whitespace-nowrap text-sm text-center">
     <a href="/salesrep/${rep.id}/MyRequests" style="text-decoration: none;">
         <span class="${
-            rep.pending_orders > 0
-                ? 'inline-flex items-center px-2 py-0.5 rounded-md bg-orange-300 text-orange-800 font-semibold'
-                : 'text-gray-500'
-        }">
+        rep.pending_orders > 0
+            ? 'inline-flex items-center px-2 py-0.5 rounded-md bg-orange-300 text-orange-800 font-semibold'
+            : 'inline-flex items-center px-2 py-0.5 rounded-md bg-gray-200 text-gray-500 font-semibold'
+    }">
             ${rep.pending_orders}
         </span>
     </a>
@@ -1466,7 +1575,7 @@ function setupBulkActions() {
 
 <td class="col-interested-customers px-6 py-4 whitespace-nowrap text-sm text-center">
     <a href="/sales-reps/${rep.id}/clients" style="text-decoration: none;">
-        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-100 text-purple-800">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 font-semibold">
             ${rep.interested_customers}
         </span>
     </a>
@@ -1488,7 +1597,7 @@ function setupBulkActions() {
 </td>
 
         <td class="col-actions px-6 py-4 whitespace-nowrap text-sm text-gray-500 no-print">
-            <div class="action-btns space-x-1 rtl:space-x-reverse">
+            <div class="action-btns space-x-1 rtl:space-x-reverse no-print">
                 <a href="/sales-reps/${rep.id}" class="action-btn view" title="عرض">
                     <i class="fas fa-eye"></i>
                 </a>
@@ -1790,7 +1899,7 @@ function performBulkAction(ids, action) {
         'pending_orders': ' الطلبات المعلقة',
         'interested_customers': ' العملاء المهتمين والمحتملين',
   	'active_agreements_count': '  الاتفاقيات النشطة',
-        'inactive_agreements_count': '  الاتفاقيات غير النشطة',	    
+        'inactive_agreements_count': '  الاتفاقيات غير النشطة',
 };
 
     // Get all table headers
@@ -1889,7 +1998,7 @@ function exportSalesReps(type = 'csv', selectedColumns = null) {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-    } else if (type === 'pdf') {        
+    } else if (type === 'pdf') {
 exportPDF(selectedColumns);
     }
 }
@@ -1900,114 +2009,220 @@ function fixArabicText(text) {
         .replace(/\+/g, '＋');
 }
 
-function exportPDF(selectedColumns) {
-    const originalContent = document.getElementById('pdf-content');
+        function exportPDF(selectedColumns) {
+            try {
+                // Create a clean container for PDF generation
+                const pdfContainer = document.createElement('div');
+                pdfContainer.className = 'pdf-export-container';
+                pdfContainer.style.width = '100%';
+                pdfContainer.style.padding = '20px';
+                pdfContainer.style.fontFamily = 'Tajawal, sans-serif';
+                pdfContainer.style.direction = 'rtl';
 
-    const clonedHeader = originalContent.querySelector('.pdf-header')?.cloneNode(true);
-    const clonedFooter = originalContent.querySelector('.pdf-footer')?.cloneNode(true);
-const originalTable = originalContent.querySelector('table');
-const clonedTable = originalTable?.cloneNode(true);
+                // Create enhanced header
+                const header = `
+            <div class="pdf-header" style="display: block;">
+                <div class="header-content">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                        <img src="${window.location.origin}/assets/img/logo.png" alt="Logo"
+                             style="max-height: 80px; filter: brightness(0) invert(1);">
+                        <h2 style="font-size: 24px; font-weight: bold; color: white; margin: 0;">
+                            تقرير سفراء العلامة التجارية
+                        </h2>
+                    </div>
+                    <div style="display: flex; justify-content: center; gap: 30px; font-size: 14px; margin-top: 10px;">
+                        <span style="background: rgba(255, 255, 255, 0.2); padding: 5px 15px; border-radius: 20px;">
+                            تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}
+                        </span>
+                        <span style="background: rgba(255, 255, 255, 0.2); padding: 5px 15px; border-radius: 20px;">
+                            الوقت: ${new Date().toLocaleTimeString('ar-EG')}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `;
 
-    const pdfContainer = document.createElement('div');
-    pdfContainer.classList.add('pdf-export-mode');
-    pdfContainer.style.padding = '10px';
+                // Create enhanced footer
+                const footer = `
+            <div class="pdf-footer" style="display: block;">
+                <p style="margin: 0; padding: 10px 0; color: #6c757d; font-size: 12px;">
+                    جميع الحقوق محفوظة &copy; شركة آفاق الخليج ${new Date().getFullYear()}
+                    | تم إنشاء التقرير في: ${new Date().toLocaleString('ar-EG')}
+                </p>
+            </div>
+        `;
 
-    // Clean header
-    if (clonedHeader) {
-        clonedHeader.style.display = 'block';
-        clonedHeader.style.boxShadow = 'none';
-        pdfContainer.appendChild(clonedHeader);
-    }
+                // Clone and prepare the table
+                const originalTable = document.querySelector('.data-table');
+                const table = originalTable.cloneNode(true);
 
-    // Filter columns in the cloned table
-if (clonedTable) {
-    const headers = clonedTable.querySelectorAll('thead th');
-    
-    headers.forEach((header, index) => {
-        const columnKey = header.getAttribute('data-column')?.trim();
+                // Remove ALL no-print columns from header and corresponding cells
+                const headers = table.querySelectorAll('thead th');
+                headers.forEach((header, index) => {
+                    const headerText = header.textContent.trim();
+                    // Remove actions column, checkbox column, and any other no-print columns
+                    if (headerText === 'الإجراءات' || header.classList.contains('no-print')) {
+                        header.remove();
+                        // Remove corresponding cells from all rows
+                        table.querySelectorAll('tbody tr').forEach(row => {
+                            if (row.cells[index]) row.cells[index].remove();
+                        });
+                    }
+                });
 
-        // If column is not selected or it's a no-print column, hide it
-        if (!selectedColumns.includes(columnKey) || header.classList.contains('no-print')) {
-            header.style.display = 'none';
-            clonedTable.querySelectorAll(`tbody tr`).forEach(row => {
-                if (row.cells[index]) {
-                    row.cells[index].style.display = 'none';
+                // Now remove personal image column specifically (it might not have text content)
+                // We need to identify it by its position or data attribute
+                const updatedHeaders = table.querySelectorAll('thead th');
+                updatedHeaders.forEach((header, index) => {
+                    // Check if this is the personal image column by looking at the first row's content
+                    const firstRow = table.querySelector('tbody tr');
+                    if (firstRow && firstRow.cells[index]) {
+                        const cellContent = firstRow.cells[index].innerHTML;
+                        // If the cell contains an image or specific content pattern for personal image
+                        if (cellContent.includes('img') || cellContent.includes('شعار')) {
+                            header.remove();
+                            table.querySelectorAll('tbody tr').forEach(row => {
+                                if (row.cells[index]) row.cells[index].remove();
+                            });
+                        }
+                    }
+                });
+
+                // Apply column selection
+                const columnMap = {
+                    'name': 'سفير العلامة التجارية',
+                    'start_work_date': 'تاريخ الالتحاق بالعمل',
+                    'work_duration': 'مدة العمل',
+                    'target_customers': 'العملاء المستهدفين',
+                    'late_customers': 'العملاء المتأخرين',
+                    'total_orders': 'الطلبات الإجمالية',
+                    'pending_orders': 'الطلبات المعلقة',
+                    'interested_customers': 'العملاء المهتمين والمحتملين',
+                    'active_agreements_count': 'الاتفاقيات النشطة',
+                    'inactive_agreements_count': 'الاتفاقيات غير النشطة'
+                };
+
+                // Re-get headers after initial cleanup
+                const finalHeaders = table.querySelectorAll('thead th');
+                finalHeaders.forEach((header, index) => {
+                    const headerText = header.textContent.trim();
+                    const columnKey = Object.keys(columnMap).find(key => columnMap[key] === headerText);
+
+                    if (columnKey && !selectedColumns.includes(columnKey)) {
+                        header.style.display = 'none';
+                        table.querySelectorAll('tbody tr').forEach(row => {
+                            if (row.cells[index]) row.cells[index].style.display = 'none';
+                        });
+                    }
+                });
+
+                // Enhance table styling for PDF
+                table.style.width = '100%';
+                table.style.borderCollapse = 'collapse';
+                table.style.fontFamily = 'Tajawal, sans-serif';
+
+                table.querySelectorAll('thead th').forEach(th => {
+                    th.style.background = 'linear-gradient(135deg, #4154f1 0%, #6a7ef9 100%)';
+                    th.style.color = 'white';
+                    th.style.padding = '12px 8px';
+                    th.style.border = '1px solid #2d3db8';
+                    th.style.fontWeight = 'bold';
+                });
+
+                table.querySelectorAll('tbody td').forEach(td => {
+                    td.style.padding = '10px 8px';
+                    td.style.border = '1px solid #dee2e6';
+                });
+
+                table.querySelectorAll('tbody tr:nth-child(even)').forEach(tr => {
+                    tr.style.backgroundColor = '#f8f9fa';
+                });
+
+                // Add page break handling
+                const rowsPerPage = 15;
+                const tableRows = table.querySelectorAll('tbody tr');
+
+                for (let i = rowsPerPage; i < tableRows.length; i += rowsPerPage) {
+                    if (tableRows[i]) {
+                        tableRows[i].style.pageBreakBefore = 'always';
+                    }
                 }
-            });
-        }
-    });
 
-    // ✅ Fix Arabic punctuation in all table cells
-    clonedTable.querySelectorAll('td, th').forEach(cell => {
-        if (cell.textContent) {
-            cell.textContent = fixArabicText(cell.textContent);
-        }
-    });
+                // Build the PDF content
+                pdfContainer.innerHTML = header + table.outerHTML + footer;
 
-    pdfContainer.appendChild(clonedTable);
-}
-    // Footer
-    if (clonedFooter) {
-        clonedFooter.style.display = 'block';
-        pdfContainer.appendChild(clonedFooter);
-    }        
-        // Handle images - replace with placeholder if CORS issues
-        originalContent.querySelectorAll('img').forEach(img => {
-            if (!img.complete || typeof img.naturalWidth === "undefined" || img.naturalWidth === 0) {
-                img.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Crect fill="%23ddd" width="100" height="100"/%3E%3Ctext fill="%23666" font-family="Arial" font-size="10" dy=".35em" text-anchor="middle" x="50" y="50"%3ENo Image%3C/text%3E%3C/svg%3E';
+                // Add to document temporarily
+                document.body.appendChild(pdfContainer);
+
+                // PDF options with page break handling
+                const options = {
+                    margin: [15, 15, 15, 15],
+                    filename: `تقرير_سفراء_العلامة_التجارية_${new Date().toISOString().slice(0,10)}.pdf`,
+                    image: {
+                        type: 'jpeg',
+                        quality: 0.95
+                    },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#ffffff',
+                        onclone: function(clonedDoc) {
+                            // Remove any remaining no-print elements
+                            const clonedNoPrint = clonedDoc.querySelectorAll('.no-print');
+                            clonedNoPrint.forEach(el => el.remove());
+
+                            // Ensure table styling
+                            const clonedTable = clonedDoc.querySelector('.data-table');
+                            if (clonedTable) {
+                                clonedTable.style.width = '100%';
+                                clonedTable.style.borderCollapse = 'collapse';
+                            }
+                        }
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a3',
+                        orientation: 'landscape',
+                        compress: true
+                    },
+                    pagebreak: {
+                        mode: ['avoid-all', 'css', 'legacy'],
+                        avoid: 'tr, td, th'
+                    }
+                };
+
+                // Generate PDF
+                html2pdf()
+                    .set(options)
+                    .from(pdfContainer)
+                    .toPdf()
+                    .get('pdf')
+                    .then(function(pdf) {
+                        // Add page numbers
+                        const totalPages = pdf.internal.getNumberOfPages();
+                        for (let i = 1; i <= totalPages; i++) {
+                            pdf.setPage(i);
+                            pdf.setFontSize(10);
+                            pdf.setTextColor(100, 100, 100);
+                            pdf.text(
+                                `صفحة ${i} من ${totalPages}`,
+                                pdf.internal.pageSize.getWidth() - 20,
+                                pdf.internal.pageSize.getHeight() - 10
+                            );
+                        }
+                    })
+                    .save()
+                    .finally(() => {
+                        // Clean up
+                        document.body.removeChild(pdfContainer);
+                    });
+
+            } catch (error) {
+                console.error('PDF export error:', error);
+                alert('حدث خطأ أثناء إنشاء ملف PDF. الرجاء المحاولة مرة أخرى.');
             }
-        });
-        
-        // Create a temporary container
-        const container = document.createElement('div');
-container.appendChild(pdfContainer);
-        document.body.appendChild(container);
-        
-        // PDF options
-        const options = {
-            margin: [20, 10, 20, 10], // top, right, bottom, left
-            filename: `مندوبي_المبيعات_${new Date().toISOString().slice(0, 10)}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { 
-                scale: 1,
-                logging: true,
-                useCORS: true,
-                allowTaint: true,
-                scrollX: 0,
-                scrollY: 0
-            },
-            jsPDF: { 
-                unit: 'mm', 
-		format: [594, 420],
-                orientation: 'landscape'
-            },
-            pagebreak: { 
-                mode: ['avoid-all', 'css', 'legacy'] 
-            }
-        };
-        
-        // Generate PDF
-        html2pdf()
-            .set(options)
-            .from(container)
-            .toPdf()
-            .get('pdf')
-            .then(function(pdf) {
-                // Add page numbers
-                const totalPages = pdf.internal.getNumberOfPages();
-                for (let i = 1; i <= totalPages; i++) {
-                    pdf.setPage(i);
-                    pdf.setFontSize(10);
-                    pdf.setTextColor(100);
-                    pdf.text(`صفحة ${i} من ${totalPages}`, pdf.internal.pageSize.getWidth() - 20, pdf.internal.pageSize.getHeight() - 10);
-                }
-            })
-            .save()
-            .then(() => {
-                // Clean up
-                document.body.removeChild(container);
-            });
-    }
+        }
 
     function exportNPDF(selectedColumns) {
 
@@ -2164,7 +2379,7 @@ function exportToPDF(selectedColumns) {
         // 1. Get the original element and clone it
         const originalElement = document.getElementById('print-area');
         const element = originalElement.cloneNode(true);
-        
+
         // 2. Temporarily add to DOM (but keep invisible)
         element.style.position = 'fixed';
         element.style.left = '-10000px';
@@ -2179,13 +2394,13 @@ function exportToPDF(selectedColumns) {
         // 4. Show PDF header and footer with proper styling
         const pdfHeader = element.querySelector('.pdf-header');
         const pdfFooter = element.querySelector('.pdf-footer');
-        
+
         if (pdfHeader) {
             pdfHeader.style.display = 'block';
             pdfHeader.style.visibility = 'visible';
             pdfHeader.style.width = '100%';
         }
-        
+
         if (pdfFooter) {
             pdfFooter.style.display = 'block';
             pdfFooter.style.visibility = 'visible';
@@ -2245,9 +2460,9 @@ table.style.width = '100%';
         const options = {
             margin: [15, 10, 20, 10], // top, left, bottom, right
             filename: `مندوبو_المبيعات_${new Date().toISOString().slice(0,10)}.pdf`,
-            image: { 
-                type: 'jpeg', 
-                quality: 0.98 
+            image: {
+                type: 'jpeg',
+                quality: 0.98
             },
             html2canvas: {
                 scale: 1, // Reduced from 2 to 1 for better rendering
@@ -2282,7 +2497,7 @@ table.style.width = '100%';
     } catch (error) {
         console.error('PDF generation error:', error);
         alert('حدث خطأ أثناء إنشاء ملف PDF. الرجاء المحاولة مرة أخرى.');
-        
+
         // Clean up even if error occurs
         const elements = document.querySelectorAll('#print-area-clone');
         elements.forEach(el => el.remove());

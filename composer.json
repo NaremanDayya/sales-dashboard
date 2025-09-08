@@ -8,7 +8,6 @@
     "require": {
         "php": "^8.2",
         "laravel/framework": "^12.0",
-        "laravel/horizon": "^5.33",
         "laravel/jetstream": "^5.3",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
@@ -16,7 +15,8 @@
         "maatwebsite/excel": "^3.1",
         "namu/wirechat": "^0.2.10",
         "pusher/pusher-php-server": "^7.2",
-        "spatie/laravel-permission": "^6.18"
+        "spatie/laravel-permission": "^6.18",
+        "stevebauman/location": "^7.6"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

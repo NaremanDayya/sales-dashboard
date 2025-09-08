@@ -67,5 +67,32 @@ public function unblock($id)
 
         return back()->with('success', 'تم إضافة IP مؤقت بنجاح');
     }
+    public function destroy(SalesRepLoginIp $ip): RedirectResponse
+    {
+        /*
+        if (!$ip->is_temporary && $ip->is_allowed) {
+            $countAllowed = SalesRepLoginIp::where('sales_rep_id', $ip->sales_rep_id)
+                ->where('is_allowed', true)
+                ->count();
+
+            if ($countAllowed <= 1) {
+                return back()->with('error', 'لا يمكن حذف الـ IP المسموح الوحيد لهذا المندوب.');
+            }
+        }
+        */
+
+        $ip->delete(); // لو حابب سجل أثري استخدم SoftDeletes (موضح بالأسفل)
+        return back()->with('success', 'تم حذف IP الجهاز بنجاح.');
+    }
+    public function allow(SalesRepLoginIp $ip)
+    {
+        $ip->update([
+            'is_allowed' => true,
+            'is_blocked' => false,
+            'allowed_until' => null,
+        ]);
+
+        return back()->with('success', 'تم منح صلاحية لهذا IP بنجاح.');
+    }
 }
 

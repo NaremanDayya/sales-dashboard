@@ -224,7 +224,7 @@
         padding: 6px 10px;
         background-color: var(--gray-100);
         border-radius: 6px;
-	 justify-content: center;    
+	 justify-content: center;
 }
 
     .rep-name {
@@ -471,7 +471,7 @@
 <div class="mb-2 flex items-center justify-center" style="width: 40px; height: 40px;">
     @if($client['company_logo'])
         <div class="relative rounded-full border-2 border-gray-200 overflow-hidden w-full h-full bg-white">
-            <img src="{{ $client['company_logo'] }}" 
+            <img src="{{ $client['company_logo'] }}"
                  alt="شعار الشركة"
                  class="absolute inset-0 w-full h-full object-scale-down p-1"
                  loading="lazy"
@@ -621,17 +621,17 @@
         data.forEach(company => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>
-                    ${company.clients.map(client => `
-                        <div class="mb-2" style="width: 40px; height: 40px;">
-                            ${client.company_logo ? 
-                                `<img src="${client.company_logo}" alt="شعار الشركة" class="rounded-full border object-cover w-full h-full">` : 
-                                `<div class="rounded-full border bg-gray-100 w-full h-full flex items-center justify-center">
-                                    <i class="fas fa-building text-gray-400"></i>
-                                </div>`}
-                        </div>
-                    `).join('')}
-                </td>
+             <td>
+    ${company.clients.map(client => `
+        <div class="mb-2" style="width: 60px; height: 60px; display: flex; justify-content: center; align-items: center;">
+            ${client.company_logo ?
+                `<img src="${client.company_logo}" alt="شعار الشركة" class="rounded-full border contain w-full h-full object-center object-cover">` :
+                `<div class="rounded-full border bg-gray-100 w-full h-full flex items-center justify-center">
+                    <i class="fas fa-building text-gray-400"></i>
+                </div>`}
+        </div>
+    `).join('')}
+</td>
                 <td style="font-size: 14px; font-weight: 700;">
                     ${company.clients.map(client => `
                         <div class="mb-2">
@@ -652,7 +652,7 @@
                     <div class="rep-group">
                         ${company.clients.map(client => `
                             <div class="rep-item" style="font-size: 14px; font-weight: 700;">
-                                <a href="/sales-reps/${client.sales_rep_id}" 
+                                <a href="/sales-reps/${client.sales_rep_id}"
                                    class="text-gray-800 hover:text-primary hover:underline">
                                     ${client.sales_rep_name}
                                 </a>
@@ -665,7 +665,7 @@
                         ${company.clients.map(client => `
                             <div class="rep-item flex items-center gap-2" style="font-size: 14px; font-weight: 700;">
                                 <span>${client.last_contact_date}</span>
-                                <a href="/client/${client.client_id}/message" 
+                                <a href="/client/${client.client_id}/message"
                                    class="text-gray-600 hover:text-primary"
                                    title="الدردشة">
                                     <i class="fas fa-comments"></i>
@@ -679,9 +679,9 @@
                         ${company.clients.map(client => `
                             <span class="rep-status d-block my-1"
                                 style="font-size: 14px; font-weight: 700;
-                                ${client.interest_status === 'interested' ? 
+                                ${client.interest_status === 'interested' ?
                                     'background-color: #ecfdf5; color: #059669;' :
-                                    client.interest_status === 'not interested' ? 
+                                    client.interest_status === 'not interested' ?
                                     'background-color: #fee2e2; color: #dc2626;' :
                                     'background-color: #fffbeb; color: #d97706;'}">
                                 ${client.interest_status === 'interested' ? 'مهتم' :
@@ -698,20 +698,20 @@
     // Initialize the table on load
     document.addEventListener('DOMContentLoaded', function() {
         renderTable();
-        
+
         // Search functionality
         document.getElementById('searchInput').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
             const dateFilter = document.getElementById('dateFilter').value;
-            
+
             const filteredData = SharedCompaniesData.filter(company => {
                 const matchesSearch = company.company_name.toLowerCase().includes(searchTerm);
-                const matchesDate = dateFilter ? 
+                const matchesDate = dateFilter ?
                     company.clients.some(client => client.last_contact_date === dateFilter) : true;
-                
+
                 return matchesSearch && matchesDate;
             });
-            
+
             currentFilteredCompanies = filteredData;
             renderTable(currentFilteredCompanies);
         });

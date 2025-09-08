@@ -44,17 +44,37 @@
                             <p class="text-sm mt-1">
                                 📆 التاريخ: {{ $ip->created_at->format('Y-m-d H:i') }}
                             </p>
-
                             <p class="text-sm mt-1">
-                                🔒 الحالة: 
+                                🌍 الموقع: {{ $ip->location ?? 'غير معروف' }}
+                            </p>
+                            <p class="text-sm mt-1">
+                                🔒 الحالة:
                                 @if ($ip->is_blocked)
                                     <span class="text-red-500 font-semibold">محظور</span>
+                                @elseif($ip->is_allowed && !$ip->is_temporary)
+                                    <span class="text-green-500 font-semibold">مسموح دائم</span>
+                                @elseif($ip->is_allowed && $ip->is_temporary)
+                                    @if($ip->allowed_until && $ip->allowed_until->isFuture())
+                                        <span class="text-blue-500 font-semibold">مسموح مؤقت (حتى {{ $ip->allowed_until->format('Y-m-d H:i') }})</span>
+                                    @else
+                                        <span class="text-yellow-500 font-semibold">صلاحية مؤقتة منتهية</span>
+                                    @endif
                                 @else
-                                    <span class="text-green-500 font-semibold">مسموح</span>
+                                    <span class="text-yellow-500 font-semibold">قيد الانتظار</span>
                                 @endif
                             </p>
 
+
                             <div class="mt-2 flex gap-2">
+                                @if (!$ip->is_allowed)
+                                    <form method="POST" action="{{ route('admin.sales-rep-ips.allow', $ip) }}">
+                                        @csrf
+                                        <button type="submit"
+                                                class="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+                                            منح صلاحية
+                                        </button>
+                                    </form>
+                                @endif
                                 @if ($ip->is_blocked)
                                     <form method="POST" action="{{ route('admin.sales-rep-ips.unblock', $ip) }}">
                                         @csrf
@@ -76,6 +96,15 @@
                                         </button>
                                     </form>
                                 @endif
+                                    <form method="POST" action="{{ route('admin.sales-rep-ips.destroy', $ip) }}"
+                                          onsubmit="return confirm('هل أنت متأكد من حذف هذا الـ IP؟');" class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                                class="text-sm bg-gray-200 text-gray-800 px-3 py-1 rounded hover:bg-gray-300">
+                                            حذف
+                                        </button>
+                                    </form>
                             </div>
                         </div>
                     @empty

@@ -286,7 +286,7 @@ if ($salesRep->user->personal_image && Storage::exists('public/' . $salesRep->us
 $image = $request->file('personal_image');
 $imageName = time() . '_' . $image->getClientOriginalName();
 $path = $request->personal_image->storeAs('profile-images', $imageName, 'public');
-$validated['personal_image'] = $path; 
+$validated['personal_image'] = $path;
     }
 
     // Prepare user data
@@ -539,18 +539,22 @@ Storage::put($csvPath, implode("\n", $newContent));
     public function allRequests()
     {
         $clientRequests = ClientEditRequest::with(['client', 'salesRep'])
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->get();
 
         $agreementRequests = AgreementEditRequest::with(['agreement', 'client', 'salesRep'])
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->get();
 
-  $chatClientRequests =ClientRequest::with(['client', 'salesRep'])
-            ->latest()
+        $chatClientRequests = ClientRequest::with(['client', 'salesRep'])
+            ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('salesRep.pendedRequests', compact('clientRequests', 'agreementRequests','chatClientRequests'));
+        // Combine all requests into one collection
+        $allRequests = $clientRequests->concat($agreementRequests)->concat($chatClientRequests)
+            ->sortByDesc('created_at');
+
+        return view('salesRep.pendedRequests', compact('clientRequests', 'agreementRequests', 'chatClientRequests', 'allRequests'));
     }
     public function myRequests(SalesRep $salesRep)
     {
@@ -560,16 +564,17 @@ Storage::put($csvPath, implode("\n", $newContent));
 
         $clientRequests = ClientEditRequest::with(['client', 'salesRep'])
             ->where('sales_rep_id', $userId)
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->get();
 
         $agreementRequests = AgreementEditRequest::with(['agreement', 'client', 'salesRep'])
             ->where('sales_rep_id', $userId)
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->get();
-$chatClientRequests =ClientRequest::with(['client', 'salesRep'])
+
+        $chatClientRequests = ClientRequest::with(['client', 'salesRep'])
             ->where('sales_rep_id', $userId)
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return view('salesRep.pendedRequests', compact('clientRequests','chatClientRequests', 'agreementRequests', 'salesRep'));
@@ -671,4 +676,35 @@ $chatClientRequests =ClientRequest::with(['client', 'salesRep'])
         ], 500);
     }
 }
+
+    public function impersonate(User $salesRep)
+    {
+//        dd($salesRep->id);
+        $admin = Auth::user();
+
+        if ($admin->role !== 'admin') {
+            abort(403, 'Access denied');
+        }
+
+        session([
+            'impersonator_id' => $admin->id,
+            'sales_Rep_name' => $salesRep->name,
+            ]);
+
+
+        Auth::login($salesRep);
+
+        return redirect('/dashboard');
+    }
+    public function stopImpersonate()
+    {
+//        dd(session('impersonator_id'));
+        if (session()->has('impersonator_id')) {
+            $admin = User::find(session('impersonator_id'));
+            Auth::login($admin);
+            session()->forget('impersonator_id');
+        }
+
+        return redirect('/dashboard');
+    }
 }

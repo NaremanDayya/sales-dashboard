@@ -4,7 +4,7 @@
 
 @include('partials.head')
 
-<body class="bg-gray-100" style="display: flex; flex-direction: column; min-height: 100vh; margin: 0; padding: 2;">
+<body class="bg-gray-100" style="display: flex; flex-direction: column; min-height: 100vh; margin: 0; padding: 2px;">
 
     <!-- ======= Header ======= -->
     @include('partials.header')
@@ -56,7 +56,12 @@
             </div>
         </div>
         @endif
-
+            @if(session()->has('impersonator_id'))
+                <div class="bg-yellow-200 text-yellow-800 p-2 text-center">
+                    انت تستخدم الأن حساب سفير العلامة التجارية : {{session('sales_Rep_name')}}
+                    <a href="{{ url('/admin/impersonate/stop') }}" class="underline">العودة لحساب الادمن</a>
+                </div>
+            @endif
         @yield('content')
         {{-- {{$slot}} --}}
     </main>
