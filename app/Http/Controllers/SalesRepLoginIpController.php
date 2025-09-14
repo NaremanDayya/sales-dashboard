@@ -67,7 +67,7 @@ public function unblock($id)
 
         return back()->with('success', 'تم إضافة IP مؤقت بنجاح');
     }
-    public function destroy(SalesRepLoginIp $ip): RedirectResponse
+    public function destroy(SalesRepLoginIp $ip)
     {
         /*
         if (!$ip->is_temporary && $ip->is_allowed) {
@@ -84,12 +84,14 @@ public function unblock($id)
         $ip->delete(); // لو حابب سجل أثري استخدم SoftDeletes (موضح بالأسفل)
         return back()->with('success', 'تم حذف IP الجهاز بنجاح.');
     }
-    public function allow(SalesRepLoginIp $ip)
+    public function allow(SalesRepLoginIp $ip, Request $request)
     {
         $ip->update([
-            'is_allowed' => true,
-            'is_blocked' => false,
-            'allowed_until' => null,
+            'is_allowed'    => true,
+            'is_blocked'    => false,
+            'allowed_until' => $request->allowed_until,
+            'is_temporary'  => $request->allowed_until ? 1 : 0,
+            'blocked_at'    => null,
         ]);
 
         return back()->with('success', 'تم منح صلاحية لهذا IP بنجاح.');

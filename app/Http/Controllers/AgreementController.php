@@ -19,6 +19,8 @@ use App\Notifications\TargetAchievedNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\FacadesLog;
 use Illuminate\Support\Str;
 use Spatie\SimpleExcel\SimpleExcelWriter;
 use Box\Spout\Writer\XLSX\Writer as XLSXWriter;
@@ -56,14 +58,15 @@ class AgreementController extends Controller
                 'agreement_id' => $agreement->id,
                 'is_notice_at_time' => $agreement->isNoticedAtTime(),
                 'required_notice_date' => $agreement->getRequiredNoticeDate()->format('Y-m-d'),
-		        'sales_Rep_name' => $agreement->salesRep->name,
+                'sales_Rep_name' => $agreement->salesRep->name,
             ];
         });
-                $services = Service::all();
+        $services = Service::all();
         $isAdmin = auth()->user()->role === 'admin';
 
-        return view('agreements.table', data: compact('Agreements','services','isAdmin'));
+        return view('agreements.table', data: compact('Agreements', 'services', 'isAdmin'));
     }
+
     public function index(SalesRep $salesrep)
     {
         $Agreements = Agreement::where('sales_rep_id', $salesrep->id)->with(['client', 'service'])->get()->map(function ($agreement) {
@@ -89,16 +92,16 @@ class AgreementController extends Controller
                 'agreement_id' => $agreement->id,
                 'is_notice_at_time' => $agreement->isNoticedAtTime(),
                 'required_notice_date' => $agreement->getRequiredNoticeDate()->format('Y-m-d'),
-		                'sales_Rep_name' => $agreement->salesRep->name,
+                'sales_Rep_name' => $agreement->salesRep->name,
 
 
             ];
         });
- $services = Service::all();
+        $services = Service::all();
         $isAdmin = auth()->user()->role === 'admin';
 
 
-        return view('agreements.table', data: compact('Agreements','services','salesrep','isAdmin'));
+        return view('agreements.table', data: compact('Agreements', 'services', 'salesrep', 'isAdmin'));
     }
 
     public function create(SalesRep $salesrep)
@@ -110,7 +113,8 @@ class AgreementController extends Controller
 
         return view('agreements.create', compact('clients', 'services', 'salesrep', 'agreement'));
     }
-    public function store(Request $request,SalesRep $salesrep)
+
+    public function store(Request $request, SalesRep $salesrep)
     {
         $validated = $this->validateAgreementRequest($request, $salesrep);
 
@@ -123,7 +127,8 @@ class AgreementController extends Controller
             'salesrep' => $agreement->sales_rep_id,
         ])->with('success', 'Agreement saved successfully.');
     }
-    protected function validateAgreementRequest(Request $request,SalesRep $salesRep): array
+
+    protected function validateAgreementRequest(Request $request, SalesRep $salesRep): array
     {
         $service = Service::find($request->input('service_id'));
 
@@ -133,20 +138,20 @@ class AgreementController extends Controller
             'agreement_id' => 'nullable|exists:agreements,id',
             'client_id' => 'required|exists:clients,id',
             'service_id' => 'required|exists:services,id',
-    'signing_date' => [
-        'required',
-        'date',
-        function ($attribute, $value, $fail) use ($salesRep) {
-            $date = \Carbon\Carbon::parse($value);
-            if ($date->month !== now()->month || $date->year !== now()->year) {
-                $fail('تاريخ التوقيع يجب أن يكون ضمن الشهر الحالي.');
-            }
+            'signing_date' => [
+                'required',
+                'date',
+                function ($attribute, $value, $fail) use ($salesRep) {
+                    $date = \Carbon\Carbon::parse($value);
+                    if ($date->month !== now()->month || $date->year !== now()->year) {
+                        $fail('تاريخ التوقيع يجب أن يكون ضمن الشهر الحالي.');
+                    }
 
-            if ($salesRep->start_work_at && $date->lt($salesRep->start_work_at)) {
-                $fail('تاريخ التوقيع يجب أن يكون بعد أو يساوي تاريخ بداية عمل المندوب.');
-            }
-        }
-    ],
+                    if ($salesRep->start_work_at && $date->lt($salesRep->start_work_at)) {
+                        $fail('تاريخ التوقيع يجب أن يكون بعد أو يساوي تاريخ بداية عمل المندوب.');
+                    }
+                }
+            ],
             'duration_years' => 'required|integer|min:1',
             'termination_type' => 'required|in:returnable,non_returnable',
             'notice_months' => 'required|integer|min:0',
@@ -159,31 +164,31 @@ class AgreementController extends Controller
             'price' => 'required|numeric|min:0',
             'total_amount' => 'numeric|min:0',
             'status' => 'required|in:active,terminated,expired',
- 'implementation_date' => [
-        'required',
-        'date',
-        'after_or_equal:signing_date',
-        function ($attribute, $value, $fail) use ($salesRep) {
-            $date = \Carbon\Carbon::parse($value);
-            if ($date->month !== now()->month || $date->year !== now()->year) {
-                $fail('تاريخ التنفيذ يجب أن يكون ضمن الشهر الحالي.');
-            }
+            'implementation_date' => [
+                'required',
+                'date',
+                'after_or_equal:signing_date',
+                function ($attribute, $value, $fail) use ($salesRep) {
+                    $date = \Carbon\Carbon::parse($value);
+                    if ($date->month !== now()->month || $date->year !== now()->year) {
+                        $fail('تاريخ التنفيذ يجب أن يكون ضمن الشهر الحالي.');
+                    }
 
-            if ($salesRep->start_work_at && $date->lt($salesRep->start_work_at)) {
-                $fail('تاريخ التنفيذ يجب أن يكون بعد أو يساوي تاريخ بداية عمل المندوب.');
-            }
-        }
-    ],
+                    if ($salesRep->start_work_at && $date->lt($salesRep->start_work_at)) {
+                        $fail('تاريخ التنفيذ يجب أن يكون بعد أو يساوي تاريخ بداية عمل المندوب.');
+                    }
+                }
+            ],
 
-], [
-    'implementation_date.after_or_equal' => 'تاريخ التنفيذ يجب أن يكون بعد أو يساوي تاريخ التوقيع.',
+        ], [
+            'implementation_date.after_or_equal' => 'تاريخ التنفيذ يجب أن يكون بعد أو يساوي تاريخ التوقيع.',
         ]);
     }
 
     protected function createAgreement(array $validated): Agreement
     {
         $implementationDate = Carbon::parse($validated['implementation_date']);
-        $endDate = $implementationDate->copy()->addYears((int) $validated['duration_years']);
+        $endDate = $implementationDate->copy()->addYears((int)$validated['duration_years']);
 
         $service = Service::find($validated['service_id']);
         $isFlatPrice = optional($service)->is_flat_price ?? false;
@@ -210,6 +215,7 @@ class AgreementController extends Controller
             'end_date' => $endDate,
         ]);
     }
+
     protected function handleTargetUpdates(Agreement $agreement): void
     {
         $service = $agreement->service;
@@ -238,6 +244,7 @@ class AgreementController extends Controller
 
         }
     }
+
     protected function updateSalesRepTargets(
         $agreement,
         Carbon $implementationDate,
@@ -245,7 +252,8 @@ class AgreementController extends Controller
         int $serviceId,
         float $productQuantity,
         float $totalAmount
-    ): ?Target {
+    ): ?Target
+    {
         $month = $implementationDate->month;
         $year = $implementationDate->year;
 
@@ -291,13 +299,15 @@ class AgreementController extends Controller
             return $target->fresh();
         });
     }
+
     protected function getOrCreateTarget(
-        int $salesRepId,
-        int $serviceId,
-        int $month,
-        int $year,
+        int   $salesRepId,
+        int   $serviceId,
+        int   $month,
+        int   $year,
         float $initialAchievedAmount = 0,
-    ): Target {
+    ): Target
+    {
         return DB::transaction(function () use ($salesRepId, $serviceId, $month, $year, $initialAchievedAmount) {
             $existingTarget = Target::where('sales_rep_id', $salesRepId)
                 ->where('service_id', $serviceId)
@@ -343,7 +353,7 @@ class AgreementController extends Controller
                 'service_id' => $serviceId,
                 'month' => $month,
                 'year' => $year,
-                'target_amount' => (float) $service->target_amount,
+                'target_amount' => (float)$service->target_amount,
                 'achieved_amount' => 0,
                 'is_achieved' => false,
                 'commission_due' => false,
@@ -360,11 +370,12 @@ class AgreementController extends Controller
 
     protected function handleAchievedTarget(
         Target $target,
-        int $salesRepId,
-        int $serviceId,
-        int $month,
-        int $year
-    ): Target {
+        int    $salesRepId,
+        int    $serviceId,
+        int    $month,
+        int    $year
+    ): Target
+    {
         return DB::transaction(function () use ($target, $salesRepId, $serviceId, $month, $year) {
             $achievedTotalAmount = $this->calculateAchievedTotalAmount($salesRepId, $serviceId, $month, $year);
             $commissionAmount = 0.005 * $achievedTotalAmount;
@@ -387,12 +398,14 @@ class AgreementController extends Controller
             return $target->fresh();
         });
     }
+
     protected function calculateAchievedTotalAmount(
         int $salesRepId,
         int $serviceId,
         int $month,
         int $year
-    ): float {
+    ): float
+    {
         return Agreement::query()
             ->where('sales_rep_id', $salesRepId)
             ->where('service_id', $serviceId)
@@ -403,13 +416,14 @@ class AgreementController extends Controller
 
     protected function createOrUpdateCommission(
         Target $target,
-        int $salesRepId,
-        int $serviceId,
-        int $month,
-        int $year,
-        float $commissionAmount,
-        float $achievedTotalAmount
-    ): void {
+        int    $salesRepId,
+        int    $serviceId,
+        int    $month,
+        int    $year,
+        float  $commissionAmount,
+        float  $achievedTotalAmount
+    ): void
+    {
         // Get the service to check commission rules if needed
         $service = Service::findOrFail($serviceId);
 
@@ -441,6 +455,7 @@ class AgreementController extends Controller
             $target->update(['commission_due' => true]);
         }
     }
+
     public function edit(SalesRep $salesrep, Agreement $agreement)
     {
         // $this->authorizeAccess($salesrep);
@@ -540,7 +555,7 @@ class AgreementController extends Controller
                 $signingDate = Carbon::parse($agreement->signing_date);
             }
 
-            $durationYears = $editableField === 'duration_years' ? (int) $validated['duration_years'] : (int) $agreement->duration_years;
+            $durationYears = $editableField === 'duration_years' ? (int)$validated['duration_years'] : (int)$agreement->duration_years;
 
             $endDate = $signingDate->copy()->addYears($durationYears);
 
@@ -557,7 +572,6 @@ class AgreementController extends Controller
             'agreement' => $agreement->id
         ])->with('success', 'تم تعديل العقد بنجاح.');
     }
-
 
 
     public function show(SalesRep $salesrep, Agreement $agreement)
@@ -648,64 +662,124 @@ class AgreementController extends Controller
 
         // Notify admins
         $adminUser = User::where('role', 'admin')->first();
-        $adminUser->notify( new AgreementRenewed($agreement));
+        $adminUser->notify(new AgreementRenewed($agreement));
 
         if ($salesRepUser = $agreement->salesRep->user ?? null) {
             $salesRepUser->notify(new AgreementRenewed($agreement));
         }
     }
+
     public function inlineUpdate(Request $request, Agreement $agreement)
     {
-        $validated = $request->validate([
-            'client_name' => 'sometimes|nullable|string|max:255',
-            'signing_date' => 'sometimes|nullable|date',
-            'duration_years' => 'sometimes|nullable|integer|min:1',
-            'termination_type' => 'sometimes|nullable|in:returnable,non_returnable',
-            'implementation_date' => 'sometimes|nullable|date',
-            'end_date' => 'sometimes|nullable|date',
-            'notice_months' => 'sometimes|nullable|integer|min:0',
-            'required_notice_date' => 'sometimes|nullable|date',
-            'notice_status' => 'sometimes|nullable|in:sent,not_sent',
-            'service_type' => 'sometimes|nullable|string|max:255',
-            'product_quantity' => 'sometimes|nullable|integer|min:0',
-            'price' => 'sometimes|nullable|numeric|min:0',
-            'total_amount' => 'sometimes|nullable|numeric|min:0',
-        ]);
+        \Log::debug('Request received', $request->all());
 
         try {
-            // تحقق من وجود البيانات المطلوبة للتحديث
-            if (empty($validated)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'لا توجد بيانات للتحديث'
-                ], 400);
-            }
+            $validated = $request->validate([
+                'client_name' => 'sometimes|nullable|string|max:255',
+                'signing_date' => [
+                    'sometimes',
+                    'nullable',
+                    'date',
 
-            // تسجيل البيانات قبل التحديث لأغراض debugging
-            \Log::info('Updating agreement:', [
-                'agreement_id' => $agreement->id,
-                'data' => $validated
+                ],
+                'duration_years' => 'sometimes|nullable|integer|min:1',
+                'termination_type' => 'sometimes|nullable|in:returnable,non_returnable',
+                'implementation_date' => [
+                    'sometimes',
+                    'nullable',
+                    'date',
+                    'after_or_equal:signing_date',
+
+                ],
+                'end_date' => 'sometimes|nullable|date',
+                'notice_months' => 'sometimes|nullable|integer|min:0',
+                'required_notice_date' => 'sometimes|nullable|date',
+                'notice_status' => 'sometimes|nullable|in:sent,not_sent',
+                'service_type' => 'sometimes|nullable|string|max:255',
+                'product_quantity' => 'sometimes|nullable|integer|min:0',
+                'price' => 'sometimes|nullable|numeric|min:0',
+                'total_amount' => 'sometimes|nullable|numeric|min:0',
             ]);
 
-            // تحديث السجل
-            $agreement->update($validated);
+            // Convert numeric fields to proper types
+            if (isset($validated['duration_years'])) {
+                $validated['duration_years'] = (int) $validated['duration_years'];
+            }
+            if (isset($validated['notice_months'])) {
+                $validated['notice_months'] = (int) $validated['notice_months'];
+            }
+            if (isset($validated['product_quantity']) && isset($validated['price'])) {
+                $validated['total_amount'] = $validated['product_quantity'] * $validated['price'];
+            } elseif (isset($validated['product_quantity']) && !isset($validated['price']) && $agreement->price) {
+                $validated['total_amount'] = $validated['product_quantity'] * $agreement->price;
+            } elseif (!isset($validated['product_quantity']) && isset($validated['price']) && $agreement->product_quantity) {
+                $validated['total_amount'] = $agreement->product_quantity * $validated['price'];
+            }
 
-            // إعادة تحميل البيانات المحدثة من قاعدة البيانات
+            \Log::debug('Validation passed with converted types', $validated);
+
+            // Handle date recalculations
+            $implementationDate = $validated['implementation_date'] ?? $agreement->implementation_date;
+            $durationYears = $validated['duration_years'] ?? $agreement->duration_years;
+            $noticeMonths = $validated['notice_months'] ?? $agreement->notice_months;
+
+            // 1️⃣ Update end_date if implementation_date or duration_years changed
+            if (
+                ($request->has('implementation_date') && $request->implementation_date != $agreement->implementation_date) ||
+                ($request->has('duration_years') && $request->duration_years != $agreement->duration_years)
+            ) {
+                if ($implementationDate && $durationYears) {
+                    $endDate = Carbon::parse($implementationDate)->addYears((int)$durationYears);
+
+                    // Ensure end_date is after or equal to implementation_date
+                    if ($endDate->lt(Carbon::parse($implementationDate))) {
+                        throw new \Exception('تاريخ الانتهاء يجب أن يكون بعد أو يساوي تاريخ التنفيذ.');
+                    }
+
+                    $validated['end_date'] = $endDate->format('Y-m-d');
+                }
+            }
+
+            // 2️⃣ Update required_notice_date if end_date or notice_months changed
+            $endDateForNotice = $validated['end_date'] ?? $agreement->end_date;
+            if (
+                ($request->has('notice_months') && $request->notice_months != $agreement->notice_months) ||
+                isset($validated['end_date'])
+            ) {
+                if ($endDateForNotice && $noticeMonths) {
+                    $requiredNoticeDate = Carbon::parse($endDateForNotice)->subMonths((int)$noticeMonths);
+                    $validated['required_notice_date'] = $requiredNoticeDate->format('Y-m-d');
+                }
+            }
+
+            // Update the agreement
+            $agreement->update($validated);
             $agreement->refresh();
+
+            \Log::debug('Update successful', $agreement->toArray());
 
             return response()->json([
                 'success' => true,
                 'message' => 'تم تحديث البيانات بنجاح',
                 'data' => $agreement->toArray()
             ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'خطأ في التحقق: ' . $e->getMessage(),
+                'errors' => $e->errors()
+            ], 422);
+
         } catch (\Exception $e) {
             \Log::error('Agreement update error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+
             return response()->json([
                 'success' => false,
                 'message' => 'حدث خطأ أثناء التحديث: ' . $e->getMessage()
             ], 500);
         }
     }
-
-
 }

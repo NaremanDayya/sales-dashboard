@@ -61,17 +61,29 @@ class Client extends Model
         return $this->belongsTo(User::class);
     }
 
-public function isLateCustomer()
-{
-    if (!$this->last_contact_date) {
-        return false;
+    public function isLateCustomer()
+    {
+        if (!$this->last_contact_date) {
+            return false;
+        }
+
+        // اجلب قيمة late_customer_days أو fallback إلى 3
+        $lateDays = Setting::where('key', 'late_customer_days')->value('value') ?? 3;
+
+        $time = now()->copy();
+        $daysCounted = 0;
+
+        // حساب الأيام المتأخرة مع تجاهل الجمعة والسبت
+        while ($daysCounted < $lateDays) {
+            $time->subDay();
+            // Carbon: 0 = الأحد ... 5 = الجمعة, 6 = السبت
+            if (!in_array($time->dayOfWeek, [5, 6])) {
+                $daysCounted++;
+            }
+        }
+
+        return $this->last_contact_date <= $time;
     }
-
-    // Get late days from settings table or default to 3
-    $lateDays = Setting::where('key', 'late_customer_days')->value('value') ?? 3;
-
-    return $this->last_contact_date <= now()->subDays($lateDays);
-}
     public function conversations()
     {
         return $this->hasMany(Conversation::class,'client_id');

@@ -585,15 +585,30 @@ font-size: 14px;
 
                         <td class="text-center">
                             @if(isset($request->client))
-                                <a href="{{ route('sales-reps.clients.show', ['sales_rep' => $request->client->sales_rep_id, 'client' => $request->client_id]) }}"
-                                   class="text-blue-600 hover:underline">
-                                    {{ $request->client->company_name ?? 'عميل غير معروف' }}
-                                </a>
-                            @elseif(isset($request->agreement) && $request->agreement->client)
-                                <a href="{{ route('sales-reps.clients.show', ['sales_rep' => $request->sales_rep_id, 'client' => $request->agreement->client_id]) }}"
-                                   class="text-blue-600 hover:underline">
-                                    {{ $request->agreement->client->company_name ?? 'عميل غير معروف' }}
-                                </a>
+                                @if(isset($request->client))
+                                    <a href="{{ route('sales-reps.clients.show', ['sales_rep' => $request->client->sales_rep_id, 'client' => $request->client_id]) }}"
+                                       class="text-blue-600 hover:underline flex items-center gap-2">
+                                        {{ $request->client->company_name ?? 'عميل غير معروف' }}
+
+                                        @if($request->client->clientEditRequests->count() > 0)
+                                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                {{ $request->client->clientEditRequests->count() }}
+            </span>
+                                        @endif
+                                    </a>
+                                @elseif(isset($request->agreement) && $request->agreement->client)
+                                    <a href="{{ route('sales-reps.clients.show', ['sales_rep' => $request->sales_rep_id, 'client' => $request->agreement->client_id]) }}"
+                                       class="text-blue-600 hover:underline flex items-center gap-2">
+                                        {{ $request->agreement->client->company_name ?? 'عميل غير معروف' }}
+
+                                        @if($request->agreement->editRequests->count() > 0)
+                                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                {{ $request->agreement->editRequests->count() }}
+            </span>
+                                        @endif
+                                    </a>
+                                @endif
+
                             @else
                                 —
                             @endif

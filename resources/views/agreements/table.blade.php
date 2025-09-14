@@ -44,7 +44,16 @@
             display: flex;
             flex-direction: column;
         }
+        #agreementEditModal {
+            display: none;
+        }
 
+        #agreementEditModal:not(.hidden) {
+            display: flex !important;
+        }
+        .position-absolute {
+            position: absolute;
+        }
         .main {
             max-width: 100%;
         }
@@ -98,7 +107,45 @@
 
         .dropdown-container { position: relative; display: inline-block; font-family: Arial, sans-serif;
         }
+        .modal-container {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
 
+        .modal-content {
+            background: white;
+            border-radius: 0.75rem;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid #e5e7eb;
+            flex-shrink: 0;
+        }
+
+        .modal-body {
+            padding: 1.25rem;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .modal-footer {
+            padding: 1.25rem;
+            border-top: 1px solid #e5e7eb;
+            flex-shrink: 0;
+        }
         .nice-button {
             background-color: #595be0;
             color: white;
@@ -1131,6 +1178,8 @@
                             <th>عدد المنتج</th>
                             <th>التسعيرة</th>
                             <th>المجموع</th>
+
+
                         </tr>
                         </thead>
                         <tbody id="tableBody">
@@ -1146,30 +1195,155 @@
         <input type="hidden" id="current_sales_rep_id" value="{{ $Agreements[0]['sales_rep_id'] ?? '' }}">
 
         <div class="pagination" id="pagination"></div>
-        <div id="editModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-                <div class="mt-3 text-center">
-                    <h3 id="modalTitle" class="text-lg font-medium text-gray-900"></h3>
-                    <form id="editForm" class="mt-4">
-                        <input type="hidden" id="editAgreementId" name="agreement_id">
-                        <input type="hidden" id="editField" name="field">
+        <!-- Agreement Edit Modal -->
+        <div id="agreementEditModal" class="modal-container hidden">
 
-                        <div class="mb-4">
-                            <label id="fieldLabel" class="block text-sm font-medium text-gray-700 mb-2"></label>
-                            <div id="inputContainer"></div>
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-800" id="modalAgreementTitle">تعديل بيانات الاتفاقية</h3>
+                    <button class="text-gray-500 hover:text-gray-700 text-xl" onclick="closeAgreementEditModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body px-6 py-4 overflow-y-auto max-h-[65vh]">
+                    <form id="agreementEditForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <input type="hidden" id="editAgreementId" name="agreement_id">
+
+                        <!-- Client Information -->
+                        <div class="col-span-2">
+                            <h4 class="text-md font-medium text-gray-700 mb-3 border-b pb-2">معلومات العميل</h4>
                         </div>
 
-                        <div class="flex justify-between mt-8">
-                            <button type="button" onclick="closeEditModal()"
-                                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
-                                إلغاء
-                            </button>
-                            <button type="submit"
-                                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                                حفظ
-                            </button>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">اسم العميل</label>
+                            <input type="text" id="editClientName" name="client_name"
+                                   class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <!-- Agreement Details -->
+                        <div class="col-span-2 mt-4">
+                            <h4 class="text-md font-medium text-gray-700 mb-3 border-b pb-2">تفاصيل الاتفاقية</h4>
+                        </div>
+
+                        <div>
+                            <label for="editSigningDate" class="block text-sm font-medium text-gray-700 mb-1">
+                                تاريخ التوقيع
+                            </label>
+                            <div class="relative">
+                                <input type="text" id="editSigningDate" name="signing_date" dir="rtl"
+                                       value="{{ old('signing_date') }}"
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border text-right">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">مدة الاتفاقية (سنوات)</label>
+                            <input type="number" id="editDurationYears" name="duration_years" min="1"
+                                   class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">نوع الإنهاء</label>
+                            <select id="editTerminationType" name="termination_type"
+                                    class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                                <option value="returnable">مشروطة بمقابل</option>
+                                <option value="non_returnable">غير مشروطة بمقابل</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="editImplementationDate" class="block text-sm font-medium text-gray-700 mb-1">
+                                تاريخ التنفيذ
+                            </label>
+                            <div class="relative">
+                                <input type="text" id="editImplementationDate" name="implementation_date" dir="rtl"
+                                       value="{{ old('implementation_date') }}"
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border text-right">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="editEndDate" class="block text-sm font-medium text-gray-700 mb-1">
+                                تاريخ الانتهاء
+                            </label>
+                            <div class="relative">
+                                <input type="text" id="editEndDate" name="end_date" dir="rtl"
+
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border text-right">
+                            </div>
+                        </div>
+                        <!-- Notice Information -->
+                        <div class="col-span-2 mt-4">
+                            <h4 class="text-md font-medium text-gray-700 mb-3 border-b pb-2">معلومات الإخطار</h4>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">أشهر الإخطار</label>
+                            <input type="number" id="editNoticeMonths" name="notice_months" min="0"
+                                   class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">تاريخ الإخطار المطلوب</label>
+                            <input type="date" id="editRequiredNoticeDate" name="required_notice_date"
+                                   class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">حالة الإخطار</label>
+                            <select id="editNoticeStatus" name="notice_status"
+                                    class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                                <option value="sent">تم الإخطار</option>
+                                <option value="not_sent">لم يتم الإخطار</option>
+                            </select>
+                        </div>
+
+                        <!-- Service Information -->
+                        <div class="col-span-2 mt-4">
+                            <h4 class="text-md font-medium text-gray-700 mb-3 border-b pb-2">معلومات الخدمة</h4>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">نوع الخدمة</label>
+                            <input type="text" id="editServiceType" name="service_type"
+                                   class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">كمية المنتج</label>
+                            <input type="number" id="editProductQuantity" name="product_quantity" min="0"
+                                   class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">السعر</label>
+                            <input type="number" id="editPrice" name="price" min="0" step="0.001"
+                                   class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                                   oninput="calculateTotal()">
+                        </div>
+
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">المبلغ الإجمالي</label>
+                            <input type="number" id="editTotalAmount" name="total_amount" min="0" step="0.001"
+                                   class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500" readonly>
                         </div>
                     </form>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer px-6 py-4 border-t bg-gray-50 flex justify-end gap-3">
+                    <button type="button" onclick="closeAgreementEditModal()"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
+                        إلغاء
+                    </button>
+                    <button type="button" onclick="saveAgreementEdits()"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+                        حفظ التغييرات
+                    </button>
                 </div>
             </div>
         </div>
@@ -1180,7 +1354,7 @@
     <script>
     let AgreementsData = [];
     let currentFilteredAgreements = [];
-    const isAdmin = @json(Auth::user()->role == 'admin');
+    const isAdmin = @json($isAdmin);
 
     document.addEventListener('DOMContentLoaded', function() {
     // Initialize data
@@ -1290,6 +1464,140 @@
     }
     });
     });
+    function openAgreementEditModal(agreementId) {
+        const agreement = AgreementsData.find(a => a.agreement_id == agreementId);
+
+        if (!agreement) {
+            showNotification('لم يتم العثور على بيانات الاتفاقية', 'error');
+            return;
+        }
+
+        // Populate the form fields
+        document.getElementById('editAgreementId').value = agreement.agreement_id;
+        document.getElementById('editClientName').value = agreement.client_name || '';
+        document.getElementById('editSigningDate').value = agreement.signing_date || '';
+        document.getElementById('editDurationYears').value = agreement.duration_years || '';
+        document.getElementById('editTerminationType').value = agreement.termination_type || 'returnable';
+        document.getElementById('editImplementationDate').value = agreement.implementation_date || '';
+        document.getElementById('editEndDate').value = agreement.end_date || '';
+        document.getElementById('editNoticeMonths').value = agreement.notice_months || '';
+        document.getElementById('editRequiredNoticeDate').value = agreement.required_notice_date || '';
+        document.getElementById('editNoticeStatus').value = agreement.notice_status || 'not_sent';
+        document.getElementById('editServiceType').value = agreement.service_type || '';
+        document.getElementById('editProductQuantity').value = agreement.product_quantity || '';
+        document.getElementById('editPrice').value = agreement.price
+            ? agreement.price.toString().replace(/,/g, '')
+            : 0;
+        calculateTotal();
+
+
+
+        // Update modal title
+        document.getElementById('modalAgreementTitle').textContent = `تعديل اتفاقية ${agreement.client_name || ''}`;
+
+        // Show the modal
+        const modal = document.getElementById('agreementEditModal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+    }
+    function calculateTotal() {
+        const quantity = document.getElementById('editProductQuantity').value || 0;
+        const price = document.getElementById('editPrice').value || 0;
+        const total = quantity * price;
+
+        document.getElementById('editTotalAmount').value =  total;
+
+    }
+    // Function to close the modal
+    function closeAgreementEditModal() {
+        const modal = document.getElementById('agreementEditModal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
+
+    // Function to save agreement edits
+    function saveAgreementEdits() {
+        const formData = new FormData(document.getElementById('agreementEditForm'));
+        const agreementId = formData.get('agreement_id');
+
+        const data = {};
+        for (let [key, value] of formData.entries()) {
+            if (key !== 'agreement_id') {
+                // Convert numeric fields to numbers
+                if (['duration_years', 'notice_months', 'product_quantity', 'price', 'total_amount'].includes(key)) {
+                    data[key] = value === '' ? null : Number(value);
+                } else {
+                    data[key] = value === '' ? null : value;
+                }
+            }
+        }
+
+        console.log('Sending data:', data); // Debug log
+
+        // Show loading state
+        const saveBtn = document.querySelector('#agreementEditModal .modal-footer button:last-child');
+        const originalText = saveBtn.textContent;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+        saveBtn.disabled = true;
+
+        fetch(`/api/agreements/${agreementId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(async response => {
+                console.log('Response status:', response.status);
+                const responseData = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(responseData.message || `Server error: ${response.status}`);
+                }
+                return responseData;
+            })
+            .then(result => {
+                console.log('Success response:', result);
+                if (result.success) {
+                    // Update local data
+                    const agreementIndex = AgreementsData.findIndex(a => a.agreement_id == agreementId);
+                    if (agreementIndex !== -1) {
+                        Object.assign(AgreementsData[agreementIndex], result.data);
+                    }
+
+                    // Update current filtered data
+                    const filteredIndex = currentFilteredAgreements.findIndex(a => a.agreement_id == agreementId);
+                    if (filteredIndex !== -1) {
+                        Object.assign(currentFilteredAgreements[filteredIndex], result.data);
+                    }
+
+                    renderTable();
+                    showNotification('تم تحديث بيانات الاتفاقية بنجاح', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                    closeAgreementEditModal();
+                } else {
+                    throw new Error(result.message || 'فشل في حفظ التغييرات');
+                }
+            })
+            .catch(error => {
+                console.error('Full error:', error);
+                showNotification('حدث خطأ أثناء حفظ التغييرات: ' + error.message, 'error');
+            })
+            .finally(() => {
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+            });
+    }
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !document.getElementById('agreementEditModal').classList.contains('hidden')) {
+            closeAgreementEditModal();
+        }
+    });
 
     function renderTable(data = currentFilteredAgreements) {
     const tbody = document.getElementById('tableBody');
@@ -1332,19 +1640,7 @@
                class="hover:text-blue-600 hover:underline cursor-pointer whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis block w-full text-center">
                 ${agreement.client_name || '—'}
             </a>
-            ${isAdmin ? `
-            <div class="edit-dropdown mt-1">
-                <button class="text-gray-400 hover:text-blue-500">
-                    <i class="fas fa-ellipsis-h"></i>
-                </button>
-                <div class="edit-menu">
-                    <div class="edit-menu-item" data-agreement-id="${agreement.agreement_id}" data-field="client_name" data-value="${escapeQuotes(agreement.client_name)}">
-                        <i class="fas fa-edit"></i>
-                        <span>تعديل</span>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+
         </div>
     </td>
 
@@ -1363,19 +1659,7 @@
             <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
                 ${formatDateForDisplay(agreement.signing_date) || '—'}
             </a>
-            ${isAdmin ? `
-            <div class="edit-dropdown">
-                <button class="text-gray-400 hover:text-blue-500">
-                    <i class="fas fa-ellipsis-h"></i>
-                </button>
-                <div class="edit-menu">
-                    <div class="edit-menu-item" data-agreement-id="${agreement.agreement_id}" data-field="signing_date" data-value="${agreement.signing_date || ''}">
-                        <i class="fas fa-edit"></i>
-                        <span>تعديل</span>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+
         </div>
     </td>
 
@@ -1385,19 +1669,7 @@
             <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
                 ${agreement.duration_years || '—'} سنوات
             </a>
-            ${isAdmin ? `
-            <div class="edit-dropdown">
-                <button class="text-gray-400 hover:text-blue-500">
-                    <i class="fas fa-ellipsis-h"></i>
-                </button>
-                <div class="edit-menu">
-                    <div class="edit-menu-item" data-agreement-id="${agreement.agreement_id}" data-field="duration_years" data-value="${agreement.duration_years || ''}">
-                        <i class="fas fa-edit"></i>
-                        <span>تعديل</span>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+
         </div>
     </td>
 
@@ -1413,19 +1685,7 @@
                 : '—'
                 }
             </a>
-            ${isAdmin ? `
-            <div class="edit-dropdown">
-                <button class="text-gray-400 hover:text-blue-500">
-                    <i class="fas fa-ellipsis-h"></i>
-                </button>
-                <div class="edit-menu">
-                    <div class="edit-menu-item" data-agreement-id="${agreement.agreement_id}" data-field="termination_type" data-value="${agreement.termination_type || ''}">
-                        <i class="fas fa-edit"></i>
-                        <span>تعديل</span>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+
         </div>
     </td>
 
@@ -1435,19 +1695,7 @@
             <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
                 ${formatDateForDisplay(agreement.implementation_date) || '—'}
             </a>
-            ${isAdmin ? `
-            <div class="edit-dropdown">
-                <button class="text-gray-400 hover:text-blue-500">
-                    <i class="fas fa-ellipsis-h"></i>
-                </button>
-                <div class="edit-menu">
-                    <div class="edit-menu-item" data-agreement-id="${agreement.agreement_id}" data-field="implementation_date" data-value="${agreement.implementation_date || ''}">
-                        <i class="fas fa-edit"></i>
-                        <span>تعديل</span>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+
         </div>
     </td>
 
@@ -1457,19 +1705,7 @@
             <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
                 ${formatDateForDisplay(agreement.end_date) || '—'}
             </a>
-            ${isAdmin ? `
-            <div class="edit-dropdown">
-                <button class="text-gray-400 hover:text-blue-500">
-                    <i class="fas fa-ellipsis-h"></i>
-                </button>
-                <div class="edit-menu">
-                    <div class="edit-menu-item" data-agreement-id="${agreement.agreement_id}" data-field="end_date" data-value="${agreement.end_date || ''}">
-                        <i class="fas fa-edit"></i>
-                        <span>تعديل</span>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+
         </div>
     </td>
 
@@ -1479,19 +1715,7 @@
             <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
                 ${agreement.notice_months || '—'}
             </a>
-            ${isAdmin ? `
-            <div class="edit-dropdown">
-                <button class="text-gray-400 hover:text-blue-500">
-                    <i class="fas fa-ellipsis-h"></i>
-                </button>
-                <div class="edit-menu">
-                    <div class="edit-menu-item" data-agreement-id="${agreement.agreement_id}" data-field="notice_months" data-value="${agreement.notice_months || ''}">
-                        <i class="fas fa-edit"></i>
-                        <span>تعديل</span>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+
         </div>
     </td>
 
@@ -1499,19 +1723,7 @@
     <td class="px-4 py-2 text-sm text-center ${ agreement.is_notice_at_time ? 'text-red-600 font-bold' : 'text-green-600 font-bold' }">
         <div class="flex items-center justify-between">
             ${formatDateForDisplay(agreement.required_notice_date) || '—'}
-            ${isAdmin ? `
-            <div class="edit-dropdown">
-                <button class="text-gray-400 hover:text-blue-500">
-                    <i class="fas fa-ellipsis-h"></i>
-                </button>
-                <div class="edit-menu">
-                    <div class="edit-menu-item" data-agreement-id="${agreement.agreement_id}" data-field="required_notice_date" data-value="${agreement.required_notice_date || ''}">
-                        <i class="fas fa-edit"></i>
-                        <span>تعديل</span>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+
         </div>
     </td>
 
@@ -1533,19 +1745,7 @@
                                         : '—'
                             }
                         </span>
-            ${isAdmin ? `
-            <div class="edit-dropdown">
-                <button class="text-gray-400 hover:text-blue-500">
-                    <i class="fas fa-ellipsis-h"></i>
-                </button>
-                <div class="edit-menu">
-                    <div class="edit-menu-item" data-agreement-id="${agreement.agreement_id}" data-field="notice_status" data-value="${agreement.notice_status || ''}">
-                        <i class="fas fa-edit"></i>
-                        <span>تعديل</span>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+
         </div>
     </td>
 
@@ -1553,19 +1753,7 @@
     <td dir="rtl" class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis">
         <div class="flex items-center justify-between">
             ${agreement.service_type || '—'}
-            ${isAdmin ? `
-            <div class="edit-dropdown">
-                <button class="text-gray-400 hover:text-blue-500">
-                    <i class="fas fa-ellipsis-h"></i>
-                </button>
-                <div class="edit-menu">
-                    <div class="edit-menu-item" data-agreement-id="${agreement.agreement_id}" data-field="service_type" data-value="${escapeQuotes(agreement.service_type)}">
-                        <i class="fas fa-edit"></i>
-                        <span>تعديل</span>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+
         </div>
     </td>
 
@@ -1573,19 +1761,7 @@
     <td class="px-4 py-2 text-sm text-gray-700">
         <div class="flex items-center justify-between">
             ${agreement.product_quantity || '—'}
-            ${isAdmin ? `
-            <div class="edit-dropdown">
-                <button class="text-gray-400 hover:text-blue-500">
-                    <i class="fas fa-ellipsis-h"></i>
-                </button>
-                <div class="edit-menu">
-                    <div class="edit-menu-item" data-agreement-id="${agreement.agreement_id}" data-field="product_quantity" data-value="${agreement.product_quantity || ''}">
-                        <i class="fas fa-edit"></i>
-                        <span>تعديل</span>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+
         </div>
     </td>
 
@@ -1593,19 +1769,7 @@
     <td class="px-4 py-2 text-sm text-gray-700">
         <div class="flex items-center justify-between">
             ${agreement.price || '—'}
-            ${isAdmin ? `
-            <div class="edit-dropdown">
-                <button class="text-gray-400 hover:text-blue-500">
-                    <i class="fas fa-ellipsis-h"></i>
-                </button>
-                <div class="edit-menu">
-                    <div class="edit-menu-item" data-agreement-id="${agreement.agreement_id}" data-field="price" data-value="${agreement.price || ''}">
-                        <i class="fas fa-edit"></i>
-                        <span>تعديل</span>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+
         </div>
     </td>
 
@@ -1613,20 +1777,15 @@
     <td class="px-4 py-2 text-sm text-gray-700">
         <div class="flex items-center justify-between">
             ${agreement.total_amount || '—'}
-            ${isAdmin ? `
-            <div class="edit-dropdown">
-                <button class="text-gray-400 hover:text-blue-500">
-                    <i class="fas fa-ellipsis-h"></i>
-                </button>
-                <div class="edit-menu">
-                    <div class="edit-menu-item" data-agreement-id="${agreement.agreement_id}" data-field="total_amount" data-value="${agreement.total_amount || ''}">
-                        <i class="fas fa-edit"></i>
-                        <span>تعديل</span>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+${isAdmin ? `
+    <button onclick="openAgreementEditModal(${agreement.agreement_id})" class="text-green-600 hover:text-green-800" title="تعديل بيانات الإتفاقية">
+        <i class="fas fa-edit"></i>
+    </button>
+    ` : ''}
         </div>
+
+
+
     </td>
     `;
     tbody.appendChild(row);
@@ -1760,6 +1919,7 @@
 
         // Initialize column checkboxes
         document.addEventListener('DOMContentLoaded', function() {
+
             const checkboxes = document.querySelectorAll('.column-checkbox input');
             checkboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', function() {
@@ -2148,7 +2308,7 @@
             inputHtml = `
                 <input type="number" name="value" value="${currentValue || ''}"
                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                       step="0.01" min="0">
+                       step="1" min="0">
             `;
         } else {
             inputHtml = `
@@ -2298,6 +2458,32 @@
                 }
             });
         }
+    });
+    flatpickr("#editImplementationDate", {
+        dateFormat: "Y-m-d",
+        locale: "ar",
+        disableMobile: true,
+        defaultDate: "{{ old('implementation_date') }}"
+    });
+
+    flatpickr("#editEndDate", {
+        dateFormat: "Y-m-d",
+        locale: "ar",
+        disableMobile: true,
+        defaultDate: "{{ old('end_date') }}"
+    });
+
+    flatpickr("#editSigningDate", {
+        dateFormat: "Y-m-d",
+        locale: "ar",
+        disableMobile: true,
+        defaultDate: "{{ old('signing_date') }}"
+    });
+    flatpickr("#editRequiredNoticeDate", {
+        dateFormat: "Y-m-d",
+        locale: "ar",
+        disableMobile: true,
+        defaultDate: "{{ old('editRequiredNoticeDate') }}"
     });
     </script>
 @endpush

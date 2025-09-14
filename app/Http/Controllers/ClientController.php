@@ -406,6 +406,7 @@ class ClientController extends Controller
 
             $validated['phone'] = $this->generateWhatsappNumber($request->country_code,$request->phone);
             $validated['whatsapp_link'] = $this->generateWhatsappLink($request->country_code,$request->phone);
+
             }
 
 
@@ -561,19 +562,26 @@ class ClientController extends Controller
     public function inlineUpdate(Request $request, Client $client)
     {
         $validated = $request->validate([
-            'company_name'     => 'sometimes|required|string|max:255',
-            'address'          => 'sometimes|nullable|string|max:500',
-            'contact_person'   => 'sometimes|nullable|string|max:255',
-            'contact_position' => 'sometimes|nullable|string|max:255',
-            'phone'            => 'sometimes|nullable|string|max:20',
-            'interest_status'  => 'sometimes|nullable|string|in:interested,not interested,neutral',
-            'country_code'     => 'sometimes|nullable|string|max:10',
+            'company_name'      => 'sometimes|required|string|max:255',
+            'address'           => 'sometimes|nullable|string|max:500',
+            'contact_person'    => 'sometimes|nullable|string|max:255',
+            'contact_position'  => 'sometimes|nullable|string|max:255',
+            'phone'             => 'sometimes|nullable|string|max:20',
+            'interest_status'   => 'sometimes|nullable|string|in:interested,not interested,neutral',
+            'country_code'      => 'sometimes|nullable|string|max:10',
+            'company_logo'      => 'sometimes|nullable|url|max:500',
+            'whatsapp_link'     => 'sometimes|nullable|url|max:500',
+            'interested_service' => 'sometimes|nullable|string|max:255',
+            'contact_count'     => 'sometimes|nullable|integer|min:0',
+            'interested_service_count'    => 'sometimes|nullable|integer|min:0',
+            'last_contact_date' => 'sometimes|nullable|date',
         ]);
 
         try {
             $phoneChanged = $request->has('phone') && $request->filled('phone');
             $countryCodeChanged = $request->has('country_code') && $request->filled('country_code');
 
+            // Handle phone and WhatsApp link generation
             if ($phoneChanged || $countryCodeChanged) {
                 $countryCode = $countryCodeChanged
                     ? $request->country_code
@@ -586,22 +594,54 @@ class ClientController extends Controller
                 if ($phone && $countryCode) {
                     $validated['phone'] = $this->generateWhatsappNumber($countryCode, $phone);
                     $validated['whatsapp_link'] = $this->generateWhatsappLink($countryCode, $phone);
+//                    Log::debug("Generated WhatsApp Link: " . $this->generateWhatsappLink($countryCode, $phone));
+
+                }
+
+
+            }
+
+            // Handle interested_service if it's an ID (convert to service name)
+            if ($request->has('interested_service') && $request->filled('interested_service')) {
+                $serviceId = $request->interested_service;
+
+                // If it's numeric, assume it's a service ID and get the name
+                if (is_numeric($serviceId)) {
+                    $service = \App\Models\Service::find($serviceId);
+                    if ($service) {
+                        $validated['interested_service'] = $service->id;
+//                        Log::debug("service: " . $service->name);
+                    }
                 }
             }
 
-            $client->update($validated);
+            // Handle contact_count and requests_count - ensure they're integers
+            if ($request->has('contact_count')) {
+                $validated['contact_count'] = ($request->contact_count);
+//                Log::debug("conatct_count: " .$request->contact_count);
 
-            // Return the complete updated client data
+            }
+
+            if ($request->has('interested_service_count')) {
+                $validated['interested_service_count'] = ($request->interested_service_count);
+            }
+
+            // Update the client
+            $client->update($validated);
+            Log::debug("Client WhatsApp Link: " . $client->whatsapp_link);
+            // Return the complete updated client data with relationships
             return response()->json([
                 'success' => true,
                 'message' => 'تم تحديث البيانات بنجاح',
-                'data'    => $client->fresh()->toArray() // Make sure this includes all relationships
+                'data'    => $client->fresh()->load('salesRep')->toArray()
             ]);
+
         } catch (\Exception $e) {
-            \Log::error('Client update error: ' . $e->getMessage());
+            Log::error('Client update error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'حدث خطأ أثناء التحديث'
+                'message' => 'حدث خطأ أثناء التحديث: ' . $e->getMessage()
             ], 500);
         }
-    }}
+    }
+}

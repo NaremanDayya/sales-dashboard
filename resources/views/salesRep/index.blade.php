@@ -1544,15 +1544,40 @@ function setupBulkActions() {
 
 <td class="col-late-customers px-4 py-3 whitespace-nowrap text-lg text-center">
     <a href="/sales-reps/${rep.id}/clients" style="text-decoration: none;">
-        <span class="${
-            rep.late_customers > 0
-                ? 'inline-flex items-center px-2 py-0.5 rounded-md bg-red-300 text-red-800 font-semibold'
-                : 'text-gray-500'
-        }">
-            ${rep.late_customers}
-        </span>
+        <!-- العدد الكلي -->
+        <div class="mb-1">
+            <span class="${
+        rep.late_customers > 0
+            ? 'inline-flex items-center px-2 py-0.5 rounded-md bg-red-300 text-red-800 font-bold text-lg'
+            : 'text-gray-400 font-bold text-lg'
+    }">
+             ${rep.late_customers}
+            </span>
+        </div>
+
+        <!-- التفاصيل: مهتم، غير مهتم، حيادي -->
+        <div class="flex justify-center space-x-4 rtl:space-x-reverse text-sm text-gray-600">
+            <!-- المهتم -->
+            <div class="flex items-center space-x-1 rtl:space-x-reverse">
+                <i class="fas fa-thumbs-up text-green-500"></i>
+                <span class="font-semibold">${rep.interested_late_customers}</span>
+            </div>
+
+            <!-- غير المهتم -->
+            <div class="flex items-center space-x-1 rtl:space-x-reverse">
+                <i class="fas fa-thumbs-down text-red-400"></i>
+                <span class="font-semibold">${rep.not_interested_late_customers}</span>
+            </div>
+
+            <!-- الحيادي -->
+            <div class="flex items-center space-x-1 rtl:space-x-reverse">
+                <i class="fas fa-clock text-gray-400"></i>
+                <span class="font-semibold">${rep.neutral_late_customers}</span>
+            </div>
+        </div>
     </a>
 </td>
+
 <td class="col-total-orders px-6 py-4 whitespace-nowrap text-sm text-center">
     <a href="/salesrep/${rep.id}/MyRequests" style="text-decoration: none;">
         <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-green-100 text-green-800 font-semibold">

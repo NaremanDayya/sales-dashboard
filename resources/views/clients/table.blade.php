@@ -55,7 +55,17 @@
     .position-relative {
         position: relative;
     }
+    .hidden {
+        display: none !important;
+    }
 
+    #clientEditModal {
+        display: none;
+    }
+
+    #clientEditModal:not(.hidden) {
+        display: flex !important;
+    }
     .position-absolute {
         position: absolute;
     }
@@ -316,6 +326,19 @@
 
     .position-absolute {
         position: absolute;
+    }
+    #logoPreview {
+        max-width: 100%;
+        height: auto;
+        object-fit: contain;
+    }
+
+    #logoPreviewContainer {
+        text-align: center;
+        border: 1px dashed #d1d5db;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        background-color: #f9fafb;
     }
 
     .top-0 {
@@ -1162,6 +1185,36 @@
     unicode-bidi: embed;
     display: inline-block;
 }
+    #clientEditModal {
+        font-family: 'Tajawal', sans-serif;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    input, select {
+        font-family: 'Tajawal', sans-serif;
+    }
+
+    /* Scrollbar styling for modal */
+    .modal-body::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .modal-body::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 10px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
 
     .pagination {
         display: flex;
@@ -1280,11 +1333,42 @@
         text-align: center !important;
     }
 
+    #clientEditModal {
+        font-family: 'Tajawal', sans-serif;
+    }
 
-    .input[type="date"].rtl {
-    direction: rtl;
-    text-align: right;
-}
+    .form-group {
+        margin-bottom: 1rem;
+        /* REMOVE display:block override if you had */
+    }
+
+    input, select {
+        font-family: 'Tajawal', sans-serif;
+    }
+
+    /* Scrollbar styling */
+    .modal-body {
+        max-height: 65vh; /* important */
+        overflow-y: auto; /* enable scroll */
+    }
+
+    .modal-body::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .modal-body::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 10px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
     .header-text {
         color: #4154f1;
     }
@@ -1607,6 +1691,10 @@
                             <option value="">الكل</option>
                             <option value="interested">مهتم</option>
                             <option value="not interested">غير مهتم</option>
+                            <option value="late">متأخرين</option>
+                            <option value="late_interested">متأخرين مهتمين</option>
+                            <option value="late_not_interested">متأخرين غير مهتمين</option>
+                            <option value="late_neutral">متأخرين مؤجلين</option>
                         </select>
                     </div>
                 </div>
@@ -1727,8 +1815,10 @@ value="{{ old('late_customer_days', \App\Models\Setting::where('key', 'late_cust
                             <th class="no-print">الدردشة</th>
                         </tr>
                     </thead>
+
                     <tbody id="tableBody">
-                        <!-- Data will be inserted here -->
+
+                    <!-- Data will be inserted here -->
                     </tbody>
                 </table>
                 <div class="pdf-footer" style="display: none;">
@@ -1739,7 +1829,145 @@ value="{{ old('late_customer_days', \App\Models\Setting::where('key', 'late_cust
         <input type="hidden" id="current_sales_rep_id" value="{{ $Clients[0]['sales_rep_id'] ?? '' }}">
 
         <div class="pagination" id="pagination"></div>
-    </div>
+            <div id="clientEditModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 hidden">
+                <div class="bg-white rounded-lg shadow-lg w-full max-w-5xl mx-4 max-h-[90vh] overflow-hidden">
+                    <!-- Modal Header -->
+                    <div class="modal-header px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-800" id="modalClientName">تعديل بيانات العميل</h3>
+                        <button class="text-gray-500 hover:text-gray-700 text-xl" onclick="closeClientEditModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <!-- Modal Body -->
+                    <div class="modal-body px-6 py-4 overflow-y-auto max-h-[65vh]">
+                        <form id="clientEditForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <input type="hidden" id="editClientId" name="client_id">
+                            <div class="col-span-2 flex justify-center mb-4">
+                                <img id="editClientLogo" src="" alt="Client Logo" class="max-h-32 max-w-full object-contain border rounded-lg p-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">مندوب المبيعات</label>
+                                <input type="text" id="editSalesRep" name="sales_rep_name" readonly
+                                       class="w-full px-3 py-2 border rounded-md bg-gray-100">
+                            </div>
+                            <!-- Company Information -->
+                            <div class="col-span-2">
+                                <h4 class="text-md font-medium text-gray-700 mb-3 border-b pb-2">معلومات الشركة</h4>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">اسم الشركة</label>
+                                <input type="text" id="editCompanyName" name="company_name"
+                                       class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">عنوان الشركة</label>
+                                <input type="text" id="editAddress" name="address"
+                                       class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+
+                            <!-- Contact Information -->
+                            <div class="col-span-2 mt-4">
+                                <h4 class="text-md font-medium text-gray-700 mb-3 border-b pb-2">معلومات الاتصال</h4>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">الشخص المسؤول</label>
+                                <input type="text" id="editContactPerson" name="contact_person"
+                                       class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">المنصب الوظيفي</label>
+                                <input type="text" id="editContactPosition" name="contact_position"
+                                       class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">رقم الجوال</label>
+                                <input type="tel" id="editPhone" name="phone" dir="ltr"
+                                       class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+{{--                            <div>--}}
+{{--                                <label class="block text-sm font-medium text-gray-700 mb-1">رابط الواتساب</label>--}}
+{{--                                <input type="url" id="editWhatsappLink" name="whatsapp_link"--}}
+{{--                                       class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">--}}
+{{--                            </div>--}}
+
+                            <!-- Status Information -->
+                            <div class="col-span-2 mt-4">
+                                <h4 class="text-md font-medium text-gray-700 mb-3 border-b pb-2">حالة العميل</h4>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">حالة الاهتمام</label>
+                                <select id="editInterestStatus" name="interest_status"
+                                        class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                                    <option value="interested">مهتم</option>
+                                    <option value="not interested">غير مهتم</option>
+                                    <option value="neutral">مؤجل</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">الخدمة المهتم بها</label>
+                                <select id="editInterestedService" name="interested_service"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                                    <option value="">اختر الخدمة</option>
+                                    @foreach($services as $service)
+                                        <option value="{{ $service->id }}">{{ $service->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">عدد مرات التواصل</label>
+                                <input type="number" id="editContactCount" name="contact_count"
+                                       class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">عدد الخدمة المهتم بها</label>
+                                <input type="number" id="editServiceCount" name="interested_service_count"
+                                       class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <!-- Additional Information -->
+                            <div class="col-span-2 mt-4">
+                                <h4 class="text-md font-medium text-gray-700 mb-3 border-b pb-2">معلومات إضافية</h4>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">تاريخ آخر تواصل</label>
+                                <input type="date" id="editLastContactDate" name="last_contact_date"
+                                       class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+
+
+
+                        </form>
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="modal-footer px-6 py-4 border-t bg-gray-50 flex justify-end gap-3">
+                        <button type="button" onclick="closeClientEditModal()"
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
+                            إلغاء
+                        </button>
+                        <button type="button" onclick="saveClientEdits()"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+                            حفظ التغييرات
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
         <!-- Edit Modal -->
         <div id="editModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 hidden">
             <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4">
@@ -1914,20 +2142,7 @@ const searchTerm = e.target.value.toLowerCase();
             ${client.sales_rep_name || '—'}
         </div>
 
-        <!-- Edit dropdown -->
-        ${isAdmin ? `
-        <div class="edit-dropdown mt-1">
-            <button class="text-gray-400 hover:text-blue-500">
-                <i class="fas fa-ellipsis-h"></i>
-            </button>
-            <div class="edit-menu">
-                <div class="edit-menu-item" onclick="openEditModal(${client.client_id}, 'company_name', '${client.company_name || ''}')">
-                    <i class="fas fa-edit"></i>
-                    <span>تعديل</span>
-                </div>
-            </div>
-        </div>
-        ` : ''}
+
     </div>
 </td>
 
@@ -1938,19 +2153,7 @@ const searchTerm = e.target.value.toLowerCase();
               onclick="redirectToClient(${client.sales_rep_id}, ${client.client_id})">
             ${client.address || '—'}
         </span>
-        ${isAdmin ? `
-        <div class="edit-dropdown">
-            <button class="text-gray-400 hover:text-blue-500">
-                <i class="fas fa-ellipsis-h"></i>
-            </button>
-            <div class="edit-menu">
-                <div class="edit-menu-item" onclick="openEditModal(${client.client_id}, 'address', '${client.address || ''}')">
-                    <i class="fas fa-edit"></i>
-                    <span>تعديل</span>
-                </div>
-            </div>
-        </div>
-        ` : ''}
+
     </div>
 </td>
             <!-- Contact Person -->
@@ -1960,19 +2163,7 @@ const searchTerm = e.target.value.toLowerCase();
               onclick="redirectToClient(${client.sales_rep_id}, ${client.client_id})">
             ${client.contact_person || '—'}
         </span>
-        ${isAdmin ? `
-        <div class="edit-dropdown">
-            <button class="text-gray-400 hover:text-blue-500">
-                <i class="fas fa-ellipsis-h"></i>
-            </button>
-            <div class="edit-menu">
-                <div class="edit-menu-item" onclick="openEditModal(${client.client_id}, 'contact_person', '${client.contact_person || ''}')">
-                    <i class="fas fa-edit"></i>
-                    <span>تعديل</span>
-                </div>
-            </div>
-        </div>
-        ` : ''}
+
     </div>
 </td>
 
@@ -1983,19 +2174,7 @@ const searchTerm = e.target.value.toLowerCase();
               onclick="redirectToClient(${client.sales_rep_id}, ${client.client_id})">
             ${client.contact_position || '—'}
         </span>
-        ${isAdmin ? `
-        <div class="edit-dropdown">
-            <button class="text-gray-400 hover:text-blue-500">
-                <i class="fas fa-ellipsis-h"></i>
-            </button>
-            <div class="edit-menu">
-                <div class="edit-menu-item" onclick="openEditModal(${client.client_id}, 'contact_position', '${client.contact_position || ''}')">
-                    <i class="fas fa-edit"></i>
-                    <span>تعديل</span>
-                </div>
-            </div>
-        </div>
-        ` : ''}
+
     </div>
 </td>
 
@@ -2008,19 +2187,7 @@ const searchTerm = e.target.value.toLowerCase();
                 ${client.phone ? (client.phone.startsWith('+') ? client.phone : '+' + client.phone) : '—'}
             </span>
         </span>
-        ${isAdmin ? `
-        <div class="edit-dropdown">
-            <button class="text-gray-400 hover:text-blue-500">
-                <i class="fas fa-ellipsis-h"></i>
-            </button>
-            <div class="edit-menu">
-                <div class="edit-menu-item" onclick="openEditModal(${client.client_id}, 'phone', '${client.phone || ''}')">
-                    <i class="fas fa-edit"></i>
-                    <span>تعديل</span>
-                </div>
-            </div>
-        </div>
-        ` : ''}
+
     </div>
 </td>
             <!-- WhatsApp Link -->
@@ -2044,19 +2211,7 @@ const searchTerm = e.target.value.toLowerCase();
                 ${getStatusText(client.interest_status)}
             </span>
         </span>
-        ${isAdmin ? `
-        <div class="edit-dropdown">
-            <button class="text-gray-400 hover:text-blue-500">
-                <i class="fas fa-ellipsis-h"></i>
-            </button>
-            <div class="edit-menu">
-                <div class="edit-menu-item" onclick="openEditModal(${client.client_id}, 'interest_status', '${client.interest_status || ''}')">
-                    <i class="fas fa-edit"></i>
-                    <span>تعديل</span>
-                </div>
-            </div>
-        </div>
-        ` : ''}
+
     </div>
 </td>
 
@@ -2106,10 +2261,15 @@ const searchTerm = e.target.value.toLowerCase();
 
             <!-- Message Link -->
             <td class="px-4 py-2 text-sm text-center no-print">
-                <a href="/client/${client.client_id}/message" class="text-blue-600 hover:underline">
-                    <i class="fas fa-comments"></i>
-                </a>
-            </td>
+    <a href="/client/${client.client_id}/message" class="text-blue-600 hover:underline mr-2">
+        <i class="fas fa-comments"></i>
+    </a>
+    ${isAdmin ? `
+    <button onclick="openClientEditModal(${client.client_id})" class="text-green-600 hover:text-green-800" title="تعديل بيانات العميل">
+        <i class="fas fa-edit"></i>
+    </button>
+    ` : ''}
+</td>
         `;
                 tbody.appendChild(row);
             });
@@ -2140,7 +2300,7 @@ function getArabicDaysWord(number) {
             const statusMap = {
                 'interested': 'مهتم',
                 'not interested': 'غير مهتم',
-                'pending': 'مؤجل'
+                'neutral': 'مؤجل'
             };
             return statusMap[status] || 'مؤجل';
         }
@@ -2149,7 +2309,7 @@ function getArabicDaysWord(number) {
             const classMap = {
                 'interested': 'bg-green-100 text-green-800',
                 'not interested': 'bg-red-100 text-red-800',
-                'pending': 'bg-gray-100 text-gray-700'
+                'neutral': 'bg-gray-100 text-gray-700'
             };
             return classMap[status] || 'bg-gray-100 text-gray-700';
         }
@@ -2386,10 +2546,10 @@ function applyServiceFilter() {
             // Apply status criteria filter if selected
             if (criteria && criteria !== "") {
                 switch (criteria.toLowerCase()) {
-                    case 'pending':
+                    case 'neutral':
                         currentFilteredClients = currentFilteredClients.filter(client =>
                             client.response_status &&
-                            client.response_status.toLowerCase() === 'pending'
+                            client.response_status.toLowerCase() === 'neutral'
                         );
                         break;
 
@@ -2407,6 +2567,39 @@ function applyServiceFilter() {
                             (client.interest_status.toLowerCase() === 'not interested' ||
                                 client.interest_status.toLowerCase() === 'not_interested' ||
                                 client.interest_status.toLowerCase() === 'notinterested')
+                        );
+                        break;
+                    case 'late':
+                        // Filter for all late customers
+                        currentFilteredClients = currentFilteredClients.filter(client =>
+                            client.is_late_customer === true
+                        );
+                        break;
+
+                    case 'late_interested':
+                        // Filter for late AND interested customers
+                        currentFilteredClients = currentFilteredClients.filter(client =>
+                            client.is_late_customer === true &&
+                            client.interest_status &&
+                            (client.interest_status.toLowerCase() === 'interested' ||
+                                client.interest_status.toLowerCase() === 'intersted')
+                        );
+                        break;
+
+                    case 'late_not_interested':
+                        currentFilteredClients = currentFilteredClients.filter(client =>
+                            client.is_late_customer === true &&
+                            client.interest_status &&
+                            (client.interest_status.toLowerCase() === 'not interested' ||
+                                client.interest_status.toLowerCase() === 'not_interested' ||
+                                client.interest_status.toLowerCase() === 'notinterested')
+                        );
+                        break;
+                    case 'late_neutral':
+                        currentFilteredClients = currentFilteredClients.filter(client =>
+                            client.is_late_customer === true &&
+                            client.interest_status &&
+                            client.interest_status.toLowerCase() === 'neutral'
                         );
                         break;
                 }
@@ -2435,7 +2628,18 @@ function applyServiceFilter() {
 
             renderTable(currentFilteredClients);
         }
+        function isClientLate(client, lateDaysThreshold = 3) {
+            if (!client.last_contact_date) return false;
 
+            const lastContactDate = new Date(client.last_contact_date);
+            const today = new Date();
+
+            // Calculate difference in days
+            const diffTime = today - lastContactDate;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            return diffDays > lateDaysThreshold;
+        }
 function exportClients(selectedColumns = null) {
     if (!selectedColumns || selectedColumns.length === 0) {
         selectedColumns = Array.from(document.querySelectorAll('.column-checkbox input[type="checkbox"]'))
@@ -2615,6 +2819,23 @@ function exportClients(selectedColumns = null) {
                 return String(date);
             }
         }
+        function previewLogoUpload(input) {
+            const logoPreview = document.getElementById('logoPreview');
+
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    logoPreview.src = e.target.result;
+                    logoPreview.style.display = 'block';
+
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
         function startEditing(cell) {
             // If already in edit mode, do nothing
             if (cell.querySelector('.edit-form')) return;
@@ -2661,17 +2882,17 @@ function exportClients(selectedColumns = null) {
             const statusMap = {
                 'مهتم': 'interested',
                 'غير مهتم': 'not interested',
-                'مؤجل': 'pending'
+                'مؤجل': 'neutral'
             };
 
-            const currentValue = statusMap[currentStatus] || 'pending';
+            const currentValue = statusMap[currentStatus] || 'neutral';
 
             cell.innerHTML = `
         <div class="edit-form">
             <select class="edit-input" data-original-value="${currentValue}">
                 <option value="interested" ${currentValue === 'interested' ? 'selected' : ''}>مهتم</option>
                 <option value="not interested" ${currentValue === 'not interested' ? 'selected' : ''}>غير مهتم</option>
-                <option value="pending" ${currentValue === 'pending' ? 'selected' : ''}>مؤجل</option>
+                <option value="neutral" ${currentValue === 'neutral' ? 'selected' : ''}>مؤجل</option>
             </select>
             <div class="edit-actions">
                 <button class="edit-btn edit-save" onclick="saveEdit(this, ${clientId}, '${field}')">
@@ -3076,4 +3297,185 @@ function exportClients(selectedColumns = null) {
             }
         });
     </script>
+
+
+            <script>
+                // Function to open the client edit modal
+                function openClientEditModal(clientId) {
+                    // Find the client data
+                    const client = ClientsData.find(c => c.client_id == clientId);
+
+                    if (!client) {
+                        showNotification('لم يتم العثور على بيانات العميل', 'error');
+                        return;
+                    }
+
+                    // Populate the form fields
+                    document.getElementById('editClientId').value = client.client_id;
+                    document.getElementById('editCompanyName').value = client.company_name || '';
+                    document.getElementById('editClientLogo').src = client.company_logo || '/path/to/placeholder/image.jpg';
+                    document.getElementById('editAddress').value = client.address || '';
+                    document.getElementById('editContactPerson').value = client.contact_person || '';
+                    document.getElementById('editContactPosition').value = client.contact_position || '';
+                    document.getElementById('editPhone').value = client.phone || '';
+                    // document.getElementById('editWhatsappLink').value = client.whatsapp_link || '';
+                    document.getElementById('editInterestStatus').value = client.interest_status || 'neutral';
+                    document.getElementById('editInterestedService').value = client.interested_service || '';
+                    document.getElementById('editContactCount').value = client.contact_count || 0;
+                    document.getElementById('editServiceCount').value = client.interested_service_count || 0;
+                    document.getElementById('editLastContactDate').value = client.last_contact_date || '';
+                    document.getElementById('editSalesRep').value = client.sales_rep_name || '';
+
+                    // Update modal title with client name
+                    document.getElementById('modalClientName').textContent = `تعديل بيانات ${client.company_name || 'العميل'}`;
+
+                    // Show the modal - FIXED: Remove the 'hidden' class
+                    const modal = document.getElementById('clientEditModal');
+                    modal.classList.remove('hidden');
+                    modal.style.display = 'flex';
+                }
+
+                // Function to close the modal - FIXED
+                function closeClientEditModal() {
+                    const modal = document.getElementById('clientEditModal');
+                    modal.classList.add('hidden');
+                    modal.style.display = 'none';
+                }
+
+                // Function to save client edits
+                function saveClientEdits() {
+                    const formData = new FormData(document.getElementById('clientEditForm'));
+                    const clientId = formData.get('client_id');
+
+                    // Convert form data to JSON object
+                    const data = {};
+                    for (let [key, value] of formData.entries()) {
+                        if (key !== 'client_id') {
+                            data[key] = value;
+                        }
+                    }
+
+                    // Show loading state
+                    const saveBtn = document.querySelector('#clientEditModal .modal-footer button:last-child');
+                    const originalText = saveBtn.textContent;
+                    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+                    saveBtn.disabled = true;
+
+                    // Send AJAX request
+                    fetch(`/api/clients/${clientId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success) {
+                                // Update local data
+                                const clientIndex = ClientsData.findIndex(c => c.client_id == clientId);
+                                if (clientIndex !== -1) {
+                                    Object.assign(ClientsData[clientIndex], data);
+                                }
+
+                                // Update current filtered data
+                                const filteredIndex = currentFilteredClients.findIndex(c => c.client_id == clientId);
+                                if (filteredIndex !== -1) {
+                                    Object.assign(currentFilteredClients[filteredIndex], data);
+                                }
+
+                                // Re-render table
+                                renderTable();
+
+                                // Show success message
+                                showNotification('تم تحديث بيانات العميل بنجاح', 'success');
+                                closeClientEditModal();
+                            } else {
+                                throw new Error(result.message || 'فشل في حفظ التغييرات');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showNotification('حدث خطأ أثناء حفظ التغييرات', 'error');
+                        })
+                        .finally(() => {
+                            // Restore button state
+                            saveBtn.textContent = originalText;
+                            saveBtn.disabled = false;
+                        });
+                }
+                function saveAgreementEdits() {
+                    const formData = new FormData(document.getElementById('agreementEditForm'));
+                    const agreementId = formData.get('agreement_id');
+
+                    const data = {};
+                    for (let [key, value] of formData.entries()) {
+                        if (key !== 'agreement_id') {
+                            data[key] = value;
+                        }
+                    }
+
+                    // Show loading state
+                    const saveBtn = document.querySelector('#agreementEditModal .modal-footer button:last-child');
+                    const originalText = saveBtn.textContent;
+                    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+                    saveBtn.disabled = true;
+
+                    // Send AJAX request - CORRECTED URL
+                    fetch(`/api/agreements/${agreementId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success) {
+                                // Update local data
+                                const agreementIndex = AgreementsData.findIndex(a => a.agreement_id == agreementId);
+                                if (agreementIndex !== -1) {
+                                    Object.assign(AgreementsData[agreementIndex], data);
+                                }
+
+                                // Update current filtered data
+                                const filteredIndex = currentFilteredAgreements.findIndex(a => a.agreement_id == agreementId);
+                                if (filteredIndex !== -1) {
+                                    Object.assign(currentFilteredAgreements[filteredIndex], data);
+                                }
+
+                                // Re-render table
+                                renderTable();
+
+                                showNotification('تم تحديث بيانات الاتفاقية بنجاح', 'success');
+                                closeAgreementEditModal();
+                            } else {
+                                throw new Error(result.message || 'فشل في حفظ التغييرات');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showNotification('حدث خطأ أثناء حفظ التغييرات', 'error');
+                        })
+                        .finally(() => {
+                            saveBtn.textContent = originalText;
+                            saveBtn.disabled = false;
+                        });
+                }
+                // Close modal when clicking outside
+                document.getElementById('clientEditModal').addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeClientEditModal();
+                    }
+                });
+
+                // Close modal with Escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && !document.getElementById('clientEditModal').classList.contains('hidden')) {
+                        closeClientEditModal();
+                    }
+                });
+            </script>
 @endpush
