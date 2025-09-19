@@ -460,16 +460,16 @@ tbody tr {
         background-color: #dcfce7;
         color: #166534;
     }
-    
+
     .commission-unpaid {
         background-color: #ffedd5;
         color: #9a3412;
     }
-    
+
     .commission-partial {
         background-color: #fef9c3;
         color: #854d0e;
-    
+
     }
 .commission-table td {
     text-align: center;
@@ -486,7 +486,12 @@ tbody tr {
 @section('content')
 <div id="print-area" class="table-container">
     <div class="table-header">
-        <h2 id="title" class="table-title">عمولات سفير العلامة التجارية: {{ $salesRep->name }}</h2>
+        <h2 id="title" class="table-title">
+            عمولات سفير العلامة التجارية: {{ $salesRep->name }}
+            @if($selectedMonth)
+شهر - {{$selectedMonth}}
+            @endif
+        </h2>
         <div class="table-actions d-flex align-items-center gap-2">
             <select id="exportType" class="form-select" style="width: 150px;">
                 <option value="excel" selected>Excel (تصدير إكسل)</option>
@@ -510,11 +515,21 @@ tbody tr {
         <div>
             <div class="d-flex align-items-center mb-3 gap-2">
                 <i class="fas fa-filter text-secondary"></i>
-                
+
+                {{-- Month Filter --}}
+                <select id="monthSelect" class="form-select w-auto" onchange="applyMonthFilter()">
+                    <option value="">الشهر: الكل</option>
+                    @for ($m = 1; $m <= 12; $m++)
+                        <option value="{{ $m }}" {{ $selectedMonth == $m ? 'selected' : '' }}>
+                            {{ \Carbon\Carbon::create()->month($m)->format('F') }}
+                        </option>
+                    @endfor
+                </select>
+
                 {{-- Year Filter --}}
                 <select id="yearSelect" class="form-select w-auto" onchange="applyYearFilter()">
                     @for ($year = now()->year - 4; $year <= now()->year + 2; $year++)
-                        <option value="{{ $year }}" {{ $selectedYear==$year ? 'selected' : '' }}>
+                        <option value="{{ $year }}" {{ $selectedYear == $year ? 'selected' : '' }}>
                             السنة: {{ $year }}
                         </option>
                     @endfor
@@ -551,91 +566,83 @@ tbody tr {
         </thead>
 <tbody>
 @foreach($Commissions as $commission)
-@php
-    $currentMonth = date('n'); // Current month (1-12)
-    $currentMonthCommission = $commission["month_commission_$currentMonth"] ?? 0;
-    $currentMonthPaid = $commission["payment_status_month_$currentMonth"] ?? false;
-    $hasCurrentMonthCommission = is_numeric($currentMonthCommission) && $currentMonthCommission > 0;
-    $achievedTarget = $commission['achieved_percentage'] >= 90;
-    $commissionId = $commission['id'];
-   
-    // Get the specific commission ID for current month
-    $currentMonthCommissionId = $commission['id'] . '-' . $currentMonth; // Combine ID with month
-@endphp
+    @php
+        // Use selected month or current month
+        $displayMonth = $selectedMonth ?: date('n');
+        $displayMonthCommission = $commission["month_commission_$displayMonth"] ?? 0;
+        $displayMonthPaid = $commission["payment_status_month_$displayMonth"] ?? false;
+        $hasDisplayMonthCommission = is_numeric($displayMonthCommission) && $displayMonthCommission > 0;
+        $achievedTarget = $commission['achieved_percentage'] >= 90;
+        $commissionId = $commission["commission_id_month_$displayMonth"] ?? null;
+    @endphp
 
-<tr>
-    <td>{{ $commission['service_type'] }}</td>
-    <td>{{ number_format($commission['total_achieved_amount'], 0) }}</td>
+    <tr>
+        <td>{{ $commission['service_type'] }}</td>
+        <td>{{ number_format($commission['total_achieved_amount'], 0) }}</td>
         <td>{{ number_format($commission['month_achieved_amount'], 0) }}</td>
-<td class="px-4 py-3 text-sm">
-    <div class="flex items-center justify-center space-x-1">
-        @if($commission['calculation_type'] === 'item')
-            <!-- Item Fee Display -->
-<span class="font-medium text-blue-600" style="font-size: 14px; font-weight: 700;">
-    {{ number_format($commission['item_fee'], 0) }}
-</span>
-<span class="text-gray-500" style="font-size: 14px; font-weight: 700;">&nbsp;&nbsp;ر.س/وحدة</span>
+        <td class="px-4 py-3 text-sm">
+            <div class="flex items-center justify-center space-x-1">
+                @if($commission['calculation_type'] === 'item')
+                    <span class="font-medium text-blue-600" style="font-size: 14px; font-weight: 700;">
+                    {{ number_format($commission['item_fee'], 0) }}
+                </span>
+                    <span class="text-gray-500" style="font-size: 14px; font-weight: 700;">&nbsp;&nbsp;ر.س/وحدة</span>
+                    <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                @else
+                    <span class="font-medium text-purple-600" style="font-size: 14px; font-weight: 700;">
+                    {{ rtrim(rtrim(number_format($commission['commission_rate'], 2, '.', ''), '0'), '.') }}%
+                </span>
+                @endif
+            </div>
+        </td>
 
-            <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-        @else
-            <!-- Rate Display -->
-            <span class="font-medium text-purple-600" style="font-size: 14px; font-weight: 700;">
-{{ rtrim(rtrim(number_format($commission['commission_rate'], 2, '.', ''), '0'), '.') }}%
+        @for ($month = 1; $month <= 12; $month++)
+            <td class="{{ $month == $displayMonth ? 'border-2 border-blue-500' : '' }} {{ $commission["payment_status_month_$month"] ? 'bg-success text-white' : '' }}">
+                @if(is_numeric($commission["month_commission_$month"]))
+                    @if($commission["month_commission_$month"] == 0)
+                        0
+                    @else
+                        {{ number_format($commission["month_commission_$month"], 0) }} ر.س
+                    @endif
+                @elseif(!empty($commission["month_commission_$month"]))
+                    {{ $commission["month_commission_$month"] }}
+                @else
+                    0
+                @endif
+            </td>
+        @endfor
 
-            </span>
+        <td>{{ number_format($commission['total_commission'], 0) }}</td>
+
+        <td class="text-center">
+            @if($displayMonthPaid)
+                <span class="badge bg-success py-1 px-2">تم الصرف</span>
+            @elseif($hasDisplayMonthCommission)
+                <span class="badge bg-warning py-1 px-2">متاح للصرف</span>
+            @else
+                <span class="badge bg-secondary py-1 px-2">لا يوجد عمولة</span>
+            @endif
+        </td>
+
+        @if(Auth::user()->role === 'admin')
+            <td class="text-center">
+                @if($hasDisplayMonthCommission && !$displayMonthPaid && $achievedTarget && $commissionId)
+                    <button onclick="payCommission('{{ $commissionId }}', {{ $displayMonth }})"
+                            class="btn btn-xs btn-primary py-0 px-2" style="font-size: 0.75rem;">
+                        صرف عمولة الشهر
+                    </button>
+                @elseif($displayMonthPaid)
+                    <span class="badge bg-success py-1 px-2">تم الصرف</span>
+                @else
+                    <span class="text-muted small">لا يستحق عمولة</span>
+                @endif
+            </td>
         @endif
-    </div>
-    
-</td>
-
-    @for ($month = 1; $month <= 12; $month++)
-<td class="{{ $month == $currentMonth ? 'border-2 border-blue-500' : '' }} {{ $commission["payment_status_month_$month"] ? 'bg-success text-white' : '' }}">
-    @if(is_numeric($commission["month_commission_$month"]))
-        @if($commission["month_commission_$month"] == 0)
-            0
-        @else
-            {{ number_format($commission["month_commission_$month"], 0) }} ر.س
-        @endif
-    @elseif(!empty($commission["month_commission_$month"]))
-        {{ $commission["month_commission_$month"] }}
-    @else
-        0
-    @endif
-</td>
-    @endfor
-
-    <td>{{ number_format($commission['total_commission'], 0) }}</td>
-
-    <td class="text-center">
-        @if($currentMonthPaid)
-            <span class="badge bg-success py-1 px-2">تم الصرف</span>
-        @elseif($hasCurrentMonthCommission)
-            <span class="badge bg-warning py-1 px-2">متاح للصرف</span>
-        @else
-            <span class="badge bg-secondary py-1 px-2">لا يوجد عمولة</span>
-        @endif
-    </td>
-
-    @if(Auth::user()->role === 'admin')
- <td class="text-center">
-        @if($hasCurrentMonthCommission && !$currentMonthPaid && $achievedTarget)
-            <button onclick="payCommission('{{ $commissionId }}')"
-                class="btn btn-xs btn-primary py-0 px-2" style="font-size: 0.75rem;"
-                data-month="{{ $currentMonth }}">
-                صرف عمولة الشهر الحالي
-            </button>
-        @elseif($currentMonthPaid)
-            <span class="badge bg-success py-1 px-2">تم الصرف</span>
-        @else
-            <span class="text-muted small">لا يستحق عمولة</span>
-        @endif
-    </td>
-    @endif
-</tr>
+    </tr>
 @endforeach
-        </tbody>
+</tbody>
     </table>
             <div class="pdf-footer" style="display: none;">
                 <p>جميع الحقوق محفوظة &copy; شركة آفاق الخليج {{ date('Y') }}</p>
@@ -658,7 +665,7 @@ function renderTable(data = commissionsData) {
     const isAdmin = @json(Auth::user()->role === 'admin');
     const currentMonth = new Date().getMonth() + 1; // Gets current month (1-12)
     const currentYear = new Date().getFullYear(); // Gets current year
-    
+
     tbody.innerHTML = '';
 
     if (!data || data.length === 0) {
@@ -678,16 +685,16 @@ function renderTable(data = commissionsData) {
     data.forEach(commission => {
         // Get current month's data
         const currentMonthCommission = commission[`month_commission_${currentMonth}`] || 0;
-        const currentMonthPaid = commission[`payment_status_month_${currentMonth}`] === true || 
+        const currentMonthPaid = commission[`payment_status_month_${currentMonth}`] === true ||
                                commission[`payment_status_month_${currentMonth}`] === 1;
-        
-        const hasCommission = currentMonthCommission !== '-' && 
-                            currentMonthCommission !== 0 && 
+
+        const hasCommission = currentMonthCommission !== '-' &&
+                            currentMonthCommission !== 0 &&
                             !isNaN(currentMonthCommission);
 
         // Status determination
         let statusText, statusClass;
-        
+
         if (!hasCommission) {
             statusText = 'لا يوجد عمولة';
             statusClass = 'bg-gray-100 text-gray-800';
@@ -729,14 +736,14 @@ function renderTable(data = commissionsData) {
         row.className = 'hover:bg-gray-50 text-center';
         row.innerHTML = `
             <!-- Your other table cells here -->
-            
+
             <!-- Status Cell -->
             <td class="px-4 py-3 text-sm text-center">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${statusClass}">
                     ${statusText}
                 </span>
             </td>
-            
+
             <!-- Action Button (for admin) -->
             ${isAdmin ? `
             <td class="px-4 py-3 text-sm text-center">
@@ -755,35 +762,150 @@ function renderTable(data = commissionsData) {
         const year = document.getElementById('yearSelect').value;
         window.location.href = window.location.pathname + '?year=' + year;
     }
+    function applyMonthFilter() {
+        const month = document.getElementById('monthSelect').value;
+        const year = document.getElementById('yearSelect').value;
 
-    // Pay commission function
-function payCommission(commissionId, monthDescription) {
-    // Show commission ID and month description in alert
-    
-    if (confirm(`هل أنت متأكد من صرف هذه العمولة؟`)) {
-        fetch(`/commissions/${commissionId}/payment-done`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(`تم صرف العمولة بنجاح`);
-                window.location.reload();
-            } else {
-                alert(`حدث خطأ: ${data.message || 'فشل في عملية الصرف'}`);
-            }
-        })
-        .catch(error => {
-            alert('حدث خطأ في الاتصال: ' + error.message);
-            console.error('Error:', error);
-        });
+        // Create URL with query parameters
+        const url = new URL(window.location.href);
+
+        if (month) {
+            url.searchParams.set('month', month);
+        } else {
+            url.searchParams.delete('month');
+        }
+
+        if (year) {
+            url.searchParams.set('year', year);
+        } else {
+            url.searchParams.delete('year');
+        }
+
+        // Redirect to the new URL
+        window.location.href = url.toString();
     }
-}
+
+    function applyYearFilter() {
+        const year = document.getElementById('yearSelect').value;
+        const month = document.getElementById('monthSelect').value;
+
+        // Create URL with query parameters
+        const url = new URL(window.location.href);
+
+        if (year) {
+            url.searchParams.set('year', year);
+        } else {
+            url.searchParams.delete('year');
+        }
+
+        if (month) {
+            url.searchParams.set('month', month);
+        } else {
+            url.searchParams.delete('month');
+        }
+
+        // Redirect to the new URL
+        window.location.href = url.toString();
+    }function applyMonthFilter() {
+        const month = document.getElementById('monthSelect').value;
+        const year = document.getElementById('yearSelect').value;
+
+        // Create URL with query parameters
+        const url = new URL(window.location.href);
+
+        if (month) {
+            url.searchParams.set('month', month);
+        } else {
+            url.searchParams.delete('month');
+        }
+
+        if (year) {
+            url.searchParams.set('year', year);
+        } else {
+            url.searchParams.delete('year');
+        }
+
+        // Redirect to the new URL
+        window.location.href = url.toString();
+    }
+
+    // Apply year filter (updated to preserve month)
+    function applyYearFilter() {
+        const year = document.getElementById('yearSelect').value;
+        const month = document.getElementById('monthSelect').value;
+
+        // Create URL with query parameters
+        const url = new URL(window.location.href);
+
+        if (year) {
+            url.searchParams.set('year', year);
+        } else {
+            url.searchParams.delete('year');
+        }
+
+        if (month) {
+            url.searchParams.set('month', month);
+        } else {
+            url.searchParams.delete('month');
+        }
+
+        // Redirect to the new URL
+        window.location.href = url.toString();
+    }
+
+    // Read URL parameters on page load
+    function readUrlParameters() {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // Get month from URL
+        const month = urlParams.get('month');
+        if (month) {
+            const monthSelect = document.getElementById('monthSelect');
+            if (monthSelect) {
+                monthSelect.value = month;
+            }
+        }
+
+        // Get year from URL
+        const year = urlParams.get('year');
+        if (year) {
+            const yearSelect = document.getElementById('yearSelect');
+            if (yearSelect) {
+                yearSelect.value = year;
+            }
+        }
+    }
+
+    // Call on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        readUrlParameters();
+    })
+    // Pay commission function
+    function payCommission(commissionId, month) {
+        if (confirm(`هل أنت متأكد من صرف عمولة هذا الشهر؟`)) {
+            fetch(`/commissions/${commissionId}/payment-done`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`تم صرف العمولة بنجاح`);
+                        window.location.reload();
+                    } else {
+                        alert(`حدث خطأ: ${data.message || 'فشل في عملية الصرف'}`);
+                    }
+                })
+                .catch(error => {
+                    alert('حدث خطأ في الاتصال: ' + error.message);
+                    console.error('Error:', error);
+                });
+        }
+    }
     // Initial render
     //document.addEventListener('DOMContentLoaded', function() {
       //  renderTable();

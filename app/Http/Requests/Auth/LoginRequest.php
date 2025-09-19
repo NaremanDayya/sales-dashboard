@@ -13,9 +13,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Stevebauman\Location\Facades\Location;
+
 
 class LoginRequest extends FormRequest
 {
+
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -129,10 +133,24 @@ protected function validateSalesRepIp($user, $currentIp): bool
 
 protected function handleInvalidIp($user, $currentIp)
 {
+
+    $locationData = Location::get($currentIp);
+//    dd($locationData);
+
+    // Save IP attempt to DB
+    SalesRepLoginIp::firstOrCreate([
+        'sales_rep_id' => $user->salesRep->id,
+        'ip_address'   => $currentIp,
+    ], [
+        'is_allowed'   => false,
+        'is_temporary' => false,
+        'is_blocked'   => false,
+        'location'     => $locationData->countryName . ' - ' . $locationData->cityName . ' - ' . $locationData->regionName,
+    ]);
     User::where('role', 'admin')->get()->each(function ($admin) use ($user, $currentIp) {
         $admin->notify(new BlockedIpLoginAttempt($user->salesRep, $currentIp));
     });
-    
+
     Auth::logout();
 }
     /**
