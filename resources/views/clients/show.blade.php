@@ -13,8 +13,11 @@
                         @php
                             $logo = $client->company_logo;
                             $isUrl = Str::startsWith($logo, ['http://', 'https://']);
-                            $logoUrl = $isUrl ? $logo : asset('storage/' . $logo);
+                            $logoUrl = $isUrl
+                                ? $logo
+                                : ($logo ? Storage::disk('s3')->temporaryUrl($logo, now()->addMinutes(10)) : null);
                         @endphp
+
 
                         <div class="flex justify-center">
                             <div class="relative">

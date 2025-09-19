@@ -22,13 +22,14 @@
                 <div class="profile-avatar">
                     <div class="avatar-edit-container text-center">
                         <div class="avatar-wrapper mb-2 position-relative">
-<img src="{{ $user->personal_image
-    ? asset('storage/' . $user->personal_image)
+                            <img src="{{ $user->personal_image
+    ? Storage::disk('s3')->temporaryUrl($user->personal_image, now()->addMinutes(5))
     : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=random' }}"
-    alt="صورة الملف الشخصي"
-    class="rounded-circle"
-    width="120"
-    id="profileImage">                        </div>
+                                 alt="صورة الملف الشخصي"
+                                 class="rounded-circle"
+                                 width="120"
+                                 id="profileImage">
+                        </div>
 
 @if (
     request()->is('showProfile') ||
@@ -63,7 +64,7 @@
                     @endphp
 <p class="profile-title text-muted font-bold d-flex align-items-center justify-content-center gap-2">
     {{ $roleText }}
-    @if(Auth::user()->role === 'admin')
+    @if(Auth::user()->role === 'admin' && isset($salesRep))
 <div x-data="{ showAdminPasswordModal: false }">
     <!-- Trigger Button -->
     <button @click="showAdminPasswordModal = true" class="btn btn-primary">

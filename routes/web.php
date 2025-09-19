@@ -40,6 +40,29 @@ require __DIR__ . '/salesRep.php';
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/s3-test', function () {
+    try {
+        $disk = Storage::disk('s3');
+
+        // Debug S3 configuration
+        $config = method_exists($disk->getDriver(), 'getAdapter')
+            ? $disk->getDriver()->getAdapter()->getClient()->getConfig()->toArray()
+            : null;
+
+        // Test upload
+        $result = $disk->put('test.txt', 'Hello S3!');
+
+        return response()->json([
+            's3_config' => $config,
+            'upload_result' => $result ? 'Upload succeeded!' : 'Upload failed!',
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+});
 
 Route::prefix('admin/settings')->middleware('auth')->group(function () {
     Route::get('/', [App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
@@ -84,16 +107,17 @@ Route::middleware([
     Route::get('/salesreps/credentials', function () {
         $csvPath = 'exports/sales_reps_credentials.csv';
 
-        if (!Storage::exists($csvPath)) {
+        try {
+            $csvUrl = Storage::disk('s3')->temporaryUrl($csvPath, now()->addMinutes(10));
+        } catch (\Exception $e) {
             return redirect()->back()->with('error', 'No credentials data available yet');
         }
 
+        // قراءة البيانات داخل النظام (اختياري)
         $credentials = [];
-        $file = Storage::get($csvPath);
-        // Explode by line, handle both Unix and Windows line endings
+        $file = Storage::disk('s3')->get($csvPath);
         $lines = preg_split('/\r\n|\r|\n/', $file);
 
-        // Skip header row and process data
         for ($i = 1; $i < count($lines); $i++) {
             $line = trim($lines[$i]);
             if (!empty($line)) {
@@ -101,7 +125,7 @@ Route::middleware([
             }
         }
 
-        return view('salesRep.credentials', compact('credentials'));
+        return view('salesRep.credentials', compact('credentials', 'csvUrl'));
     })->name('salesreps.credentials');
 Route::get('/admin/shared-companies', [ClientController::class, 'sharedCompanies'])->name('admin.shared-companies');
 

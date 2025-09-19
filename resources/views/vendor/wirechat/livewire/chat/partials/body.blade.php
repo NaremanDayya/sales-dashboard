@@ -217,30 +217,25 @@
                                     @endif
 
                                     {{-- Attachment section --}}
+                                    {{-- Attachment section --}}
+                                    {{-- Attachment section --}}
                                     @if ($attachment)
-                                        {{-- Attachment is Application/ --}}
                                         @if (str()->startsWith($attachment->mime_type, 'application/'))
                                             @include('wirechat::livewire.chat.partials.file', [ 'attachment' => $attachment ])
-                                        @endif
 
-                                        {{-- Attachment is Video/ --}}
-                                        @if (str()->startsWith($attachment->mime_type, 'video/'))
+                                        @elseif (str()->startsWith($attachment->mime_type, 'video/'))
                                             <x-wirechat::video height="max-h-[400px]" :cover="false" source="{{ $attachment?->url }}" />
-                                        @endif
 
-                                        {{-- Attachment is image/ --}}
-                                        @if (str()->startsWith($attachment->mime_type, 'image/'))
-                                            @include('wirechat::livewire.chat.partials.image', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'attachment' => $attachment ])
+                                        @elseif (str()->startsWith($attachment->mime_type, 'image/'))
+                                            @include('wirechat::livewire.chat.partials.image', [
+                                                'previousMessage' => $previousMessage,
+                                                'message' => $message,
+                                                'nextMessage' => $nextMessage,
+                                                'belongsToAuth' => $belongsToAuth,
+                                                'attachment' => $attachment
+                                            ])
                                         @endif
                                     @endif
-
-                                    {{-- if message is emoji then don't show the styled messagebody layout --}}
-                                    @if ($isEmoji)
-                                        <p class="text-5xl dark:text-white">
-                                            {{ $message->body }}
-                                        </p>
-                                    @endif
-
                                     {{-- Message body section --}}
                                     {{-- If message is not emoji then show the message body styles --}}
                                     @if ($message->body && !$isEmoji)

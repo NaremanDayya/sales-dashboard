@@ -94,10 +94,13 @@
                         @if(!empty($selectedConversation?->client?->company_logo))
                             <a href="{{ route('sales-reps.clients.show', ['sales_rep' => $client->sales_rep_id, 'client' => $client->id]) }}">
                                 <img
-                                    src="{{ asset('storage/' . $client->company_logo) }}"
+                                    src="{{ $client->company_logo
+        ? Storage::disk('s3')->temporaryUrl($client->company_logo, now()->addMinutes(5))
+        : 'https://ui-avatars.com/api/?name=' . urlencode($client->company_name) . '&background=random' }}"
                                     alt="شعار الشركة"
                                     class="max-h-full max-w-full object-contain bg-white rounded-full"
-                                >
+                                />
+
                             </a>
                         @else
                             <svg class="w-full h-full rounded-full" fill="currentColor" viewBox="0 0 24 24">
