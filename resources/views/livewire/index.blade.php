@@ -188,9 +188,9 @@ $salesRepId = Auth::user()->salesRep->id;
                     <span class="sr-only">Open user menu</span>
 
                     <div class="relative h-10 w-10 rounded-full overflow-hidden border-2 border-white/30 group-hover:border-white/50 transition-all duration-300">
- <img class="h-full w-full object-cover"
-                            src="{{ Auth::user()->personal_image ? asset('storage/' . Auth::user()->personal_image) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=random' }}"
-                            alt="{{ Auth::user()->name }}">
+                        <img class="h-full w-full object-cover"
+                             src="{{ Auth::user()->personal_image ? Storage::disk('s3')->url(Auth::user()->personal_image) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=random' }}"
+                             alt="{{ Auth::user()->name }}">
                         <div class="absolute inset-0 bg-white/10 group-hover:bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
 

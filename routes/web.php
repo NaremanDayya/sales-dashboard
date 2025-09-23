@@ -130,7 +130,7 @@ Route::middleware([
 Route::get('/admin/shared-companies', [ClientController::class, 'sharedCompanies'])->name('admin.shared-companies');
 
     Route::get('/admin/impersonate/{salesRep}', [SalesRepController::class, 'impersonate'])
-        ->middleware(['auth']); // admin middleware
+        ->middleware(['auth']);
 
 
 Route::put('/admin/commissions/{commission}/update-type', [AdminCommissionController::class, 'updateCommissionType'])

@@ -94,9 +94,9 @@
                         @if(!empty($selectedConversation?->client?->company_logo))
                             <a href="{{ route('sales-reps.clients.show', ['sales_rep' => $client->sales_rep_id, 'client' => $client->id]) }}">
                                 <img
-                                    src="{{ $client->company_logo
-        ? Storage::disk('s3')->temporaryUrl($client->company_logo, now()->addMinutes(5))
-        : 'https://ui-avatars.com/api/?name=' . urlencode($client->company_name) . '&background=random' }}"
+                                    src="{{ $selectedConversation?->client->company_logo
+        ? Storage::disk('s3')->temporaryUrl($selectedConversation?->client->company_logo, now()->addMinutes(5))
+        : 'https://ui-avatars.com/api/?name=' . urlencode($selectedConversation?->client->company_name) . '&background=random' }}"
                                     alt="شعار الشركة"
                                     class="max-h-full max-w-full object-contain bg-white rounded-full"
                                 />

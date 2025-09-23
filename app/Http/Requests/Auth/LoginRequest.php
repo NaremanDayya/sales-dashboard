@@ -77,7 +77,7 @@ public function authenticate()
     // Skip IP validation if admin is logging in (from admin IP)
     $currentIp = Request::ip();
     $adminIp = '129.208.193.133';
-
+//dd($currentIp);
     if ($user->salesRep && $currentIp !== $adminIp) {
         $isValidIp = $this->validateSalesRepIp($user, $currentIp);
 

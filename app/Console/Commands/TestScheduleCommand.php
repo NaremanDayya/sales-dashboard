@@ -11,7 +11,7 @@ class TestScheduleCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'app:test-schedule-command';
+
 
     /**
      * The console command description.
@@ -26,7 +26,7 @@ class TestScheduleCommand extends Command
     public function handle()
     {
          $this->info('Scheduler is working! Time: '. now());
-          
+
         return 0;
     }
 }
