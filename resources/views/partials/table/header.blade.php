@@ -101,42 +101,45 @@ $salesRepId = Auth::user()->salesRep->id;
                 @include('partials.chatClient')
             </div>
 
- <div x-data="{ chatDropdownOpen: false }" class="relative">
-                <!-- Chat toggle button -->
+            <div x-data="{
+                            chatDropdownOpen: false,
+                            unreadCount: 0,
+                            init() {
+                                window.addEventListener('chat-unread-count', (event) => {
+                                    this.unreadCount = event.detail.count;
+                                });
+                            }
+                        }" class="relative">
                 <button @click="chatDropdownOpen = !chatDropdownOpen"
-                    class="p-2 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors duration-200 relative">
-                    <!-- Chat icon SVG -->
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-6 w-6"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M8 3h8a5 5 0 0 1 5 5v6a5 5 0 0 1-5 5h-4l-4 4v-4H8a5 5 0 0 1-5-5V8a5 5 0 0 1 5-5z"
-                        />
+                        class="p-2 text-gray-300 hover:text-white rounded-full hover:bg-gray-700 transition-all duration-300 group relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M8 3h8a5 5 0 0 1 5 5v6a5 5 0 0 1-5 5h-4l-4 4v-4H8a5 5 0 0 1-5-5V8a5 5 0 0 1 5-5z" />
                     </svg>
+
+
+                    <!-- Unread count badge -->
+                    <span x-show="unreadCount > 0" x-text="unreadCount"
+                          class="unread-badge absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full"
+                          style="font-size: 0.6rem;"></span>
+
+
+                    <span
+                        class="absolute -inset-1 rounded-full bg-white bg-opacity-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                 </button>
 
-                <!-- Dropdown panel -->
-                <div
-                    x-show="chatDropdownOpen"
-                    @click.away="chatDropdownOpen = false"
-                    x-transition:enter="ease-out duration-200"
-                    x-transition:enter-start="opacity-0 translate-y-1"
-                    x-transition:enter-end="opacity-100 translate-y-0"
-                    x-transition:leave="ease-in duration-150"
-                    x-transition:leave-start="opacity-100 translate-y-0"
-                    x-transition:leave-end="opacity-0 translate-y-1"
-                    class="absolute right-0 mt-2 w-96 origin-top-right"
-                    style="margin-right: -20rem;"
-                    x-cloak
-                >
-                    <div class="text-sm h-[500px] z-50 bg-white border overflow-hidden dark:border-neutral-700 rounded-xl shadow-xl border-neutral-200/70 text-neutral-700 dark:bg-neutral-900">
+                <div x-show="chatDropdownOpen" @click.away="chatDropdownOpen = false"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     class="absolute right-0 mt-2 w-96 origin-top-right z-50" style="margin-right: -20rem;"
+                     x-cloak>
+                    <div
+                        class="text-sm h-[500px] bg-gray-800 border border-gray-700 rounded-xl shadow-xl overflow-hidden">
                         <livewire:wirechat.chats />
                     </div>
                 </div>
@@ -175,9 +178,9 @@ $salesRepId = Auth::user()->salesRep->id;
                         class="relative flex items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 p-1 shadow hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 group">
                     <span class="sr-only">Open user menu</span>
                     <div class="relative h-10 w-10 rounded-full overflow-hidden border-2 border-white/30 group-hover:border-white/50 transition-all duration-300">
-<img 
-    class="h-full w-full object-cover" 
-    src="{{ Auth::user()->personal_image ? asset('storage/' . Auth::user()->personal_image) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=random' }}" 
+<img
+    class="h-full w-full object-cover"
+    src="{{ Auth::user()->personal_image ? asset('storage/' . Auth::user()->personal_image) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=random' }}"
     alt="{{ Auth::user()->name }}"
 >
                         <div class="absolute inset-0 bg-white/10 group-hover:bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

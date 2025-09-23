@@ -62,10 +62,7 @@ class ClientEditRequestController extends Controller
         } else if ($client_request->status == 'rejected') {
             $user->notify(new ClientEditRequestRejectedNotification($client_request));
         }
-        return redirect()->route('sales-reps.clients.show', [
-            'client' => $client->id,
-            'sales_rep' => $client->sales_rep_id,
-        ])->with('success', 'Request reviewed successfully.');
+        return redirect()->route('admin.allRequests');
     }
 
     public function review(Client $client, ClientEditRequest $client_request)

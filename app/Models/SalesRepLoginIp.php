@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use Torann\GeoIP\GeoIP;
 class SalesRepLoginIp extends Model
 {
     use HasFactory;
@@ -18,6 +18,7 @@ class SalesRepLoginIp extends Model
         'is_temporary',
         'blocked_at',
 	'allowed_until',
+        'location',
     ];
 
     protected $casts = [

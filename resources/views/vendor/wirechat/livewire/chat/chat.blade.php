@@ -10,7 +10,7 @@
 
 @assets
     <style>
-     
+
         emoji-picker {
             width: 100% !important;
             height: 100%;
@@ -98,7 +98,7 @@
 
         return $wire.widget == true;
     }
-}" 
+}"
 
  x-init="setTimeout(() => {
 
@@ -132,3 +132,9 @@
 
     <livewire:wirechat.chat.drawer />
 </div>
+<script>
+    window.addEventListener('open-edit-modal', event => {
+        const editModal = new bootstrap.Modal(document.getElementById('editMessageModal'));
+        editModal.show();
+    });
+</script>

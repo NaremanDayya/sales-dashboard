@@ -34,15 +34,19 @@ class SalesRepController extends Controller
                 'start_work_date' => $rep->start_work_date->format('Y-m-d'),
                 'work_duration' => $rep->work_duration,
                 'target_customers' => $rep->clients->count(),
-                'late_customers' => $rep->lateCustomers,
+                'late_customers' => $rep->lateCustomers('interested')+$rep->lateCustomers('not interested')+$rep->lateCustomers('neutral'),
+                'interested_late_customers' => $rep->lateCustomers('interested'),
+                'not_interested_late_customers' => $rep->lateCustomers('not interested'),
+                'neutral_late_customers' => $rep->lateCustomers('neutral'),
                 'total_orders' => $rep->totalOrders,
                 'pending_orders' => $rep->totalPendedRequests,
                 'interested_customers' => $rep->interestedClients->count(),
                 'active_agreements_count' =>(int) ($rep->active_agreements_count),
 		'inactive_agreements_count' => (int) ($rep->inactive_agreements_count),
-		'personal_image' => !empty($rep->user?->personal_image)
-    ? asset('storage/' . $rep->user->personal_image)
-    : 'https://ui-avatars.com/api/?name=' . urlencode($rep->user?->name ?? 'User') . '&background=random',
+                'personal_image' => !empty($rep->user?->personal_image)
+                    ? Storage::disk('s3')->temporaryUrl($rep->user->personal_image, now()->addMinutes(10))
+                    : 'https://ui-avatars.com/api/?name=' . urlencode($rep->user?->name ?? 'User') . '&background=random',
+
 
                 'account_status' => $rep->user->account_status,
 
@@ -64,133 +68,135 @@ class SalesRepController extends Controller
     }
 
 
-public function store(Request $request)
-{
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'start_work_date' => 'required|date',
-        'email' => 'required|email|unique:users,email',
-        'interested_customers' => 'nullable|integer',
-        'phone' => 'nullable|string|digits:10',
-        'permissions' => 'nullable|array',
-        'permissions.*' => 'exists:permissions,id',
-        'password' => 'required|string|min:8',
-        'birthday' => 'required|date|before:today',
-        'gender' => 'required|in:male,female',
-        'id_card' => 'required|digits:10|regex:/^[12][0-9]{9}$/|unique:users,id_card',
-        'personal_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-        'remove_personal_image' => 'nullable|boolean',
-    ]);
-
-    $age = Carbon::parse($request->birthday)->age;
-
-    // Check for existing user
-    $existingUser = User::where('name', $request->name)
-        ->where('nationality', $request->nationality)
-        ->whereDate('birthday', $request->birthday)
-        ->where('email', $request->email)
-        ->whereJsonContains('contact_info->phone', $request->phone)
-        ->first();
-
-    if ($existingUser) {
-        return back()->withErrors(['error' => 'المستخدم موجود بالفعل بنفس البيانات.'])->withInput();
-    }
-
-    // Create user
-    $user = User::create([
-        'name' => $request->name,
-        'username' => strtolower(str_replace(' ', '.', $request->name)) . rand(1, 999),
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
-        'role' => 'salesRep',
-        'email_verified_at' => now(),
-        'contact_info' => json_encode(['phone' => $request->input('phone')]),
-        'account_status' => $request->status,
-        'age' => $age,
-        'nationality' => $request->nationality,
-        'gender' => $request->gender,
-        'id_card' => $request->id_card,
-        'birthday' => $request->birthday,
-    ]);
-	$csvPath = 'exports/sales_reps_credentials.csv';
-
-$credentials = [
-    'name' => $user->name,
-    'email' => $user->email,
-    'password' => $request->password, // كلمة المرور الأصلية
-];
-
-// إنشاء الملف إذا مش موجود مع العنوان
-if (!Storage::exists($csvPath)) {
-    Storage::put($csvPath, "Name,Email,Password\n");
-}
-
-// قراءة المحتوى الحالي
-$existingContent = Storage::get($csvPath);
-$lines = explode("\n", $existingContent);
-$headers = array_shift($lines);
-
-$updated = false;
-$newContent = [$headers];
-
-// تحديث أو إضافة السطر الجديد
-foreach ($lines as $line) {
-    if (empty(trim($line))) continue;
-
-    $data = str_getcsv($line);
-
-    if (count($data) >= 2 && $data[1] === $credentials['email']) {
-        $newContent[] = implode(',', [
-            $credentials['name'],
-            $credentials['email'],
-            $credentials['password'],
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'start_work_date' => 'required|date',
+            'email' => 'required|email|unique:users,email',
+            'interested_customers' => 'nullable|integer',
+            'phone' => 'nullable|string|digits:10',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'exists:permissions,id',
+            'password' => 'required|string|min:8',
+            'birthday' => 'required|date|before:today',
+            'gender' => 'required|in:male,female',
+            'id_card' => 'required|digits:10|regex:/^[12][0-9]{9}$/|unique:users,id_card',
+            'personal_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'remove_personal_image' => 'nullable|boolean',
         ]);
-        $updated = true;
-    } else {
-        $newContent[] = $line;
+
+        $age = Carbon::parse($request->birthday)->age;
+
+        // Check for existing user
+        $existingUser = User::where('name', $request->name)
+            ->where('nationality', $request->nationality)
+            ->whereDate('birthday', $request->birthday)
+            ->where('email', $request->email)
+            ->whereJsonContains('contact_info->phone', $request->phone)
+            ->first();
+
+        if ($existingUser) {
+            return back()->withErrors(['error' => 'المستخدم موجود بالفعل بنفس البيانات.'])->withInput();
+        }
+
+        // Create user
+        $user = User::create([
+            'name' => $request->name,
+            'username' => strtolower(str_replace(' ', '.', $request->name)) . rand(1, 999),
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'salesRep',
+            'email_verified_at' => now(),
+            'contact_info' => json_encode(['phone' => $request->input('phone')]),
+            'account_status' => $request->status,
+            'age' => $age,
+            'nationality' => $request->nationality,
+            'gender' => $request->gender,
+            'id_card' => $request->id_card,
+            'birthday' => $request->birthday,
+        ]);
+
+        // CSV handling (store on S3)
+        $csvPath = 'exports/sales_reps_credentials.csv';
+        $credentials = [
+            'name' => $user->name,
+            'email' => $user->email,
+            'password' => $request->password,
+        ];
+
+        // Check if CSV exists on S3
+        if (!Storage::disk('s3')->exists($csvPath)) {
+            Storage::disk('s3')->put($csvPath, "Name,Email,Password\n");
+        }
+
+        $existingContent = Storage::disk('s3')->get($csvPath);
+        $lines = explode("\n", $existingContent);
+        $headers = array_shift($lines);
+
+        $updated = false;
+        $newContent = [$headers];
+
+        foreach ($lines as $line) {
+            if (empty(trim($line))) continue;
+
+            $data = str_getcsv($line);
+
+            if (count($data) >= 2 && $data[1] === $credentials['email']) {
+                $newContent[] = implode(',', [
+                    $credentials['name'],
+                    $credentials['email'],
+                    $credentials['password'],
+                ]);
+                $updated = true;
+            } else {
+                $newContent[] = $line;
+            }
+        }
+
+        if (!$updated) {
+            $newContent[] = implode(',', [
+                $credentials['name'],
+                $credentials['email'],
+                $credentials['password'],
+            ]);
+        }
+
+        Storage::disk('s3')->put($csvPath, implode("\n", $newContent));
+
+        // Handle personal image upload to S3
+        if ($request->hasFile('personal_image')) {
+            $file = $request->file('personal_image');
+            $path = 'profile-photos/' . $file->hashName();
+            Storage::disk('s3')->putFileAs('profile-photos', $file, $file->hashName());
+            $user->personal_image = $path;
+            $user->save();
+        }
+
+        // Sync permissions
+        $this->syncPermissions($user, $request->permissions ?? []);
+
+        // Work duration calculation
+        $startDate = Carbon::parse($request->start_work_date);
+        $diff = $startDate->diff(Carbon::now());
+
+        // Create sales rep record
+        $salesRep = SalesRep::create([
+            'name' => $request->name,
+            'start_work_date' => $request->start_work_date,
+            'interested_customers' => 0,
+            'work_duration' => "{$diff->y} years, {$diff->m} months, {$diff->d} days",
+            'user_id' => $user->id,
+            'target_customers' => 0,
+            'late_customers' => 0,
+            'total_orders' => 0,
+            'pending_orders' => 0
+        ]);
+
+        return redirect()->route('sales-reps.index')
+            ->with('success', "تم إضافة المندوب {$salesRep->name} بنجاح");
     }
-}
 
-if (!$updated) {
-    $newContent[] = implode(',', [
-        $credentials['name'],
-        $credentials['email'],
-        $credentials['password'],
-    ]);
-}
-
-Storage::put($csvPath, implode("\n", $newContent));
-
-    // Handle image upload
-    if ($request->hasFile('personal_image')) {
-        $path = $request->file('personal_image')->store('profile-photos', 'public');
-        $user->personal_image = $path;
-        $user->save();
-    }
-
-    // Sync permissions
-    $this->syncPermissions($user, $request->permissions ?? []);
-
-    // Work duration calculation
-    $startDate = Carbon::parse($request->start_work_date);
-    $diff = $startDate->diff(Carbon::now());
-
-    // Create sales rep record
-    $salesRep = SalesRep::create([
-        'name' => $request->name,
-        'start_work_date' => $request->start_work_date,
-        'interested_customers' => 0,
-        'work_duration' => "{$diff->y} years, {$diff->m} months, {$diff->d} days",
-        'user_id' => $user->id,
-        'target_customers' => 0,
-        'late_customers' => 0,
-        'total_orders' => 0,
-        'pending_orders' => 0
-    ]);
-
-    return redirect()->route('sales-reps.index')
-        ->with('success', "تم إضافة المندوب {$salesRep->name} بنجاح");
-}
     private function syncPermissions(User $user, array $permissions)
     {
         $permissionNames = Permission::whereIn('id', $permissions)->pluck('name')->toArray();
@@ -286,7 +292,7 @@ if ($salesRep->user->personal_image && Storage::exists('public/' . $salesRep->us
 $image = $request->file('personal_image');
 $imageName = time() . '_' . $image->getClientOriginalName();
 $path = $request->personal_image->storeAs('profile-images', $imageName, 'public');
-$validated['personal_image'] = $path; 
+$validated['personal_image'] = $path;
     }
 
     // Prepare user data
@@ -539,18 +545,22 @@ Storage::put($csvPath, implode("\n", $newContent));
     public function allRequests()
     {
         $clientRequests = ClientEditRequest::with(['client', 'salesRep'])
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->get();
 
         $agreementRequests = AgreementEditRequest::with(['agreement', 'client', 'salesRep'])
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->get();
 
-  $chatClientRequests =ClientRequest::with(['client', 'salesRep'])
-            ->latest()
+        $chatClientRequests = ClientRequest::with(['client', 'salesRep'])
+            ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('salesRep.pendedRequests', compact('clientRequests', 'agreementRequests','chatClientRequests'));
+        // Combine all requests into one collection
+        $allRequests = $clientRequests->concat($agreementRequests)->concat($chatClientRequests)
+            ->sortByDesc('created_at');
+
+        return view('salesRep.pendedRequests', compact('clientRequests', 'agreementRequests', 'chatClientRequests', 'allRequests'));
     }
     public function myRequests(SalesRep $salesRep)
     {
@@ -560,16 +570,17 @@ Storage::put($csvPath, implode("\n", $newContent));
 
         $clientRequests = ClientEditRequest::with(['client', 'salesRep'])
             ->where('sales_rep_id', $userId)
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->get();
 
         $agreementRequests = AgreementEditRequest::with(['agreement', 'client', 'salesRep'])
             ->where('sales_rep_id', $userId)
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->get();
-$chatClientRequests =ClientRequest::with(['client', 'salesRep'])
+
+        $chatClientRequests = ClientRequest::with(['client', 'salesRep'])
             ->where('sales_rep_id', $userId)
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return view('salesRep.pendedRequests', compact('clientRequests','chatClientRequests', 'agreementRequests', 'salesRep'));
@@ -671,4 +682,35 @@ $chatClientRequests =ClientRequest::with(['client', 'salesRep'])
         ], 500);
     }
 }
+
+    public function impersonate(User $salesRep)
+    {
+//        dd($salesRep->id);
+        $admin = Auth::user();
+
+        if ($admin->role !== 'admin') {
+            abort(403, 'Access denied');
+        }
+
+        session([
+            'impersonator_id' => $admin->id,
+            'sales_Rep_name' => $salesRep->name,
+            ]);
+
+
+        Auth::login($salesRep);
+
+        return redirect('/dashboard');
+    }
+    public function stopImpersonate()
+    {
+//        dd(session('impersonator_id'));
+        if (session()->has('impersonator_id')) {
+            $admin = User::find(session('impersonator_id'));
+            Auth::login($admin);
+            session()->forget('impersonator_id');
+        }
+
+        return redirect('/dashboard');
+    }
 }

@@ -35,7 +35,7 @@ protected $appends = ['active_agreements_count', 'inactive_agreements_count'];
 	public function loginIps()
 {
     return $this->hasMany(SalesRepLoginIp ::class);
-}	
+}
 
     public function clients()
     {
@@ -83,8 +83,38 @@ public function chatClientRequest()
 
     public function getLateCustomersAttribute()
     {
-        $time = now()->subDays(3);
-        return $this->clients()->where('last_contact_date', '<=', $time)->count();
+        $days = optional(\App\Models\Setting::where('key', 'late_customer_days')->first())->value ?? 3;
+
+        $time = now()->subDays($days);
+
+        $query = $this->clients()->where('last_contact_date', '<=', $time);
+
+
+
+        return $query->count();
+    }
+    public function lateCustomers($status = null)
+    {
+        // اجلب قيمة late_customer_days أو fallback إلى 3
+        $lateDays = optional(\App\Models\Setting::where('key', 'late_customer_days')->first())->value ?? 3;
+
+        $time = now()->copy();
+        $daysCounted = 0;
+
+        while ($daysCounted < $lateDays) {
+            $time->subDay();
+            if (!in_array($time->dayOfWeek, [5, 6])) {
+                $daysCounted++;
+            }
+        }
+
+        $query = $this->clients()->where('last_contact_date', '<=', $time);
+        if ($status) {
+            $query->where('interest_status', $status);
+            return $query->count();
+        }
+
+        return $query->whereIn('interest_status', ['interested', 'not interested', 'neutral'])->count();
     }
 
     public function targets()
@@ -187,7 +217,7 @@ public function chatClientRequest()
     }
 	public function getWorkDurationAttribute()
 {
-    if (!$this->start_work_date) { 
+    if (!$this->start_work_date) {
         return null;
     }
 

@@ -40,6 +40,29 @@ require __DIR__ . '/salesRep.php';
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/s3-test', function () {
+    try {
+        $disk = Storage::disk('s3');
+
+        // Debug S3 configuration
+        $config = method_exists($disk->getDriver(), 'getAdapter')
+            ? $disk->getDriver()->getAdapter()->getClient()->getConfig()->toArray()
+            : null;
+
+        // Test upload
+        $result = $disk->put('test.txt', 'Hello S3!');
+
+        return response()->json([
+            's3_config' => $config,
+            'upload_result' => $result ? 'Upload succeeded!' : 'Upload failed!',
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+});
 
 Route::prefix('admin/settings')->middleware('auth')->group(function () {
     Route::get('/', [App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
@@ -51,7 +74,7 @@ Route::get('/kernel-test', function() {
     $kernel = app()->make(\App\Console\Kernel::class);
     return response()->json(['status' => 'Kernel loaded successfully']);
 });
-Route::middleware(['auth', \App\Http\Middleware\AuthorizeSalesRep::class])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\AuthorizeSalesRep::class])->group(callback: function () {
     Route::resource('sales-reps.clients', ClientController::class)->except(['edit', 'update']);
 });
 Route::middleware(['auth'])->group(function () {
@@ -70,6 +93,8 @@ Route::prefix('sales-reps')->group(function () {
     Route::get('{id}/export-pdf', [pdfController::class, 'exportSalesRepPdf'])->name('salesreps.export.pdf');
     Route::get('{id}/p4review-pdf', [pdfController::class, 'previewSalesRepPdf'])->name('salesreps.preview.pdf');
 });
+Route::get('/admin/impersonate/stop', [SalesRepController::class, 'stopImpersonate'])
+    ->middleware('auth');
 /*
 |--------------------------------------------------------------------------
 | Core Features: Clients, Services, Agreements, Targets
@@ -82,16 +107,17 @@ Route::middleware([
     Route::get('/salesreps/credentials', function () {
         $csvPath = 'exports/sales_reps_credentials.csv';
 
-        if (!Storage::exists($csvPath)) {
+        try {
+            $csvUrl = Storage::disk('s3')->temporaryUrl($csvPath, now()->addMinutes(10));
+        } catch (\Exception $e) {
             return redirect()->back()->with('error', 'No credentials data available yet');
         }
 
+        // قراءة البيانات داخل النظام (اختياري)
         $credentials = [];
-        $file = Storage::get($csvPath);
-        // Explode by line, handle both Unix and Windows line endings
+        $file = Storage::disk('s3')->get($csvPath);
         $lines = preg_split('/\r\n|\r|\n/', $file);
 
-        // Skip header row and process data
         for ($i = 1; $i < count($lines); $i++) {
             $line = trim($lines[$i]);
             if (!empty($line)) {
@@ -99,9 +125,14 @@ Route::middleware([
             }
         }
 
-        return view('salesRep.credentials', compact('credentials'));
+        return view('salesRep.credentials', compact('credentials', 'csvUrl'));
     })->name('salesreps.credentials');
 Route::get('/admin/shared-companies', [ClientController::class, 'sharedCompanies'])->name('admin.shared-companies');
+
+    Route::get('/admin/impersonate/{salesRep}', [SalesRepController::class, 'impersonate'])
+        ->middleware(['auth']);
+
+
 Route::put('/admin/commissions/{commission}/update-type', [AdminCommissionController::class, 'updateCommissionType'])
     ->name('admin.commissions.updateType');
 Route::put('/admin/password/update',[AuthenticatedSessionController::class, 'updatePassword'])
@@ -112,6 +143,12 @@ Route::prefix('admin/sales-rep-ips')->group(function () {
     Route::post('block/{ip}', [SalesRepLoginIpController::class, 'block'])->name('admin.sales-rep-ips.block');
     Route::post('unblock/{ip}', [SalesRepLoginIpController::class, 'unblock'])->name('admin.sales-rep-ips.unblock');
     Route::post('add-temp-ip/{salesRep}', [SalesRepLoginIpController::class, 'addTemporaryIp'])->name('admin.sales-rep-ips.add-temp-ip');
+    Route::delete('/delete/{ip}', [SalesRepLoginIpController::class, 'destroy'])
+        ->name('admin.sales-rep-ips.destroy')
+        ->middleware(['auth']);
+    Route::post('/{ip}/allow', [SalesRepLoginIpController::class, 'allow'])
+        ->name('admin.sales-rep-ips.allow')
+        ->middleware(['auth']);
 });
 
 Route::get('/run-scheduled-tasks', function () {
@@ -280,14 +317,14 @@ Route::middleware('auth')->group(function () {
 });
         Route::post('/sales-reps/{salesRep}/update-photo', [SalesRepController::class, 'updatePhoto'])->name('sales-reps.updatePhoto');
 Route::delete('/admin/client-edit-request/delete/{client_request}', [AdminClientEditRequestController::class, 'destroy'])->name('admin.client-request.delete');
-Route::get('/admin/client-edit-requests/{client}/edit/{client_request}', [AdminClientEditRequestController::class, 'edit'])->name('admin.client-request.edit'); 
-Route::put('/admin/client-edit-requests/{client}/update/{client_request}', [AdminClientEditRequestController::class, 'update'])->name('admin.client-request.update'); 
-Route::get('/admin/client-edit-requests/{client}/review/{client_request}', [AdminClientEditRequestController::class, 'review'])->name('admin.client-request.review'); 
+Route::get('/admin/client-edit-requests/{client}/edit/{client_request}', [AdminClientEditRequestController::class, 'edit'])->name('admin.client-request.edit');
+Route::put('/admin/client-edit-requests/{client}/update/{client_request}', [AdminClientEditRequestController::class, 'update'])->name('admin.client-request.update');
+Route::get('/admin/client-edit-requests/{client}/review/{client_request}', [AdminClientEditRequestController::class, 'review'])->name('admin.client-request.review');
 Route::get('/admin/client-pended-edit-requests', [AdminClientEditRequestController::class, 'pendedRequests'])->name('admin.client-edit-requests.pended');
 Route::get('/admin/client-requests/{client}/edit/{client_request}', [ClientRequestController::class, 'edit'])->name('admin.chat-client-request.edit');
-Route::delete('/admin/client-requests/{client}/delete/{client_request}', [ClientRequestController::class, 'destroy'])->name('admin.chat-client-request.destroy'); 
-Route::put('/admin/client-requests/{client}/update/{client_request}', [ClientRequestController::class, 'update'])->name('admin.chat-client-request.update'); 
-Route::get('/admin/client-requests/{client}/review/{client_request}', [ClientRequestController::class, 'review'])->name('admin.chat-client-request.review'); 
+Route::delete('/admin/client-requests/{client}/delete/{client_request}', [ClientRequestController::class, 'destroy'])->name('admin.chat-client-request.destroy');
+Route::put('/admin/client-requests/{client}/update/{client_request}', [ClientRequestController::class, 'update'])->name('admin.chat-client-request.update');
+Route::get('/admin/client-requests/{client}/review/{client_request}', [ClientRequestController::class, 'review'])->name('admin.chat-client-request.review');
 Route::get('/client-edit-requests/{clientEditRequest}', [ClientEditRequestController::class, 'review'])
     ->name('client-edit-requests.show')
     ->middleware('auth');

@@ -38,14 +38,14 @@
                 this.showUnreadStatus= false;
             }
     }
-    }"  
+    }"
 
-    id="conversation-{{ $conversation->id }}" 
+    id="conversation-{{ $conversation->id }}"
         wire:key="conversation-em-{{ $conversation->id }}-{{ $conversation->updated_at->timestamp }}"
         x-on:chat-opened.window="handleChatOpened($event)"
         x-on:chat-closed.window="handleChatClosed($event)">
-        <a @if ($widget) tabindex="0" 
-        role="button" 
+        <a @if ($widget) tabindex="0"
+        role="button"
         dusk="openChatWidgetButton"
         @click="$dispatch('open-chat',{conversation:@js($conversation->id)})"
         @keydown.enter="$dispatch('open-chat',{conversation:@js($conversation->id)})"
@@ -57,15 +57,17 @@
                 'dark:bg-[var(--wc-dark-secondary)] bg-[var(--wc-light-secondary)] border-r-4  border-opacity-20 border-[var(--wc-brand-primary)]'">
 
             <div class="shrink-0">
-                <x-wirechat::avatar disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
+                <x-wirechat::avatar
+                    disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
                     group="{{ $conversation->isGroup() }}"
-:src="$group 
-    ? $group?->cover_url 
-    : ($receiver?->personal_image 
-        ? asset('storage/' . $receiver->personal_image) 
-        : null)"
-class="w-12 h-12"
-/>            </div>
+                    src="{!! $group
+        ? ($group->cover_url)
+        : ($receiver?->personal_image
+            ? Storage::disk('s3')->temporaryUrl($receiver->personal_image, now()->addMinutes(5))
+            : null) !!}"
+                    class="w-12 h-12"
+                />
+            </div>
 
             <aside class="grid  grid-cols-12 w-full">
                 <div
