@@ -57,6 +57,9 @@
         </div>
         @endif
             @if(session()->has('impersonator_id'))
+
+
+
                 <div class="bg-yellow-200 text-yellow-800 p-2 text-center">
                     انت تستخدم الأن حساب سفير العلامة التجارية : {{session('sales_Rep_name')}}
                     <a href="{{ url('/admin/impersonate/stop') }}" class="underline">العودة لحساب الادمن</a>

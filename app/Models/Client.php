@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Namu\WireChat\Traits\Chatable;
 use App\Models\Setting;
+use Illuminate\Support\Facades\Storage;
+
 class Client extends Model
 {
     use HasFactory, Chatable;
@@ -93,4 +95,23 @@ class Client extends Model
         $last_contact_date = Carbon::Parse($this->last_contact_date);
         return (int)$last_contact_date->diffInDays(now());
     }
+  public function getCompanyLogoAttribute()
+{
+    $logo = $this->attributes['company_logo'] ?? null;
+
+    if (!$logo) {
+        return null;
+    }
+
+    if (Storage::disk('s3')->exists($logo)) {
+        return Storage::disk('s3')->temporaryUrl($logo, now()->addMinutes(1));
+    }
+
+    if (Storage::disk('public')->exists($logo)) {
+        return asset('storage/' . $logo);
+    }
+
+    return 'https://ui-avatars.com/api/?name=' . urlencode($this->attributes['company_name']) . '&background=random';
+}
+
 }

@@ -7,7 +7,7 @@
    $isNotSameAsNext = !$isSameAsNext;
    $isSameAsPrevious = ($message?->sendable_id === $previousMessage?->sendable_id) && ($message?->sendable_type === $previousMessage?->sendable_type);
    $isNotSameAsPrevious = !$isSameAsPrevious;
-   dd($attachment->url);
+
 @endphp
 
 
@@ -41,4 +41,4 @@
         'rounded-bl-2xl' => ($isNotSameAsNext && !$belongsToAuth),
         ])
 
-        loading="lazy" src="{{ $attachment->url}}" alt="{{  __('wirechat::chat.labels.attachment') }}">
+        loading="lazy" src="{{ $attachment->generateUrl($attachment->file_path)}}" alt="{{  __('wirechat::chat.labels.attachment') }}">

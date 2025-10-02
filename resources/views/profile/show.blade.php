@@ -22,14 +22,16 @@
                 <div class="profile-avatar">
                     <div class="avatar-edit-container text-center">
                         <div class="avatar-wrapper mb-2 position-relative">
-                            <img src="{{ $user->personal_image
+
+<img src="{{ $user->personal_image
     ? Storage::disk('s3')->temporaryUrl($user->personal_image, now()->addMinutes(5))
     : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=random' }}"
                                  alt="صورة الملف الشخصي"
                                  class="rounded-circle"
                                  width="120"
                                  id="profileImage">
-                        </div>
+
+                                 </div>
 
 @if (
     request()->is('showProfile') ||
@@ -70,7 +72,8 @@
     <button @click="showAdminPasswordModal = true" class="btn btn-primary">
         <i class="bi bi-key"></i> تغيير كلمة المرور
     </button>
-    <div class="mt-2">
+
+      <div class="mt-2">
         <a href="{{ url('/admin/impersonate/' . $salesRep->user->id) }}"
            class="btn btn-warning">
             <i class="bi bi-person-check-fill"></i> الدخول كـ {{ $salesRep->user->name }}

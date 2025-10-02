@@ -57,7 +57,7 @@
                 'dark:bg-[var(--wc-dark-secondary)] bg-[var(--wc-light-secondary)] border-r-4  border-opacity-20 border-[var(--wc-brand-primary)]'">
 
             <div class="shrink-0">
-                <x-wirechat::avatar
+ <x-wirechat::avatar
                     disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
                     group="{{ $conversation->isGroup() }}"
                     src="{!! $group

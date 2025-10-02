@@ -9,7 +9,7 @@ use Livewire\Component;
 class ChatList extends Component
 {
      public $type = 'all';
-    public $conversation;
+    public $conversation  = null;
     public $selectedConversation;
     public $client_id;
 

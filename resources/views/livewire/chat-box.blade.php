@@ -85,6 +85,7 @@
                         </svg>
                     </a>
 
+
                     <!-- User Avatar -->
                     @php
                         $client = $selectedConversation->client;
@@ -94,12 +95,26 @@
                         @if(!empty($selectedConversation?->client?->company_logo))
                             <a href="{{ route('sales-reps.clients.show', ['sales_rep' => $client->sales_rep_id, 'client' => $client->id]) }}">
                                 <img
-                                    src="{{ $selectedConversation?->client->company_logo
-        ? Storage::disk('s3')->temporaryUrl($selectedConversation?->client->company_logo, now()->addMinutes(5))
-        : 'https://ui-avatars.com/api/?name=' . urlencode($selectedConversation?->client->company_name) . '&background=random' }}"
+
+<!-- User Avatar -->
+<div class="shrink-0 inline-flex items-center justify-center relative transition overflow-visible text-gray-300 dark:text-[var(--wc-dark-secondary)] text-base h-12 w-12 mx-auto border rounded-full p-2 bg-white dark:bg-[var(--wc-dark-secondary)] dark:border-[var(--wc-dark-secondary)] flex items-center justify-center">
+
+    @if(!empty($selectedConversation?->client?->company_logo))
+         <img
+
+                                    src="{{ $selectedConversation?->client->company_logo}}"
                                     alt="شعار الشركة"
                                     class="max-h-full max-w-full object-contain bg-white rounded-full"
                                 />
+
+    @else
+        <svg class="w-full h-full rounded-full" fill="currentColor" viewBox="0 0 24 24">
+            <path
+                d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z">
+            </path>
+        </svg>
+    @endif
+</div>
 
                             </a>
                         @else

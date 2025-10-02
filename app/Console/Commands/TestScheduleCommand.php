@@ -19,6 +19,7 @@ class TestScheduleCommand extends Command
      * @var string
      */
     protected $description = 'Command description';
+       protected $signature = 'test:command';
 
     /**
      * Execute the console command.

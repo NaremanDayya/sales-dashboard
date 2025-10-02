@@ -238,8 +238,8 @@
                                     @endif
                                     {{-- Message body section --}}
                                     {{-- If message is not emoji then show the message body styles --}}
-                                    @if ($message->body && !$isEmoji)
-                                        @include('wirechat::livewire.chat.partials.message', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'isGroup' => $isGroup, 'attachment' => $attachment])
+                                    @if ($message->body)
+                                        @include('wirechat::livewire.chat.partials.message', [ 'previousMessage' => $previousMessage, 'message' => $message, 'nextMessage' => $nextMessage, 'belongsToAuth' => $belongsToAuth, 'isGroup' => $isGroup, 'attachment' => $attachment,'isEmoji' => $isEmoji])
                                     @endif
                                 </div>
                             </div>

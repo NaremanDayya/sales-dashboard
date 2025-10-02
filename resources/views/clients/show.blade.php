@@ -3,14 +3,16 @@
 @section('content')
     @php use Illuminate\Support\Str; @endphp
 
-    <section class="client-profile">
-        <div class="flex flex-col lg:flex-row gap-6">
-            <!-- Left Column (Profile Card) -->
-            <div class="w-full lg:w-1/3">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <!-- Client Header -->
-                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 text-center">
-                        @php
+
+<section class="client-profile">
+    <div class="flex flex-col lg:flex-row gap-6">
+        <!-- Left Column (Profile Card) -->
+        <div class="w-full lg:w-1/3">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <!-- Client Header -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 text-center">
+                     @php
+
                             $logo = $client->company_logo;
                             $isUrl = Str::startsWith($logo, ['http://', 'https://']);
                             $logoUrl = $isUrl

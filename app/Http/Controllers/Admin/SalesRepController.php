@@ -43,10 +43,10 @@ class SalesRepController extends Controller
                 'interested_customers' => $rep->interestedClients->count(),
                 'active_agreements_count' =>(int) ($rep->active_agreements_count),
 		'inactive_agreements_count' => (int) ($rep->inactive_agreements_count),
+
                 'personal_image' => !empty($rep->user?->personal_image)
                     ? Storage::disk('s3')->temporaryUrl($rep->user->personal_image, now()->addMinutes(10))
                     : 'https://ui-avatars.com/api/?name=' . urlencode($rep->user?->name ?? 'User') . '&background=random',
-
 
                 'account_status' => $rep->user->account_status,
 
@@ -683,7 +683,8 @@ Storage::put($csvPath, implode("\n", $newContent));
     }
 }
 
-    public function impersonate(User $salesRep)
+ public function impersonate(User $salesRep)
+
     {
 //        dd($salesRep->id);
         $admin = Auth::user();

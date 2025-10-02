@@ -14,7 +14,8 @@ $salesRepId = Auth::user()->salesRep->id;
         <div class="header-brand flex-shrink-0">
             <a href="{{ route('dashboard') }}" class="logo block transition-transform hover:scale-105">
                 <div class="flex items-center space-x-2 space-x-reverse">
-                    <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="logo-img h-16 w-auto">
+                    
+<img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="logo-img h-16 w-auto">
                 </div>
             </a>
         </div>
@@ -108,49 +109,26 @@ $salesRepId = Auth::user()->salesRep->id;
         <!-- Right Actions - Improved spacing and icons -->
         <div class="header-actions flex items-center gap-3">
             <!-- Chat Dropdown -->
-<div x-data="{ chatDropdownOpen: false }" class="relative">
-    <!-- Chat toggle button -->
-    <button
-        @click="chatDropdownOpen = !chatDropdownOpen"
-        class="p-2 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors duration-200 relative"
-    >
-        <!-- Chat icon SVG -->
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-        >
-            <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M8 3h8a5 5 0 0 1 5 5v6a5 5 0 0 1-5 5h-4l-4 4v-4H8a5 5 0 0 1-5-5V8a5 5 0 0 1 5-5z"
-            />
-        </svg>
-    </button>
-
-    <!-- Dropdown panel -->
-    <div
-        x-show="chatDropdownOpen"
-        @click.away="chatDropdownOpen = false"
-        x-transition:enter="ease-out duration-200"
-        x-transition:enter-start="opacity-0 translate-y-1"
-        x-transition:enter-end="opacity-100 translate-y-0"
-        x-transition:leave="ease-in duration-150"
-        x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 translate-y-1"
-        class="absolute right-0 mt-2 w-96 origin-top-right"
-        style="margin-right: -20rem;"
-        x-cloak
-    >
-        <div class="text-sm h-[500px] z-50 bg-white border overflow-hidden dark:border-neutral-700 rounded-xl shadow-xl border-neutral-200/70 text-neutral-700 dark:bg-neutral-900">
-            <livewire:wirechat.chats />
-        </div>
-    </div>
-</div>
-
+ <div x-data="{ chatDropdownOpen: false }" class="relative">
+                    <button @click="chatDropdownOpen = !chatDropdownOpen"
+                        class="p-2 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors duration-200 relative">
+<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M8 3h8a5 5 0 0 1 5 5v6a5 5 0 0 1-5 5h-4l-4 4v-4H8a5 5 0 0 1-5-5V8a5 5 0 0 1 5-5z" />
+                                 </svg>                    </button>
+                    <div x-show="chatDropdownOpen" @click.away="chatDropdownOpen=false"
+                        x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1"
+                        x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="ease-in duration-150"
+                        x-transition:leave-start="opacity-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 translate-y-1"
+                        class="absolute right-0 mt-2 w-96 origin-top-right" style="margin-right: -20rem;" x-cloak>
+                        <div
+                            class="text-sm h-[500px] z-50 bg-white border overflow-hidden dark:border-neutral-700 rounded-xl shadow-xl border-neutral-200/70 text-neutral-700 dark:bg-neutral-900">
+                            <livewire:wirechat.chats />
+                        </div>
+                    </div>
+                </div>
             <!-- Notifications Dropdown -->
             @php
             $user = Auth::user();
@@ -188,9 +166,10 @@ $salesRepId = Auth::user()->salesRep->id;
                     <span class="sr-only">Open user menu</span>
 
                     <div class="relative h-10 w-10 rounded-full overflow-hidden border-2 border-white/30 group-hover:border-white/50 transition-all duration-300">
-                        <img class="h-full w-full object-cover"
-                             src="{{ Auth::user()->personal_image ? Storage::disk('s3')->url(Auth::user()->personal_image) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=random' }}"
-                             alt="{{ Auth::user()->name }}">
+                      
+<img class="h-full w-full object-cover"
+     src="{{ Auth::user()->personal_image ? Storage::disk('s3')->temporaryUrl(Auth::user()->personal_image, now()->addMinutes(60)) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=random' }}"
+     alt="{{ Auth::user()->name }}">
                         <div class="absolute inset-0 bg-white/10 group-hover:bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
 

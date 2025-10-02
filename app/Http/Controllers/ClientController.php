@@ -33,9 +33,7 @@ class ClientController extends Controller
         $Clients = Client::orderByRaw('last_contact_date IS NULL, last_contact_date ASC')->get()->map(function ($client) {
             return [
                 'client_id' => $client->id,
-                'company_logo' => $client->company_logo
-                    ? Storage::disk('s3')->temporaryUrl($client->company_logo, now()->addMinutes(1))
-                    : null,
+               'company_logo' => $client->company_logo,
                 'company_name' => $client->company_name,
                 'address' => $client->address,
                 'contact_person' => $client->contact_person,
@@ -75,9 +73,8 @@ class ClientController extends Controller
 		->map(function ($client) {
             return [
                 'client_id' => $client->id,
-                'company_logo' => $client->company_logo
-                    ? Storage::disk('s3')->temporaryUrl($client->company_logo, now()->addMinutes(1))
-                    : null,
+
+       'company_logo' => $client->company_logo,
                 'company_name' => $client->company_name,
                 'client_created_at' => $client->created_at,
                 'address' => $client->address,
@@ -187,7 +184,7 @@ class ClientController extends Controller
                 'last_contact_date' => 'required|date|before_or_equal:today',
                 'interested_service' => 'required|exists:services,id',
                 'interested_service_count' => 'required|integer|min:0',
-                'contact_details' => 'required|string|max:255',
+                'contact_details' => 'required|string',
             ], [
                 'phone.digits' => 'يجب أن يتكون رقم الجوال من 10 أرقام',
                 'company_logo.required' => 'يجب اختيار شعار للشركة',
@@ -195,27 +192,30 @@ class ClientController extends Controller
                 'last_contact_date.before_or_equal' => 'لا يمكن اختيار تاريخ في المستقبل.',
             ]);
 
-            // Handle S3 upload
-            if ($request->hasFile('company_logo')) {
-                $file = $request->file('company_logo');
-                $newPath = 'company_logos/' . $file->hashName();
-                Storage::disk('s3')->putFileAs('company_logos', $file, $file->hashName());
-                $validated['company_logo'] = $newPath;
-            } elseif ($hasTempLogo) {
-                // Move the temp public file to S3
-                $tempPath = $request->input('company_logo_temp');
-                $filename = basename($tempPath);
-                $newPath = 'company_logos/' . $filename;
+        if ($request->hasFile('company_logo')) {
+    $file = $request->file('company_logo');
 
-                if (Storage::disk('public')->exists($tempPath)) {
-                    // Upload to S3
-                    Storage::disk('s3')->putFileAs('company_logos', Storage::disk('public')->path($tempPath), $filename);
-                    // Optionally delete the temp file from local public disk
-                    Storage::disk('public')->delete($tempPath);
-                    $validated['company_logo'] = $newPath;
-                }
-                session()->forget('temp_company_logo');
-            }
+    // Store directly into "public/company_logos"
+    $path = $file->store('company_logos', 'public');
+
+    $validated['company_logo'] = $path;
+
+} elseif ($hasTempLogo) {
+    // Move the temp public file into final "company_logos" directory
+    $tempPath = $request->input('company_logo_temp');
+    $filename = basename($tempPath);
+    $newPath = 'company_logos/' . $filename;
+
+    if (Storage::disk('public')->exists($tempPath)) {
+        // Move the file (no need to re-read contents like S3)
+        Storage::disk('public')->move($tempPath, $newPath);
+
+        $validated['company_logo'] = $newPath;
+    }
+
+    // Clean session
+    session()->forget('temp_company_logo');
+}
 
             // Check for duplicate client info
             $exists = Client::where('company_name', $validated['company_name'])
@@ -531,7 +531,7 @@ class ClientController extends Controller
                     'sales_rep_name' => $client->salesRep?->user?->name ?? 'غير معروف',
                     'interest_status' => $client->interest_status,
                     'client_id' => $client->id,
-                    'company_logo' => $client->company_logo ? asset('storage/' . $client->company_logo) : null,
+                    'company_logo' => $client->company_logo,
                     'sales_rep_id' => $client->sales_rep_id,
                     'last_contact_date' => optional($client->last_contact_date)->format('Y-m-d') ?? '—',
 

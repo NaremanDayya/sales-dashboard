@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Requests\Auth;
-
+use Stevebauman\Location\Facades\Location;
 use Illuminate\Support\Facades\Hash;
 use App\Models\SalesRepLoginIp;
 use Illuminate\Support\Facades\Request;
@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Stevebauman\Location\Facades\Location;
 
 
 class LoginRequest extends FormRequest
@@ -74,21 +73,23 @@ public function authenticate()
         ]);
     }
 
-    // Skip IP validation if admin is logging in (from admin IP)
-    $currentIp = Request::ip();
-    $adminIp = '129.208.193.133';
-//dd($currentIp);
-    if ($user->salesRep && $currentIp !== $adminIp) {
-        $isValidIp = $this->validateSalesRepIp($user, $currentIp);
+    // Get and properly convert IP address
+    // $ip = Request::ip();
+    // $currentIp = $this->convertToIPv4($ip);
 
-        if (!$isValidIp) {
-            $this->handleInvalidIp($user, $currentIp);
-            RateLimiter::hit($this->throttleKey());
-            throw ValidationException::withMessages([
-                'email' => 'هذا الجهاز غير مصرح له بتسجيل الدخول إلى النظام.',
-            ]);
-        }
-    }
+    // $adminIp = '129.208.193.133';
+
+    // if ($user->salesRep && $currentIp !== $adminIp) {
+    //     $isValidIp = $this->validateSalesRepIp($user, $currentIp);
+
+    //     if (!$isValidIp) {
+    //         $this->handleInvalidIp($user, $currentIp);
+    //         RateLimiter::hit($this->throttleKey());
+    //         throw ValidationException::withMessages([
+    //             'email' => 'هذا الجهاز غير مصرح له بتسجيل الدخول إلى النظام.',
+    //         ]);
+    //     }
+    // }
 
     // Successful login
     Auth::login($user, $this->boolean('remember'));
@@ -97,8 +98,43 @@ public function authenticate()
     return redirect()->route('dashboard');
 }
 
+/**
+ * Convert IPv6 to IPv4 if possible, otherwise return original IP
+ */
+protected function convertToIPv4($ip): string
+{
+    // If it's already IPv4, return as is
+    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+        return $ip;
+    }
+
+    // Handle IPv6 mapped IPv4 addresses (::ffff:192.168.1.1)
+    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+        // Check if it's an IPv4-mapped IPv6 address
+        if (strpos($ip, '::ffff:') === 0) {
+            $ipv4 = substr($ip, 7);
+            if (filter_var($ipv4, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                return $ipv4;
+            }
+        }
+        
+        // Check if it's an IPv4-compatible IPv6 address (deprecated but still possible)
+        if (strpos($ip, '::') === 0) {
+            $ipv4 = substr($ip, 2);
+            if (filter_var($ipv4, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                return $ipv4;
+            }
+        }
+    }
+
+    // If conversion not possible, return the original IP
+    return $ip;
+}
+
 protected function validateSalesRepIp($user, $currentIp): bool
 {
+    $locationData = Location::get($currentIp);
+    // dd($locationData);
     // Check main IP
     $mainIp = SalesRepLoginIp::where('sales_rep_id', $user->salesRep->id)
         ->where('is_allowed', true)
@@ -111,6 +147,7 @@ protected function validateSalesRepIp($user, $currentIp): bool
             'ip_address' => $currentIp,
             'is_allowed' => true,
             'is_temporary' => false,
+            'location'     => $locationData->countryName . ' - ' . $locationData->cityName . ' - ' . $locationData->regionName,
         ]);
         return true;
     }
@@ -135,7 +172,11 @@ protected function handleInvalidIp($user, $currentIp)
 {
 
     $locationData = Location::get($currentIp);
+
 //    dd($locationData);
+
+
+// dd($locationData,$currentIp);
 
     // Save IP attempt to DB
     SalesRepLoginIp::firstOrCreate([

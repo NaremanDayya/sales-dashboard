@@ -64,6 +64,8 @@ Route::get('/s3-test', function () {
     }
 });
 
+Route::get('/admin/impersonate/stop', [SalesRepController::class, 'stopImpersonate'])
+    ->middleware('auth');
 Route::prefix('admin/settings')->middleware('auth')->group(function () {
     Route::get('/', [App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
     Route::post('/', [App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
@@ -74,7 +76,7 @@ Route::get('/kernel-test', function() {
     $kernel = app()->make(\App\Console\Kernel::class);
     return response()->json(['status' => 'Kernel loaded successfully']);
 });
-Route::middleware(['auth', \App\Http\Middleware\AuthorizeSalesRep::class])->group(callback: function () {
+Route::middleware(['auth', \App\Http\Middleware\AuthorizeSalesRep::class])->group( function () {
     Route::resource('sales-reps.clients', ClientController::class)->except(['edit', 'update']);
 });
 Route::middleware(['auth'])->group(function () {
@@ -104,7 +106,7 @@ Route::middleware([
     'auth',
     App\Http\Middleware\AdminRoleMiddleware::class
 ])->group(function () {
-    Route::get('/salesreps/credentials', function () {
+ Route::get('/salesreps/credentials', function () {
         $csvPath = 'exports/sales_reps_credentials.csv';
 
         try {
@@ -112,12 +114,12 @@ Route::middleware([
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'No credentials data available yet');
         }
-
-        // قراءة البيانات داخل النظام (اختياري)
+        
         $credentials = [];
         $file = Storage::disk('s3')->get($csvPath);
         $lines = preg_split('/\r\n|\r|\n/', $file);
 
+        // Start from index 1 to skip the header row
         for ($i = 1; $i < count($lines); $i++) {
             $line = trim($lines[$i]);
             if (!empty($line)) {
@@ -127,10 +129,13 @@ Route::middleware([
 
         return view('salesRep.credentials', compact('credentials', 'csvUrl'));
     })->name('salesreps.credentials');
+
+   
+        Route::get('/admin/impersonate/{salesRep}', [SalesRepController::class, 'impersonate'])
+        ->middleware(['auth']);
+
 Route::get('/admin/shared-companies', [ClientController::class, 'sharedCompanies'])->name('admin.shared-companies');
 
-    Route::get('/admin/impersonate/{salesRep}', [SalesRepController::class, 'impersonate'])
-        ->middleware(['auth']);
 
 
 Route::put('/admin/commissions/{commission}/update-type', [AdminCommissionController::class, 'updateCommissionType'])

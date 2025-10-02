@@ -1,21 +1,16 @@
 <div>
-<div x-data="{type:'all',conversation:@entangle('conversation')}" @load.window="Livewire.dispatch('refresh')" x-init="
-
-   setTimeout(()=>{
-
-    conversationElement = document.getElementById('conversation-'+conversation);
-
-
-    //scroll to the element
-
-    if(conversationElement)
-    {
-
-        conversationElement.scrollIntoView({'behavior':'smooth'});
-
+<div x-data="{type:'all',conversation:@entangle('conversation').defer}" @load.window="Livewire.dispatch('refresh')" x-init="
+setTimeout(() => {
+    // Add this null check:
+    if (conversation) {
+        conversationElement = document.getElementById('conversation-'+conversation);
+        
+        //scroll to the element
+        if(conversationElement) {
+            conversationElement.scrollIntoView({'behavior':'smooth'});
+        }
     }
-
-    },200);
+}, 100);
 
 
 
@@ -53,10 +48,10 @@
 		<!-- User Avatar -->
 		<div class="shrink-0 inline-flex items-center justify-center relative transition overflow-visible text-gray-300 dark:text-[var(--wc-dark-secondary)] text-base h-12 w-12 mx-auto border rounded-full p-2 bg-white dark:bg-[var(--wc-dark-secondary)] dark:border-[var(--wc-dark-secondary)] flex items-center justify-center">
     @if(!empty($conversation?->client?->company_logo))
-                <img
-                    src="{{ $conversation->client->company_logo
-        ? Storage::disk('s3')->temporaryUrl($conversation->client->company_logo, now()->addMinutes(5))
-        : 'https://ui-avatars.com/api/?name=' . urlencode($conversation->client->company_name) . '&background=random' }}"
+
+            
+       <img
+                    src="{{ $conversation->client->company_logo}}"
                     alt="شعار الشركة"
                     class="max-h-full max-w-full object-contain"
                 />
