@@ -114,7 +114,7 @@ Route::middleware([
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'No credentials data available yet');
         }
-        
+
         $credentials = [];
         $file = Storage::disk('s3')->get($csvPath);
         $lines = preg_split('/\r\n|\r|\n/', $file);
@@ -130,7 +130,7 @@ Route::middleware([
         return view('salesRep.credentials', compact('credentials', 'csvUrl'));
     })->name('salesreps.credentials');
 
-   
+
         Route::get('/admin/impersonate/{salesRep}', [SalesRepController::class, 'impersonate'])
         ->middleware(['auth']);
 
@@ -408,6 +408,7 @@ Route::get('/notifications/list', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/chat-clients', [ClientController::class, 'chatClients']);
     Route::get('/clientChat', Index::class)->name('chat.index');
+    Route::get('/container', \App\Livewire\ChatContainer::class)->name('chat.index');
     Route::get('client/{client}/Chat/{conversation}', Chat::class)->name('client.chat');
     Route::get('client/{client}/message', [ChatController::class, 'message'])->name('client.message');
     Route::get('/chat/unread-count', [ChatController::class, 'unreadConversationsCount']);
