@@ -6,6 +6,7 @@ use App\Models\Agreement;
 use App\Models\Client;
 use App\Models\User;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
@@ -34,11 +35,12 @@ class AppServiceProvider extends ServiceProvider
  if (app()->environment('production')) {
         URL::forceScheme('https'); // Force HTTPS
     }
-     
+        Model::preventLazyLoading(!app()->isProduction());
+
 DB::listen(function ($query) {
     if ($query->time > 200) {
         \Log::info("⏱️ Slow Query: {$query->sql} ({$query->time} ms)");
     }
-});        
+});
     }
 }

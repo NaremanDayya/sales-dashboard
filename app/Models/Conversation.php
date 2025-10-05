@@ -95,4 +95,8 @@ class Conversation extends Model
     {
         return $this->belongsTo(Client::class);
     }
+    public function latestMessage()
+    {
+        return $this->hasOne(Message::class)->latestOfMany();
+    }
 }

@@ -1,3 +1,6 @@
+@php
+    $receiver = $selectedConversation->getReceiver();
+@endphp
 <div x-data="{
     height: 0,
     conversationElement: null,
@@ -36,8 +39,8 @@
      @scroll-bottom.window="
     $nextTick(() => conversationElement.scrollTop = conversationElement.scrollHeight);"
      class="w-full overflow-hidden" data-user-id="{{ auth()->id() }}" id="chat-box"
-     data-receiver-id="{{ $selectedConversation->getReceiver()->id }}" data-user='@json(auth()->user())'>
-    <meta name="receiver-id" content="{{ $selectedConversation->receiver_id }}">
+     data-receiver-id="{{ $receiver->id }}" data-user='@json(auth()->user())'>
+    <meta name="receiver-id" content="{{ $receiver->id }}">
 
     <!-- Edit Message Modal -->
     <template x-teleport="body">
@@ -128,8 +131,10 @@
 
                     <!-- User Info -->
                     <div class="flex flex-col">
+
+
                         <h6 class="truncate font-medium tracking-wider text-gray-900">
-                            {{ $selectedConversation->getReceiver()->name ?? $selectedConversation->getReceiver()->email }}
+                            {{ $receiver->name ?? $receiver->email }}
                         </h6>
                         <a href="{{ route('sales-reps.clients.show', ['sales_rep' => $client->sales_rep_id, 'client' => $client->id]) }}"
                            class="text-xs text-gray-500 truncate hover:underline">

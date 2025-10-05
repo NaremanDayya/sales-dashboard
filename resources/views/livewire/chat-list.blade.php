@@ -4,7 +4,7 @@ setTimeout(() => {
     // Add this null check:
     if (conversation) {
         conversationElement = document.getElementById('conversation-'+conversation);
-        
+
         //scroll to the element
         if(conversationElement) {
             conversationElement.scrollIntoView({'behavior':'smooth'});
@@ -49,7 +49,7 @@ setTimeout(() => {
 		<div class="shrink-0 inline-flex items-center justify-center relative transition overflow-visible text-gray-300 dark:text-[var(--wc-dark-secondary)] text-base h-12 w-12 mx-auto border rounded-full p-2 bg-white dark:bg-[var(--wc-dark-secondary)] dark:border-[var(--wc-dark-secondary)] flex items-center justify-center">
     @if(!empty($conversation?->client?->company_logo))
 
-            
+
        <img
                     src="{{ $conversation->client->company_logo}}"
                     alt="شعار الشركة"
@@ -87,7 +87,7 @@ setTimeout(() => {
 
 
                             <small
-                                class="text-gray-700">{{$conversation->messages?->last()?->created_at?->shortAbsoluteDiffForHumans()}}
+                                class="text-gray-700">{{ $conversation->latestMessage?->created_at?->shortAbsoluteDiffForHumans() }}
                             </small>
 
                         </div>
@@ -127,9 +127,9 @@ setTimeout(() => {
 
 
 
-                            @php
-                            $lastMessage = $conversation->messages?->last()?->message ?? '';
-                            @endphp
+                                @php
+                                    $lastMessage = $conversation->latestMessage?->message ?? '';
+                                @endphp
 
                             <p class="grow truncate text-sm font-[100]">
                                 @if ($lastMessage === 'like')
@@ -144,9 +144,9 @@ setTimeout(() => {
                             </p>
 
                             {{-- unread count --}}
-                            @if ($conversation->unreadMessagesCount()>0)
+                            @if ($conversation->unread_messages_count >0)
                             <span class="font-bold p-px px-2 text-xs shrink-0 rounded-full bg-[#a855f7] text-white">
-                                {{$conversation->unreadMessagesCount()}}
+                                {{$conversation->unread_messages_count }}
                             </span>
 
                             @endif

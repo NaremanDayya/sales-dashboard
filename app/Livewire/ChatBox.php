@@ -48,14 +48,19 @@ class ChatBox extends Component
         $this->loadMessages();
         $this->dispatch('update-chat-height');
     }
-
     public function loadMessages()
     {
         $count = Message::where('conversation_id', $this->selectedConversation->id)->count();
 
-        $this->loadedMessages = Message::where('conversation_id', $this->selectedConversation->id)
-            ->skip($count - $this->paginate_var)
+        $this->loadedMessages = Message::with([
+            'sender',
+            'receiver',
+            'conversation.client.salesRep' // Eager load nested relationships
+        ])
+            ->where('conversation_id', $this->selectedConversation->id)
+            ->skip(max(0, $count - $this->paginate_var))
             ->take($this->paginate_var)
+            ->orderBy('created_at')
             ->get();
 
         return $this->loadedMessages;
@@ -67,16 +72,16 @@ class ChatBox extends Component
             if ($event['conversation_id'] == $this->selectedConversation->id) {
                 $this->dispatch('scroll-bottom');
 
-                $newMessage = Message::find($event['message_id']);
+                // Eager load the new message with relationships
+                $newMessage = Message::with(['sender', 'receiver'])
+                    ->find($event['message_id']);
 
-                #push message
                 $this->loadedMessages->push($newMessage);
 
-                // #mark as read
                 $newMessage->read_at = now();
                 $newMessage->save();
 
-                //#broadcast
+                // Use the eager loaded receiver
                 $this->selectedConversation->getReceiver()
                     ->notify(new MessageRead(
                         Auth::user(),
@@ -94,8 +99,11 @@ class ChatBox extends Component
             'conversation_id' => $this->selectedConversation->id,
             'sender_id' => Auth::id(),
             'receiver_id' => $this->selectedConversation->getReceiver()->id,
-            'message' => 'like'
+            'message' => $this->message ?? 'like',
         ]);
+
+        $createdMessage->load(['sender', 'receiver']);
+
         $this->loadedMessages->push($createdMessage);
 
         $this->selectedConversation->updated_at = now();
@@ -125,28 +133,26 @@ class ChatBox extends Component
             'message' => $this->message
         ]);
 
+        // Eager load relationships when pushing new message
+        $createdMessage->load(['sender', 'receiver']);
+
         $this->message = '';
-        #scroll to bottom
         $this->dispatch('scroll-bottom');
 
-        #push the message
         $this->loadedMessages->push($createdMessage);
 
-        #update conversation model
         $this->selectedConversation->updated_at = now();
         $this->selectedConversation->save();
 
-        #refresh chatlist
         $this->dispatch('refresh')->to('chat-list');
 
-        #broadcast
-        $receiver = $this->selectedConversation->getReceiver();
-        $messageReceiver = $createdMessage->receiver->id;
+        // Use pre-loaded receiver instead of triggering new query
+        $receiver = $createdMessage->receiver;
         $receiver->notify(new MessageSent(
             Auth::user(),
             $createdMessage,
             $this->selectedConversation,
-            $messageReceiver,
+            $receiver->id,
         ));
     }
     public function deleteConversation($conversationId)

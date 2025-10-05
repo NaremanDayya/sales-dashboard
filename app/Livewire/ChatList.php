@@ -8,8 +8,8 @@ use Livewire\Component;
 
 class ChatList extends Component
 {
-     public $type = 'all';
-    public $conversation  = null;
+    public $type = 'all';
+    public $conversation = null;
     public $selectedConversation;
     public $client_id;
 
@@ -32,10 +32,12 @@ class ChatList extends Component
         $user = Auth::user();
 
         $conversations = Conversation::with([
-            'client',
-            'messages' => function($query) {
-                $query->latest()->limit(1);
-            }
+            // Eager load all necessary relationships
+            'client.salesRep',
+            'latestMessage.sender',
+            'latestMessage.receiver',
+            'messages.sender', // Prevent N+1 in views
+            'messages.receiver'
         ])
             ->where(function ($query) use ($user) {
                 $query->where('sender_id', $user->id)
@@ -50,9 +52,7 @@ class ChatList extends Component
                         ->whereNull('read_at');
                 }
             ])
-            ->orderByRaw("
-        CASE WHEN unread_messages_count > 0 THEN 0 ELSE 1 END
-    ")
+            ->orderByRaw("CASE WHEN unread_messages_count > 0 THEN 0 ELSE 1 END")
             ->orderBy('updated_at', 'desc')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -60,6 +60,5 @@ class ChatList extends Component
         return view('livewire.chat-list', [
             'conversations' => $conversations,
         ]);
-
     }
 }
