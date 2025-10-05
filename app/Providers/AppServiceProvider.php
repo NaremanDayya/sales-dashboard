@@ -9,6 +9,7 @@ use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\DB;
@@ -39,7 +40,7 @@ class AppServiceProvider extends ServiceProvider
 
 DB::listen(function ($query) {
     if ($query->time > 200) {
-        \Log::info("⏱️ Slow Query: {$query->sql} ({$query->time} ms)");
+        Log ::info("⏱️ Slow Query: {$query->sql} ({$query->time} ms)");
     }
 });
     }
