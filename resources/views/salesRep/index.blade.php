@@ -836,10 +836,10 @@
         width: 100%;
         text-align: center;
         padding: 20px 0;
-        background: linear-gradient(135deg, #4154f1 0%, #6a7ef9 100%);
-        color: white;
+        background-color: #ffffff !important; /* إزالة الخلفية الزرقاء */
+        color: #333; /* تغيير اللون إلى داكن */
         margin-bottom: 20px;
-        border-bottom: 3px solid #2d3db8;
+        border-bottom: 2px solid #4154f1; /* إضافة حدود زرقاء بدلاً من الخلفية */
     }
 
     .pdf-header .header-content {
@@ -852,13 +852,14 @@
     .pdf-header .header-logo {
         max-height: 80px;
         width: auto;
-        filter: brightness(0) invert(1);
+        /* إزالة filter الذي يحول اللون إلى أبيض */
+        filter: none !important;
     }
 
     .pdf-header .header-text {
         font-size: 24px;
         font-weight: bold;
-        color: white;
+        color: #4154f1 !important; /* تغيير اللون إلى أزرق */
         margin: 0;
     }
 
@@ -871,9 +872,19 @@
     }
 
     .pdf-header .report-date {
-        background: rgba(255, 255, 255, 0.2);
+        background: #f8f9fa;
         padding: 5px 15px;
         border-radius: 20px;
+        color: #495057;
+        border: 1px solid #dee2e6;
+    }
+
+    .pdf-header .report-time {
+        background: #f8f9fa;
+        padding: 5px 15px;
+        border-radius: 20px;
+        color: #495057;
+        border: 1px solid #dee2e6;
     }
 
     .pdf-footer {
@@ -991,18 +1002,6 @@ table.data-table thead {
             display: none !important;
         }
 
-        .pdf-header {
-            display: block !important;
-	    background-color: #ffffff;
-    box-shadow: none;
-        }
-
-        /* Optional: remove shadows, rounded borders in print for better clarity */
- .pdf-header .header-content { box-shadow: none !important;
-                -webkit-box-shadow: none !important;
-    filter: none !important;
-		border-radius: 0 !important;
-        }
 
         .body {
             margin: 0;
@@ -1035,7 +1034,7 @@ table.data-table thead {
                     <button id="columnsBtn" class="export-btn columns-btn" onclick="openColumnsModal()">
                         <span class="btn-icon"><i class="fas fa-columns"></i></span>
                         <span class="btn-text">اختيار الأعمدة</span>
-                        <span id="columnsBadge" class="columns-badge">10</span>
+                        <span id="columnsBadge" class="columns-badge">11</span>
                     </button>
                 </div>
                 <div class="export-options no-print">
@@ -1089,6 +1088,13 @@ table.data-table thead {
 
                             <div class="columns-list" id="columnsList">
                                 <!-- Column items will be generated here -->
+                                <div class="column-item">
+                                    <label class="column-checkbox">
+                                        <input type="checkbox" value="personal_image" checked>
+                                        <span class="checkmark"></span>
+                                        <span class="column-name">الصورة الشخصية</span>
+                                    </label>
+                                </div>
                                 <div class="column-item">
                                     <label class="column-checkbox">
                                         <input type="checkbox" value="name" checked>
@@ -1501,7 +1507,7 @@ function setupBulkActions() {
                    onchange="updateBulkActionsButton()">
         </td>
 
-<td class="px-4 py-2 text-center no-print">
+<td class="px-4 py-2 text-center">
   ${rep.personal_image
     ? `<img src="${rep.personal_image}" alt="شعار" class="h-16 w-16 mx-auto rounded-full border object-cover" />`
     : '—'}
@@ -1913,47 +1919,48 @@ function performBulkAction(ids, action) {
         }
 
         function updateTableColumns(selectedColumns) {
-    // Map between checkbox values and column classes/names
-    const columnMapping = {
-        'name': ' سفير العلامة التجارية',
-        'start_work_date': 'تاريخ الالتحاق بالعمل',
-        'work_duration': 'مدة العمل',
-        'target_customers': ' العملاء المستهدفين',
-        'late_customers': ' العملاء المتأخرين',
-        'total_orders': ' الطلبات الإجمالية',
-        'pending_orders': ' الطلبات المعلقة',
-        'interested_customers': ' العملاء المهتمين والمحتملين',
-  	'active_agreements_count': '  الاتفاقيات النشطة',
-        'inactive_agreements_count': '  الاتفاقيات غير النشطة',
-};
+            // Map between checkbox values and column classes/names
+            const columnMapping = {
+                'personal_image': 'الصورة الشخصية',
+                'name': ' سفير العلامة التجارية',
+                'start_work_date': 'تاريخ الالتحاق بالعمل',
+                'work_duration': 'مدة العمل',
+                'target_customers': ' العملاء المستهدفين',
+                'late_customers': ' العملاء المتأخرين',
+                'total_orders': ' الطلبات الإجمالية',
+                'pending_orders': ' الطلبات المعلقة',
+                'interested_customers': ' العملاء المهتمين والمحتملين',
+                'active_agreements_count': '  الاتفاقيات النشطة',
+                'inactive_agreements_count': '  الاتفاقيات غير النشطة',
+            };
 
-    // Get all table headers
-    const headers = document.querySelectorAll('.data-table thead th');
+            // Get all table headers
+            const headers = document.querySelectorAll('.data-table thead th');
 
-    headers.forEach((header, index) => {
-        const headerText = header.textContent.trim();
-        const isActionColumn = headerText === 'الإجراءات';
+            headers.forEach((header, index) => {
+                const headerText = header.textContent.trim();
+                const isActionColumn = headerText === 'الإجراءات';
 
-        // Always show action column
-        if (isActionColumn) {
-            header.style.display = '';
-            document.querySelectorAll('.data-table tbody tr').forEach(row => {
-                if (row.cells[index]) row.cells[index].style.display = '';
+                // Always show action column
+                if (isActionColumn) {
+                    header.style.display = '';
+                    document.querySelectorAll('.data-table tbody tr').forEach(row => {
+                        if (row.cells[index]) row.cells[index].style.display = '';
+                    });
+                    return;
+                }
+
+                // Check if this column should be visible
+                const columnKey = Object.keys(columnMapping).find(key => columnMapping[key] === headerText);
+                const shouldShow = selectedColumns.includes(columnKey);
+
+                // Set visibility
+                header.style.display = shouldShow ? '' : 'none';
+                document.querySelectorAll('.data-table tbody tr').forEach(row => {
+                    if (row.cells[index]) row.cells[index].style.display = shouldShow ? '' : 'none';
+                });
             });
-            return;
         }
-
-        // Check if this column should be visible
-        const columnKey = Object.keys(columnMapping).find(key => columnMapping[key] === headerText);
-        const shouldShow = selectedColumns.includes(columnKey);
-
-        // Set visibility
-        header.style.display = shouldShow ? '' : 'none';
-        document.querySelectorAll('.data-table tbody tr').forEach(row => {
-            if (row.cells[index]) row.cells[index].style.display = shouldShow ? '' : 'none';
-        });
-    });
-}
 function updateColumnsBadge() {
             const checkedCount = document.querySelectorAll('.column-checkbox input:checked').length;
             document.getElementById('columnsBadge').textContent = checkedCount;
@@ -2043,34 +2050,33 @@ function fixArabicText(text) {
                 pdfContainer.style.padding = '20px';
                 pdfContainer.style.fontFamily = 'Tajawal, sans-serif';
                 pdfContainer.style.direction = 'rtl';
+                pdfContainer.style.backgroundColor = '#ffffff';
 
-                // Create enhanced header
+                // Create enhanced header with white background and proper image
                 const header = `
-            <div class="pdf-header" style="display: block;">
-                <div class="header-content">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-                        <img src="${window.location.origin}/assets/img/logo.png" alt="Logo"
-                             style="max-height: 80px; filter: brightness(0) invert(1);">
-                        <h2 style="font-size: 24px; font-weight: bold; color: white; margin: 0;">
-                            تقرير سفراء العلامة التجارية
-                        </h2>
-                    </div>
-                    <div style="display: flex; justify-content: center; gap: 30px; font-size: 14px; margin-top: 10px;">
-                        <span style="background: rgba(255, 255, 255, 0.2); padding: 5px 15px; border-radius: 20px;">
-                            تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}
-                        </span>
-                        <span style="background: rgba(255, 255, 255, 0.2); padding: 5px 15px; border-radius: 20px;">
-                            الوقت: ${new Date().toLocaleTimeString('ar-EG')}
-                        </span>
-                    </div>
+            <div class="pdf-header" style="display: block; background-color: #ffffff; padding: 20px; margin-bottom: 20px; border-bottom: 2px solid #4154f1;">
+                <div class="header-content" style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                    <img src="${window.location.origin}/assets/img/logo.png" alt="Logo"
+                         style="max-height: 80px; width: auto;">
+                    <h2 style="font-size: 24px; font-weight: bold; color: #4154f1; margin: 0;">
+                        تقرير سفراء العلامة التجارية
+                    </h2>
+                </div>
+                <div style="display: flex; justify-content: center; gap: 30px; font-size: 14px; margin-top: 10px;">
+                    <span style="background: #f8f9fa; padding: 5px 15px; border-radius: 20px; color: #495057; border: 1px solid #dee2e6;">
+                        تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}
+                    </span>
+                    <span style="background: #f8f9fa; padding: 5px 15px; border-radius: 20px; color: #495057; border: 1px solid #dee2e6;">
+                        الوقت: ${new Date().toLocaleTimeString('ar-EG')}
+                    </span>
                 </div>
             </div>
         `;
 
                 // Create enhanced footer
                 const footer = `
-            <div class="pdf-footer" style="display: block;">
-                <p style="margin: 0; padding: 10px 0; color: #6c757d; font-size: 12px;">
+            <div class="pdf-footer" style="display: block; margin-top: 30px; padding: 15px 0; border-top: 2px solid #dee2e6; background: #f8f9fa;">
+                <p style="margin: 0; color: #6c757d; font-size: 12px; text-align: center;">
                     جميع الحقوق محفوظة &copy; شركة آفاق الخليج ${new Date().getFullYear()}
                     | تم إنشاء التقرير في: ${new Date().toLocaleString('ar-EG')}
                 </p>
@@ -2081,11 +2087,11 @@ function fixArabicText(text) {
                 const originalTable = document.querySelector('.data-table');
                 const table = originalTable.cloneNode(true);
 
-                // Remove ALL no-print columns from header and corresponding cells
+                // Remove ONLY no-print columns (checkbox and actions), NOT the image column
                 const headers = table.querySelectorAll('thead th');
                 headers.forEach((header, index) => {
                     const headerText = header.textContent.trim();
-                    // Remove actions column, checkbox column, and any other no-print columns
+                    // Remove only actions column and checkbox column
                     if (headerText === 'الإجراءات' || header.classList.contains('no-print')) {
                         header.remove();
                         // Remove corresponding cells from all rows
@@ -2095,26 +2101,11 @@ function fixArabicText(text) {
                     }
                 });
 
-                // Now remove personal image column specifically (it might not have text content)
-                // We need to identify it by its position or data attribute
-                const updatedHeaders = table.querySelectorAll('thead th');
-                updatedHeaders.forEach((header, index) => {
-                    // Check if this is the personal image column by looking at the first row's content
-                    const firstRow = table.querySelector('tbody tr');
-                    if (firstRow && firstRow.cells[index]) {
-                        const cellContent = firstRow.cells[index].innerHTML;
-                        // If the cell contains an image or specific content pattern for personal image
-                        if (cellContent.includes('img') || cellContent.includes('شعار')) {
-                            header.remove();
-                            table.querySelectorAll('tbody tr').forEach(row => {
-                                if (row.cells[index]) row.cells[index].remove();
-                            });
-                        }
-                    }
-                });
+                // DO NOT remove the image column - let it be handled by column selection
 
                 // Apply column selection
                 const columnMap = {
+                    'personal_image': 'الصورة الشخصية',
                     'name': 'سفير العلامة التجارية',
                     'start_work_date': 'تاريخ الالتحاق بالعمل',
                     'work_duration': 'مدة العمل',
@@ -2141,10 +2132,11 @@ function fixArabicText(text) {
                     }
                 });
 
-                // Enhance table styling for PDF
+                // Enhance table styling for PDF with image support
                 table.style.width = '100%';
                 table.style.borderCollapse = 'collapse';
                 table.style.fontFamily = 'Tajawal, sans-serif';
+                table.style.marginBottom = '20px';
 
                 table.querySelectorAll('thead th').forEach(th => {
                     th.style.background = 'linear-gradient(135deg, #4154f1 0%, #6a7ef9 100%)';
@@ -2152,11 +2144,30 @@ function fixArabicText(text) {
                     th.style.padding = '12px 8px';
                     th.style.border = '1px solid #2d3db8';
                     th.style.fontWeight = 'bold';
+                    th.style.textAlign = 'center';
                 });
 
                 table.querySelectorAll('tbody td').forEach(td => {
                     td.style.padding = '10px 8px';
                     td.style.border = '1px solid #dee2e6';
+                    td.style.textAlign = 'center';
+                    td.style.verticalAlign = 'middle';
+
+                    // Special styling for image cells
+                    if (td.querySelector('img')) {
+                        td.style.padding = '8px 4px';
+                    }
+                });
+
+                // Style images for PDF
+                table.querySelectorAll('tbody td img').forEach(img => {
+                    img.style.maxWidth = '50px';
+                    img.style.maxHeight = '50px';
+                    img.style.borderRadius = '50%';
+                    img.style.border = '2px solid #e2e8f0';
+                    img.style.objectFit = 'cover';
+                    img.style.display = 'block';
+                    img.style.margin = '0 auto';
                 });
 
                 table.querySelectorAll('tbody tr:nth-child(even)').forEach(tr => {
@@ -2164,7 +2175,7 @@ function fixArabicText(text) {
                 });
 
                 // Add page break handling
-                const rowsPerPage = 15;
+                const rowsPerPage = 12; // Reduced to accommodate images
                 const tableRows = table.querySelectorAll('tbody tr');
 
                 for (let i = rowsPerPage; i < tableRows.length; i += rowsPerPage) {
@@ -2179,9 +2190,9 @@ function fixArabicText(text) {
                 // Add to document temporarily
                 document.body.appendChild(pdfContainer);
 
-                // PDF options with page break handling
+                // PDF options with enhanced image handling
                 const options = {
-                    margin: [15, 15, 15, 15],
+                    margin: [10, 10, 10, 10], // Reduced margins for more space
                     filename: `تقرير_سفراء_العلامة_التجارية_${new Date().toISOString().slice(0,10)}.pdf`,
                     image: {
                         type: 'jpeg',
@@ -2192,6 +2203,7 @@ function fixArabicText(text) {
                         useCORS: true,
                         logging: false,
                         backgroundColor: '#ffffff',
+                        allowTaint: true, // Allow tainted images
                         onclone: function(clonedDoc) {
                             // Remove any remaining no-print elements
                             const clonedNoPrint = clonedDoc.querySelectorAll('.no-print');
@@ -2203,6 +2215,26 @@ function fixArabicText(text) {
                                 clonedTable.style.width = '100%';
                                 clonedTable.style.borderCollapse = 'collapse';
                             }
+
+                            // Ensure header has white background
+                            const clonedHeader = clonedDoc.querySelector('.pdf-header');
+                            if (clonedHeader) {
+                                clonedHeader.style.backgroundColor = '#ffffff';
+                                clonedHeader.style.color = '#333';
+                            }
+
+                            // Ensure images are properly sized
+                            const clonedImages = clonedDoc.querySelectorAll('img');
+                            clonedImages.forEach(img => {
+                                if (img.classList.contains('header-logo')) {
+                                    img.style.maxHeight = '80px';
+                                } else if (img.parentElement.closest('td')) {
+                                    // Table images
+                                    img.style.maxWidth = '50px';
+                                    img.style.maxHeight = '50px';
+                                    img.style.borderRadius = '50%';
+                                }
+                            });
                         }
                     },
                     jsPDF: {
@@ -2213,7 +2245,7 @@ function fixArabicText(text) {
                     },
                     pagebreak: {
                         mode: ['avoid-all', 'css', 'legacy'],
-                        avoid: 'tr, td, th'
+                        avoid: ['tr', 'td', 'th']
                     }
                 };
 
@@ -2246,6 +2278,12 @@ function fixArabicText(text) {
             } catch (error) {
                 console.error('PDF export error:', error);
                 alert('حدث خطأ أثناء إنشاء ملف PDF. الرجاء المحاولة مرة أخرى.');
+
+                // Clean up even on error
+                const container = document.querySelector('.pdf-export-container');
+                if (container) {
+                    document.body.removeChild(container);
+                }
             }
         }
 
@@ -2444,6 +2482,7 @@ table.style.width = '100%';
 
         // 6. Handle column visibility
         const columnMap = {
+            'personal_image': 'الصورة الشخصية',
             'name': ' سفير العلامة التجارية',
             'start_work_date': 'تاريخ الالتحاق بالعمل',
             'work_duration': 'مدة العمل',
@@ -2599,6 +2638,7 @@ const data = currentFilteredReps.map(rep => {
 
 function getColumnKey(columnName) {
 const columnMap = {
+    'personal_image': 'الصورة الشخصية',
     'سفير العلامة التجارية': 'name',
     'تاريخ الالتحاق بالعمل': 'start_work_date',
     'مدة العمل': 'work_duration',
