@@ -636,7 +636,9 @@ font-size: 14px;
                                         'contact_person' => 'الشخص المسؤول',
                                         'interest_status' => 'حالة الاهتمام',
                                         'phone' => 'رقم الهاتف',
-                                        'contact_position' => 'منصب المسؤول'
+                                        'contact_position' => 'منصب المسؤول',
+                                           'interested_service' => 'الخدمة المهتم بها',
+                                        'interested_service_count' => 'عدد الخدمة المهتم بها',
                                     ];
                                     echo $editedFieldsTranslation[$request->edited_field] ?? $request->edited_field;
                                 @endphp

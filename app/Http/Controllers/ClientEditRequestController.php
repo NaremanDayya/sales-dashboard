@@ -55,6 +55,8 @@ class ClientEditRequestController extends Controller
             'interest_status',
             'phone',
             'contact_position',
+            'interested_service',
+            'interested_service_count',
         ];
  $fieldTranslations = [
         'company_name' => 'اسم الشركة',

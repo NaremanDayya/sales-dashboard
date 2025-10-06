@@ -330,6 +330,8 @@ class ClientController extends Controller
             'contact_position' => ' منصب الشخص المسؤول',
             'interest_status' => 'حالة الاهتمام',
             'phone' => 'رقم الجوال',
+            'interested_service' => 'الخدمة المهتم بها',
+            'interested_service_count' => 'عدد الخدمة المهتم بها',
         ];
         $approvedEditRequest = $client->clientEditRequests()
             ->where('sales_rep_id', $salesRep->user->id)
@@ -337,9 +339,10 @@ class ClientController extends Controller
             ->where('request_type', 'client_data_change')
             ->latest()
             ->first();
+        $services = Service::all();
         $editableField = $approvedEditRequest ? $approvedEditRequest->edited_field : null;
         // dd($editableField);
-        return view('clients.show', compact('client', 'salesRep', 'requestTypes', 'columns', 'editableField'));
+        return view('clients.show', compact('client', 'salesRep', 'requestTypes', 'columns', 'editableField','services'));
     }
 
     // Show form to edit client
@@ -389,6 +392,12 @@ class ClientController extends Controller
             case 'contact_position':
             case 'address':
                 $rules[$editableField] = 'nullable|string';
+                break;
+            case 'interested_service':
+                $rules[$editableField] = 'nullable|exists:services,id';
+                break;
+            case 'interested_service_count':
+                $rules[$editableField] = 'nullable|int';
                 break;
             default:
                 return back()->with('error', 'لا يمكن تعديل هذا الحقل.');
