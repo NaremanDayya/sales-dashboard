@@ -1571,7 +1571,7 @@ function setupBulkActions() {
 
             <!-- غير المهتم -->
             <div class="flex items-center space-x-1 rtl:space-x-reverse">
-                <i class="fas fa-thumbs-down text-red-400"></i>
+                <i class="fas fa-thumbs-down text-red-700"></i>
                 <span class="font-semibold">${rep.not_interested_late_customers}</span>
             </div>
 
