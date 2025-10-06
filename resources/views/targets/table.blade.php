@@ -488,14 +488,36 @@
         <i class="fas fa-chart-line mr-1"></i> عرض العمولات
     </a>
 
-<select id="exportType" class="form-select" style="width: 150px; direction: rtl; text-align: right;">
-    <option value="excel" selected>Excel (تصدير إكسل)</option>
-    <option value="pdf">PDF (تصدير PDF)</option>
-</select>                <button class="btn btn-outline" onclick="handleExport()">
-<span style="font-size:14px; font-weight:800;">
-    <i class="fas fa-download"></i> تصدير
-</span>                </button>
+         <div class="relative" x-data="{ exportOpen: false }">
+             <button @click="exportOpen = !exportOpen"
+                     class="btn btn-outline flex items-center gap-2">
+            <span style="font-size:14px; font-weight:800;">
+                <i class="fas fa-download"></i> تصدير
+            </span>
+                 <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': exportOpen }"
+                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                 </svg>
+             </button>
 
+             <!-- Export Dropdown Menu -->
+             <div x-show="exportOpen" x-cloak
+                  @click.away="exportOpen = false"
+                  class="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 animate-fadeIn">
+                 <div class="py-1">
+                     <button onclick="handleExport('excel')"
+                             class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                         <i class="fas fa-file-excel text-green-600 ml-2"></i>
+                         <span>تصدير Excel</span>
+                     </button>
+                     <button onclick="handleExport('pdf')"
+                             class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                         <i class="fas fa-file-pdf text-red-600 ml-2"></i>
+                         <span>تصدير PDF</span>
+                     </button>
+                 </div>
+             </div>
+         </div>
                 <button class="btn btn-outline" onclick="window.print()" title="طباعة التقرير">
                     <i class="fas fa-print"></i>
                 </button>
@@ -1025,17 +1047,6 @@ function applyFilter() {
 
 
 
-function handleExport() {
-        const exportType = document.getElementById('exportType').value;
-    if (exportType === 'excel') {
-        exportTargets();
-    } else if (exportType === 'pdf') {
-        generateTargetsPDF();
-    } else {
-        alert('اختر نوع التصدير أولاً');
-    }
-    }
-
     // Initialize table when DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
             renderTable();
@@ -1064,138 +1075,192 @@ function handleExport() {
         }
         return fieldStr;
     }
-function exportTargets() {
-    try {
-        // Check if SheetJS is available
-        if (typeof XLSX === 'undefined') {
-            alert('Excel export library not loaded! Please include SheetJS library.');
-            return;
-        }
-
-        // Check if data exists
-        if (!targetsData || targetsData.length === 0) {
-            alert('No data available to export!');
-            return;
-        }
-
-        // Define Arabic headers
-        const headers = [
-            "نوع الخدمة",
-            "نسبة التارجت",
-            "الشهر 1 (%)",
-            "الشهر 2 (%)",
-            "الشهر 3 (%)",
-            "الشهر 4 (%)",
-            "الشهر 5 (%)",
-            "الشهر 6 (%)",
-            "الشهر 7 (%)",
-            "الشهر 8 (%)",
-            "الشهر 9 (%)",
-            "الشهر 10 (%)",
-            "الشهر 11 (%)",
-            "الشهر 12 (%)",
-            "المجموع الكلي (%)",
-            "حالة العمولة"
-        ];
-
-        // Prepare data - convert numbers to percentages (divided by 100)
-        const data = targetsData.map(target => [
-            target.service_type || 'N/A',
-            (target.target_amount || 0) / 100,
-            (target.month_achieved_1 || 0) / 100,
-            (target.month_achieved_2 || 0) / 100,
-            (target.month_achieved_3 || 0) / 100,
-            (target.month_achieved_4 || 0) / 100,
-            (target.month_achieved_5 || 0) / 100,
-            (target.month_achieved_6 || 0) / 100,
-            (target.month_achieved_7 || 0) / 100,
-            (target.month_achieved_8 || 0) / 100,
-            (target.month_achieved_9 || 0) / 100,
-            (target.month_achieved_10 || 0) / 100,
-            (target.month_achieved_11 || 0) / 100,
-            (target.month_achieved_12 || 0) / 100,
-            (target.year_achieved_target || 0) / 100,
-            target.commission_value_month_1 || 0,
-            target.commission_value_month_2 || 0,
-            target.commission_value_month_3 || 0,
-            target.commission_value_month_4 || 0,
-            target.commission_value_month_5 || 0,
-            target.commission_value_month_6 || 0,
-            target.commission_value_month_7 || 0,
-            target.commission_value_month_8 || 0,
-            target.commission_value_month_9 || 0,
-            target.commission_value_month_10 || 0,
-            target.commission_value_month_11 || 0,
-            target.commission_value_month_12 || 0,
-            target.commission_status || 'N/A',
-        ]);
-        // Create worksheet
-        const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
-
-        // Set column widths
-        ws['!cols'] = [
-            { wch: 25 },  // Service type
-            { wch: 15 },  // Target amount
-            ...Array(12).fill({ wch: 7 }),  // 12 months
-            { wch: 15 },  // Year total
-            { wch: 20 }   // Commission status
-        ];
-
-        // Format percentage columns (columns B to O, 0-based index)
-        const percentageCols = [1, ...Array.from({length: 13}, (_, i) => i + 2)];
-
-        percentageCols.forEach(col => {
-            for (let row = 1; row <= targetsData.length; row++) {
-                const cellAddress = XLSX.utils.encode_cell({r: row, c: col});
-                if (ws[cellAddress]) {
-                    ws[cellAddress].t = 'n';  // Number type
-                    ws[cellAddress].z = '0.00%';  // Percentage format
-                }
+        function handleExport(type) {
+            if (type === 'excel') {
+                exportTargets();
+            } else if (type === 'pdf') {
+                generateTargetsPDF();
             }
-        });
+        }
 
-        // Create workbook and export
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "تقرير التارجت");
-        XLSX.writeFile(wb, "تقرير_التارجت.xlsx");
+        function exportTargets() {
+            try {
+                // Check if SheetJS is available
+                if (typeof XLSX === 'undefined') {
+                    alert('Excel export library not loaded! Please include SheetJS library.');
+                    return;
+                }
 
-    } catch (error) {
-        console.error('Export error:', error);
-        alert('حدث خطأ أثناء التصدير: ' + error.message);
-    }
-}
+                // Check if data exists
+                if (!targetsData || targetsData.length === 0) {
+                    alert('No data available to export!');
+                    return;
+                }
 
-    function generateTargetsPDF() {
-    const header = document.querySelector('.pdf-header');
-    const footer = document.querySelector('.pdf-footer');
-    const element = document.querySelector('.pdf-content');
+                // Get sales rep name for filename
+                const salesRepName = "{{ $salesRep->name ?? 'targets' }}";
+                const sanitizedName = salesRepName.replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '').replace(/\s+/g, '_');
 
-    // Safety checks in case header/footer don't exist
-    if (header) header.style.display = 'block';
-    if (footer) footer.style.display = 'block';
+                // Define Arabic headers
+                const headers = [
+                    "نوع الخدمة",
+                    "تارجت الخدمة",
+                    "التارجت المرحل للشهر الحالي",
+                    "التارجت المطلوب للشهر الحالي",
+                    "الشهر 1 (%)",
+                    "الشهر 2 (%)",
+                    "الشهر 3 (%)",
+                    "الشهر 4 (%)",
+                    "الشهر 5 (%)",
+                    "الشهر 6 (%)",
+                    "الشهر 7 (%)",
+                    "الشهر 8 (%)",
+                    "الشهر 9 (%)",
+                    "الشهر 10 (%)",
+                    "الشهر 11 (%)",
+                    "الشهر 12 (%)",
+                    "النسبة السنوية المحققة للخدمة (%)",
+                    "المجموع السنوي المحقق للخدمة",
+                    "حالة العمولة للشهر الحالي"
+                ];
 
-    if (!element) {
-        console.error('PDF content element not found');
-        return;
-    }
+                // Helper function to handle dash values and formatting
+                const formatCellValue = (value, isPercentage = false) => {
+                    if (value === '-' || value === null || value === undefined) {
+                        return '-';
+                    }
 
-    const options = {
-        margin:       0.5,
-        filename:     'targets-report.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
-    };
+                    const numValue = parseFloat(String(value).replace(/,/g, ''));
 
-    html2pdf().set(options).from(element).save().then(() => {
-        if (header) header.style.display = 'none';
-        if (footer) footer.style.display = 'none';
-    }).catch(error => {
-        console.error("PDF generation failed:", error);
-        if (header) header.style.display = 'none';
-        if (footer) footer.style.display = 'none';
-    });
-}
+                    if (isNaN(numValue)) {
+                        return String(value);
+                    }
+
+                    if (isPercentage) {
+                        return numValue / 100; // Convert to decimal for Excel percentage format
+                    }
+
+                    return numValue;
+                };
+
+                // Prepare data with proper formatting
+                const data = targetsData.map(target => [
+                    target.service_type || 'N/A',
+                    formatCellValue(target.target_amount),
+                    formatCellValue(target.carried_over_amount),
+                    formatCellValue(target.actual_target_amount),
+                    formatCellValue(target.month_achieved_1, true), // true for percentage columns
+                    formatCellValue(target.month_achieved_2, true),
+                    formatCellValue(target.month_achieved_3, true),
+                    formatCellValue(target.month_achieved_4, true),
+                    formatCellValue(target.month_achieved_5, true),
+                    formatCellValue(target.month_achieved_6, true),
+                    formatCellValue(target.month_achieved_7, true),
+                    formatCellValue(target.month_achieved_8, true),
+                    formatCellValue(target.month_achieved_9, true),
+                    formatCellValue(target.month_achieved_10, true),
+                    formatCellValue(target.month_achieved_11, true),
+                    formatCellValue(target.month_achieved_12, true),
+                    formatCellValue(target.year_achieved_target, true),
+                    formatCellValue(target.year_achieved_amount),
+                    target.commission_status || 'N/A'
+                ]);
+
+                // Create worksheet
+                const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
+
+                // Set column widths
+                ws['!cols'] = [
+                    { wch: 25 },  // Service type
+                    { wch: 15 },  // Target amount
+                    { wch: 20 },  // Carried over amount
+                    { wch: 20 },  // Actual target amount
+                    ...Array(12).fill({ wch: 10 }),  // 12 months
+                    { wch: 20 },  // Year achieved target
+                    { wch: 20 },  // Year achieved amount
+                    { wch: 20 }   // Commission status
+                ];
+
+                // Apply formatting to cells
+                const range = XLSX.utils.decode_range(ws['!ref']);
+
+                // Format percentage columns (columns E to Q - 0-based index 4 to 16)
+                for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+                    for (let C = 4; C <= 16; ++C) {
+                        const cellAddress = XLSX.utils.encode_cell({r: R, c: C});
+                        if (ws[cellAddress]) {
+                            if (ws[cellAddress].v !== '-') {
+                                // Only format numeric cells, leave dashes as text
+                                ws[cellAddress].t = 'n';
+                                ws[cellAddress].z = '0.00%';
+                            } else {
+                                // Keep dash cells as text
+                                ws[cellAddress].t = 's';
+                            }
+                        }
+                    }
+                }
+
+                // Format numeric columns (columns B, C, D, R - 0-based index 1, 2, 3, 17)
+                const numericCols = [1, 2, 3, 17];
+                for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+                    numericCols.forEach(C => {
+                        const cellAddress = XLSX.utils.encode_cell({r: R, c: C});
+                        if (ws[cellAddress] && ws[cellAddress].v !== '-') {
+                            ws[cellAddress].t = 'n';
+                            ws[cellAddress].z = '#,##0';
+                        } else if (ws[cellAddress] && ws[cellAddress].v === '-') {
+                            ws[cellAddress].t = 's';
+                        }
+                    });
+                }
+
+                // Create workbook and export
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "تقرير_التارجت");
+                XLSX.writeFile(wb, `تقرير_التارجت_${sanitizedName}.xlsx`);
+
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('حدث خطأ أثناء التصدير: ' + error.message);
+            }
+        }
+
+        function generateTargetsPDF() {
+            const header = document.querySelector('.pdf-header');
+            const footer = document.querySelector('.pdf-footer');
+            const element = document.querySelector('.pdf-content');
+
+            // Safety checks in case header/footer don't exist
+            if (header) header.style.display = 'block';
+            if (footer) footer.style.display = 'block';
+
+            if (!element) {
+                console.error('PDF content element not found');
+                return;
+            }
+
+            // Get sales rep name for filename
+            const salesRepName = "{{ $salesRep->name ?? 'targets' }}";
+            const sanitizedName = salesRepName.replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '').replace(/\s+/g, '_');
+
+            const options = {
+                margin:       0.5,
+                filename:     `تقرير_التارجت_${sanitizedName}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'a2', orientation: 'landscape' }
+            };
+
+            html2pdf().set(options).from(element).save().then(() => {
+                if (header) header.style.display = 'none';
+                if (footer) footer.style.display = 'none';
+            }).catch(error => {
+                console.error("PDF generation failed:", error);
+                if (header) header.style.display = 'none';
+                if (footer) footer.style.display = 'none';
+            });
+        }
       let commissionId = null;
     let achievedAmount = 0;
 
