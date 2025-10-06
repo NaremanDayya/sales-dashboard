@@ -57,6 +57,93 @@
         .main {
             max-width: 100%;
         }
+
+        /* تصحيحات CSS للزر المنسدل */
+        .export-options {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown.active .btn-dropdown svg {
+            transform: rotate(180deg);
+        }
+
+        .dropdown.active .dropdown-menu {
+            display: block !important;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 180px;
+            margin-top: 4px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            z-index: 1000;
+        }
+
+        .btn-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            color: #374151;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 140px;
+            justify-content: space-between;
+        }
+
+        .btn-dropdown:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        .btn-dropdown svg {
+            transition: transform 0.2s;
+            width: 12px;
+            height: 8px;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 8px 12px;
+            text-align: right;
+            color: #374151;
+            font-size: 14px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+
+        .dropdown-icon {
+            color: #6b7280;
+            width: 16px;
+            height: 16px;
+        }
+
         .hidden {
             display: none !important;
         }
@@ -553,7 +640,6 @@
             text-align: center;
             font-size: 14px;
             font-weight: 800;
-
             vertical-align: middle;
         }
 
@@ -733,83 +819,7 @@
             object-fit: contain;
         }
 
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .btn-dropdown {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: #ffffff;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            color: #374151;
-            font-size: 14px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-dropdown:hover {
-            background: #f9fafb;
-            border-color: #9ca3af;
-        }
-
-        .btn-dropdown svg {
-            transition: transform 0.2s;
-        }
-
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            min-width: 180px;
-            margin-top: 4px;
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            z-index: 10;
-        }
-
-        .dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            width: 100%;
-            padding: 8px 12px;
-            text-align: left;
-            color: #374151;
-            font-size: 14px;
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
-
-        .dropdown-item:hover {
-            background: #f9fafb;
-        }
-
-        .dropdown-icon {
-            color: #6b7280;
-        }
-
-        /* Show dropdown when active */
-        .dropdown.active .btn-dropdown svg {
-            transform: rotate(180deg);
-        }
-
-        .dropdown.active .dropdown-menu {
-            display: block;
-        }
-
         @media print {
-
-            /* Hide everything outside print-area */
             body * {
                 visibility: hidden;
             }
@@ -819,7 +829,6 @@
                 visibility: visible;
             }
 
-            /* Position print-area at top left and full width */
             #print-area {
                 position: absolute;
                 left: 0;
@@ -831,7 +840,6 @@
                 color: #000;
             }
 
-            /* Hide UI controls */
             #print-area .table-actions,
             #print-area .table-filters,
             #print-area .pagination,
@@ -846,7 +854,6 @@
                 display: none !important;
             }
 
-            /* Style the table */
             #print-area table.data-table {
                 width: 100% !important;
                 border-collapse: collapse;
@@ -863,12 +870,10 @@
                 background-color: #f0f0f0;
             }
 
-            /* Prevent page breaks inside rows */
             #print-area tr {
                 page-break-inside: avoid;
             }
 
-            /* Show footer in print */
             #print-area .pdf-footer {
                 display: block !important;
                 text-align: center;
@@ -877,7 +882,6 @@
                 color: #444;
             }
 
-            /* RTL support */
             #print-area {
                 direction: rtl;
                 width: 100% !important
@@ -891,7 +895,6 @@
                 display: block !important;
             }
 
-            /* Optional: remove shadows, rounded borders in print for better clarity */
             .pdf-header .header-content {
                 box-shadow: none !important;
                 border-radius: 0 !important;
@@ -917,14 +920,14 @@
                     سفير العلامة التجارية: {{ $salesrep->name }}
                 </div>
             @endisset
-            <h2 id="title" class="table-title">الاتفاقيات</h2>
+            <h2 id="title" class="table-title no-print">الاتفاقيات</h2>
             <div class="table-actions d-flex align-items-center gap-2">
                 @if(Auth::user()->role == 'salesRep')
                     <a class="btn btn-primary" href="{{ route('salesrep.agreements.create', Auth::user()->salesRep->id) }}">
                         <i class="fas fa-plus"></i> إضافة إتفاقية
                     </a>
                 @endif
-                <div class="export-btn-group">
+                <div class="export-btn-group no-print">
                     <button id="columnsBtn" class="export-btn columns-btn" onclick="openColumnsModal()">
                         <span class="btn-icon"><i class="fas fa-columns"></i></span>
                         <span class="btn-text">اختيار الأعمدة</span>
@@ -946,7 +949,8 @@
                                     <path d="M4 6H20M4 12H20M4 18H11" stroke="currentColor" stroke-width="2"
                                           stroke-linecap="round" />
                                 </svg>
-                                تصدير كملف Excel                        </button>
+                                تصدير كملف Excel
+                            </button>
                             <button class="dropdown-item" data-type="pdf">
                                 <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
                                      xmlns="http://www.w3.org/2000/svg">
@@ -1104,7 +1108,6 @@
                     </div>
                 </div>
 
-
                 <button class="btn btn-outline" onclick="window.print()" title="طباعة التقرير">
                     <i class="fas fa-print"></i>
                 </button>
@@ -1149,13 +1152,12 @@
             </div>
         </div>
         <div class="table-responsive">
-
             <div class="pdf-content">
                 <div class="pdf-header" style="display: none;">
-                    <div
-                        class="header-content d-flex align-items-center justify-content-between flex-wrap mb-4 p-3 shadow rounded bg-white">
+                    <div class="header-content d-flex align-items-center justify-content-between flex-wrap mb-4 p-3 shadow rounded bg-white">
                         <div class="d-flex flex-column align-items-center text-center mx-auto">
                             <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="header-logo mb-2" />
+                            <h2 class="header-text">تقرير الاتفاقيات</h2>
                         </div>
                     </div>
                 </div>
@@ -1178,8 +1180,6 @@
                             <th>عدد المنتج</th>
                             <th>التسعيرة</th>
                             <th>المجموع</th>
-
-
                         </tr>
                         </thead>
                         <tbody id="tableBody">
@@ -1195,9 +1195,9 @@
         <input type="hidden" id="current_sales_rep_id" value="{{ $Agreements[0]['sales_rep_id'] ?? '' }}">
 
         <div class="pagination" id="pagination"></div>
+
         <!-- Agreement Edit Modal -->
         <div id="agreementEditModal" class="modal-container hidden">
-
             <div class="modal-content">
                 <!-- Modal Header -->
                 <div class="modal-header px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
@@ -1271,7 +1271,6 @@
                             </label>
                             <div class="relative">
                                 <input type="text" id="editEndDate" name="end_date" dir="rtl"
-
                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border text-right">
                             </div>
                         </div>
@@ -1325,7 +1324,6 @@
                                    oninput="calculateTotal()">
                         </div>
 
-
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">المبلغ الإجمالي</label>
                             <input type="number" id="editTotalAmount" name="total_amount" min="0" step="0.001"
@@ -1351,456 +1349,315 @@
 @endsection
 
 @push('scripts')
+    <!-- مكتبات التصدير -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
     <script>
-    let AgreementsData = [];
-    let currentFilteredAgreements = [];
-    const isAdmin = @json($isAdmin);
+        let AgreementsData = [];
+        let currentFilteredAgreements = [];
+        const isAdmin = @json($isAdmin);
 
-    document.addEventListener('DOMContentLoaded', function() {
-    // Initialize data
-    AgreementsData = @json($Agreements);
-    currentFilteredAgreements = [...AgreementsData];
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize data
+            AgreementsData = @json($Agreements);
+            currentFilteredAgreements = [...AgreementsData];
 
-    console.log("Agreements Data:", AgreementsData);
+            console.log("Agreements Data:", AgreementsData);
 
-    // Render initial table
-    renderTable();
+            // Render initial table
+            renderTable();
 
-    // Setup event listeners
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const filteredData = currentFilteredAgreements.filter(agreement => {
-    return (
-    (agreement.client_name && agreement.client_name.toLowerCase().includes(searchTerm)) ||
-    (agreement.sales_Rep_name && agreement.sales_Rep_name.toLowerCase().includes(searchTerm)) ||
-    (agreement.termination_type && agreement.termination_type.toLowerCase().includes(searchTerm)) ||
-    (agreement.service_type && agreement.service_type.toLowerCase().includes(searchTerm))
-    );
-    });
-    renderTable(filteredData);
-    });
+            // Initialize export functionality
+            initializeExportFunctionality();
 
-    // Handle form submission
-    document.getElementById('editForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+            // Setup event listeners
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredData = currentFilteredAgreements.filter(agreement => {
+                    return (
+                        (agreement.client_name && agreement.client_name.toLowerCase().includes(searchTerm)) ||
+                        (agreement.sales_Rep_name && agreement.sales_Rep_name.toLowerCase().includes(searchTerm)) ||
+                        (agreement.termination_type && agreement.termination_type.toLowerCase().includes(searchTerm)) ||
+                        (agreement.service_type && agreement.service_type.toLowerCase().includes(searchTerm))
+                    );
+                });
+                renderTable(filteredData);
+            });
 
-    const formData = new FormData(this);
-    const agreementId = formData.get('agreement_id');
-    const field = formData.get('field');
-    let value = formData.get('value');
+            // Initialize column checkboxes
+            const checkboxes = document.querySelectorAll('.column-checkbox input');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const checkmark = this.nextElementSibling;
+                    if (this.checked) {
+                        checkmark.style.backgroundColor = 'var(--primary)';
+                        checkmark.style.borderColor = 'var(--primary)';
+                    } else {
+                        checkmark.style.backgroundColor = '';
+                        checkmark.style.borderColor = 'var(--gray-300)';
+                    }
+                    updateColumnsBadge();
+                });
+            });
 
-    // Convert empty string to null for database consistency
-    if (value === '') {
-    value = null;
-    }
+            // Initialize with all columns selected
+            updateColumnsBadge();
+        });
 
-    // Show loading state
-    const submitBtn = this.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = 'جاري الحفظ...';
+        // ==================== وظائف التصدير ====================
+        function initializeExportFunctionality() {
+            const exportBtn = document.getElementById('exportBtn');
+            const exportDropdown = document.getElementById('exportDropdown');
 
-    // Send AJAX request
-    fetch(`/api/agreements/${agreementId}`, {
-    method: 'PATCH',
-    headers: {
-    'Content-Type': 'application/json',
-    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-    'Accept': 'application/json'
-    },
-    body: JSON.stringify({ [field]: value })
-    })
-    .then(response => {
-    if (!response.ok) {
-    throw new Error('Network response was not ok');
-    }
-    return response.json();
-    })
-    .then(data => {
-    if (data.success) {
-    // Update local data
-    const agreementIndex = AgreementsData.findIndex(a => a.agreement_id == agreementId);
-    if (agreementIndex !== -1) {
-    AgreementsData[agreementIndex][field] = data.data[field];
-    }
+            if (exportBtn && exportDropdown) {
+                exportBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const dropdown = this.closest('.dropdown');
+                    dropdown.classList.toggle('active');
+                });
 
-    // Update current filtered data if needed
-    const filteredIndex = currentFilteredAgreements.findIndex(a => a.agreement_id == agreementId);
-    if (filteredIndex !== -1) {
-    currentFilteredAgreements[filteredIndex][field] = data.data[field];
-    }
+                // Handle export type selection
+                const exportItems = exportDropdown.querySelectorAll('.dropdown-item');
+                exportItems.forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const exportType = this.getAttribute('data-type');
+                        handleExport(exportType);
 
-    // Re-render table
-    renderTable();
+                        // Close dropdown after selection
+                        const dropdown = this.closest('.dropdown');
+                        dropdown.classList.remove('active');
+                    });
+                });
 
-    // Show success message
-    showNotification('تم تحديث البيانات بنجاح', 'success');
-    closeEditModal();
-    } else {
-    throw new Error(data.message || 'فشل في التحديث');
-    }
-    })
-    .catch(error => {
-    console.error('Error:', error);
-    showNotification('حدث خطأ أثناء التحديث: ' + error.message, 'error');
-
-    // Re-render table to reset any temporary changes
-    renderTable();
-    })
-    .finally(() => {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = 'حفظ';
-    });
-    });
-
-    // Add event listeners for edit menu items using event delegation
-    document.addEventListener('click', function(e) {
-    if (e.target.closest('.edit-menu-item')) {
-    const menuItem = e.target.closest('.edit-menu-item');
-    const agreementId = menuItem.getAttribute('data-agreement-id');
-    const field = menuItem.getAttribute('data-field');
-    const value = menuItem.getAttribute('data-value');
-
-    openEditModal(agreementId, field, value);
-    }
-    });
-    });
-    function openAgreementEditModal(agreementId) {
-        const agreement = AgreementsData.find(a => a.agreement_id == agreementId);
-
-        if (!agreement) {
-            showNotification('لم يتم العثور على بيانات الاتفاقية', 'error');
-            return;
-        }
-
-        // Populate the form fields
-        document.getElementById('editAgreementId').value = agreement.agreement_id;
-        document.getElementById('editClientName').value = agreement.client_name || '';
-        document.getElementById('editSigningDate').value = agreement.signing_date || '';
-        document.getElementById('editDurationYears').value = agreement.duration_years || '';
-        document.getElementById('editTerminationType').value = agreement.termination_type || 'returnable';
-        document.getElementById('editImplementationDate').value = agreement.implementation_date || '';
-        document.getElementById('editEndDate').value = agreement.end_date || '';
-        document.getElementById('editNoticeMonths').value = agreement.notice_months || '';
-        document.getElementById('editRequiredNoticeDate').value = agreement.required_notice_date || '';
-        document.getElementById('editNoticeStatus').value = agreement.notice_status || 'not_sent';
-        document.getElementById('editServiceType').value = agreement.service_type || '';
-        document.getElementById('editProductQuantity').value = agreement.product_quantity || '';
-        document.getElementById('editPrice').value = agreement.price
-            ? agreement.price.toString().replace(/,/g, '')
-            : 0;
-        calculateTotal();
-
-
-
-        // Update modal title
-        document.getElementById('modalAgreementTitle').textContent = `تعديل اتفاقية ${agreement.client_name || ''}`;
-
-        // Show the modal
-        const modal = document.getElementById('agreementEditModal');
-        modal.classList.remove('hidden');
-        modal.style.display = 'flex';
-    }
-    function calculateTotal() {
-        const quantity = document.getElementById('editProductQuantity').value || 0;
-        const price = document.getElementById('editPrice').value || 0;
-        const total = quantity * price;
-
-        document.getElementById('editTotalAmount').value =  total;
-
-    }
-    // Function to close the modal
-    function closeAgreementEditModal() {
-        const modal = document.getElementById('agreementEditModal');
-        modal.classList.add('hidden');
-        modal.style.display = 'none';
-    }
-
-    // Function to save agreement edits
-    function saveAgreementEdits() {
-        const formData = new FormData(document.getElementById('agreementEditForm'));
-        const agreementId = formData.get('agreement_id');
-
-        const data = {};
-        for (let [key, value] of formData.entries()) {
-            if (key !== 'agreement_id') {
-                // Convert numeric fields to numbers
-                if (['duration_years', 'notice_months', 'product_quantity', 'price', 'total_amount'].includes(key)) {
-                    data[key] = value === '' ? null : Number(value);
-                } else {
-                    data[key] = value === '' ? null : value;
-                }
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.dropdown')) {
+                        const dropdowns = document.querySelectorAll('.dropdown');
+                        dropdowns.forEach(dropdown => {
+                            dropdown.classList.remove('active');
+                        });
+                    }
+                });
             }
         }
 
-        console.log('Sending data:', data); // Debug log
+        function handleExport(type) {
+            const selectedColumns = getSelectedColumns();
 
-        // Show loading state
-        const saveBtn = document.querySelector('#agreementEditModal .modal-footer button:last-child');
-        const originalText = saveBtn.textContent;
-        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
-        saveBtn.disabled = true;
-
-        fetch(`/api/agreements/${agreementId}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-            .then(async response => {
-                console.log('Response status:', response.status);
-                const responseData = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(responseData.message || `Server error: ${response.status}`);
-                }
-                return responseData;
-            })
-            .then(result => {
-                console.log('Success response:', result);
-                if (result.success) {
-                    // Update local data
-                    const agreementIndex = AgreementsData.findIndex(a => a.agreement_id == agreementId);
-                    if (agreementIndex !== -1) {
-                        Object.assign(AgreementsData[agreementIndex], result.data);
-                    }
-
-                    // Update current filtered data
-                    const filteredIndex = currentFilteredAgreements.findIndex(a => a.agreement_id == agreementId);
-                    if (filteredIndex !== -1) {
-                        Object.assign(currentFilteredAgreements[filteredIndex], result.data);
-                    }
-
-                    renderTable();
-                    showNotification('تم تحديث بيانات الاتفاقية بنجاح', 'success');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 500);
-                    closeAgreementEditModal();
-                } else {
-                    throw new Error(result.message || 'فشل في حفظ التغييرات');
-                }
-            })
-            .catch(error => {
-                console.error('Full error:', error);
-                showNotification('حدث خطأ أثناء حفظ التغييرات: ' + error.message, 'error');
-            })
-            .finally(() => {
-                saveBtn.textContent = originalText;
-                saveBtn.disabled = false;
-            });
-    }
-    // Close modal with Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && !document.getElementById('agreementEditModal').classList.contains('hidden')) {
-            closeAgreementEditModal();
-        }
-    });
-
-    function renderTable(data = currentFilteredAgreements) {
-    const tbody = document.getElementById('tableBody');
-    if (!tbody) {
-    console.error("Table body element not found!");
-    return;
-    }
-    tbody.innerHTML = '';
-
-    if (!data || data.length === 0) {
-    tbody.innerHTML = `
-    <tr>
-        <td colspan="15" class="empty-state">
-            <div class="empty-icon">
-                <i class="fas fa-user-times"></i>
-            </div>
-            <div class="empty-text">لا توجد بيانات متاحة</div>
-        </td>
-    </tr>
-    `;
-    return;
-    }
-
-    data.forEach(agreement => {
-    const row = document.createElement('tr');
-
-    // Helper function to escape quotes for HTML attributes
-    const escapeQuotes = (str) => (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-
-    row.innerHTML = `
-    <!-- Client Logo -->
-    <td class="px-4 py-2 text-center">
-        ${agreement.client_logo ? `<img src="${agreement.client_logo}" alt="شعار" class="h-10 mx-auto rounded-full border" />` : '—'}
-    </td>
-
-    <!-- Client Name -->
-    <td class="px-4 py-2 text-sm font-semibold text-gray-800">
-        <div class="flex flex-col items-center">
-            <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}"
-               class="hover:text-blue-600 hover:underline cursor-pointer whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis block w-full text-center">
-                ${agreement.client_name || '—'}
-            </a>
-
-        </div>
-    </td>
-
-    <!-- Sales Rep Name -->
-    <td class="px-4 py-2 text-sm font-semibold text-gray-800">
-        <div class="flex flex-col items-center">
-            <a href="/sales-reps/${agreement.sales_rep_id}" class="hover:text-blue-600 hover:underline cursor-pointer whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis block w-full text-center">
-                ${agreement.sales_Rep_name || '—'}
-            </a>
-        </div>
-    </td>
-
-    <!-- Signing Date -->
-    <td class="px-4 py-2 text-sm text-gray-700">
-        <div class="flex items-center justify-between">
-            <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
-                ${formatDateForDisplay(agreement.signing_date) || '—'}
-            </a>
-
-        </div>
-    </td>
-
-    <!-- Duration Years -->
-    <td class="whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis px-4 py-2 text-sm text-gray-700">
-        <div class="flex items-center justify-between">
-            <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
-                ${agreement.duration_years || '—'} سنوات
-            </a>
-
-        </div>
-    </td>
-
-    <!-- Termination Type -->
-    <td class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis">
-        <div class="flex items-center justify-between">
-            <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
-                ${
-                agreement.termination_type === 'returnable'
-                ? `مشروطة بمقابل `
-                : agreement.termination_type === 'non_returnable'
-                ? 'غير مشروطة بمقابل'
-                : '—'
-                }
-            </a>
-
-        </div>
-    </td>
-
-    <!-- Implementation Date -->
-    <td class="px-4 py-2 text-sm text-gray-700">
-        <div class="flex items-center justify-between">
-            <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
-                ${formatDateForDisplay(agreement.implementation_date) || '—'}
-            </a>
-
-        </div>
-    </td>
-
-    <!-- End Date -->
-    <td class="px-4 py-2 text-sm text-gray-700">
-        <div class="flex items-center justify-between">
-            <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
-                ${formatDateForDisplay(agreement.end_date) || '—'}
-            </a>
-
-        </div>
-    </td>
-
-    <!-- Notice Months -->
-    <td class="px-4 py-2 text-sm text-gray-700">
-        <div class="flex items-center justify-between">
-            <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
-                ${agreement.notice_months || '—'}
-            </a>
-
-        </div>
-    </td>
-
-    <!-- Required Notice Date -->
-    <td class="px-4 py-2 text-sm text-center ${ agreement.is_notice_at_time ? 'text-red-600 font-bold' : 'text-green-600 font-bold' }">
-        <div class="flex items-center justify-between">
-            ${formatDateForDisplay(agreement.required_notice_date) || '—'}
-
-        </div>
-    </td>
-
-    <!-- Notice Status -->
-    <td class="px-4 py-2 text-center whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis">
-        <div class="flex items-center justify-between">
-                        <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-semibold ${
-                            agreement.notice_status === 'sent'
-                                ? 'bg-green-100 text-green-600'
-                                : (agreement.notice_status === 'not_sent' || agreement.notice_status === 'not sent')
-                                    ? 'bg-red-100 text-red-600'
-                                    : 'bg-gray-100 text-gray-600'
-                        }">
-                            ${
-                                agreement.notice_status === 'sent'
-                                    ? 'تم الإخطار'
-                                    : (agreement.notice_status === 'not_sent' || agreement.notice_status === 'not sent')
-                                        ? 'لم يتم الإخطار'
-                                        : '—'
-                            }
-                        </span>
-
-        </div>
-    </td>
-
-    <!-- Service Type -->
-    <td dir="rtl" class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis">
-        <div class="flex items-center justify-between">
-            ${agreement.service_type || '—'}
-
-        </div>
-    </td>
-
-    <!-- Product Quantity -->
-    <td class="px-4 py-2 text-sm text-gray-700">
-        <div class="flex items-center justify-between">
-            ${agreement.product_quantity || '—'}
-
-        </div>
-    </td>
-
-    <!-- Price -->
-    <td class="px-4 py-2 text-sm text-gray-700">
-        <div class="flex items-center justify-between">
-            ${agreement.price || '—'}
-
-        </div>
-    </td>
-
-    <!-- Total Amount -->
-    <td class="px-4 py-2 text-sm text-gray-700">
-        <div class="flex items-center justify-between">
-            ${agreement.total_amount || '—'}
-${isAdmin ? `
-    <button onclick="openAgreementEditModal(${agreement.agreement_id})" class="text-green-600 hover:text-green-800" title="تعديل بيانات الإتفاقية">
-        <i class="fas fa-edit"></i>
-    </button>
-    ` : ''}
-        </div>
-
-
-
-    </td>
-    `;
-    tbody.appendChild(row);
-    });
-    }
-
-    function addNewAgreement() {
-            const salesRepId = document.getElementById('current_sales_rep_id').value;
-            if (!salesRepId) {
-                alert("الرجاء تحديد مندوب مبيعات أولاً");
+            if (selectedColumns.length === 0) {
+                showNotification('يرجى اختيار أعمدة للتصدير', 'error');
                 return;
             }
-            window.location.href = "{{ route('salesrep.agreements.create', ['salesrep' => ':id']) }}".replace(':id', salesRepId);
+
+            switch(type) {
+                case 'xlsx':
+                    exportToExcel(selectedColumns);
+                    break;
+                case 'pdf':
+                    exportToPDF(selectedColumns);
+                    break;
+                default:
+                    console.error('Unknown export type:', type);
+                    showNotification('نوع التصدير غير معروف', 'error');
+            }
         }
 
+        function exportToExcel(selectedColumns) {
+            try {
+                // Column names in Arabic
+                const columnsMap = {
+                    client_logo: "شعار العميل",
+                    client_name: "العميل",
+                    sales_Rep_name: "سفير العلامة التجارية",
+                    signing_date: "توقيع الاتفاقية",
+                    duration_years: "مدة الاتفاقية",
+                    termination_type: "إنهاء الاتفاقية",
+                    implementation_date: "تنفيذ الاتفاقية",
+                    end_date: "انتهاء الاتفاقية",
+                    notice_months: "أشهر الإخطار",
+                    required_notice_date: "الإخطار المتوقع",
+                    notice_status: "حالة الإخطار",
+                    service_type: "الخدمة",
+                    product_quantity: "عدد المنتج",
+                    price: "التسعيرة",
+                    total_amount: "المجموع"
+                };
+
+                // Prepare headers (exclude client_logo for Excel)
+                const headers = selectedColumns
+                    .filter(key => key !== 'client_logo')
+                    .map(key => columnsMap[key] || key);
+
+                // Prepare data
+                const data = currentFilteredAgreements.map(agreement => {
+                    const row = [];
+                    selectedColumns.forEach(key => {
+                        if (key !== 'client_logo') {
+                            let value = '';
+
+                            switch (key) {
+                                case 'client_name':
+                                    value = agreement.client_name || '';
+                                    break;
+                                case 'sales_Rep_name':
+                                    value = agreement.sales_Rep_name || '';
+                                    break;
+                                case 'signing_date':
+                                    value = formatDateForDisplay(agreement.signing_date) || '';
+                                    break;
+                                case 'duration_years':
+                                    value = agreement.duration_years ? `${agreement.duration_years} سنوات` : '';
+                                    break;
+                                case 'termination_type':
+                                    value = agreement.termination_type === 'returnable'
+                                        ? 'مشروطة بمقابل'
+                                        : agreement.termination_type === 'non_returnable'
+                                            ? 'غير مشروطة بمقابل'
+                                            : '';
+                                    break;
+                                case 'implementation_date':
+                                    value = formatDateForDisplay(agreement.implementation_date) || '';
+                                    break;
+                                case 'end_date':
+                                    value = formatDateForDisplay(agreement.end_date) || '';
+                                    break;
+                                case 'notice_months':
+                                    value = agreement.notice_months || '';
+                                    break;
+                                case 'required_notice_date':
+                                    value = formatDateForDisplay(agreement.required_notice_date) || '';
+                                    break;
+                                case 'notice_status':
+                                    value = getNoticeStatus(agreement.notice_status);
+                                    break;
+                                case 'service_type':
+                                    value = agreement.service_type || '';
+                                    break;
+                                case 'product_quantity':
+                                    value = agreement.product_quantity || '';
+                                    break;
+                                case 'price':
+                                    value = agreement.price ? Number(agreement.price).toFixed(2) : '';
+                                    break;
+                                case 'total_amount':
+                                    value = agreement.total_amount ? Number(agreement.total_amount).toFixed(2) : '';
+                                    break;
+                                default:
+                                    value = agreement[key] || '';
+                            }
+                            row.push(value);
+                        }
+                    });
+                    return row;
+                });
+
+                // Create workbook and worksheet
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
+
+                // Auto-size columns
+                const colWidths = headers.map((header, colIndex) => {
+                    const maxLen = Math.max(
+                        header.length,
+                        ...data.map(row => (row[colIndex] ? String(row[colIndex]).length : 0))
+                    );
+                    return { wch: Math.min(Math.max(maxLen + 2, 10), 50) };
+                });
+                ws['!cols'] = colWidths;
+
+                // Add worksheet to workbook
+                XLSX.utils.book_append_sheet(wb, ws, "الاتفاقيات");
+
+                // Generate file name with current date
+                const date = new Date().toISOString().slice(0, 10);
+                const fileName = `اتفاقيات_الشركة_${date}.xlsx`;
+
+                // Save file
+                XLSX.writeFile(wb, fileName);
+
+                showNotification('تم تصدير البيانات إلى Excel بنجاح', 'success');
+
+            } catch (error) {
+                console.error('Error exporting to Excel:', error);
+                showNotification('حدث خطأ أثناء التصدير إلى Excel', 'error');
+            }
+        }
+
+        function exportToPDF(selectedColumns) {
+            try {
+                // Show loading
+                showNotification('جاري إنشاء ملف PDF...', 'success');
+
+                // Clone the main content
+                const printArea = document.getElementById('print-area').cloneNode(true);
+
+                // Hide unnecessary elements in the clone
+                const elementsToHide = printArea.querySelectorAll('.table-actions, .table-filters, .pagination, .export-options, .btn, .no-print');
+                elementsToHide.forEach(el => el.style.display = 'none');
+
+                // Hide columns that are not selected
+                const table = printArea.querySelector('.data-table');
+                const headers = table.querySelectorAll('thead th');
+
+                headers.forEach((header, index) => {
+                    const columnName = header.textContent.trim();
+                    const columnKey = getColumnKey(columnName);
+
+                    if (!selectedColumns.includes(columnKey)) {
+                        header.style.display = 'none';
+                        table.querySelectorAll('tbody tr').forEach(row => {
+                            if (row.cells[index]) {
+                                row.cells[index].style.display = 'none';
+                            }
+                        });
+                    }
+                });
+
+                // Show PDF header and footer
+                const pdfHeader = printArea.querySelector('.pdf-header');
+                const pdfFooter = printArea.querySelector('.pdf-footer');
+                if (pdfHeader) pdfHeader.style.display = 'block';
+                if (pdfFooter) pdfFooter.style.display = 'block';
+
+                // PDF options
+                const options = {
+                    margin: 10,
+                    filename: `اتفاقيات_الشركة_${new Date().toISOString().slice(0,10)}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#ffffff', // optional, ensures background is white
+                        onclone: function(clonedDoc) {
+                            // Remove any remaining no-print elements in cloned doc
+                            const clonedNoPrint = clonedDoc.querySelectorAll('.no-print');
+                            clonedNoPrint.forEach(el => el.remove());
+                        }
+                    },
+                    jsPDF: {
+                        unit: 'mm',               // Using mm for better scaling
+                        format: [600, 297],     // Custom size: A2 landscape approx 420x297 mm
+                        orientation: 'landscape',
+                        compress: true
+                    },
+                    pagebreak: { mode: ['css', 'legacy'] } // handle page breaks
+                };
+
+                // Generate PDF
+                html2pdf().set(options).from(printArea).save();
+
+            } catch (error) {
+                console.error('Error exporting to PDF:', error);
+                showNotification('حدث خطأ أثناء التصدير إلى PDF', 'error');
+            }
+        }
+
+        // ==================== وظائف الأعمدة ====================
         function openColumnsModal() {
             document.getElementById('columnsModal').style.display = 'flex';
             updateColumnsBadge();
@@ -1891,24 +1748,23 @@ ${isAdmin ? `
         }
 
         function getColumnKey(columnName) {
-            const columnMap =
-                {
-                    'شعار العميل': 'client_logo',
-                    'العميل': 'client_name',
-                    'سفير العلامة التجارية': 'sales_Rep_name',
-                    'توقيع الاتفاقية': 'signing_date',
-                    'مدة الاتفاقية': 'duration_years',
-                    'إنهاء الاتفاقية': 'termination_type',
-                    'تنفيذ الاتفاقية': 'implementation_date',
-                    'انتهاء الاتفاقية': 'end_date',
-                    'أشهر الإخطار': 'notice_months',
-                    'الإخطار المتوقع': 'required_notice_date',
-                    'حالة الإخطار': 'notice_status',
-                    'الخدمة': 'service_type',
-                    'عدد المنتج': 'product_quantity',
-                    'التسعيرة': 'price',
-                    'المجموع': 'total_amount'
-                }
+            const columnMap = {
+                'شعار العميل': 'client_logo',
+                'العميل': 'client_name',
+                'سفير العلامة التجارية': 'sales_Rep_name',
+                'توقيع الاتفاقية': 'signing_date',
+                'مدة الاتفاقية': 'duration_years',
+                'إنهاء الاتفاقية': 'termination_type',
+                'تنفيذ الاتفاقية': 'implementation_date',
+                'انتهاء الاتفاقية': 'end_date',
+                'أشهر الإخطار': 'notice_months',
+                'الإخطار المتوقع': 'required_notice_date',
+                'حالة الإخطار': 'notice_status',
+                'الخدمة': 'service_type',
+                'عدد المنتج': 'product_quantity',
+                'التسعيرة': 'price',
+                'المجموع': 'total_amount'
+            };
             return columnMap[columnName] || columnName.toLowerCase().replace(/\s+/g, '_');
         }
 
@@ -1917,28 +1773,13 @@ ${isAdmin ? `
             document.getElementById('columnsBadge').textContent = checkedCount;
         }
 
-        // Initialize column checkboxes
-        document.addEventListener('DOMContentLoaded', function() {
+        function getSelectedColumns() {
+            const checkboxes = document.querySelectorAll('.column-checkbox input:checked');
+            const selectedColumns = Array.from(checkboxes).map(checkbox => checkbox.value);
+            return selectedColumns;
+        }
 
-            const checkboxes = document.querySelectorAll('.column-checkbox input');
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    const checkmark = this.nextElementSibling;
-                    if (this.checked) {
-                        checkmark.style.backgroundColor = 'var(--primary)';
-                        checkmark.style.borderColor = 'var(--primary)';
-                    } else {
-                        checkmark.style.backgroundColor = '';
-                        checkmark.style.borderColor = 'var(--gray-300)';
-                    }
-                    updateColumnsBadge();
-                });
-            });
-
-            // Initialize with all columns selected
-            updateColumnsBadge();
-        });
-
+        // ==================== وظائف التصفية ====================
         function applyFilter() {
             const criteria = document.getElementById('filterSelect').value;
             const serviceTypeKey = document.getElementById('serviceTypeFilter').value;
@@ -2007,483 +1848,399 @@ ${isAdmin ? `
 
             renderTable();
         }
-        function getSelectedColumns() {
-            const checkboxes = document.querySelectorAll('.column-checkbox input:checked');
-            const selectedColumns = Array.from(checkboxes).map(checkbox => checkbox.value);
-            return selectedColumns;
-        }
 
-        function exportAgreements(selectedColumns = null) {
-            // If no columns selected, use all available columns
-            if (!selectedColumns || selectedColumns.length === 0) {
-                selectedColumns = Array.from(document.querySelectorAll('.column-checkbox input[type="checkbox"]'))
-                    .filter(checkbox => checkbox.checked)
-                    .map(checkbox => checkbox.value);
+        // ==================== وظائف العرض ====================
+        function renderTable(data = currentFilteredAgreements) {
+            const tbody = document.getElementById('tableBody');
+            if (!tbody) {
+                console.error("Table body element not found!");
+                return;
+            }
+            tbody.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `
+        <tr>
+            <td colspan="15" class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-user-times"></i>
+                </div>
+                <div class="empty-text">لا توجد بيانات متاحة</div>
+            </td>
+        </tr>
+        `;
+                return;
             }
 
-            // Column names in Arabic
-            const columnsMap = {
-                client_logo: "شعار العميل",
-                client_name: " العميل",
-                sales_Rep_name: " سفير العلامة التجارية",
-                signing_date: " توقيع الاتفاقية",
-                duration_years: "مدة الاتفاقية ",
-                termination_type: " إنهاء الاتفاقية",
-                implementation_date: " تنفيذ الاتفاقية",
-                end_date: " انتهاء الاتفاقية",
-                notice_months: "أشهر الإخطار ",
-                required_notice_date: " الإخطار المتوقع",
-                notice_status: "حالة الإخطار",
-                service_type: " الخدمة",
-                product_quantity: "عدد المنتج",
-                price: "التسعيرة",
-                total_amount: "المجموع"
-            };
+            data.forEach(agreement => {
+                const row = document.createElement('tr');
 
-            const headers = selectedColumns
-                .filter(key => key !== 'client_logo')
-                .map(key => columnsMap[key]);
+                row.innerHTML = `
+        <!-- Client Logo -->
+        <td class="px-4 py-2 text-center">
+            ${agreement.client_logo ? `<img src="${agreement.client_logo}" alt="شعار" class="h-10 mx-auto rounded-full border" />` : '—'}
+        </td>
 
-            const data = currentFilteredAgreements.map(agreement => {
-                const row = {};
-                selectedColumns.forEach(key => {
-                    let value = (agreement[key] !== undefined && agreement[key] !== null) ? agreement[key] : '';
-                    switch (key) {
-                        case 'client_logo':
-                            row[key] = agreement.client_logo || '';
-                            break;
-                        case 'client_name':
-                            row[key] = agreement.client_name || '';
-                            break;
-                        case 'sales_Rep_name':
-                            row[key] = agreement.sales_Rep_name || '';
-                            break;
-                        case 'signing_date':
-                            row[key] = formatDateForDisplay(agreement.signing_date);
-                            break;
-                        case 'duration_years':
-                            row[key] = agreement.duration_years || '';
-                            break;
-                        case 'termination_type':
-                            row[key] = agreement.termination_type === 'returnable'
-                                ? `مشروطة بمقابل `
-                                : agreement.termination_type === 'non_returnable'
-                                    ? 'غير مشروطة بمقابل'
-                                    : '—';
-                            break;
-                        case 'implementation_date':
-                            row[key] = formatDateForDisplay(agreement.implementation_date);
-                            break;
-                        case 'end_date':
-                            row[key] = formatDateForDisplay(agreement.end_date);
-                            break;
-                        case 'notice_months':
-                            row[key] = agreement.notice_months || '';
-                            break;
-                        case 'required_notice_date':
-                            row[key] = formatDateForDisplay(agreement.required_notice_date);
-                            break;
-                        case 'notice_status':
-                            row[key] = getNoticeStatus(agreement.notice_status);
-                            break;
-                        case 'service_type':
-                            row[key] = agreement.service_type || '';
-                            break;
-                        case 'product_quantity':
-                            row[key] = agreement.product_quantity || '';
-                            break;
-                        case 'price':
-                            row[key] = agreement.price || '';
-                            break;
-                        case 'total_amount':
-                            row[key] = agreement.total_amount || '';
-                            break;
-                        default:
-                            row[key] = '';
-                    }
-                });
-                return row;
-            });
+        <!-- Client Name -->
+        <td class="px-4 py-2 text-sm font-semibold text-gray-800">
+            <div class="flex flex-col items-center">
+                <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}"
+                   class="hover:text-blue-600 hover:underline cursor-pointer whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis block w-full text-center">
+                    ${agreement.client_name || '—'}
+                </a>
+            </div>
+        </td>
 
-            // Prepare worksheet data: headers + rows
-            const wsData = [headers, ...data.map(row => selectedColumns
-                .filter(key => key !== 'client_logo')
-                .map(key => row[key]))];
-            const worksheet = XLSX.utils.aoa_to_sheet(wsData);
+        <!-- Sales Rep Name -->
+        <td class="px-4 py-2 text-sm font-semibold text-gray-800">
+            <div class="flex flex-col items-center">
+                <a href="/sales-reps/${agreement.sales_rep_id}" class="hover:text-blue-600 hover:underline cursor-pointer whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis block w-full text-center">
+                    ${agreement.sales_Rep_name || '—'}
+                </a>
+            </div>
+        </td>
 
-            // Auto-size columns
-            const colWidths = wsData[0].map((_, colIndex) => {
-                const maxLen = wsData.reduce((max, row) => {
-                    const cell = row[colIndex] ? String(row[colIndex]) : '';
-                    return Math.max(max, cell.length);
-                }, 10);
-                return { wch: maxLen + 2 };
-            });
-            worksheet['!cols'] = colWidths;
+        <!-- Signing Date -->
+        <td class="px-4 py-2 text-sm text-gray-700">
+            <div class="flex items-center justify-between">
+                <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
+                    ${formatDateForDisplay(agreement.signing_date) || '—'}
+                </a>
+            </div>
+        </td>
 
-            // Create and download workbook
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "اتفاقيات");
+        <!-- Duration Years -->
+        <td class="whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis px-4 py-2 text-sm text-gray-700">
+            <div class="flex items-center justify-between">
+                <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
+                    ${agreement.duration_years || '—'} سنوات
+                </a>
+            </div>
+        </td>
 
-            XLSX.writeFile(workbook, `اتفاقيات_الشركة_${new Date().toISOString().slice(0, 10)}.xlsx`);
-        }
-        // CSV Export function
-        function exportToCSV(headers, data, selectedKeys) {
-            let csvContent = '\uFEFF' + headers.join(',') + '\r\n';
-
-            data.forEach(row => {
-                const rowValues = selectedKeys.map(key => {
-                    let value = row[key] || '';
-                    // Escape quotes and wrap in quotes if contains comma or special characters
-                    if (typeof value === 'string' && (value.includes(',') || value.includes('\n') || value.includes('"'))) {
-                        return `"${value.replace(/"/g, '""')}"`;
-                    }
-                    return value;
-                });
-                csvContent += rowValues.join(',') + '\r\n';
-            });
-
-            // Create download link
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `تقرير_اتفاقيات_الشركة_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // PDF Export function using html2pdf
-        function exportToPDF(selectedColumns) {
-            // Clone the table to modify for PDF export
-            const table = document.querySelector('.data-table').cloneNode(true);
-            const pdfHeader = document.querySelector('.pdf-header').cloneNode(true);
-            const pdfFooter = document.querySelector('.pdf-footer').cloneNode(true);
-
-            // Style adjustments for header and footer
-            pdfHeader.style.display = 'block';
-            pdfHeader.style.width = '100%';
-            pdfHeader.style.padding = '10px';
-
-            pdfFooter.style.display = 'block';
-            pdfFooter.style.width = '100%';
-            pdfFooter.style.padding = '15px'; // Increased padding
-            pdfFooter.style.minHeight = '80px'; // Minimum height guarantee
-            pdfFooter.style.boxSizing = 'border-box';
-
-            // Create a container for the PDF content
-            const pdfContainer = document.createElement('div');
-            pdfContainer.style.padding = '20px';
-            pdfContainer.style.width = '100%';
-            pdfContainer.style.direction = 'rtl';
-            pdfContainer.style.textAlign = 'right';
-            pdfContainer.style.fontFamily = `'Cairo', 'Tajawal', 'Arial', sans-serif'`;
-            pdfContainer.appendChild(pdfHeader);
-            pdfContainer.appendChild(table);
-            pdfContainer.appendChild(pdfFooter);
-
-            // Hide columns that are not selected
-            const headers = table.querySelectorAll('thead th');
-            headers.forEach((header, index) => {
-                const columnName = header.textContent.trim();
-                const columnKey = getColumnKey(columnName);
-
-                if (!selectedColumns.includes(columnKey)) {
-                    header.style.display = 'none';
-                    table.querySelectorAll('tbody tr').forEach(row => {
-                        if (row.cells[index]) {
-                            row.cells[index].style.display = 'none';
-                            row.cells[index].direction = 'rtl';
-                            row.cells[index].style.textAlign = 'right';
-                        }
-                    });
+        <!-- Termination Type -->
+        <td class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis">
+            <div class="flex items-center justify-between">
+                <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
+                    ${
+                    agreement.termination_type === 'returnable'
+                        ? `مشروطة بمقابل `
+                        : agreement.termination_type === 'non_returnable'
+                            ? 'غير مشروطة بمقابل'
+                            : '—'
                 }
+                </a>
+            </div>
+        </td>
+
+        <!-- Implementation Date -->
+        <td class="px-4 py-2 text-sm text-gray-700">
+            <div class="flex items-center justify-between">
+                <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
+                    ${formatDateForDisplay(agreement.implementation_date) || '—'}
+                </a>
+            </div>
+        </td>
+
+        <!-- End Date -->
+        <td class="px-4 py-2 text-sm text-gray-700">
+            <div class="flex items-center justify-between">
+                <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
+                    ${formatDateForDisplay(agreement.end_date) || '—'}
+                </a>
+            </div>
+        </td>
+
+        <!-- Notice Months -->
+        <td class="px-4 py-2 text-sm text-gray-700">
+            <div class="flex items-center justify-between">
+                <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
+                    ${agreement.notice_months || '—'}
+                </a>
+            </div>
+        </td>
+
+        <!-- Required Notice Date -->
+        <td class="px-4 py-2 text-sm text-center ${ agreement.is_notice_at_time ? 'text-red-600 font-bold' : 'text-green-600 font-bold' }">
+            <div class="flex items-center justify-between">
+                ${formatDateForDisplay(agreement.required_notice_date) || '—'}
+            </div>
+        </td>
+
+        <!-- Notice Status -->
+        <td class="px-4 py-2 text-center whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis">
+            <div class="flex items-center justify-between">
+                <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-semibold ${
+                    agreement.notice_status === 'sent'
+                        ? 'bg-green-100 text-green-600'
+                        : (agreement.notice_status === 'not_sent' || agreement.notice_status === 'not sent')
+                            ? 'bg-red-100 text-red-600'
+                            : 'bg-gray-100 text-gray-600'
+                }">
+                    ${
+                    agreement.notice_status === 'sent'
+                        ? 'تم الإخطار'
+                        : (agreement.notice_status === 'not_sent' || agreement.notice_status === 'not sent')
+                            ? 'لم يتم الإخطار'
+                            : '—'
+                }
+                </span>
+            </div>
+        </td>
+
+        <!-- Service Type -->
+        <td dir="rtl" class="px-4 py-2 text-sm text-gray-700 whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis">
+            <div class="flex items-center justify-between">
+                ${agreement.service_type || '—'}
+            </div>
+        </td>
+
+        <!-- Product Quantity -->
+        <td class="px-4 py-2 text-sm text-gray-700">
+            <div class="flex items-center justify-between">
+                ${agreement.product_quantity || '—'}
+            </div>
+        </td>
+
+        <!-- Price -->
+        <td class="px-4 py-2 text-sm text-gray-700">
+            <div class="flex items-center justify-between">
+                ${agreement.price || '—'}
+            </div>
+        </td>
+
+        <!-- Total Amount -->
+        <td class="px-4 py-2 text-sm text-gray-700">
+            <div class="flex items-center justify-between">
+                ${agreement.total_amount || '—'}
+                ${isAdmin ? `
+                <button onclick="openAgreementEditModal(${agreement.agreement_id})" class="text-green-600 hover:text-green-800 no-print" title="تعديل بيانات الإتفاقية">
+                    <i class="fas fa-edit"></i>
+                </button>
+                ` : ''}
+            </div>
+        </td>
+        `;
+                tbody.appendChild(row);
             });
-            // Options for html2pdf
-            const options = {
-                margin: [15, 10, 20, 10], // [top, left, bottom, right] - increased bottom margin
-                filename: `تقرير_اتفاقيات_الشركة_${new Date().toISOString().slice(0,10)}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: {
-                    scale: 2,
-                    ignoreElements: (element) => {
-                        // Ignore elements that might interfere with layout
-                        return element.classList.contains('ignore-pdf');
+        }
+
+        // ==================== وظائف التعديل ====================
+        function openAgreementEditModal(agreementId) {
+            const agreement = AgreementsData.find(a => a.agreement_id == agreementId);
+
+            if (!agreement) {
+                showNotification('لم يتم العثور على بيانات الاتفاقية', 'error');
+                return;
+            }
+
+            // Populate the form fields
+            document.getElementById('editAgreementId').value = agreement.agreement_id;
+            document.getElementById('editClientName').value = agreement.client_name || '';
+            document.getElementById('editSigningDate').value = agreement.signing_date || '';
+            document.getElementById('editDurationYears').value = agreement.duration_years || '';
+            document.getElementById('editTerminationType').value = agreement.termination_type || 'returnable';
+            document.getElementById('editImplementationDate').value = agreement.implementation_date || '';
+            document.getElementById('editEndDate').value = agreement.end_date || '';
+            document.getElementById('editNoticeMonths').value = agreement.notice_months || '';
+            document.getElementById('editRequiredNoticeDate').value = agreement.required_notice_date || '';
+            document.getElementById('editNoticeStatus').value = agreement.notice_status || 'not_sent';
+            document.getElementById('editServiceType').value = agreement.service_type || '';
+            document.getElementById('editProductQuantity').value = agreement.product_quantity || '';
+            document.getElementById('editPrice').value = agreement.price
+                ? agreement.price.toString().replace(/,/g, '')
+                : 0;
+            calculateTotal();
+
+            // Update modal title
+            document.getElementById('modalAgreementTitle').textContent = `تعديل اتفاقية ${agreement.client_name || ''}`;
+
+            // Show the modal
+            const modal = document.getElementById('agreementEditModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+
+        function calculateTotal() {
+            const quantity = document.getElementById('editProductQuantity').value || 0;
+            const price = document.getElementById('editPrice').value || 0;
+            const total = quantity * price;
+
+            document.getElementById('editTotalAmount').value =  total;
+        }
+
+        function closeAgreementEditModal() {
+            const modal = document.getElementById('agreementEditModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+
+        function saveAgreementEdits() {
+            const formData = new FormData(document.getElementById('agreementEditForm'));
+            const agreementId = formData.get('agreement_id');
+
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                if (key !== 'agreement_id') {
+                    // Convert numeric fields to numbers
+                    if (['duration_years', 'notice_months', 'product_quantity', 'price', 'total_amount'].includes(key)) {
+                        data[key] = value === '' ? null : Number(value);
+                    } else {
+                        data[key] = value === '' ? null : value;
                     }
+                }
+            }
+
+            console.log('Sending data:', data);
+
+            // Show loading state
+            const saveBtn = document.querySelector('#agreementEditModal .modal-footer button:last-child');
+            const originalText = saveBtn.textContent;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+            saveBtn.disabled = true;
+
+            fetch(`/api/agreements/${agreementId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
                 },
-                jsPDF: {
-                    unit: 'mm',
-                    format: [594, 420],
-                    orientation: 'landscape',
-                    // Add more space for footer
-                    putOnlyUsedFonts: true,
-                    compress: true
-                }
-            };
+                body: JSON.stringify(data)
+            })
+                .then(async response => {
+                    console.log('Response status:', response.status);
+                    const responseData = await response.json();
 
-            // Generate PDF
-            html2pdf().set(options).from(pdfContainer).save();
+                    if (!response.ok) {
+                        throw new Error(responseData.message || `Server error: ${response.status}`);
+                    }
+                    return responseData;
+                })
+                .then(result => {
+                    console.log('Success response:', result);
+                    if (result.success) {
+                        // Update local data
+                        const agreementIndex = AgreementsData.findIndex(a => a.agreement_id == agreementId);
+                        if (agreementIndex !== -1) {
+                            Object.assign(AgreementsData[agreementIndex], result.data);
+                        }
+
+                        // Update current filtered data
+                        const filteredIndex = currentFilteredAgreements.findIndex(a => a.agreement_id == agreementId);
+                        if (filteredIndex !== -1) {
+                            Object.assign(currentFilteredAgreements[filteredIndex], result.data);
+                        }
+
+                        renderTable();
+                        showNotification('تم تحديث بيانات الاتفاقية بنجاح', 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 500);
+                        closeAgreementEditModal();
+                    } else {
+                        throw new Error(result.message || 'فشل في حفظ التغييرات');
+                    }
+                })
+                .catch(error => {
+                    console.error('Full error:', error);
+                    showNotification('حدث خطأ أثناء حفظ التغييرات: ' + error.message, 'error');
+                })
+                .finally(() => {
+                    saveBtn.textContent = originalText;
+                    saveBtn.disabled = false;
+                });
         }
 
-        // Helper functions
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !document.getElementById('agreementEditModal').classList.contains('hidden')) {
+                closeAgreementEditModal();
+            }
+        });
+
+        // ==================== وظائف مساعدة ====================
         function getNoticeStatus(status) {
             if (status === 'sent') return 'تم الإخطار';
             if (status === 'not sent' || status === 'not_sent') return 'لم يتم الإخطار';
             return '—';
         }
 
-    function openEditModal(agreementId, field, currentValue) {
-        const modal = document.getElementById('editModal');
-        const fieldLabel = document.getElementById('fieldLabel');
-        const inputContainer = document.getElementById('inputContainer');
-        const editAgreementId = document.getElementById('editAgreementId');
-        const editField = document.getElementById('editField');
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 6px;
+        color: white;
+        font-weight: 500;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: opacity 0.5s;
+    `;
 
-        // Set modal title and field label based on field type
-        const fieldLabels = {
-            'client_name': 'اسم العميل',
-            'signing_date': 'تاريخ التوقيع',
-            'duration_years': 'مدة الاتفاقية (سنوات)',
-            'termination_type': 'نوع الإنهاء',
-            'implementation_date': 'تاريخ التنفيذ',
-            'end_date': 'تاريخ الانتهاء',
-            'notice_months': 'أشهر الإخطار',
-            'required_notice_date': 'تاريخ الإخطار المطلوب',
-            'notice_status': 'حالة الإخطار',
-            'service_type': 'نوع الخدمة',
-            'product_quantity': 'كمية المنتج',
-            'price': 'السعر',
-            'total_amount': 'المبلغ الإجمالي'
-        };
+            notification.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444';
+            notification.textContent = message;
 
-        document.getElementById('modalTitle').textContent = `تعديل ${fieldLabels[field]}`;
-        fieldLabel.textContent = fieldLabels[field];
-        editAgreementId.value = agreementId;
-        editField.value = field;
+            document.body.appendChild(notification);
 
-        // Create appropriate input based on field type
-        let inputHtml = '';
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        }
 
-        if (field === 'termination_type') {
-            inputHtml = `
-                <select name="value" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="z-index: 10060;">
-                    <option value="">اختر نوع الإنهاء</option>
-                    <option value="returnable" ${currentValue === 'returnable' ? 'selected' : ''}>مشروطة بمقابل</option>
-                    <option value="non_returnable" ${currentValue === 'non_returnable' ? 'selected' : ''}>غير مشروطة بمقابل</option>
-                </select>
-            `;
-        } else if (field === 'notice_status') {
-            // Handle both 'not_sent' and 'not sent' values
-            const normalizedValue = currentValue === 'not sent' ? 'not_sent' : currentValue;
-            inputHtml = `
-                <select name="value" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="z-index: 10060;">
-                    <option value="">اختر حالة الإخطار</option>
-                    <option value="sent" ${normalizedValue === 'sent' ? 'selected' : ''}>تم الإخطار</option>
-                    <option value="not_sent" ${normalizedValue === 'not_sent' ? 'selected' : ''}>لم يتم الإخطار</option>
-                </select>
-            `;
-        } else if (field.includes('_date')) {
-            // Format date for input[type="date"] (YYYY-MM-DD)
-            let formattedDate = '';
-            if (currentValue) {
-                const date = new Date(currentValue);
-                if (!isNaN(date.getTime())) {
-                    formattedDate = date.toISOString().split('T')[0];
-                }
+        function formatDateForDisplay(date) {
+            if (!date) return "";
+            try {
+                const d = new Date(date);
+                return isNaN(d.getTime()) ? String(date) : d.toLocaleDateString('ar-EG');
+            } catch (e) {
+                console.warn("Date formatting failed for:", date);
+                return String(date);
             }
-
-            inputHtml = `
-                <input type="date" name="value" value="${formattedDate}"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-            `;
-        } else if (field === 'duration_years' || field === 'notice_months' || field === 'product_quantity') {
-            inputHtml = `
-                <input type="number" name="value" value="${currentValue || ''}"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                       ${field === 'duration_years' ? 'min="1"' : 'min="0"'}
-                       step="1">
-            `;
-        } else if (field === 'price' || field === 'total_amount') {
-            inputHtml = `
-                <input type="number" name="value" value="${currentValue || ''}"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                       step="1" min="0">
-            `;
-        } else {
-            inputHtml = `
-                <input type="text" name="value" value="${currentValue || ''}"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-            `;
         }
 
-        inputContainer.innerHTML = inputHtml;
-        modal.classList.remove('hidden');
-
-        // Focus the first input element in the modal
-        setTimeout(() => {
-            const firstInput = inputContainer.querySelector('input, select');
-            if (firstInput) {
-                firstInput.focus();
+        function addNewAgreement() {
+            const salesRepId = document.getElementById('current_sales_rep_id').value;
+            if (!salesRepId) {
+                alert("الرجاء تحديد مندوب مبيعات أولاً");
+                return;
             }
-        }, 100);
-    }
-
-    // Close modal
-    function closeEditModal() {
-        document.getElementById('editModal').classList.add('hidden');
-    }
-
-    // Close modal when clicking outside
-    document.getElementById('editModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeEditModal();
-        }
-    });
-
-    function showNotification(message, type) {
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 6px;
-            color: white;
-            font-weight: 500;
-            z-index: 10000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        `;
-
-        notification.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444';
-        notification.textContent = message;
-
-        document.body.appendChild(notification);
-
-        // Remove notification after 3 seconds
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            notification.style.transition = 'opacity 0.5s';
-            setTimeout(() => notification.remove(), 500);
-        }, 3000);
-    }
-
-    function formatDateForDisplay(date) {
-        if (!date) return "";
-        try {
-            const d = new Date(date);
-            return isNaN(d.getTime()) ? String(date) : d.toLocaleDateString('ar-EG');
-        } catch (e) {
-            console.warn("Date formatting failed for:", date);
-            return String(date);
-        }
-    }
-
-
-    function formatDateForCSV(dateString) {
-            if (!dateString) return 'لايوجد تاريخ';
-
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) return ''; // Invalid date
-
-            // Format as YYYY-MM-DD (Excel-friendly format)
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-
-            return `${year}-${month}-${day}`;
+            window.location.href = "{{ route('salesrep.agreements.create', ['salesrep' => ':id']) }}".replace(':id', salesRepId);
         }
 
+        // ==================== تهيئة Flatpickr ====================
+        flatpickr("#editImplementationDate", {
+            dateFormat: "Y-m-d",
+            locale: "ar",
+            disableMobile: true,
+            defaultDate: "{{ old('implementation_date') }}"
+        });
 
-        function printSection(id) {
-            const content = document.getElementById(id).innerHTML;
-            const original = document.body.innerHTML;
+        flatpickr("#editEndDate", {
+            dateFormat: "Y-m-d",
+            locale: "ar",
+            disableMobile: true,
+            defaultDate: "{{ old('end_date') }}"
+        });
 
-            document.body.innerHTML = content;
-            window.print();
-            document.body.innerHTML = original;
-            location.reload();
-        }
+        flatpickr("#editSigningDate", {
+            dateFormat: "Y-m-d",
+            locale: "ar",
+            disableMobile: true,
+            defaultDate: "{{ old('signing_date') }}"
+        });
 
-    // Add this function if you need it for CSV export
-
-    function handleExport(type) {
-        const selectedColumns = getSelectedColumns();
-
-        switch(type) {
-            case 'xlsx':
-                exportAgreements(selectedColumns);
-                break;
-            case 'pdf':
-                exportToPDF(selectedColumns);
-                break;
-            default:
-                console.error('Unknown export type:', type);
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Toggle dropdown menu
-        const exportBtn = document.getElementById('exportBtn');
-        const exportDropdown = document.getElementById('exportDropdown');
-
-        if (exportBtn && exportDropdown) {
-            exportBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const dropdown = this.closest('.dropdown');
-                dropdown.classList.toggle('active');
-            });
-
-            // Handle export type selection
-            const exportItems = exportDropdown.querySelectorAll('.dropdown-item');
-            exportItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    const exportType = this.getAttribute('data-type');
-                    handleExport(exportType);
-
-                    // Close dropdown after selection
-                    const dropdown = this.closest('.dropdown');
-                    dropdown.classList.remove('active');
-                });
-            });
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.dropdown')) {
-                    const dropdowns = document.querySelectorAll('.dropdown');
-                    dropdowns.forEach(dropdown => {
-                        dropdown.classList.remove('active');
-                    });
-                }
-            });
-        }
-    });
-    flatpickr("#editImplementationDate", {
-        dateFormat: "Y-m-d",
-        locale: "ar",
-        disableMobile: true,
-        defaultDate: "{{ old('implementation_date') }}"
-    });
-
-    flatpickr("#editEndDate", {
-        dateFormat: "Y-m-d",
-        locale: "ar",
-        disableMobile: true,
-        defaultDate: "{{ old('end_date') }}"
-    });
-
-    flatpickr("#editSigningDate", {
-        dateFormat: "Y-m-d",
-        locale: "ar",
-        disableMobile: true,
-        defaultDate: "{{ old('signing_date') }}"
-    });
-    flatpickr("#editRequiredNoticeDate", {
-        dateFormat: "Y-m-d",
-        locale: "ar",
-        disableMobile: true,
-        defaultDate: "{{ old('editRequiredNoticeDate') }}"
-    });
+        flatpickr("#editRequiredNoticeDate", {
+            dateFormat: "Y-m-d",
+            locale: "ar",
+            disableMobile: true,
+            defaultDate: "{{ old('editRequiredNoticeDate') }}"
+        });
     </script>
 @endpush

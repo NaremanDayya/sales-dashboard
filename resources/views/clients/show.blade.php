@@ -21,14 +21,14 @@
                         @endphp
 
 
-                        <div class="flex justify-center">
-                            <div class="relative">
-                                <img src="{{ $logoUrl }}" onerror="this.src='{{ asset('images/default-company.png') }}'"
-                                     alt="Logo"
-                                     class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md">
-                            </div>
+                    <div class="flex justify-center">
+                        <div class="relative w-24 h-24">
+                            <img src="{{ $logoUrl }}"
+                                 onerror="this.src='{{ asset('images/default-company.png') }}'"
+                                 alt="Logo"
+                                 class="w-full h-full rounded-full object-contain border-4 border-white shadow-md bg-white p-1">
                         </div>
-
+                    </div>
                         <h1 class="text-2xl font-bold text-gray-800 mt-4">{{ $client->company_name }}</h1>
                         <p class="text-gray-600">{{ $client->contact_person }}</p>
 
