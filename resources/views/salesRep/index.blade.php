@@ -33,22 +33,6 @@
         direction: rtl;
         padding: 20px;
     }
-    .pdf-export-container {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        position: fixed !important;
-        left: -10000px !important;
-        top: -10000px !important;
-        z-index: -9999 !important;
-        pointer-events: none !important;
-    }
-
-    /* Ensure the original PDF content in view is hidden */
-    .pdf-content .pdf-header,
-    .pdf-content .pdf-footer {
-        display: none !important;
-    }
     .export-btn-group {
         position: relative;
         display: inline-block;
@@ -2302,7 +2286,6 @@ function fixArabicText(text) {
                 }
             }
         }
-
 
 
 function getAchievementClass(percentage) {
