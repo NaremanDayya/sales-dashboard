@@ -33,6 +33,22 @@
         direction: rtl;
         padding: 20px;
     }
+    .pdf-export-container {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        position: fixed !important;
+        left: -10000px !important;
+        top: -10000px !important;
+        z-index: -9999 !important;
+        pointer-events: none !important;
+    }
+
+    /* Ensure the original PDF content in view is hidden */
+    .pdf-content .pdf-header,
+    .pdf-content .pdf-footer {
+        display: none !important;
+    }
     .export-btn-group {
         position: relative;
         display: inline-block;
@@ -2287,286 +2303,7 @@ function fixArabicText(text) {
             }
         }
 
-    function exportNPDF(selectedColumns) {
 
-    const originalContent = document.querySelector('.pdf-content');
-
-    // Temporarily show the header/footer
-    const header = originalContent.querySelector('.pdf-header');
-    const footer = originalContent.querySelector('.pdf-footer');
-    header.style.display = 'block';
-    footer.style.display = 'block';
-
-    // Clone the full content (with table, header, footer)
-    const clonedContent = originalContent.cloneNode(true);
-
-    // Restore visibility (in case clonedContent inherited "none")
-    clonedContent.querySelector('.pdf-header').style.display = 'block';
-    clonedContent.querySelector('.pdf-footer').style.display = 'block';
-
-    // Clone and manipulate the table only (so live UI isn't touched)
-    const table = clonedContent.querySelector('.data-table');
-
-    // Remove checkbox column
-    const selectAllHeader = table.querySelector('thead th:first-child');
-    if (selectAllHeader && selectAllHeader.querySelector('input[type="checkbox"]')) {
-        selectAllHeader.remove();
-        table.querySelectorAll('tbody tr').forEach(row => {
-            if (row.cells[0]?.querySelector('input[type="checkbox"]')) {
-                row.deleteCell(0);
-            }
-        });
-    }
-
-    // Remove action column
-    const headers = table.querySelectorAll('thead th');
-    const actionHeader = Array.from(headers).find(th => th.textContent.trim() === 'الإجراءات');
-    if (actionHeader) {
-        const actionIndex = Array.from(headers).indexOf(actionHeader);
-        actionHeader.remove();
-        table.querySelectorAll('tbody tr').forEach(row => {
-            if (row.cells[actionIndex]) {
-                row.deleteCell(actionIndex);
-            }
-        });
-    }
-
-    // Hide unselected columns
-    table.querySelectorAll('thead th').forEach((header, index) => {
-        const columnName = header.textContent.trim();
-        const columnKey = getRepColumnKey(columnName);
-
-        if (!selectedColumns.includes(columnKey)) {
-            header.style.display = 'none';
-            table.querySelectorAll('tbody tr').forEach(row => {
-                if (row.cells[index]) {
-                    row.cells[index].style.display = 'none';
-                }
-            });
-        }
-    });
-
-    // Wrap the cloned content into a new container
-    const wrapper = document.createElement('div');
-    wrapper.appendChild(clonedContent);
-
-    // Generate PDF
-    html2pdf()
-        .set({
-            margin: 10,
-            filename: `تقرير_سفراء العلامة التجارية_${new Date().toISOString().slice(0, 10)}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' }
-        })
-        .from(wrapper)
-        .save()
-        .then(() => {
-            // Optional: Hide header/footer again
-            header.style.display = 'none';
-            footer.style.display = 'none';
-        });
-}
-
-
-function exportMPDF(selectedColumns) {
-    // Clone the full PDF content (including table, header, footer)
-    const fullContent = document.querySelector('.pdf-content').cloneNode(true);
-
-    // Show the header and footer
-    const header = fullContent.querySelector('.pdf-header');
-    const footer = fullContent.querySelector('.pdf-footer');
-    if (header) header.style.display = 'block';
-    if (footer) footer.style.display = 'block';
-
-    // Reference the table inside the cloned content
-    const table = fullContent.querySelector('.data-table');
-
-    // Remove the select all checkbox column if it exists
-    const selectAllHeader = table.querySelector('thead th:first-child');
-    if (selectAllHeader && selectAllHeader.querySelector('input[type="checkbox"]')) {
-        selectAllHeader.remove();
-        table.querySelectorAll('tbody tr').forEach(row => {
-            if (row.cells[0] && row.cells[0].querySelector('input[type="checkbox"]')) {
-                row.deleteCell(0);
-            }
-        });
-    }
-
-    // Remove the "الإجراءات" column
-    const headers = table.querySelectorAll('thead th');
-    const actionHeader = Array.from(headers).find(th => th.textContent.trim() === 'الإجراءات');
-    if (actionHeader) {
-        const actionIndex = Array.from(headers).indexOf(actionHeader);
-        actionHeader.remove();
-        table.querySelectorAll('tbody tr').forEach(row => {
-            if (row.cells[actionIndex]) {
-                row.deleteCell(actionIndex);
-            }
-        });
-    }
-
-    // Hide columns not in selectedColumns
-    const allHeaders = table.querySelectorAll('thead th');
-    allHeaders.forEach((header, index) => {
-        const columnName = header.textContent.trim();
-        const columnKey = getRepColumnKey(columnName); // You must define this mapping function
-
-        if (!selectedColumns.includes(columnKey)) {
-            header.style.display = 'none';
-            table.querySelectorAll('tbody tr').forEach(row => {
-                if (row.cells[index]) {
-                    row.cells[index].style.display = 'none';
-                }
-            });
-        }
-    });
-
-    // Setup options for html2pdf
-    const options = {
-        margin: 10,
-        filename: `تقرير_سفراء العلامة التجارية_${new Date().toISOString().slice(0, 10)}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' }
-    };
-
-    // Generate and save PDF
-    html2pdf().set(options).from(fullContent).save();
-}
-
-
-
-function exportToPDF(selectedColumns) {
-    try {
-        // 1. Get the original element and clone it
-        const originalElement = document.getElementById('print-area');
-        const element = originalElement.cloneNode(true);
-
-        // 2. Temporarily add to DOM (but keep invisible)
-        element.style.position = 'fixed';
-        element.style.left = '-10000px';
-        element.style.top = '0';
-        element.style.width = originalElement.offsetWidth + 'px';
-        document.body.appendChild(element);
-
-        // 3. Hide elements that shouldn't be in PDF
-        const elementsToHide = element.querySelectorAll('.no-print, .table-actions, .table-filters, .pagination');
-        elementsToHide.forEach(el => el.style.display = 'none');
-
-        // 4. Show PDF header and footer with proper styling
-        const pdfHeader = element.querySelector('.pdf-header');
-        const pdfFooter = element.querySelector('.pdf-footer');
-
-        if (pdfHeader) {
-            pdfHeader.style.display = 'block';
-            pdfHeader.style.visibility = 'visible';
-            pdfHeader.style.width = '100%';
-        }
-
-        if (pdfFooter) {
-            pdfFooter.style.display = 'block';
-            pdfFooter.style.visibility = 'visible';
-            pdfFooter.style.width = '100%';
-            pdfFooter.style.minHeight = '50px';
-            pdfFooter.style.padding = '10px';
-        }
-
-        // 5. Ensure table is visible and properly sized
-        const table = element.querySelector('.data-table');
-        if (table) {
-table.style.width = '100%';
-            table.style.visibility = 'visible';
-            table.style.display = 'table';
-        }
-
-        // 6. Handle column visibility
-        const columnMap = {
-            'personal_image': 'الصورة الشخصية',
-            'name': ' سفير العلامة التجارية',
-            'start_work_date': 'تاريخ الالتحاق بالعمل',
-            'work_duration': 'مدة العمل',
-            'target_customers': ' العملاء المستهدفين',
-            'late_customers': ' العملاء المتأخرين',
-            'total_orders': ' الطلبات الإجمالية',
-            'pending_orders': ' الطلبات المعلقة',
-            'interested_customers': ' العملاء المهتمين والمحتملين',
-            'active_agreements_count': ' الاتفاقيات النشطة',
-            'inactive_agreements_count': ' الاتفاقيات غير النشطة'
-        };
-
-        if (table) {
-            const headers = table.querySelectorAll('thead th');
-            headers.forEach((header, index) => {
-                const headerText = header.textContent.trim();
-                const columnKey = Object.keys(columnMap).find(key => columnMap[key] === headerText);
-
-                // Skip action and checkbox columns
-                if (headerText === 'الإجراءات' || header.classList.contains('no-print')) {
-                    header.style.display = 'none';
-                    table.querySelectorAll('tbody tr').forEach(row => {
-                        if (row.cells[index]) row.cells[index].style.display = 'none';
-                    });
-                    return;
-                }
-
-                // Hide if column not selected
-                if (columnKey && !selectedColumns.includes(columnKey)) {
-                    header.style.display = 'none';
-                    table.querySelectorAll('tbody tr').forEach(row => {
-                        if (row.cells[index]) row.cells[index].style.display = 'none';
-                    });
-                }
-            });
-        }
-
-        // 7. PDF generation options
-        const options = {
-            margin: [15, 10, 20, 10], // top, left, bottom, right
-            filename: `مندوبو_المبيعات_${new Date().toISOString().slice(0,10)}.pdf`,
-            image: {
-                type: 'jpeg',
-                quality: 0.98
-            },
-            html2canvas: {
-                scale: 1, // Reduced from 2 to 1 for better rendering
-                scrollX: 0,
-                scrollY: 0,
-                windowWidth: originalElement.scrollWidth,
-                logging: true, // Enable for debugging
-                useCORS: true,
-                allowTaint: true
-            },
-            jsPDF: {
-                unit: 'mm',
-                format: 'a3',
-                orientation: 'landscape',
-                compress: true,
-                hotfixes: ['px_scaling'] // Fix pixel scaling issues
-            }
-        };
-
-        // 8. Add small delay before generating PDF
-        setTimeout(() => {
-            html2pdf()
-                .set(options)
-                .from(element)
-                .save()
-                .then(() => {
-                    // Clean up
-                    document.body.removeChild(element);
-                });
-        }, 500);
-
-    } catch (error) {
-        console.error('PDF generation error:', error);
-        alert('حدث خطأ أثناء إنشاء ملف PDF. الرجاء المحاولة مرة أخرى.');
-
-        // Clean up even if error occurs
-        const elements = document.querySelectorAll('#print-area-clone');
-        elements.forEach(el => el.remove());
-    }
-}
 
 function getAchievementClass(percentage) {
     if (percentage === undefined) return 'inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-gray-800 font-semibold';

@@ -50,72 +50,112 @@
                                 <span class="badge bg-primary-soft text-primary me-3">رقم الاتفاقية</span>
                                 <span class="fw-medium">#{{ $agreement_request->agreement->id }}</span>
                             </div>
-                            <div class="d-flex align-items-center">
+                            @php
+                                $fields = [
+                                    'service_type' => 'نوع الخدمة',
+                                    'signing_date' => 'تاريخ التوقيع',
+                                    'duration_years' => 'مدة السنوات',
+                                    'termination_type' => 'نوع الإنهاء',
+                                    'notice_months' => 'شهور الإخطار',
+                                    'notice_status' => 'حالة الإخطار',
+                                    'product_quantity' => 'كمية المنتج',
+                                    'price' => 'السعر',
+                                    'agreement_status' => 'حالة الاتفاقية',
+                                    'implementation_date' => 'تاريخ التنفيذ',
+                                ];
+
+                                $translatedLabel = $fields[$editedFieldLabel ?? ''] ?? $editedFieldLabel;
+
+                                $payload = json_decode($agreement_request->payload, true) ?? [];
+                                $oldValue = $payload['old_value'] ?? null;
+                                $newValue = $payload['new_value'] ?? null;
+
+                                // Translate agreement_status and notice_status values if they exist
+                                if (($agreement_request->edited_field ?? null) === 'agreement_status') {
+                                    $statusTranslations = [
+                                        'active' => 'سارية',
+                                        'terminated' => 'منتهية',
+                                        'pending' => 'قيد الانتظار',
+                                    ];
+                                    $oldValue = $statusTranslations[$oldValue] ?? $oldValue;
+                                    $newValue = $statusTranslations[$newValue] ?? $newValue;
+                                }
+
+                                if (($agreement_request->edited_field ?? null) === 'notice_status') {
+                                    $noticeTranslations = [
+                                        'sent' => 'تم الإرسال',
+                                        'not_sent' => 'لم يتم الإرسال',
+                                    ];
+                                    $oldValue = $noticeTranslations[$oldValue] ?? $oldValue;
+                                    $newValue = $noticeTranslations[$newValue] ?? $newValue;
+                                }
+
+                                // Fallback if new value is not yet updated
+                                $newValue = $newValue ?: 'لم يتم التعديل بعد';
+                            @endphp
+
+
+                            <div class="d-flex align-items-center mb-3">
                                 <span class="badge bg-primary-soft text-primary me-3">الحقل المعدل</span>
-                                <span class="fw-medium">{{ $editedFieldLabel }}</span>
+                                <span class="fw-medium">{{ $translatedLabel }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- NEW SECTION: Old Value and New Value Comparison -->
-                @php
-                    $payload = json_decode($agreement_request->payload, true) ?? [];
-                    $oldValue = $payload['old_value'] ?? null;
-                    $newValue = $payload['new_value'] ?? null;
-                @endphp
 
-                @if($oldValue || $newValue)
-                    <div class="values-comparison bg-light p-4 rounded-3 mb-4">
-                        <h5 class="text-primary mb-4"><i class="bi bi-arrow-left-right me-2"></i>مقارنة القيم</h5>
+                <!-- Values Comparison -->
+                <div class="values-comparison bg-light p-4 rounded-3 mb-4 shadow-sm">
+                    <h5 class="text-primary mb-4">
+                        <i class="bi bi-arrow-left-right me-2"></i>مقارنة القيم
+                    </h5>
 
-                        <div class="row">
-                            <!-- Old Value -->
-                            @if($oldValue)
-                                <div class="col-md-6 mb-3">
-                                    <div class="value-card bg-white p-3 rounded-2 border border-danger border-2 h-100">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="value-badge bg-danger text-white rounded-circle me-2" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
-                                                <i class="bi bi-arrow-left"></i>
-                                            </div>
-                                            <h6 class="mb-0 text-danger fw-bold">القيمة القديمة</h6>
-                                        </div>
-                                        <div class="value-content p-2 bg-light rounded">
-                                            <p class="mb-0 text-dark fw-medium">{{ $oldValue }}</p>
-                                        </div>
+                    <div class="row">
+                        <!-- Old Value -->
+                        <div class="col-md-6 mb-3">
+                            <div class="value-card bg-white p-3 rounded-2 border border-danger border-2 h-100">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="value-badge bg-danger text-white rounded-circle me-2"
+                                         style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="bi bi-arrow-left"></i>
                                     </div>
+                                    <h6 class="mb-0 text-danger fw-bold">القيمة القديمة</h6>
                                 </div>
-                            @endif
-
-                            <!-- New Value -->
-                            @if($newValue)
-                                <div class="col-md-6 mb-3">
-                                    <div class="value-card bg-white p-3 rounded-2 border border-success border-2 h-100">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="value-badge bg-success text-white rounded-circle me-2" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
-                                                <i class="bi bi-arrow-right"></i>
-                                            </div>
-                                            <h6 class="mb-0 text-success fw-bold">القيمة الجديدة</h6>
-                                        </div>
-                                        <div class="value-content p-2 bg-light rounded">
-                                            <p class="mb-0 text-dark fw-medium">{{ $newValue }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-
-                        <!-- Change Indicator -->
-                        @if($oldValue && $newValue)
-                            <div class="change-indicator text-center mt-3">
-                                <div class="d-inline-flex align-items-center bg-primary text-white px-4 py-2 rounded-pill">
-                                    <i class="bi bi-arrow-repeat me-2"></i>
-                                    <span class="fw-medium">تم طلب تغيير القيمة</span>
+                                <div class="value-content p-2 bg-light rounded">
+                                    <p class="mb-0 text-dark fw-medium">{{ $oldValue ?? 'غير متوفرة' }}</p>
                                 </div>
                             </div>
-                        @endif
+                        </div>
+
+                        <!-- New Value -->
+                        <div class="col-md-6 mb-3">
+                            <div class="value-card bg-white p-3 rounded-2 border {{ $newValue === 'لم يتم التعديل بعد' ? 'border-secondary' : 'border-success' }} border-2 h-100">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="value-badge {{ $newValue === 'لم يتم التعديل بعد' ? 'bg-secondary' : 'bg-success' }} text-white rounded-circle me-2"
+                                         style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="bi bi-arrow-right"></i>
+                                    </div>
+                                    <h6 class="mb-0 {{ $newValue === 'لم يتم التعديل بعد' ? 'text-secondary' : 'text-success' }} fw-bold">
+                                        القيمة الجديدة
+                                    </h6>
+                                </div>
+                                <div class="value-content p-2 bg-light rounded">
+                                    <p class="mb-0 text-dark fw-medium">{{ $newValue }}</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                @endif
+
+                    <!-- Change Indicator -->
+                    @if($oldValue && $newValue !== 'لم يتم التعديل بعد')
+                        <div class="change-indicator text-center mt-3">
+                            <div class="d-inline-flex align-items-center bg-primary text-white px-4 py-2 rounded-pill shadow-sm">
+                                <i class="bi bi-arrow-repeat me-2"></i>
+                                <span class="fw-medium">تم طلب تغيير القيمة</span>
+                            </div>
+                        </div>
+                    @endif
+                </div>
 
                 <!-- Request Description -->
                 <div class="request-details bg-light p-4 rounded-3 mb-4">

@@ -18,7 +18,102 @@
         --gray-800: #1e293b;
         --gray-900: #0f172a;
     }
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
 
+    .btn-dropdown {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        color: #374151;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-dropdown:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+    }
+
+    .btn-dropdown svg {
+        transition: transform 0.2s;
+    }
+
+    .dropdown-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        min-width: 180px;
+        margin-top: 4px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        z-index: 1000;
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        padding: 8px 12px;
+        text-align: left;
+        color: #374151;
+        font-size: 14px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .dropdown-item:hover {
+        background: #f9fafb;
+    }
+
+    .dropdown-icon {
+        color: #6b7280;
+    }
+
+    /* Show dropdown when active */
+    .dropdown.active .btn-dropdown svg {
+        transform: rotate(180deg);
+    }
+
+    .dropdown.active .dropdown-menu {
+        display: block;
+    }
+    .pdf-export-table {
+        border: 2px solid #000 !important;
+        border-collapse: collapse !important;
+    }
+
+    .pdf-export-table th,
+    .pdf-export-table td {
+        border: 2px solid #000 !important;
+        padding: 8px !important;
+        text-align: center !important;
+    }
+
+    .pdf-export-table thead th {
+        background-color: #f0f0f0 !important;
+        border-bottom: 3px solid #000 !important;
+        font-weight: bold !important;
+    }
+    /* Ensure dropdown stays above other elements */
+    .export-options {
+        position: relative;
+        z-index: 1000;
+    }
     * {
         box-sizing: border-box;
         margin: 0;
@@ -493,13 +588,43 @@ tbody tr {
             @endif
         </h2>
         <div class="table-actions d-flex align-items-center gap-2">
-            <select id="exportType" class="form-select" style="width: 150px;">
-                <option value="excel" selected>Excel (تصدير إكسل)</option>
-                <option value="pdf">PDF (تصدير PDF)</option>
-            </select>
-            <button class="btn btn-outline" onclick="handleExport()">
-                <i class="fas fa-download"></i> تصدير
-            </button>
+            @isset($salesRep)
+                <div class="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-full" style="font-size:14px; font-weight:800;">
+                    سفير العلامة التجارية: {{ $salesRep->name }}
+                </div>
+            @endisset
+            <div class="export-options">
+                <div class="dropdown">
+                    <button class="btn btn-dropdown" id="exportBtn" type="button">
+                        تصدير البيانات
+                        <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                    </button>
+                    <div class="dropdown-menu" id="exportDropdown">
+                        <button class="dropdown-item" data-type="excel">
+                            <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2"/>
+                                <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2"/>
+                                <path d="M16 13H8" stroke="currentColor" stroke-width="2"/>
+                                <path d="M16 17H8" stroke="currentColor" stroke-width="2"/>
+                                <path d="M10 9H8" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            تصدير كملف Excel
+                        </button>
+                        <button class="dropdown-item" data-type="pdf">
+                            <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M4 7V17C4 18.1046 4.89543 19 6 19H18C19.1046 19 20 18.1046 20 17V7M4 7H20M4 7L6 4H18L20 7"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                            </svg>
+                            تصدير كملف PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
             <button class="btn btn-outline" onclick="window.print()" title="طباعة التقرير">
                 <i class="fas fa-print"></i>
             </button>
@@ -904,6 +1029,197 @@ function renderTable(data = commissionsData) {
                     alert('حدث خطأ في الاتصال: ' + error.message);
                     console.error('Error:', error);
                 });
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        const exportBtn = document.getElementById('exportBtn');
+        const dropdown = document.getElementById('exportDropdown');
+
+        // Toggle dropdown on button click
+        exportBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            this.closest('.dropdown').classList.toggle('active');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.dropdown').forEach(drop => {
+                drop.classList.remove('active');
+            });
+        });
+
+        // Handle export option clicks
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const exportType = this.getAttribute('data-type');
+                if (exportType === 'excel') {
+                    exportToExcel();
+                } else if (exportType === 'pdf') {
+                    exportToPDF();
+                }
+                this.closest('.dropdown').classList.remove('active');
+            });
+        });
+
+        // Prevent dropdown from closing when clicking inside it
+        dropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
+
+    // Export to Excel function
+    function exportToExcel() {
+        try {
+            // Get table data
+            const table = document.querySelector('.table-bordered');
+            const rows = Array.from(table.querySelectorAll('tbody tr'));
+
+            if (rows.length === 0) {
+                alert('لا توجد بيانات للتصدير');
+                return;
+            }
+
+            // Prepare data for Excel
+            const data = [];
+
+            // Add headers
+            const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+            data.push(headers);
+
+            // Add rows
+            rows.forEach(row => {
+                const rowData = Array.from(row.querySelectorAll('td')).map(td => {
+                    // Remove any HTML tags and get clean text
+                    return td.textContent.trim().replace(/\s+/g, ' ');
+                });
+                data.push(rowData);
+            });
+
+            // Create worksheet
+            const ws = XLSX.utils.aoa_to_sheet(data);
+
+            // Auto-size columns
+            const colWidths = headers.map((_, colIndex) => {
+                const maxLen = data.reduce((max, row) => {
+                    const cell = row[colIndex] ? String(row[colIndex]) : '';
+                    return Math.max(max, cell.length);
+                }, headers[colIndex].length);
+                return { wch: Math.min(maxLen + 2, 50) };
+            });
+            ws['!cols'] = colWidths;
+
+            // Create workbook and append sheet
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "العمولات");
+
+            // Generate and download
+            const salesRepName = "{{ $salesRep->name }}".replace(/\s+/g, '_');
+            const fileName = `عمولات_${salesRepName}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+
+        } catch (error) {
+            console.error('Excel export error:', error);
+            alert('حدث خطأ أثناء تصدير ملف Excel');
+        }
+    }
+
+    // Export to PDF function
+    function exportToPDF() {
+        try {
+            // Clone the main content area
+            const printArea = document.getElementById('print-area').cloneNode(true);
+
+            // Add PDF-specific border classes to tables
+            const tables = printArea.querySelectorAll('table');
+            tables.forEach(table => {
+                table.classList.add('pdf-export-table');
+            });
+
+            // Remove action buttons and filters from cloned content
+            const elementsToRemove = printArea.querySelectorAll('.no-print, .table-actions, .table-filters, .btn, .dropdown, .search-box, .pagination');
+            elementsToRemove.forEach(el => el.remove());
+
+            // Show PDF header and footer in the clone
+            const pdfHeader = printArea.querySelector('.pdf-header');
+            const pdfFooter = printArea.querySelector('.pdf-footer');
+            if (pdfHeader) pdfHeader.style.display = 'block';
+            if (pdfFooter) pdfFooter.style.display = 'block';
+
+            // Create a clean container for PDF
+            const pdfContainer = document.createElement('div');
+            pdfContainer.style.width = '100%';
+            pdfContainer.style.padding = '20px';
+            pdfContainer.style.fontFamily = 'Tajawal, sans-serif';
+            pdfContainer.style.direction = 'rtl';
+            pdfContainer.style.backgroundColor = '#ffffff';
+
+            // Add the PDF border styles inline
+            const style = document.createElement('style');
+            style.textContent = `
+            .pdf-export-table {
+                border: 2px solid #000 !important;
+                border-collapse: collapse !important;
+            }
+            .pdf-export-table th,
+            .pdf-export-table td {
+                border: 2px solid #000 !important;
+                padding: 8px !important;
+            }
+            .pdf-export-table thead th {
+                background-color: #f0f0f0 !important;
+                border-bottom: 3px solid #000 !important;
+            }
+        `;
+            pdfContainer.appendChild(style);
+            pdfContainer.appendChild(printArea);
+
+            // Add to document temporarily
+            document.body.appendChild(pdfContainer);
+
+            // PDF options
+            const options = {
+                margin: [10, 10, 10, 10],
+                filename: `عمولات_{{ $salesRep->name }}_${new Date().toISOString().slice(0,10)}.pdf`,
+                image: {
+                    type: 'jpeg',
+                    quality: 0.98
+                },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff',
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: printArea.scrollWidth
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a3',
+                    orientation: 'landscape',
+                    compress: true
+                }
+            };
+
+            // Generate PDF
+            html2pdf()
+                .set(options)
+                .from(pdfContainer)
+                .save()
+                .finally(() => {
+                    // Clean up
+                    document.body.removeChild(pdfContainer);
+                });
+
+        } catch (error) {
+            console.error('PDF export error:', error);
+            alert('حدث خطأ أثناء إنشاء ملف PDF');
+
+            // Clean up on error
+            const container = document.querySelector('#pdf-container-temp');
+            if (container) {
+                document.body.removeChild(container);
+            }
         }
     }
     // Initial render

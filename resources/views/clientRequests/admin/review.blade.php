@@ -45,9 +45,25 @@
                 <div class="p-6 border-b border-gray-100 dark:border-gray-700">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         @if(isset($editedFieldLabel) && $editedFieldLabel)
+                            @php
+                                $fields = [
+                                    'company_name' => 'اسم الشركة',
+                                    'logo' => 'الشعار',
+                                    'address' => 'العنوان',
+                                    'contact_person' => 'الشخص المسؤول',
+                                    'contact_position' => 'منصب الشخص المسؤول',
+                                    'interest_status' => 'حالة الاهتمام',
+                                    'phone' => 'رقم الجوال',
+                                    'interested_service' => 'الخدمة المهتم بها',
+                                    'interested_service_count' => 'عدد الخدمات المهتم بها',
+                                ];
+
+                                $translatedLabel = $fields[$editedFieldLabel] ?? $editedFieldLabel;
+                            @endphp
+
                             <div class="space-y-1">
                                 <span class="text-sm font-medium text-gray-500 dark:text-gray-400">الحقل المعدل</span>
-                                <p class="text-lg font-semibold text-gray-800 dark:text-white">{{ $editedFieldLabel }}</p>
+                                <p class="text-lg font-semibold text-gray-800 dark:text-white">{{ $translatedLabel }}</p>
                             </div>
                         @endif
                         <div class="space-y-1">
@@ -80,55 +96,69 @@
                         $payload = json_decode($client_request->payload, true) ?? [];
                         $oldValue = $payload['old_value'] ?? null;
                         $newValue = $payload['new_value'] ?? null;
+
+                        // Translate interest statuses if the edited field is 'interest_status'
+                        if (($client_request->edited_field ?? null) === 'interest_status') {
+                            $statusTranslations = [
+                                'interested' => 'مهتم',
+                                'not_interested' => 'غير مهتم',
+                                'neutral' => 'مؤجل',
+                            ];
+
+                            if (isset($statusTranslations[$oldValue])) {
+                                $oldValue = $statusTranslations[$oldValue];
+                            }
+
+                            if (isset($statusTranslations[$newValue])) {
+                                $newValue = $statusTranslations[$newValue];
+                            }
+                        }
+
+                        // Add fallback text if new value isn't set
+                        $newValue = $newValue ?: 'لم يتم التعديل بعد';
                     @endphp
 
-                    @if($oldValue || $newValue)
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <!-- Old Value Card -->
-                            @if($oldValue)
-                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
-                                    <div class="flex items-center mb-3">
-                                        <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">القيمة القديمة</span>
-                                    </div>
-                                    <div class="p-3 bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-600">
-                                        <p class="text-gray-800 dark:text-gray-200 text-lg font-semibold break-words">
-                                            {{ $oldValue }}
-                                        </p>
-                                    </div>
-                                </div>
-                            @endif
-
-                            <!-- New Value Card -->
-                            @if($newValue)
-                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
-                                    <div class="flex items-center mb-3">
-                                        <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">القيمة الجديدة</span>
-                                    </div>
-                                    <div class="p-3 bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-600">
-                                        <p class="text-gray-800 dark:text-gray-200 text-lg font-semibold break-words">
-                                            {{ $newValue }}
-                                        </p>
-                                    </div>
-                                </div>
-                            @endif
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <!-- Old Value Card -->
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                            <div class="flex items-center mb-3">
+                                <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">القيمة القديمة</span>
+                            </div>
+                            <div class="p-3 bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-600">
+                                <p class="text-gray-800 dark:text-gray-200 text-lg font-semibold break-words">
+                                    {{ $oldValue ?? 'غير متوفرة' }}
+                                </p>
+                            </div>
                         </div>
 
-                        <!-- Change Indicator (if both values exist) -->
-                        @if($oldValue && $newValue)
-                            <div class="flex items-center justify-center mb-6">
-                                <div class="flex items-center bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clip-rule="evenodd" />
-                                    </svg>
-                                    <span class="text-sm font-medium text-blue-700 dark:text-blue-300">تم طلب تغيير القيمة</span>
-                                </div>
+                        <!-- New Value Card -->
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                            <div class="flex items-center mb-3">
+                                <div class="w-3 h-3 {{ $newValue === 'لم يتم التعديل بعد' ? 'bg-gray-400' : 'bg-green-500' }} rounded-full mr-2"></div>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">القيمة الجديدة</span>
                             </div>
-                        @endif
+                            <div class="p-3 bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-600">
+                                <p class="text-gray-800 dark:text-gray-200 text-lg font-semibold break-words">
+                                    {{ $newValue }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if($oldValue && $newValue !== 'لم يتم التعديل بعد')
+                        <div class="flex items-center justify-center mb-6">
+                            <div class="flex items-center bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clip-rule="evenodd" />
+                                </svg>
+                                <span class="text-sm font-medium text-blue-700 dark:text-blue-300">تم طلب تغيير القيمة</span>
+                            </div>
+                        </div>
                     @endif
 
-                    @if($client_request->description || $client_request->message)
+
+                @if($client_request->description || $client_request->message)
                         <div class="space-y-1 mb-4">
                             <span class="text-sm font-medium text-gray-500 dark:text-gray-400">وصف الطلب</span>
                             <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
