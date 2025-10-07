@@ -37,9 +37,7 @@ class AgreementController extends Controller
         $Agreements = Agreement::with(['client', 'service'])->get()->map(function ($agreement) {
             return [
                 // Client logo (assuming relation `client` exists and client has `company_logo`)
-                'client_logo' => $agreement->client && $agreement->client->company_logo
-                    ? asset('storage/' . $agreement->client->company_logo)
-                    : null,
+                'client_logo' => $agreement->client->company_logo,
                 'client_name' => $agreement->client ? $agreement->client->company_name : '—',
                 'signing_date' => $agreement->signing_date ? $agreement->signing_date->format('Y-m-d') : '—',
                 'duration_years' => $agreement->duration_years ?? '—',
@@ -72,9 +70,7 @@ class AgreementController extends Controller
         $Agreements = Agreement::where('sales_rep_id', $salesrep->id)->with(['client', 'service'])->get()->map(function ($agreement) {
             return [
                 // Client logo (assuming relation `client` exists and client has `company_logo`)
-                'client_logo' => $agreement->client && $agreement->client->company_logo
-                    ? asset('storage/' . $agreement->client->company_logo)
-                    : null,
+                'client_logo' => $agreement->client->company_logo,
                 'client_name' => $agreement->client ? $agreement->client->company_name : '—',
                 'signing_date' => $agreement->signing_date ? $agreement->signing_date->format('Y-m-d') : '—',
                 'duration_years' => $agreement->duration_years ?? '—',
