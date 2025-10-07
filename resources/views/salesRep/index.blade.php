@@ -26,25 +26,6 @@
         padding: 0;
         font-family: 'Tajawal', sans-serif;
     }
-.pdf-export-container {
-    position: fixed !important;
-    left: -10000px !important;
-    top: -10000px !important;
-    width: 100% !important;
-    padding: 20px !important;
-    font-family: 'Tajawal', sans-serif !important;
-    direction: rtl !important;
-    background-color: #ffffff !important;
-    z-index: -9999 !important;
-    pointer-events: none !important;
-
-}
-
-    /* Ensure the original PDF content in view is hidden */
-    .pdf-content .pdf-header,
-    .pdf-content .pdf-footer {
-        display: none !important;
-    }
     body {
         background-color: var(--gray-100);
         color: var(--gray-800);
