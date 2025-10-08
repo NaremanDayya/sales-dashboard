@@ -66,7 +66,7 @@
 
                                 $translatedLabel = $fields[$editedFieldLabel ?? ''] ?? $editedFieldLabel;
 
-                                $payload = json_decode($agreement_request->payload, true) ?? [];
+                                $payload = $agreement_request->payload ?? [];
                                 $oldValue = $payload['old_value'] ?? null;
                                 $newValue = $payload['new_value'] ?? null;
 

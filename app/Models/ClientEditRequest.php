@@ -15,9 +15,11 @@ class ClientEditRequest extends Model
         'response_date',
         'notes',
         'edited_field',
+        'payload',
     ];
     protected $casts = [
     'response_date' => 'datetime',
+        'payload' => 'array',
 ];
 
     public function client()

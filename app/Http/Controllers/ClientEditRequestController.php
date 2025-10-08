@@ -72,14 +72,20 @@ class ClientEditRequestController extends Controller
             'update_message' => 'required|string',
             'edited_field' => ['required', 'in:' . implode(',', $columns)],
         ]);
+        $editedField = $validated['edited_field'];
+        $oldValue = $client->$editedField;
         $clientEditRequest = ClientEditRequest::create([
-            'client_id' => $client->id,
-            'sales_rep_id' => $client->salesRep->user->id,
-            'request_type' => 'client_data_change',
-            'description' => $validated['updated_message'] ?? null,
-            'status' => 'pending',
-            'edited_field' => $validated['edited_field'],
+            'client_id'     => $client->id,
+            'sales_rep_id'  => $client->salesRep->user->id,
+            'request_type'  => 'client_data_change',
+            'description'   => $validated['updated_message'] ?? null,
+            'status'        => 'pending',
+            'edited_field'  => $editedField,
+            'payload'       => [
+                'old_value' => $oldValue,
+            ],
         ]);
+//        dd($clientEditRequest->payload);
         $user = User::where('role', 'admin')->first();
         $user->notify(new ClientEditRequestNotification($clientEditRequest));
         return redirect()

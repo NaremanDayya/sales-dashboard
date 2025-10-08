@@ -93,7 +93,7 @@
 
                     <!-- NEW SECTION: Old Value and New Value -->
                     @php
-                        $payload = json_decode($client_request->payload, true) ?? [];
+                        $payload = $client_request->payload  ?? [];
                         $oldValue = $payload['old_value'] ?? null;
                         $newValue = $payload['new_value'] ?? null;
 

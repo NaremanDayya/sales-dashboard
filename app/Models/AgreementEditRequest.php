@@ -15,7 +15,12 @@ class AgreementEditRequest extends Model
         'description',
         'response_date',
         'notes',
+        'payload',
         'edited_field',
+    ];
+    protected $casts =[
+        'payload' => 'array',
+
     ];
 
     public function agreement()
