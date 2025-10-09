@@ -71,6 +71,7 @@ class ClientEditRequestController extends Controller
 
             'update_message' => 'required|string',
             'edited_field' => ['required', 'in:' . implode(',', $columns)],
+            'new_value' => 'required',
         ]);
         $editedField = $validated['edited_field'];
         $oldValue = $client->$editedField;
@@ -83,6 +84,7 @@ class ClientEditRequestController extends Controller
             'edited_field'  => $editedField,
             'payload'       => [
                 'old_value' => $oldValue,
+                'new_value' => $validated['new_value'],
             ],
         ]);
 //        dd($clientEditRequest->payload);

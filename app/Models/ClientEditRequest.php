@@ -15,6 +15,7 @@ class ClientEditRequest extends Model
         'response_date',
         'notes',
         'edited_field',
+        'new_value',
         'payload',
     ];
     protected $casts = [

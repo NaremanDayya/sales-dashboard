@@ -290,6 +290,14 @@
                                                     @endforeach
                                                 </select>
                                             </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">القيمة
+                                                    الجديدة</label>
+                                                <input name="new_value" required rows="3"
+                                                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                                          placeholder="أضف القيمة المستخدمة للتعديل..." >
+
+                                            </div>
 
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 mb-1">سبب
