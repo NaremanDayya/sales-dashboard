@@ -3,18 +3,25 @@
 namespace App\Livewire;
 
 use App\Models\Conversation;
+use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class ChatList extends Component
 {
+    use WithPagination;
+
     public $type = 'all';
     public $conversation = null;
     public $selectedConversation;
     public $client_id;
+    public $perPage = 8;
+    public $hasMore = true;
 
     protected $listeners = [
-        'refresh' => 'refresh'
+        'refresh' => 'refresh',
+        'loadMore' => 'loadMore'
     ];
 
     public function mount($client_id = null)
@@ -24,6 +31,13 @@ class ChatList extends Component
 
     public function refresh()
     {
+        $this->resetPage();
+        $this->render();
+    }
+
+    public function loadMore()
+    {
+        $this->perPage += 8;
         $this->render();
     }
 
@@ -32,12 +46,8 @@ class ChatList extends Component
         $user = Auth::user();
 
         $conversations = Conversation::with([
-            // Eager load all necessary relationships
-            'client.salesRep',
-            'latestMessage.sender',
-            'latestMessage.receiver',
-            'messages.sender', // Prevent N+1 in views
-            'messages.receiver'
+            'client:id,sales_rep_id,company_name,company_logo',
+            'client.salesRep:id,name',
         ])
             ->where(function ($query) use ($user) {
                 $query->where('sender_id', $user->id)
@@ -46,16 +56,52 @@ class ChatList extends Component
             ->when($this->client_id, function ($query) {
                 $query->where('client_id', $this->client_id);
             })
-            ->withCount([
-                'messages as unread_messages_count' => function($query) use ($user) {
-                    $query->where('receiver_id', $user->id)
-                        ->whereNull('read_at');
-                }
-            ])
-            ->orderByRaw("CASE WHEN unread_messages_count > 0 THEN 0 ELSE 1 END")
             ->orderBy('updated_at', 'desc')
             ->orderBy('created_at', 'desc')
+            ->take($this->perPage)
             ->get();
+
+        // Manually get latest message data for each conversation
+        if ($conversations->isNotEmpty()) {
+            $conversationIds = $conversations->pluck('id');
+
+            // Get the latest message for each conversation
+            $latestMessages = Message::whereIn('conversation_id', $conversationIds)
+                ->whereIn('id', function($query) use ($conversationIds) {
+                    $query->select(\DB::raw('MAX(id)'))
+                        ->from('messages')
+                        ->whereIn('conversation_id', $conversationIds)
+                        ->groupBy('conversation_id');
+                })
+                ->select('id', 'conversation_id', 'message', 'created_at', 'sender_id')
+                ->get()
+                ->keyBy('conversation_id');
+
+            // Attach latest message data to conversations
+            $conversations->each(function ($conversation) use ($latestMessages, $user) {
+                $latestMessage = $latestMessages->get($conversation->id);
+
+                // Add latest message data as custom attributes
+                $conversation->latest_message_text = $latestMessage ? $latestMessage->message : '';
+                $conversation->latest_message_time = $latestMessage ? $latestMessage->created_at : null;
+                $conversation->latest_message_sender_id = $latestMessage ? $latestMessage->sender_id : null;
+
+                // Calculate unread count using your model method
+                $conversation->unread_messages_count = $conversation->unreadMessagesCount();
+            });
+        }
+
+        // Check if there are more conversations to load
+        $totalConversations = Conversation::where(function ($query) use ($user) {
+            $query->where('sender_id', $user->id)
+                ->orWhere('receiver_id', $user->id);
+        })
+            ->when($this->client_id, function ($query) {
+                $query->where('client_id', $this->client_id);
+            })
+            ->count();
+
+        $this->hasMore = $conversations->count() < $totalConversations;
 
         return view('livewire.chat-list', [
             'conversations' => $conversations,

@@ -95,8 +95,42 @@ class Conversation extends Model
     {
         return $this->belongsTo(Client::class);
     }
-    public function latestMessage()
+    public function getLatestMessageTextAttribute()
     {
-        return $this->hasOne(Message::class)->latestOfMany();
+        if (!$this->relationLoaded('latestMessage') && !isset($this->attributes['latest_message_text'])) {
+            $latestMessage = Message::where('conversation_id', $this->id)
+                ->latest('id')
+                ->first();
+
+            return $latestMessage ? $latestMessage->message : '';
+        }
+
+        return $this->latestMessage?->message ?? $this->attributes['latest_message_text'] ?? '';
+    }
+
+    public function getLatestMessageTimeAttribute()
+    {
+        if (!$this->relationLoaded('latestMessage') && !isset($this->attributes['latest_message_time'])) {
+            $latestMessage = Message::where('conversation_id', $this->id)
+                ->latest('id')
+                ->first();
+
+            return $latestMessage ? $latestMessage->created_at : null;
+        }
+
+        return $this->latestMessage?->created_at ?? $this->attributes['latest_message_time'] ?? null;
+    }
+
+    public function getLatestMessageSenderIdAttribute()
+    {
+        if (!$this->relationLoaded('latestMessage') && !isset($this->attributes['latest_message_sender_id'])) {
+            $latestMessage = Message::where('conversation_id', $this->id)
+                ->latest('id')
+                ->first();
+
+            return $latestMessage ? $latestMessage->sender_id : null;
+        }
+
+        return $this->latestMessage?->sender_id ?? $this->attributes['latest_message_sender_id'] ?? null;
     }
 }

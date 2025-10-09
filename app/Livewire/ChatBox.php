@@ -99,7 +99,7 @@ class ChatBox extends Component
             'conversation_id' => $this->selectedConversation->id,
             'sender_id' => Auth::id(),
             'receiver_id' => $this->selectedConversation->getReceiver()->id,
-            'message' => $this->message ?? 'like',
+            'message' => 'like',
         ]);
 
         $createdMessage->load(['sender', 'receiver']);
