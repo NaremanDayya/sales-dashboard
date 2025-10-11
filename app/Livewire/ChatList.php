@@ -91,7 +91,7 @@ class ChatList extends Component
                         ->whereIn('conversation_id', $conversationIds)
                         ->groupBy('conversation_id');
                 })
-                ->select('id', 'conversation_id', 'message', 'created_at', 'sender_id')
+                ->select('id', 'conversation_id', 'message', 'created_at')
                 ->get()
                 ->keyBy('conversation_id');
 
