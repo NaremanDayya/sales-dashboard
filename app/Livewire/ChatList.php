@@ -96,6 +96,13 @@ class ChatList extends Component
                         });
                 });
             })
+            // Add unread messages count for ordering
+            ->withCount(['messages as unread_count' => function ($query) use ($user) {
+                $query->where('read_at', null)
+                    ->where('sender_id', '!=', $user->id);
+            }])
+            // Order by: unread messages first (desc), then updated_at (desc), then created_at (desc)
+            ->orderBy('unread_count', 'desc')
             ->orderBy('updated_at', 'desc')
             ->orderBy('created_at', 'desc')
             ->skip($offset)
