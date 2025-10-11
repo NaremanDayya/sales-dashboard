@@ -13,38 +13,20 @@ class ChatList extends Component
     public $conversation = null;
     public $selectedConversation;
     public $client_id;
-    public $perPage = 20;
-    public $hasMore = false;
-    public $loadedCount = 0;
-    public $loading = false;
 
     protected $listeners = [
         'refresh' => 'refresh',
-        'loadMore' => 'loadMore'
     ];
 
-    public function mount($client_id = null, $selectedConversation = null)
+    public function mount($client_id = null)
     {
         $this->client_id = $client_id;
-        $this->selectedConversation = $selectedConversation;
     }
 
     public function refresh()
     {
-        $this->perPage = 20;
-        $this->loadedCount = 0;
-        $this->hasMore = false;
-        $this->loading = false;
-    }
-
-    public function loadMore()
-    {
-        if ($this->loading || !$this->hasMore) {
-            return;
-        }
-
-        $this->loading = true;
-        $this->perPage += 8;
+        // Simply refresh the component
+        $this->dispatch('refresh-completed');
     }
 
     public function render()
@@ -62,22 +44,9 @@ class ChatList extends Component
             ->when($this->client_id, function ($query) {
                 $query->where('client_id', $this->client_id);
             })
-            // Join with messages to get the latest message timestamp
-            ->leftJoin('messages', function ($join) {
-                $join->on('conversations.id', '=', 'messages.conversation_id')
-                    ->whereRaw('messages.id = (
-                    SELECT MAX(id) FROM messages
-                    WHERE messages.conversation_id = conversations.id
-                )');
-            })
-            // Order by the latest message's created_at or updated_at
-            ->orderBy('messages.created_at', 'desc')
-            ->orderBy('conversations.updated_at', 'desc')
-            ->select('conversations.*') // Select only conversation columns
-            ->limit($this->perPage)
+            ->orderBy('updated_at', 'desc')
+            ->orderBy('created_at', 'desc')
             ->get();
-
-        $this->loadedCount = $conversations->count();
 
         // Manually get latest message data for each conversation
         if ($conversations->isNotEmpty()) {
@@ -91,7 +60,7 @@ class ChatList extends Component
                         ->whereIn('conversation_id', $conversationIds)
                         ->groupBy('conversation_id');
                 })
-                ->select('id', 'conversation_id', 'message', 'created_at')
+                ->select('id', 'conversation_id', 'message', 'created_at', 'sender_id')
                 ->get()
                 ->keyBy('conversation_id');
 
@@ -109,22 +78,8 @@ class ChatList extends Component
             });
         }
 
-        // Check if there are more conversations to load
-        $totalConversations = Conversation::where(function ($query) use ($user) {
-            $query->where('sender_id', $user->id)
-                ->orWhere('receiver_id', $user->id);
-        })
-            ->when($this->client_id, function ($query) {
-                $query->where('client_id', $this->client_id);
-            })
-            ->count();
-
-        $this->hasMore = $this->loadedCount < $totalConversations;
-        $this->loading = false;
-
         return view('livewire.chat-list', [
             'conversations' => $conversations,
-            'selectedConversation' => $this->selectedConversation,
         ]);
     }
 }
