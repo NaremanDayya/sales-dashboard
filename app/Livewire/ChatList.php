@@ -6,18 +6,17 @@ use App\Models\Conversation;
 use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class ChatList extends Component
 {
-    use WithPagination;
-
     public $type = 'all';
     public $conversation = null;
     public $selectedConversation;
     public $client_id;
-    public $perPage = 8;
-    public $hasMore = true;
+    public $perPage = 20;
+    public $hasMore = false; // Initialize with false
+    public $loadedCount = 0;
+    public $loading = false; // Add loading state
 
     protected $listeners = [
         'refresh' => 'refresh',
@@ -31,14 +30,21 @@ class ChatList extends Component
 
     public function refresh()
     {
-        $this->resetPage();
-        $this->render();
+        $this->perPage = 20;
+        $this->loadedCount = 0;
+        $this->hasMore = false;
+        $this->loading = false;
+        $this->dispatch('refresh-completed');
     }
 
     public function loadMore()
     {
+        if ($this->loading || !$this->hasMore) {
+            return;
+        }
+
+        $this->loading = true;
         $this->perPage += 8;
-        $this->render();
     }
 
     public function render()
@@ -58,8 +64,10 @@ class ChatList extends Component
             })
             ->orderBy('updated_at', 'desc')
             ->orderBy('created_at', 'desc')
-            ->take($this->perPage)
+            ->limit($this->perPage)
             ->get();
+
+        $this->loadedCount = $conversations->count();
 
         // Manually get latest message data for each conversation
         if ($conversations->isNotEmpty()) {
@@ -101,7 +109,8 @@ class ChatList extends Component
             })
             ->count();
 
-        $this->hasMore = $conversations->count() < $totalConversations;
+        $this->hasMore = $this->loadedCount < $totalConversations;
+        $this->loading = false;
 
         return view('livewire.chat-list', [
             'conversations' => $conversations,
