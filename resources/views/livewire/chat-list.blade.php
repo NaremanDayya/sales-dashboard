@@ -1,221 +1,174 @@
+<div class="flex flex-col h-full bg-white border-r border-gray-200">
+    <!-- Header -->
+    <div class="p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold text-gray-800">المحادثات</h2>
+            <button class="p-2 text-gray-500 hover:text-gray-700 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+            </button>
+        </div>
 
-<div>
-    <div x-data="{
-        type: 'all',
+        <!-- Search -->
+        <div class="mt-4 relative">
+            <input
+                type="text"
+                wire:model.live="search"
+                placeholder="ابحث في المحادثات..."
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <div class="absolute left-3 top-2.5 text-gray-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conversations List -->
+    <div class="flex-1 overflow-y-auto"
+         x-data="{
         loading: @entangle('loading'),
         hasMore: @entangle('hasMore'),
         init() {
-            setTimeout(() => {
-                const conversation = @this.get('selectedConversation');
-                if (conversation) {
-                    const conversationElement = document.getElementById('conversation-'+conversation);
-                    if(conversationElement) {
-                        conversationElement.scrollIntoView({'behavior':'smooth'});
-                    }
-                }
-            }, 100);
+            const container = this.$el;
 
-            // Infinite scroll implementation
-            const mainElement = this.$el.querySelector('main');
-            mainElement.addEventListener('scroll', () => {
+            // Ensure scroll is visible
+            container.style.overflowY = 'auto';
+            container.style.overflowX = 'hidden';
+
+            container.addEventListener('scroll', () => {
                 if (this.loading || !this.hasMore) return;
 
-                const scrollTop = mainElement.scrollTop;
-                const scrollHeight = mainElement.scrollHeight;
-                const clientHeight = mainElement.clientHeight;
+                const scrollTop = container.scrollTop;
+                const scrollHeight = container.scrollHeight;
+                const clientHeight = container.clientHeight;
 
                 // Load more when near bottom (100px from bottom)
                 if (scrollHeight - scrollTop <= clientHeight + 100) {
-                    this.loadMore();
+                    @this.loadMore();
                 }
             });
 
-            Echo.private('users.{{Auth()->User()->id}}')
-            .notification((notification)=>{
-                if(notification['type']== 'App\\Notifications\\MessageRead'||notification['type']== 'App\\Notifications\\MessageSent')
-                {
-                    @this.refresh();
-                }
+            // Listen for real-time updates
+            Livewire.on('conversationUpdated', (data) => {
+                @this.refresh();
             });
-        },
-        async loadMore() {
-            if (this.loading || !this.hasMore) return;
-
-            this.loading = true;
-            try {
-                await @this.call('loadMore');
-            } catch (error) {
-                console.error('Error loading more conversations:', error);
-                this.loading = false;
-            }
         }
-    }" class="flex flex-col transition-all h-full overflow-hidden">
+     }"
+         style="overflow-y: auto; overflow-x: hidden;">
 
-        <header class="px-3 z-10 bg-white sticky top-0 w-full py-10">
-            @include('partials.chat-list-header')
-        </header>
+        <!-- Conversations -->
+        <div class="divide-y divide-gray-100">
+            @foreach($conversations as $conversation)
+                @php
+                    // Safe data access with null coalescing
+                    $client = $conversation->client ?? null;
+                    $companyName = $client->company_name ?? 'Unknown Company';
+                    $companyLogo = $client->company_logo ?? null;
+                    $salesRepName = $client->salesRep->name ?? 'Sales Rep';
+                @endphp
 
-        <main class="overflow-y-auto overflow-hidden grow h-full relative">
-            {{-- chatlist --}}
-            <ul id="conversationsList" class="p-2 grid w-full space-y-2">
-                @if ($conversations && $conversations->count() > 0)
-                    @foreach ($conversations as $key => $conversation)
-                        <li id="conversation-{{$conversation->id}}" wire:key="{{$conversation->id}}"
-                            data-name="{{ Str::lower($conversation->getReceiver()->name) }}"
-                            data-company="{{ Str::lower($conversation->client->company_name) }}"
-                            class="py-3 hover:bg-gray-50 rounded-2xl dark:hover:bg-gray-700/70 transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2 {{$conversation->id==$selectedConversation?->id ? 'bg-gray-100/70':''}}">
-                            <!-- User Avatar -->
-                            <div class="shrink-0 inline-flex items-center justify-center relative transition overflow-visible text-gray-300 dark:text-[var(--wc-dark-secondary)] text-base h-12 w-12 mx-auto border rounded-full p-2 bg-white dark:bg-[var(--wc-dark-secondary)] dark:border-[var(--wc-dark-secondary)] flex items-center justify-center">
-                                @if(!empty($conversation?->client?->company_logo))
-                                    <img
-                                        src="{{ $conversation->client->company_logo}}"
-                                        alt="شعار الشركة"
-                                        class="max-h-full max-w-full object-contain"
-                                    />
-                                @else
-                                    <svg class="w-full h-full rounded-full" fill="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z">
-                                        </path>
-                                    </svg>
-                                @endif
-                            </div>
+                <a
+                    href="{{ route('client.chat', ['client' => $client->id ?? '', 'conversation' => $conversation->id]) }}"
+                    class="flex items-center p-4 transition-colors duration-200 cursor-pointer group {{ $conversation->id === ($selectedConversation->id ?? null) ? 'bg-blue-50 border-r-4 border-blue-500' : 'hover:bg-gray-50' }}">
 
-                            <aside class="grid grid-cols-12 w-full">
-                                <a href="{{route('client.chat',[
-                                    'client' => $conversation->client->id,
-                                    'conversation' => $conversation->id,
-                                    ])}}"
-                                   class="col-span-11 border-b pb-2 border-gray-200 relative overflow-hidden truncate leading-5 w-full flex-nowrap p-1">
-
-                                    {{-- name and date --}}
-                                    <div class="flex justify-between w-full items-center">
-                                        <div class="flex flex-col">
-                                            <h6 class="truncate font-medium tracking-wider text-gray-900">
-                                                {{ $conversation->getReceiver()->name }}
-                                            </h6>
-                                            <span class="text-xs text-gray-500 truncate">
-                                                {{ $conversation->client->company_name }}
-                                            </span>
-                                        </div>
-                                        <small
-                                            class="text-gray-700">{{ $conversation->latest_message_time?->shortAbsoluteDiffForHumans() }}
-
-                                        </small>
-                                    </div>
-
-                                    {{-- Message body --}}
-                                    <div class="flex gap-x-2 items-center">
-                                        @if ($conversation->messages?->last()?->sender_id==auth()->id())
-                                            @if ($conversation->isLastMessageReadByUser())
-                                                {{-- double tick --}}
-                                                <span class="text-blue-500">
-                                                    <svg viewBox="0 0 18 18" height="18" width="18" preserveAspectRatio="xMidYMid meet"
-                                                         class="" version="1.1" x="0px" y="0px" enable-background="new 0 0 18 18">
-                                                        <path fill="currentColor"
-                                                              d="M17.394,5.035l-0.57-0.444c-0.188-0.147-0.462-0.113-0.609,0.076l-6.39,8.198 c-0.147,0.188-0.406,0.206-0.577,0.039l-0.427-0.388c-0.171-0.167-0.431-0.15-0.578,0.038L7.792,13.13 c-0.147,0.188-0.128,0.478,0.043,0.645l1.575,1.51c0.171,0.167,0.43,0.149,0.577-0.039l7.483-9.602 C17.616,5.456,17.582,5.182,17.394,5.035z M12.502,5.035l-0.57-0.444c-0.188-0.147-0.462-0.113-0.609,0.076l-6.39,8.198 c-0.147,0.188-0.406,0.206-0.577,0.039l-2.614-2.556c-0.171-0.167-0.447-0.164-0.614,0.007l-0.505,0.516 c-0.167,0.171-0.164,0.447,0.007,0.614l3.887,3.8c0.171,0.167,0.43,0.149,0.577-0.039l7.483-9.602 C12.724,5.456,12.69,5.182,12.502,5.035z">
-                                                        </path>
-                                                    </svg>
-                                                </span>
-                                            @else
-                                                {{-- single tick --}}
-                                                <span class="text-gray-500">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
-                                                         fill="currentColor">
-                                                        <path d="M1 12.5l5.5 5.5L20.5 4.5l2 2L6.5 22.5 0 16z" />
-                                                    </svg>
-                                                </span>
-                                            @endif
-                                        @endif
-
-                                        @php
-                                            $lastMessage =  $conversation->latest_message_text  ?? '';
-                                        @endphp
-
-                                        <p class="grow truncate text-sm font-[100]">
-                                            @if ($lastMessage === 'like')
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                                                     class="w-6 h-6 text-blue-500 group-hover:text-blue-600 dark:text-blue-400 dark:group-hover:text-blue-300 transition-colors">
-                                                    <path
-                                                        d="M7.493 18.5c-.425 0-.82-.236-.975-.632A7.48 7.48 0 0 1 6 15.125c0-1.75.599-3.358 1.602-4.634.151-.192.373-.309.6-.397.473-.183.89-.514 1.212-.924a9.042 9.042 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75A.75.75 0 0 1 15 2a2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H14.23c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23h-.777ZM2.331 10.727a11.969 11.969 0 0 0-.831 4.398 12 12 0 0 0 .52 3.507C2.28 19.482 3.105 20 3.994 20H4.9c.445 0 .72-.498.523-.898a8.963 8.963 0 0 1-.924-3.977c0-1.708.476-3.305 1.302-4.666.245-.403-.028-.959-.5-.959H4.25c-.832 0-1.612.453-1.918 1.227Z" />
-                                                </svg>
-                                            @else
-                                                {{ $lastMessage }}
-                                            @endif
-                                        </p>
-
-                                        {{-- unread count --}}
-                                        @if ($conversation->unread_messages_count >0)
-                                            <span class="font-bold p-px px-2 text-xs shrink-0 rounded-full bg-[#a855f7] text-white">
-                                                {{$conversation->unread_messages_count }}
-                                            </span>
-                                        @endif
-                                    </div>
-                                </a>
-
-                                {{-- Dropdown --}}
-                                <div class="col-span-1 flex flex-col text-center my-auto">
-                                    <x-dropdown align="right" width="48">
-                                        <x-slot name="trigger">
-                                            <button>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                                     class="bi bi-three-dots-vertical w-7 h-7 text-gray-700" viewBox="0 0 16 16">
-                                                    <path
-                                                        d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" />
-                                                </svg>
-                                            </button>
-                                        </x-slot>
-
-                                        <x-slot name="content">
-                                            <div class="w-full p-1">
-                                                <button
-                                                    href="{{ route('sales-reps.clients.show',[$conversation->client->salesRep->id, $conversation->client_id]) }}"
-                                                    class="items-center gap-3 flex w-full px-4 py-2 text-left text-sm leading-5 text-gray-500 hover:bg-gray-100 transition-all duration-150 ease-in-out focus:outline-none focus:bg-gray-100">
-                                                    <span>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                             fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
-                                                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-                                                            <path fill-rule="evenodd"
-                                                                  d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z" />
-                                                        </svg>
-                                                    </span>
-                                                    View Profile
-                                                </button>
-                                            </div>
-                                        </x-slot>
-                                    </x-dropdown>
+                    <!-- Avatar -->
+                    <div class="relative flex-shrink-0">
+                        <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                            @if($companyLogo)
+                                <img
+                                    src="{{ $companyLogo }}"
+                                    alt="{{ $companyName }}"
+                                    class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                                    {{ substr($companyName, 0, 1) }}
                                 </div>
-                            </aside>
-                        </li>
-                    @endforeach
-                @else
-                    <li class="text-center py-8 text-gray-500">
-                        لا توجد محادثات
-                    </li>
-                @endif
-            </ul>
+                            @endif
+                        </div>
 
-            {{-- Loading indicator --}}
-            <div x-show="loading" class="text-center py-4" x-cloak>
-                <div class="inline-flex items-center">
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <!-- Online Status -->
+                        <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                    </div>
+
+                    <!-- Conversation Info -->
+                    <div class="flex-1 min-w-0 mr-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $companyName }}</h3>
+                            <span class="text-xs text-gray-500 whitespace-nowrap" x-text="formatTime('{{ $conversation->latest_message_time }}')"></span>
+                        </div>
+
+                        <div class="flex items-center justify-between mt-1">
+                            <p class="text-sm text-gray-600 truncate flex items-center space-x-1 space-x-reverse">
+                                @if(($conversation->latest_message_sender_id ?? null) == auth()->id())
+                                    @if($conversation->is_last_message_read ?? false)
+                                        <span class="text-blue-500">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M12.354 4.354a.5.5 0 0 0-.708-.708L5 10.293 1.854 7.146a.5.5 0 1 0-.708.708l3.5 3.5a.5.5 0 0 0 .708 0l7-7z"/>
+                                                <path d="M8.146 11.354l-.896-.897.707-.707.543.543 6.646-6.647a.5.5 0 0 1 .708.708l-7 7a.5.5 0 0 1-.708 0z"/>
+                                            </svg>
+                                        </span>
+                                    @endif
+                                @endif
+                                <span>{{ ($conversation->latest_message_text ?? '') === 'like' ? '👍' : ($conversation->latest_message_text ?? '') }}</span>
+                            </p>
+
+                            @if(($conversation->unread_messages_count ?? 0) > 0)
+                                <span class="bg-blue-500 text-white text-xs rounded-full px-2 py-1 min-w-5 text-center">{{ $conversation->unread_messages_count }}</span>
+                            @endif
+                        </div>
+
+                        <p class="text-xs text-gray-500 mt-1 truncate">{{ $salesRepName }}</p>
+                    </div>
+                </a>
+            @endforeach
+        </div>
+
+        <!-- Loading More -->
+        <div x-show="loading" class="p-4 text-center" x-cloak>
+            <div class="inline-flex items-center">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-sm text-gray-600">جاري تحميل المزيد...</span>
+            </div>
+        </div>
+
+        <!-- No Conversations -->
+        @if(!$loading && $conversations->count() === 0)
+            <div class="p-8 text-center">
+                <div class="text-gray-500">
+                    <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                     </svg>
-                    جاري تحميل المزيد...
+                    <p class="text-lg font-medium mb-2">لا توجد محادثات</p>
+                    <p class="text-sm">ابدأ محادثة جديدة من خلال النقر على زر "+"</p>
                 </div>
             </div>
-
-            {{-- No more conversations --}}
-            <div x-show="!hasMore && {{ $conversations->count() }} > 0" class="text-center py-4 text-gray-500" x-cloak>
-                لا توجد محادثات أخرى
-            </div>
-
-            <div style="min-height: 20vh;"></div>
-        </main>
-
-        @include('partials.client-selection-modal')
+        @endif
     </div>
 
-    @vite('resources/js/client-chat.js')
+    <script>
+        function formatTime(dateString) {
+            if (!dateString) return '';
+            try {
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+
+                if (diffMins < 1) return 'الآن';
+                if (diffMins < 60) return `${diffMins} د`;
+                if (diffHours < 24) return `${diffHours} س`;
+                if (diffDays < 7) return `${diffDays} يوم`;
+                return date.toLocaleDateString('ar-SA');
+            } catch (e) {
+                return '';
+            }
+        }
+    </script>
 </div>
