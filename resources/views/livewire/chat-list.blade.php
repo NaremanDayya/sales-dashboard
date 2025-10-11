@@ -1,9 +1,7 @@
 <div>
     <div x-data="{
         type: 'all',
-        conversation: @entangle('conversation').defer,
-        loading: @entangle('loading').defer,
-        hasMore: @entangle('hasMore').defer,
+        conversation: $wire.entangle('conversation'),
         init() {
             setTimeout(() => {
                 if (this.conversation) {
@@ -14,53 +12,21 @@
                 }
             }, 100);
 
-            // Infinite scroll implementation - FIXED
-            const mainElement = this.$el.querySelector('main');
-            mainElement.addEventListener('scroll', () => {
-                if (this.loading || !this.hasMore) return;
-
-                const scrollTop = mainElement.scrollTop;
-                const scrollHeight = mainElement.scrollHeight;
-                const clientHeight = mainElement.clientHeight;
-
-                // Load more when 100px from bottom - FIXED LOGIC
-                if (scrollHeight - scrollTop <= clientHeight + 100) {
-                    this.loadMore();
-                }
-            });
-
-            // Listen for load more completion
-            window.addEventListener('load-more-completed', () => {
-                this.loading = false;
-            });
-
             Echo.private('users.{{Auth()->User()->id}}')
             .notification((notification)=>{
                 if(notification['type']== 'App\\Notifications\\MessageRead'||notification['type']== 'App\\Notifications\\MessageSent')
                 {
-                    window.Livewire.emit('refresh');
+                    $wire.refresh();
                 }
             });
-        },
-        async loadMore() {
-            if (this.loading || !this.hasMore) return;
-
-            this.loading = true;
-            try {
-                await @this.call('loadMore');
-            } catch (error) {
-                console.error('Error loading more conversations:', error);
-                this.loading = false;
-            }
         }
     }" class="flex flex-col transition-all h-full overflow-hidden">
-        <!-- ... rest of your template remains the same ... -->
 
         <header class="px-3 z-10 bg-white sticky top-0 w-full py-10">
             @include('partials.chat-list-header')
         </header>
 
-        <main class="overflow-y-scroll overflow-hidden grow h-full relative" style="contain:content">
+        <main class="overflow-y-auto overflow-hidden grow h-full relative">
             {{-- chatlist --}}
             <ul id="conversationsList" class="p-2 grid w-full space-y-2">
                 @if ($conversations && $conversations->count() > 0)
@@ -134,7 +100,6 @@
                                         @endif
 
                                         @php
-
                                             $lastMessage =  $conversation->latest_message_text  ?? '';
                                         @endphp
 
@@ -200,22 +165,6 @@
                     </li>
                 @endif
             </ul>
-
-            {{-- Loading indicator --}}
-            <div x-show="loading" class="text-center py-4">
-                <div class="inline-flex items-center">
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    جاري تحميل المزيد...
-                </div>
-            </div>
-
-            {{-- No more conversations --}}
-            <div x-show="!hasMore && {{ $conversations->count() }} > 0" class="text-center py-4 text-gray-500">
-                لا توجد محادثات أخرى
-            </div>
 
             <div style="min-height: 20vh;"></div>
         </main>

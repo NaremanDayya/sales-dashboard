@@ -13,14 +13,9 @@ class ChatList extends Component
     public $conversation = null;
     public $selectedConversation;
     public $client_id;
-    public $perPage = 20;
-    public $hasMore = false; // Initialize with false
-    public $loadedCount = 0;
-    public $loading = false; // Add loading state
 
     protected $listeners = [
         'refresh' => 'refresh',
-        'loadMore' => 'loadMore'
     ];
 
     public function mount($client_id = null)
@@ -30,21 +25,8 @@ class ChatList extends Component
 
     public function refresh()
     {
-        $this->perPage = 20;
-        $this->loadedCount = 0;
-        $this->hasMore = false;
-        $this->loading = false;
+        // Simply refresh the component
         $this->dispatch('refresh-completed');
-    }
-
-    public function loadMore()
-    {
-        if ($this->loading || !$this->hasMore) {
-            return;
-        }
-
-        $this->loading = true;
-        $this->perPage += 8;
     }
 
     public function render()
@@ -64,10 +46,7 @@ class ChatList extends Component
             })
             ->orderBy('updated_at', 'desc')
             ->orderBy('created_at', 'desc')
-            ->limit($this->perPage)
             ->get();
-
-        $this->loadedCount = $conversations->count();
 
         // Manually get latest message data for each conversation
         if ($conversations->isNotEmpty()) {
@@ -98,19 +77,6 @@ class ChatList extends Component
                 $conversation->unread_messages_count = $conversation->unreadMessagesCount();
             });
         }
-
-        // Check if there are more conversations to load
-        $totalConversations = Conversation::where(function ($query) use ($user) {
-            $query->where('sender_id', $user->id)
-                ->orWhere('receiver_id', $user->id);
-        })
-            ->when($this->client_id, function ($query) {
-                $query->where('client_id', $this->client_id);
-            })
-            ->count();
-
-        $this->hasMore = $this->loadedCount < $totalConversations;
-        $this->loading = false;
 
         return view('livewire.chat-list', [
             'conversations' => $conversations,
