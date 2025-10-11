@@ -14,9 +14,9 @@ class ChatList extends Component
     public $selectedConversation;
     public $client_id;
     public $perPage = 20;
-    public $hasMore = true;
+    public $hasMore = false; // Initialize with false
     public $loadedCount = 0;
-    public $loading = false; // ADD THIS
+    public $loading = false; // Add loading state
 
     protected $listeners = [
         'refresh' => 'refresh',
@@ -32,8 +32,9 @@ class ChatList extends Component
     {
         $this->perPage = 20;
         $this->loadedCount = 0;
-        $this->hasMore = true;
-        $this->loading = false; // ADD THIS
+        $this->hasMore = false;
+        $this->loading = false;
+        $this->dispatch('refresh-completed');
     }
 
     public function loadMore()
@@ -42,11 +43,8 @@ class ChatList extends Component
             return;
         }
 
-        $this->loading = true; // SET LOADING STATE
+        $this->loading = true;
         $this->perPage += 8;
-
-        // Reset loading state after render
-        $this->dispatch('load-more-completed');
     }
 
     public function render()
@@ -112,7 +110,7 @@ class ChatList extends Component
             ->count();
 
         $this->hasMore = $this->loadedCount < $totalConversations;
-        $this->loading = false; // RESET LOADING STATE AFTER RENDER
+        $this->loading = false;
 
         return view('livewire.chat-list', [
             'conversations' => $conversations,
