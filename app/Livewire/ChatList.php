@@ -6,13 +6,20 @@ use App\Models\Conversation;
 use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class ChatList extends Component
 {
+    use WithPagination;
+
     public $type = 'all';
     public $conversation = null;
     public $selectedConversation;
     public $client_id;
+    public $perPage = 20;
+    public $page = 1;
+    public $hasMore = true;
+    public $loading = false;
 
     protected $listeners = [
         'refresh' => 'refresh',
@@ -25,13 +32,38 @@ class ChatList extends Component
 
     public function refresh()
     {
-        // Simply refresh the component
+        $this->resetPage();
+        $this->hasMore = true;
+        $this->loading = false;
         $this->dispatch('refresh-completed');
     }
 
-    public function render()
+    public function loadMore()
+    {
+        if ($this->loading || !$this->hasMore) {
+            return;
+        }
+
+        $this->loading = true;
+        $this->page++;
+
+        // Get additional conversations
+        $additionalConversations = $this->getConversations($this->page);
+
+        if ($additionalConversations->count() < $this->perPage) {
+            $this->hasMore = false;
+        }
+
+        $this->loading = false;
+
+        // Emit event to append new conversations to the list
+        $this->dispatch('conversations-loaded', conversations: $additionalConversations->toArray());
+    }
+
+    private function getConversations($page = 1)
     {
         $user = Auth::user();
+        $offset = ($page - 1) * $this->perPage;
 
         $conversations = Conversation::with([
             'client:id,sales_rep_id,company_name,company_logo',
@@ -46,6 +78,8 @@ class ChatList extends Component
             })
             ->orderBy('updated_at', 'desc')
             ->orderBy('created_at', 'desc')
+            ->skip($offset)
+            ->take($this->perPage)
             ->get();
 
         // Manually get latest message data for each conversation
@@ -76,6 +110,18 @@ class ChatList extends Component
                 // Calculate unread count using your model method
                 $conversation->unread_messages_count = $conversation->unreadMessagesCount();
             });
+        }
+
+        return $conversations;
+    }
+
+    public function render()
+    {
+        $conversations = $this->getConversations();
+//dd($conversations);
+        // Check if there are more conversations to load
+        if ($conversations->count() < $this->perPage) {
+            $this->hasMore = false;
         }
 
         return view('livewire.chat-list', [
