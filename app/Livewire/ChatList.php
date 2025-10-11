@@ -82,6 +82,7 @@ class ChatList extends Component
                         ->groupBy('conversation_id');
                 })
                 ->select('id', 'conversation_id', 'message', 'created_at', 'sender_id')
+                ->orderBy('updated_at')
                 ->get()
                 ->keyBy('conversation_id');
 
