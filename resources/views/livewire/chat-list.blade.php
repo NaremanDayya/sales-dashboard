@@ -58,7 +58,8 @@
                                 <img
                                     src="{{ $companyLogo }}"
                                     alt="{{ $companyName }}"
-                                    class="w-full h-full object-cover">
+                                    class="max-h-full max-w-full object-contain bg-white rounded-full">
+
                             @else
                                 <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
                                     {{ substr($companyName, 0, 1) }}
