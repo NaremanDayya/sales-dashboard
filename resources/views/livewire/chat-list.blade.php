@@ -1,24 +1,52 @@
 <div>
     <div x-data="{
         type: 'all',
-        conversation: $wire.entangle('conversation'),
+        loading: @entangle('loading'),
+        hasMore: @entangle('hasMore'),
         init() {
             setTimeout(() => {
-                if (this.conversation) {
-                    const conversationElement = document.getElementById('conversation-'+this.conversation);
+                const conversation = @this.get('selectedConversation');
+                if (conversation) {
+                    const conversationElement = document.getElementById('conversation-'+conversation);
                     if(conversationElement) {
                         conversationElement.scrollIntoView({'behavior':'smooth'});
                     }
                 }
             }, 100);
 
+            // Infinite scroll implementation
+            const mainElement = this.$el.querySelector('main');
+            mainElement.addEventListener('scroll', () => {
+                if (this.loading || !this.hasMore) return;
+
+                const scrollTop = mainElement.scrollTop;
+                const scrollHeight = mainElement.scrollHeight;
+                const clientHeight = mainElement.clientHeight;
+
+                // Load more when near bottom (100px from bottom)
+                if (scrollHeight - scrollTop <= clientHeight + 100) {
+                    this.loadMore();
+                }
+            });
+
             Echo.private('users.{{Auth()->User()->id}}')
             .notification((notification)=>{
                 if(notification['type']== 'App\\Notifications\\MessageRead'||notification['type']== 'App\\Notifications\\MessageSent')
                 {
-                    $wire.refresh();
+                    @this.refresh();
                 }
             });
+        },
+        async loadMore() {
+            if (this.loading || !this.hasMore) return;
+
+            this.loading = true;
+            try {
+                await @this.call('loadMore');
+            } catch (error) {
+                console.error('Error loading more conversations:', error);
+                this.loading = false;
+            }
         }
     }" class="flex flex-col transition-all h-full overflow-hidden">
 
@@ -165,6 +193,22 @@
                     </li>
                 @endif
             </ul>
+
+            {{-- Loading indicator --}}
+            <div x-show="loading" class="text-center py-4" x-cloak>
+                <div class="inline-flex items-center">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    جاري تحميل المزيد...
+                </div>
+            </div>
+
+            {{-- No more conversations --}}
+            <div x-show="!hasMore && {{ $conversations->count() }} > 0" class="text-center py-4 text-gray-500" x-cloak>
+                لا توجد محادثات أخرى
+            </div>
 
             <div style="min-height: 20vh;"></div>
         </main>
