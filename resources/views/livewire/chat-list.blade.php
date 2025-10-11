@@ -54,6 +54,7 @@
             }
         }
     }" class="flex flex-col transition-all h-full overflow-hidden">
+        <!-- ... rest of your template remains the same ... -->
 
         <header class="px-3 z-10 bg-white sticky top-0 w-full py-10">
             @include('partials.chat-list-header')
