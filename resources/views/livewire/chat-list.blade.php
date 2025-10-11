@@ -1,29 +1,7 @@
 <div class="flex flex-col h-full bg-white border-r border-gray-200">
-    <!-- Header -->
-    <div class="p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
-        <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold text-gray-800">المحادثات</h2>
-            <button class="p-2 text-gray-500 hover:text-gray-700 transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-            </button>
-        </div>
-
-        <!-- Search -->
-        <div class="mt-4 relative">
-            <input
-                type="text"
-                wire:model.live="search"
-                placeholder="ابحث في المحادثات..."
-                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            <div class="absolute left-3 top-2.5 text-gray-400">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-            </div>
-        </div>
-    </div>
+    <header class="px-3 z-10 bg-white sticky top-0 w-full py-10">
+        @include('partials.chat-list-header')
+    </header>
 
     <!-- Conversations List -->
     <div class="flex-1 overflow-y-auto"
@@ -149,6 +127,8 @@
             </div>
         @endif
     </div>
+    @include('partials.client-selection-modal')
+    @vite('resources/js/client-chat.js')
 
     <script>
         function formatTime(dateString) {
