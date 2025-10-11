@@ -6,36 +6,33 @@ use App\Models\Conversation;
 use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class ChatList extends Component
 {
-    use WithPagination;
-
-    public $type = 'all';
-    public $conversation = null;
+    public $client;
     public $selectedConversation;
-    public $client_id;
+    public $search = '';
     public $perPage = 20;
-    public $page = 1;
     public $hasMore = true;
     public $loading = false;
+    public $page = 1;
+    public $allConversations; // This will store Conversation objects
 
     protected $listeners = [
-        'refresh' => 'refresh',
+        'conversationUpdated' => 'handleConversationUpdate',
+        'newMessageReceived' => 'handleNewMessage',
+        'refreshChatList' => 'refresh',
     ];
 
-    public function mount($client_id = null)
+    public function mount($client = null)
     {
-        $this->client_id = $client_id;
+        $this->client = $client;
+        $this->loadInitialConversations();
     }
 
-    public function refresh()
+    public function loadInitialConversations()
     {
-        $this->resetPage();
-        $this->hasMore = true;
-        $this->loading = false;
-        $this->dispatch('refresh-completed');
+        $this->allConversations = $this->getConversations(1);
     }
 
     public function loadMore()
@@ -47,17 +44,35 @@ class ChatList extends Component
         $this->loading = true;
         $this->page++;
 
-        // Get additional conversations
         $additionalConversations = $this->getConversations($this->page);
 
         if ($additionalConversations->count() < $this->perPage) {
             $this->hasMore = false;
         }
 
+        // Merge new conversations with existing ones (keep as Collection)
+        $this->allConversations = $this->allConversations->merge($additionalConversations);
         $this->loading = false;
+    }
 
-        // Emit event to append new conversations to the list
-        $this->dispatch('conversations-loaded', conversations: $additionalConversations->toArray());
+    public function handleConversationUpdate($conversationId)
+    {
+        // Refresh the entire list to get updated data
+        $this->refresh();
+    }
+
+    public function handleNewMessage($data)
+    {
+        // Refresh to show new messages and updated order
+        $this->refresh();
+    }
+
+    public function refresh()
+    {
+        $this->page = 1;
+        $this->hasMore = true;
+        $this->loading = false;
+        $this->loadInitialConversations();
     }
 
     private function getConversations($page = 1)
@@ -73,8 +88,13 @@ class ChatList extends Component
                 $query->where('sender_id', $user->id)
                     ->orWhere('receiver_id', $user->id);
             })
-            ->when($this->client_id, function ($query) {
-                $query->where('client_id', $this->client_id);
+            ->when($this->search, function ($query) {
+                $query->whereHas('client', function ($q) {
+                    $q->where('company_name', 'like', '%' . $this->search . '%')
+                        ->orWhereHas('salesRep', function ($q2) {
+                            $q2->where('name', 'like', '%' . $this->search . '%');
+                        });
+                });
             })
             ->orderBy('updated_at', 'desc')
             ->orderBy('created_at', 'desc')
@@ -82,50 +102,53 @@ class ChatList extends Component
             ->take($this->perPage)
             ->get();
 
-        // Manually get latest message data for each conversation
-        if ($conversations->isNotEmpty()) {
-            $conversationIds = $conversations->pluck('id');
+        return $this->enhanceConversationsWithMessages($conversations);
+    }
 
-            // Get the latest message for each conversation
-            $latestMessages = Message::whereIn('conversation_id', $conversationIds)
-                ->whereIn('id', function($query) use ($conversationIds) {
-                    $query->select(\DB::raw('MAX(id)'))
-                        ->from('messages')
-                        ->whereIn('conversation_id', $conversationIds)
-                        ->groupBy('conversation_id');
-                })
-                ->select('id', 'conversation_id', 'message', 'created_at', 'sender_id')
-                ->get()
-                ->keyBy('conversation_id');
-
-            // Attach latest message data to conversations
-            $conversations->each(function ($conversation) use ($latestMessages, $user) {
-                $latestMessage = $latestMessages->get($conversation->id);
-
-                // Add latest message data as custom attributes
-                $conversation->latest_message_text = $latestMessage ? $latestMessage->message : '';
-                $conversation->latest_message_time = $latestMessage ? $latestMessage->created_at : null;
-                $conversation->latest_message_sender_id = $latestMessage ? $latestMessage->sender_id : null;
-
-                // Calculate unread count using your model method
-                $conversation->unread_messages_count = $conversation->unreadMessagesCount();
-            });
+    private function enhanceConversationsWithMessages($conversations)
+    {
+        if ($conversations->isEmpty()) {
+            return $conversations;
         }
+
+        $conversationIds = $conversations->pluck('id');
+
+        // Get latest messages
+        $latestMessages = Message::whereIn('conversation_id', $conversationIds)
+            ->whereIn('id', function($query) use ($conversationIds) {
+                $query->select(\DB::raw('MAX(id)'))
+                    ->from('messages')
+                    ->whereIn('conversation_id', $conversationIds)
+                    ->groupBy('conversation_id');
+            })
+            ->select('id', 'conversation_id', 'message', 'created_at', 'sender_id')
+            ->get()
+            ->keyBy('conversation_id');
+
+        // Enhance conversations with message data
+        $conversations->each(function ($conversation) use ($latestMessages) {
+            $latestMessage = $latestMessages->get($conversation->id);
+
+            $conversation->latest_message_text = $latestMessage ? $latestMessage->message : '';
+            $conversation->latest_message_time = $latestMessage ? $latestMessage->created_at : null;
+            $conversation->latest_message_sender_id = $latestMessage ? $latestMessage->sender_id : null;
+            $conversation->receiver_name = $conversation->getReceiver()->name;
+            $conversation->unread_messages_count = $conversation->unreadMessagesCount();
+            $conversation->is_last_message_read = $conversation->isLastMessageReadByUser();
+        });
 
         return $conversations;
     }
 
+    public function updatedSearch()
+    {
+        $this->refresh();
+    }
+
     public function render()
     {
-        $conversations = $this->getConversations();
-//dd($conversations);
-        // Check if there are more conversations to load
-        if ($conversations->count() < $this->perPage) {
-            $this->hasMore = false;
-        }
-
         return view('livewire.chat-list', [
-            'conversations' => $conversations,
+            'conversations' => $this->allConversations ?? collect(),
         ]);
     }
 }
