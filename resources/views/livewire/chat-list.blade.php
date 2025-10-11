@@ -1,11 +1,60 @@
 <div>
-    <div class="flex flex-col transition-all h-full overflow-hidden" id="chatListContainer">
+    <div x-data="{
+        type: 'all',
+        loading: @entangle('loading'),
+        hasMore: @entangle('hasMore'),
+        init() {
+            setTimeout(() => {
+                const conversation = @this.get('selectedConversation');
+                if (conversation) {
+                    const conversationElement = document.getElementById('conversation-'+conversation);
+                    if(conversationElement) {
+                        conversationElement.scrollIntoView({'behavior':'smooth'});
+                    }
+                }
+            }, 100);
+
+            // Infinite scroll implementation
+            const mainElement = this.$el.querySelector('main');
+            mainElement.addEventListener('scroll', () => {
+                if (this.loading || !this.hasMore) return;
+
+                const scrollTop = mainElement.scrollTop;
+                const scrollHeight = mainElement.scrollHeight;
+                const clientHeight = mainElement.clientHeight;
+
+                // Load more when near bottom (100px from bottom)
+                if (scrollHeight - scrollTop <= clientHeight + 100) {
+                    this.loadMore();
+                }
+            });
+
+            Echo.private('users.{{Auth()->User()->id}}')
+            .notification((notification)=>{
+                if(notification['type']== 'App\\Notifications\\MessageRead'||notification['type']== 'App\\Notifications\\MessageSent')
+                {
+                    @this.refresh();
+                }
+            });
+        },
+        async loadMore() {
+            if (this.loading || !this.hasMore) return;
+
+            this.loading = true;
+            try {
+                await @this.call('loadMore');
+            } catch (error) {
+                console.error('Error loading more conversations:', error);
+                this.loading = false;
+            }
+        }
+    }" class="flex flex-col transition-all h-full overflow-hidden">
 
         <header class="px-3 z-10 bg-white sticky top-0 w-full py-10">
             @include('partials.chat-list-header')
         </header>
 
-        <main class="overflow-y-auto overflow-hidden grow h-full relative" id="chatListMain">
+        <main class="overflow-y-auto overflow-hidden grow h-full relative">
             {{-- chatlist --}}
             <ul id="conversationsList" class="p-2 grid w-full space-y-2">
                 @if ($conversations && $conversations->count() > 0)
@@ -13,7 +62,7 @@
                         <li id="conversation-{{$conversation->id}}" wire:key="{{$conversation->id}}"
                             data-name="{{ Str::lower($conversation->getReceiver()->name) }}"
                             data-company="{{ Str::lower($conversation->client->company_name) }}"
-                            class="py-3 hover:bg-gray-50 rounded-2xl dark:hover:bg-gray-700/70 transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2 {{$conversation->id == $selectedConversation?->id ? 'bg-gray-100/70':''}}">
+                            class="py-3 hover:bg-gray-50 rounded-2xl dark:hover:bg-gray-700/70 transition-colors duration-150 flex gap-4 relative w-full cursor-pointer px-2 {{$conversation->id==$selectedConversation?->id ? 'bg-gray-100/70':''}}">
                             <!-- User Avatar -->
                             <div class="shrink-0 inline-flex items-center justify-center relative transition overflow-visible text-gray-300 dark:text-[var(--wc-dark-secondary)] text-base h-12 w-12 mx-auto border rounded-full p-2 bg-white dark:bg-[var(--wc-dark-secondary)] dark:border-[var(--wc-dark-secondary)] flex items-center justify-center">
                                 @if(!empty($conversation?->client?->company_logo))
@@ -146,7 +195,7 @@
             </ul>
 
             {{-- Loading indicator --}}
-            <div id="loadingIndicator" class="text-center py-4 hidden">
+            <div x-show="loading" class="text-center py-4" x-cloak>
                 <div class="inline-flex items-center">
                     <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -157,7 +206,7 @@
             </div>
 
             {{-- No more conversations --}}
-            <div id="noMoreConversations" class="text-center py-4 text-gray-500 hidden">
+            <div x-show="!hasMore && {{ $conversations->count() }} > 0" class="text-center py-4 text-gray-500" x-cloak>
                 لا توجد محادثات أخرى
             </div>
 
@@ -168,87 +217,4 @@
     </div>
 
     @vite('resources/js/client-chat.js')
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const chatListMain = document.getElementById('chatListMain');
-            const loadingIndicator = document.getElementById('loadingIndicator');
-            const noMoreConversations = document.getElementById('noMoreConversations');
-            let isLoading = false;
-            let hasMore = @json($hasMore);
-
-            // Scroll to selected conversation
-            setTimeout(() => {
-                const selectedConversation = @json($selectedConversation?->id);
-                if (selectedConversation) {
-                    const conversationElement = document.getElementById('conversation-'+selectedConversation);
-                    if(conversationElement) {
-                        conversationElement.scrollIntoView({'behavior':'smooth'});
-                    }
-                }
-            }, 100);
-
-            // Infinite scroll handler
-            chatListMain.addEventListener('scroll', function() {
-                if (isLoading || !hasMore) return;
-
-                const scrollTop = chatListMain.scrollTop;
-                const scrollHeight = chatListMain.scrollHeight;
-                const clientHeight = chatListMain.clientHeight;
-
-                // Load more when 100px from bottom
-                if (scrollHeight - scrollTop <= clientHeight + 100) {
-                    loadMoreConversations();
-                }
-            });
-
-            async function loadMoreConversations() {
-                if (isLoading || !hasMore) return;
-
-                isLoading = true;
-                loadingIndicator.classList.remove('hidden');
-
-                try {
-                    // Call Livewire loadMore method
-                    await @this.call('loadMore');
-
-                    // Update hasMore state after successful load
-                    hasMore = @this.get('hasMore');
-
-                    // Hide/show indicators based on state
-                    if (!hasMore) {
-                        noMoreConversations.classList.remove('hidden');
-                    }
-                } catch (error) {
-                    console.error('Error loading more conversations:', error);
-                } finally {
-                    isLoading = false;
-                    loadingIndicator.classList.add('hidden');
-                }
-            }
-
-            // Listen for Livewire updates to update our local state
-            Livewire.hook('message.processed', (message) => {
-                if (message.component.fingerprint.name === 'chat-list') {
-                    hasMore = message.component.ephemeral.hasMore;
-
-                    // Update indicators based on new state
-                    if (!hasMore) {
-                        noMoreConversations.classList.remove('hidden');
-                    } else {
-                        noMoreConversations.classList.add('hidden');
-                    }
-                }
-            });
-// test
-            // Echo notifications
-            Echo.private('users.{{Auth()->User()->id}}')
-                .notification((notification)=>{
-                    if(notification['type']== 'App\\Notifications\\MessageRead'||notification['type']== 'App\\Notifications\\MessageSent')
-                    {
-                    @this.refresh();
-                    }
-                });
-        });
-    </script>
 </div>
