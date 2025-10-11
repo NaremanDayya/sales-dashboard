@@ -62,8 +62,18 @@ class ChatList extends Component
             ->when($this->client_id, function ($query) {
                 $query->where('client_id', $this->client_id);
             })
-            ->orderBy('updated_at', 'desc')
-            ->orderBy('created_at', 'desc')
+            // Join with messages to get the latest message timestamp
+            ->leftJoin('messages', function ($join) {
+                $join->on('conversations.id', '=', 'messages.conversation_id')
+                    ->whereRaw('messages.id = (
+                    SELECT MAX(id) FROM messages
+                    WHERE messages.conversation_id = conversations.id
+                )');
+            })
+            // Order by the latest message's created_at or updated_at
+            ->orderBy('messages.created_at', 'desc')
+            ->orderBy('conversations.updated_at', 'desc')
+            ->select('conversations.*') // Select only conversation columns
             ->limit($this->perPage)
             ->get();
 
@@ -82,7 +92,6 @@ class ChatList extends Component
                         ->groupBy('conversation_id');
                 })
                 ->select('id', 'conversation_id', 'message', 'created_at', 'sender_id')
-                ->orderBy('updated_at')
                 ->get()
                 ->keyBy('conversation_id');
 
