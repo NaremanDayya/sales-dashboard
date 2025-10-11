@@ -240,7 +240,7 @@
                     }
                 }
             });
-
+// test
             // Echo notifications
             Echo.private('users.{{Auth()->User()->id}}')
                 .notification((notification)=>{
