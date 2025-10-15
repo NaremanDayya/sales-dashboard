@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\ClientsExport;
+use App\Models\Setting;
 use Illuminate\Support\Str;
 use App\Models\Client;
 use App\Models\Conversation;
@@ -27,82 +28,166 @@ use Illuminate\Support\Facades\Validator;
 
 class ClientController extends Controller
 {
-    public function allClients()
+    public function allClients(Request $request)
     {
+        $query = Client::query();
 
-        $Clients = Client::orderByRaw('last_contact_date IS NULL, last_contact_date ASC')->get()->map(function ($client) {
-            return [
-                'client_id' => $client->id,
-               'company_logo' => $client->company_logo,
-                'company_name' => $client->company_name,
-                'address' => $client->address,
-                'contact_person' => $client->contact_person,
-                'client_created_at' => $client->created_at,
-                'contact_position' => $client->contact_position,
-                'phone' => $client->phone,
-                'whatsapp_link' => $client->whatsapp_link,
-                'interest_status' => $client->interest_status,
-                'last_contact_date' => $client->last_contact_date?->format('Y-m-d'),
-                'is_late_customer' => $client->isLateCustomer(),
-                'contact_count' => $client->contact_count,
-		'requests_count' => $client->allEditRequests()->count(),
-                'sales_rep_id' => $client->sales_rep_id,
-                'contact_days_left' => $client->late_days,
-'interested_service' => Service::where('id', $client->interested_service)->value('name'),
-                'agreements_count' => $client->agreements()->count(),
-                'interested_service_count' => $client->interested_service_count,
-                'sales_rep_name' => $client->salesRep->name,
+        // Apply search filter
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('company_name', 'LIKE', "%{$search}%")
+                    ->orWhere('contact_person', 'LIKE', "%{$search}%")
+                    ->orWhere('phone', 'LIKE', "%{$search}%");
+            });
+        }
 
-            ];
-        });
-	  $services = Service::all();
+        // Apply interest status filter
+        if ($request->has('interest_status') && !empty($request->interest_status)) {
+            $query->where('interest_status', $request->interest_status);
+        }
+
+        // Apply service type filter
+        if ($request->has('service_type') && !empty($request->service_type)) {
+            $query->where('interested_service', $request->service_type);
+        }
+
+        // Apply date range filter
+        if ($request->has('from_date') && !empty($request->from_date)) {
+            $query->whereDate('last_contact_date', '>=', $request->from_date);
+        }
+
+        if ($request->has('to_date') && !empty($request->to_date)) {
+            $query->whereDate('last_contact_date', '<=', $request->to_date);
+        }
+
+        // Apply late customer filter
+        if ($request->has('late_customer') && !empty($request->late_customer)) {
+            $lateDays = Setting::where('key', 'late_customer_days')->value('value') ?? 3;
+
+            if ($request->late_customer === 'late') {
+                $query->where(function($q) use ($lateDays) {
+                    $q->whereNull('last_contact_date')
+                        ->orWhereRaw("DATEDIFF(CURDATE(), last_contact_date) > ?", [$lateDays]);
+                });
+            } else {
+                $query->whereNotNull('last_contact_date')
+                    ->whereRaw("DATEDIFF(CURDATE(), last_contact_date) <= ?", [$lateDays]);
+            }
+        }
+
+        $Clients = $query->orderByRaw('last_contact_date IS NULL, last_contact_date ASC')
+            ->get()
+            ->map(function ($client) {
+                return [
+                    'client_id' => $client->id,
+                    'company_logo' => $client->company_logo,
+                    'company_name' => $client->company_name,
+                    'address' => $client->address,
+                    'contact_person' => $client->contact_person,
+                    'client_created_at' => $client->created_at,
+                    'contact_position' => $client->contact_position,
+                    'phone' => $client->phone,
+                    'whatsapp_link' => $client->whatsapp_link,
+                    'interest_status' => $client->interest_status,
+                    'last_contact_date' => $client->last_contact_date?->format('Y-m-d'),
+                    'is_late_customer' => $client->isLateCustomer(),
+                    'contact_count' => $client->contact_count,
+                    'requests_count' => $client->allEditRequests()->count(),
+                    'sales_rep_id' => $client->sales_rep_id,
+                    'contact_days_left' => $client->late_days,
+                    'interested_service' => Service::where('id', $client->interested_service)->value('name'),
+                    'agreements_count' => $client->agreements()->count(),
+                    'interested_service_count' => $client->interested_service_count,
+                    'sales_rep_name' => $client->salesRep->name,
+                ];
+            });
+
+        $services = Service::all();
         $isAdmin = auth()->user()->role === 'admin';
         $sales_rep_names = SalesRep::pluck('name');
         $userRole = Auth::user()->role;
-//dd($isAdmin);
-        return view('clients.table', data: compact('Clients','services','isAdmin','sales_rep_names','userRole'));
 
+        return view('clients.table', compact('Clients', 'services', 'isAdmin', 'sales_rep_names', 'userRole'));
     }
-    public function index(SalesRep $salesRep)
+
+    public function index(Request $request, SalesRep $salesRep)
     {
-        //$this->authorize('viewAny', Client::class);
+        $query = Client::where('sales_rep_id', $salesRep->id);
 
-        $Clients = Client::where('sales_rep_id', $salesRep->id)
-    		->orderByRaw('last_contact_date IS NULL, last_contact_date ASC')
-    		->get()
-		->map(function ($client) {
-            return [
-                'client_id' => $client->id,
+        // Apply the same filters as above
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('company_name', 'LIKE', "%{$search}%")
+                    ->orWhere('contact_person', 'LIKE', "%{$search}%")
+                    ->orWhere('phone', 'LIKE', "%{$search}%");
+            });
+        }
 
-       'company_logo' => $client->company_logo,
-                'company_name' => $client->company_name,
-                'client_created_at' => $client->created_at,
-                'address' => $client->address,
-                'contact_person' => $client->contact_person,
-                'contact_position' => $client->contact_position,
-                'phone' => $client->phone,
-                'whatsapp_link' => $client->whatsapp_link,
-                'interest_status' => $client->interest_status,
-                'last_contact_date' => $client->last_contact_date?->format('Y-m-d'),
-                'is_late_customer' => $client->isLateCustomer(),
-                'contact_count' => $client->contact_count,
-                'requests_count' => $client->allEditRequests()->count(),
-                'sales_rep_id' => $client->sales_rep_id,
-                'interested_service' => Service::where('id', $client->interested_service)->value('name'),
-                'contact_days_left' => $client->late_days,
-                'agreements_count' => $client->agreements()->count(),
-                'interested_service_count' => $client->interested_service_count,
-                'sales_rep_name' => $client->salesRep->name,
+        if ($request->has('interest_status') && !empty($request->interest_status)) {
+            $query->where('interest_status', $request->interest_status);
+        }
 
-            ];
-        });
+        if ($request->has('service_type') && !empty($request->service_type)) {
+            $query->where('interested_service', $request->service_type);
+        }
+
+        if ($request->has('from_date') && !empty($request->from_date)) {
+            $query->whereDate('last_contact_date', '>=', $request->from_date);
+        }
+
+        if ($request->has('to_date') && !empty($request->to_date)) {
+            $query->whereDate('last_contact_date', '<=', $request->to_date);
+        }
+
+        if ($request->has('late_customer') && !empty($request->late_customer)) {
+            $lateDays = Setting::where('key', 'late_customer_days')->value('value') ?? 3;
+
+            if ($request->late_customer === 'late') {
+                $query->where(function($q) use ($lateDays) {
+                    $q->whereNull('last_contact_date')
+                        ->orWhereRaw("DATEDIFF(CURDATE(), last_contact_date) > ?", [$lateDays]);
+                });
+            } else {
+                $query->whereNotNull('last_contact_date')
+                    ->whereRaw("DATEDIFF(CURDATE(), last_contact_date) <= ?", [$lateDays]);
+            }
+        }
+
+        $Clients = $query->orderByRaw('last_contact_date IS NULL, last_contact_date ASC')
+            ->get()
+            ->map(function ($client) {
+                return [
+                    'client_id' => $client->id,
+                    'company_logo' => $client->company_logo,
+                    'company_name' => $client->company_name,
+                    'client_created_at' => $client->created_at,
+                    'address' => $client->address,
+                    'contact_person' => $client->contact_person,
+                    'contact_position' => $client->contact_position,
+                    'phone' => $client->phone,
+                    'whatsapp_link' => $client->whatsapp_link,
+                    'interest_status' => $client->interest_status,
+                    'last_contact_date' => $client->last_contact_date?->format('Y-m-d'),
+                    'is_late_customer' => $client->isLateCustomer(),
+                    'contact_count' => $client->contact_count,
+                    'requests_count' => $client->allEditRequests()->count(),
+                    'sales_rep_id' => $client->sales_rep_id,
+                    'interested_service' => Service::where('id', $client->interested_service)->value('name'),
+                    'contact_days_left' => $client->late_days,
+                    'agreements_count' => $client->agreements()->count(),
+                    'interested_service_count' => $client->interested_service_count,
+                    'sales_rep_name' => $client->salesRep->name,
+                ];
+            });
+
         $isAdmin = auth()->user()->role === 'admin';
         $services = Service::all();
         $sales_rep_names = SalesRep::pluck('name');
         $userRole = Auth::user()->role;
 
-        return view('clients.table', data: compact('Clients','services','isAdmin','sales_rep_names','userRole'));
-
+        return view('clients.table', compact('Clients', 'services', 'isAdmin', 'sales_rep_names', 'userRole'));
     }
 
     // Show form to create a new client
@@ -419,8 +504,13 @@ class ClientController extends Controller
 
             }
 
-
         $client->update($validated);
+        $newValue = $client->$editableField;
+        $approvedEditRequest->update([
+            'payload'       => [
+                'new_value' => $newValue,
+            ],
+    ]);
         $permission = $client->salesRep->myLastPermission($client, $editableField);
         $permission->update(['used' => true]);
         return redirect()->route('sales-reps.clients.index', $client->sales_rep_id)->with('success', 'تم تحديث الحقل بنجاح.');
