@@ -25,11 +25,13 @@
         .clickable-cell {
             cursor: pointer;
             transition: all 0.2s ease;
+            font-weight: 500;
         }
 
         .clickable-cell:hover {
             background-color: #f1f5f9;
             color: #4154f1;
+            font-weight: 600;
         }
 
         .hidden {
@@ -44,6 +46,67 @@
             direction: ltr;
             unicode-bidi: embed;
             display: inline-block;
+            font-weight: 600;
+        }
+
+        /* Improved Table Styles */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-table {
+            min-width: 1400px; /* Ensure table has minimum width */
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem; /* Slightly smaller font for better fit */
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 700;
+            padding: 12px 8px;
+            text-align: center;
+            white-space: nowrap;
+            border: none;
+            font-size: 0.8rem;
+        }
+
+        .data-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: center;
+            vertical-align: middle;
+            font-weight: 500;
+            background: white;
+        }
+
+        .data-table tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .data-table tr:nth-child(even) td {
+            background-color: #f9fafb;
+        }
+
+        /* Make specific content bolder */
+        .company-name {
+            font-weight: 700 !important;
+            color: #1f2937;
+        }
+
+        .status-badge {
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+
+        .count-badge {
+            font-weight: 700;
+            font-size: 0.8rem;
         }
 
         /* Notification styles */
@@ -84,7 +147,12 @@
             border-left: 4px solid #dc2626;
         }
 
-        /* Modal and dropdown styles */
+        /* Improved Dropdown styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
         .dropdown-menu {
             display: none;
             position: absolute;
@@ -101,6 +169,44 @@
 
         .dropdown.active .dropdown-menu {
             display: block;
+        }
+
+        /* Improved Filter Section */
+        .filters-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 1024px) {
+            .filters-grid {
+                grid-template-columns: 1fr 2fr;
+            }
+        }
+
+        .filter-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-item label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+
+        .date-range-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto auto;
+            gap: 0.5rem;
+            align-items: end;
         }
 
         /* Print styles */
@@ -138,6 +244,7 @@
             #print-area table.data-table {
                 width: 100% !important;
                 border-collapse: collapse;
+                font-weight: bold;
             }
 
             #print-area table.data-table th,
@@ -165,30 +272,279 @@
         }
 
         /* Scrollbar styling */
-        .modal-body::-webkit-scrollbar {
-            width: 6px;
+        .table-container::-webkit-scrollbar {
+            height: 8px;
         }
 
-        .modal-body::-webkit-scrollbar-track {
+        .table-container::-webkit-scrollbar-track {
             background: #f1f1f1;
             border-radius: 10px;
         }
 
-        .modal-body::-webkit-scrollbar-thumb {
+        .table-container::-webkit-scrollbar-thumb {
             background: #c1c1c1;
             border-radius: 10px;
         }
 
-        .modal-body::-webkit-scrollbar-thumb:hover {
+        .table-container::-webkit-scrollbar-thumb:hover {
             background: #a8a8a8;
         }
 
-        /* Ensure no word wrapping in table cells */
-        .data-table td,
-        .data-table th {
-            white-space: nowrap;
+        /* Column Selection Modal */
+        .columns-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .columns-modal.active {
+            display: flex;
+        }
+
+        .columns-modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
             overflow: hidden;
-            text-overflow: ellipsis;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .columns-modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .columns-modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .columns-modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .columns-modal-body {
+            padding: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .columns-search {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .columns-search input {
+            width: 100%;
+            padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+
+        .columns-search i {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+        }
+
+        .columns-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        .column-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .column-item:hover {
+            background-color: #f3f4f6;
+        }
+
+        .column-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 500;
+        }
+
+        .column-checkbox input[type="checkbox"] {
+            width: 1.125rem;
+            height: 1.125rem;
+            border-radius: 4px;
+            border: 2px solid #d1d5db;
+            cursor: pointer;
+        }
+
+        .column-checkbox input[type="checkbox"]:checked {
+            background-color: #4f46e5;
+            border-color: #4f46e5;
+        }
+
+        .columns-modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .columns-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-select-all {
+            background: none;
+            border: none;
+            color: #4f46e5;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-select-all:hover {
+            background-color: #eef2ff;
+        }
+
+        .btn-cancel {
+            background: none;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background-color: #f9fafb;
+        }
+
+        .btn-apply {
+            background: #4f46e5;
+            border: none;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn-apply:hover {
+            background: #4338ca;
+        }
+
+        /* Action buttons styling */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4338ca;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-purple {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .btn-purple:hover {
+            background: #7c3aed;
+        }
+
+        .btn-dark {
+            background: #374151;
+            color: white;
+        }
+
+        .btn-dark:hover {
+            background: #1f2937;
+        }
+
+        .btn-gray {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-gray:hover {
+            background: #4b5563;
         }
     </style>
 @endpush
@@ -203,33 +559,31 @@
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Header -->
             <div class="mb-6">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                    <div class="mb-4 sm:mb-0">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
                         <h1 class="text-2xl font-bold text-gray-900">العملاء</h1>
                         <p class="text-gray-600 mt-1">إدارة وعرض جميع عملاء الشركة</p>
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex flex-wrap gap-3">
+                    <div class="action-buttons">
                         @if(Auth::user()->role == 'salesRep')
-                            <a class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
-                               href="{{ route('sales-reps.clients.create', Auth::user()->salesRep->id) }}">
-                                <i class="fas fa-plus ml-2"></i>
+                            <a class="btn btn-primary" href="{{ route('sales-reps.clients.create', Auth::user()->salesRep->id) }}">
+                                <i class="fas fa-plus"></i>
                                 إضافة عميل
                             </a>
                         @endif
 
                         @if(Auth::user()->role == 'admin')
-                            <a class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
-                               href="{{ route('admin.shared-companies') }}">
-                                <i class="fas fa-users ml-2"></i>
+                            <a class="btn btn-success" href="{{ route('admin.shared-companies') }}">
+                                <i class="fas fa-users"></i>
                                 العملاء المشتركين
                             </a>
 
                             <!-- Late Days Settings Button -->
                             <div class="late-days-btn-group" x-data="{ open: false }">
-                                <button @click="open = true" class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-white hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors duration-200">
-                                    <i class="fas fa-cog ml-2"></i>
+                                <button @click="open = true" class="btn btn-warning">
+                                    <i class="fas fa-cog"></i>
                                     أيام التأخير
                                 </button>
 
@@ -276,71 +630,65 @@
                             </div>
                         @endif
 
-                        <!-- Export and Columns -->
-                        <div class="flex gap-3">
-                            <!-- Columns Selection -->
-                            <div class="export-btn-group">
-                                <button id="columnsBtn" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200" onclick="openColumnsModal()">
-                                    <i class="fas fa-columns ml-2"></i>
-                                    اختيار الأعمدة
-                                    <span id="columnsBadge" class="bg-white text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-2">13</span>
+                        <!-- Columns Selection -->
+                        <button id="columnsBtn" class="btn btn-purple" onclick="openColumnsModal()">
+                            <i class="fas fa-columns"></i>
+                            اختيار الأعمدة
+                            <span id="columnsBadge" class="bg-white text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-2">13</span>
+                        </button>
+
+                        <!-- Export Dropdown -->
+                        <div class="dropdown">
+                            <button class="btn btn-dark" id="exportBtn" type="button">
+                                تصدير البيانات
+                                <i class="fas fa-chevron-down mr-2 text-sm"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <button class="dropdown-item flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-right" data-type="xlsx">
+                                    <i class="fas fa-file-excel ml-2 text-green-600"></i>
+                                    تصدير كملف Excel
+                                </button>
+                                <button class="dropdown-item flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-right" data-type="pdf">
+                                    <i class="fas fa-file-pdf ml-2 text-red-600"></i>
+                                    تصدير كملف PDF
                                 </button>
                             </div>
-
-                            <!-- Export Dropdown -->
-                            <div class="export-options">
-                                <div class="dropdown relative">
-                                    <button class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-white hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200" id="exportBtn" type="button">
-                                        تصدير البيانات
-                                        <i class="fas fa-chevron-down mr-2 text-sm"></i>
-                                    </button>
-                                    <div class="dropdown-menu absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
-                                        <button class="dropdown-item flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-right" data-type="xlsx">
-                                            <i class="fas fa-file-excel ml-2 text-green-600"></i>
-                                            تصدير كملف Excel
-                                        </button>
-                                        <button class="dropdown-item flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-right" data-type="pdf">
-                                            <i class="fas fa-file-pdf ml-2 text-red-600"></i>
-                                            تصدير كملف PDF
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Print Button -->
-                            <button class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200 no-print" onclick="window.print()">
-                                <i class="fas fa-print ml-2"></i>
-                                طباعة
-                            </button>
                         </div>
+
+                        <!-- Print Button -->
+                        <button class="btn btn-gray no-print" onclick="window.print()">
+                            <i class="fas fa-print"></i>
+                            طباعة
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Filters Section -->
+            <!-- Improved Filters Section -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
                 <div class="p-6">
                     <form method="GET" action="{{ request()->url() }}" id="filterForm">
-                        <!-- First Row: Search and Main Filters -->
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div class="filters-grid">
                             <!-- Search Box -->
-                            <div class="relative">
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-search text-gray-400"></i>
+                            <div class="filter-item">
+                                <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2">بحث سريع</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-search text-gray-400"></i>
+                                    </div>
+                                    <input type="text"
+                                           class="block w-full pr-10 pl-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                           placeholder="ابحث في العملاء..."
+                                           id="searchInput"
+                                           name="search"
+                                           value="{{ request('search') }}">
                                 </div>
-                                <input type="text"
-                                       class="block w-full pr-10 pl-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                                       placeholder="بحث في العملاء..."
-                                       id="searchInput"
-                                       name="search"
-                                       value="{{ request('search') }}">
                             </div>
 
                             <!-- Main Filters -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <!-- Interest Status -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">حالة الاهتمام</label>
+                            <div class="filter-group">
+                                <div class="filter-item">
+                                    <label for="filterSelect" class="block text-sm font-medium text-gray-700 mb-2">حالة الاهتمام</label>
                                     <select id="filterSelect" name="interest_status" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
                                         <option value="">الكل</option>
                                         <option value="interested" {{ request('interest_status') == 'interested' ? 'selected' : '' }}>مهتم</option>
@@ -353,9 +701,8 @@
                                     </select>
                                 </div>
 
-                                <!-- Service Type -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">نوع الخدمة</label>
+                                <div class="filter-item">
+                                    <label for="serviceTypeFilter" class="block text-sm font-medium text-gray-700 mb-2">نوع الخدمة</label>
                                     <select id="serviceTypeFilter" name="service" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
                                         <option value="">الكل</option>
                                         @foreach($services as $service)
@@ -364,9 +711,8 @@
                                     </select>
                                 </div>
 
-                                <!-- Sales Rep -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">مندوب المبيعات</label>
+                                <div class="filter-item">
+                                    <label for="salesRepFilter" class="block text-sm font-medium text-gray-700 mb-2">مندوب المبيعات</label>
                                     <select id="salesRepFilter" name="sales_rep" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
                                         <option value="">كل المندوبين</option>
                                         @foreach($sales_rep_names as $name)
@@ -375,10 +721,10 @@
                                     </select>
                                 </div>
 
-                                <!-- Late Days -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">أيام التأخير</label>
+                                <div class="filter-item">
+                                    <label for="lateDaysInput" class="block text-sm font-medium text-gray-700 mb-2">أيام التأخير</label>
                                     <input type="number"
+                                           id="lateDaysInput"
                                            name="late_days"
                                            value="{{ request('late_days', \App\Models\Setting::where('key', 'late_customer_days')->value('value') ?? 3) }}"
                                            class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
@@ -388,11 +734,10 @@
                             </div>
                         </div>
 
-                        <!-- Second Row: Date Filters -->
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <!-- Created Date Filter -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">تاريخ الإنشاء</label>
+                        <!-- Date Filters -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                            <div class="filter-item">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الإنشاء</label>
                                 <div class="flex gap-2">
                                     <input type="text"
                                            id="createdAtFilter"
@@ -409,19 +754,18 @@
                                 </div>
                             </div>
 
-                            <!-- Contact Date Range -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">نطاق تاريخ التواصل</label>
-                                <div class="flex gap-2">
+                            <div class="filter-item">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">نطاق تاريخ التواصل</label>
+                                <div class="date-range-group">
                                     <input type="text"
                                            id="fromDate"
-                                           class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                           class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                                            placeholder="من تاريخ"
                                            name="from_date"
                                            value="{{ request('from_date') }}">
                                     <input type="text"
                                            id="toDate"
-                                           class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                           class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                                            placeholder="إلى تاريخ"
                                            name="to_date"
                                            value="{{ request('to_date') }}">
@@ -437,12 +781,12 @@
 
                         <!-- Action Buttons -->
                         <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
-                            <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 font-medium">
-                                <i class="fas fa-filter ml-2"></i>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-filter"></i>
                                 تطبيق الفلتر
                             </button>
-                            <button type="button" onclick="resetFilters()" class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200 font-medium">
-                                <i class="fas fa-redo ml-2"></i>
+                            <button type="button" onclick="resetFilters()" class="btn btn-gray">
+                                <i class="fas fa-redo"></i>
                                 إعادة تعيين
                             </button>
                         </div>
@@ -462,26 +806,26 @@
                     </div>
                 </div>
 
-                <!-- Table Container -->
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 data-table">
-                        <thead class="bg-gray-50">
+                <!-- Improved Table Container -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
                         <tr>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">شعار شركة العميل</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الشركة</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">مقر الشركة</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الشخص المسؤول</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المنصب الوظيفي</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">رقم الجوال</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider no-print">واتس اب مباشر</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">حالة الاهتمام</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الخدمة المهتم بها</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عدد الخدمة</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">آخر تواصل</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">آخر تواصل منذ</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عدد مرات التواصل</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">طلبات العميل</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider no-print">الدردشة</th>
+                            <th>شعار شركة العميل</th>
+                            <th>الشركة</th>
+                            <th>مقر الشركة</th>
+                            <th>الشخص المسؤول</th>
+                            <th>المنصب الوظيفي</th>
+                            <th>رقم الجوال</th>
+                            <th class="no-print">واتس اب مباشر</th>
+                            <th>حالة الاهتمام</th>
+                            <th>الخدمة المهتم بها</th>
+                            <th>عدد الخدمة</th>
+                            <th>آخر تواصل</th>
+                            <th>آخر تواصل منذ</th>
+                            <th>عدد مرات التواصل</th>
+                            <th>طلبات العميل</th>
+                            <th class="no-print">الدردشة</th>
                         </tr>
                         </thead>
                         <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
@@ -501,172 +845,114 @@
         </div>
     </div>
 
-    <!-- Columns Selection Modal -->
-    <div id="columnsModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                    <i class="fas fa-columns ml-2 text-purple-600"></i>
+    <!-- Fixed Columns Selection Modal -->
+    <div id="columnsModal" class="columns-modal">
+        <div class="columns-modal-content">
+            <div class="columns-modal-header">
+                <h3 class="columns-modal-title">
+                    <i class="fas fa-columns"></i>
                     اختيار الأعمدة للعرض
                 </h3>
-                <button class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeColumnsModal()">
-                    <i class="fas fa-times text-lg"></i>
+                <button class="columns-modal-close" onclick="closeColumnsModal()">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="p-6 overflow-y-auto">
-                <div class="mb-4">
-                    <div class="relative">
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-gray-400"></i>
-                        </div>
-                        <input type="text"
-                               id="columnsSearch"
-                               placeholder="بحث عن عمود..."
-                               class="block w-full pr-10 pl-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                               onkeyup="filterColumns()">
+            <div class="columns-modal-body">
+                <div class="columns-search">
+                    <input type="text" id="columnsSearch" placeholder="بحث عن عمود..." onkeyup="filterColumns()">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="columns-list" id="columnsList">
+                    <!-- Column items will be generated here -->
+                    <div class="column-item">
+                        <label class="column-checkbox">
+                            <input type="checkbox" value="client_logo" checked>
+                            <span class="column-name">شعار شركة العميل</span>
+                        </label>
+                    </div>
+                    <div class="column-item">
+                        <label class="column-checkbox">
+                            <input type="checkbox" value="company_name" checked>
+                            <span class="column-name">الشركة</span>
+                        </label>
+                    </div>
+                    <div class="column-item">
+                        <label class="column-checkbox">
+                            <input type="checkbox" value="address" checked>
+                            <span class="column-name">مقر الشركة</span>
+                        </label>
+                    </div>
+                    <div class="column-item">
+                        <label class="column-checkbox">
+                            <input type="checkbox" value="contact_person" checked>
+                            <span class="column-name">الشخص المسؤول</span>
+                        </label>
+                    </div>
+                    <div class="column-item">
+                        <label class="column-checkbox">
+                            <input type="checkbox" value="contact_position" checked>
+                            <span class="column-name">المنصب الوظيفي</span>
+                        </label>
+                    </div>
+                    <div class="column-item">
+                        <label class="column-checkbox">
+                            <input type="checkbox" value="phone" checked>
+                            <span class="column-name">رقم الجوال</span>
+                        </label>
+                    </div>
+                    <div class="column-item">
+                        <label class="column-checkbox">
+                            <input type="checkbox" value="whatsapp_link" checked>
+                            <span class="column-name">رابط واتس اب مباشر</span>
+                        </label>
+                    </div>
+                    <div class="column-item">
+                        <label class="column-checkbox">
+                            <input type="checkbox" value="interest_status" checked>
+                            <span class="column-name">حالة الاهتمام</span>
+                        </label>
+                    </div>
+                    <div class="column-item">
+                        <label class="column-checkbox">
+                            <input type="checkbox" value="interested_service" checked>
+                            <span class="column-name">الخدمة المهتم بها</span>
+                        </label>
+                    </div>
+                    <div class="column-item">
+                        <label class="column-checkbox">
+                            <input type="checkbox" value="last_contact_date" checked>
+                            <span class="column-name">تاریخ آخر تواصل</span>
+                        </label>
+                    </div>
+                    <div class="column-item">
+                        <label class="column-checkbox">
+                            <input type="checkbox" value="contact_days_left" checked>
+                            <span class="column-name">آخر تواصل منذ</span>
+                        </label>
+                    </div>
+                    <div class="column-item">
+                        <label class="column-checkbox">
+                            <input type="checkbox" value="contact_count" checked>
+                            <span class="column-name">عدد مرات التواصل</span>
+                        </label>
+                    </div>
+                    <div class="column-item">
+                        <label class="column-checkbox">
+                            <input type="checkbox" value="requests_count" checked>
+                            <span class="column-name">طلبات العميل</span>
+                        </label>
                     </div>
                 </div>
-                <div class="columns-list grid grid-cols-1 gap-2" id="columnsList">
-                    <div id="columnsModal" class="columns-modal">
-                        <div class="columns-modal-content">
-                            <div class="columns-modal-header">
-                                <h3 class="columns-modal-title">
-                                    <i class="fas fa-columns"></i>
-                                    اختيار الأعمدة للعرض
-                                </h3>
-                                <button class="columns-modal-close" onclick="closeColumnsModal()">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            <div class="columns-modal-body">
-                                <div class="columns-search">
-                                    <input type="text" id="columnsSearch" placeholder="بحث عن عمود..."
-                                           onkeyup="filterColumns()">
-                                    <i class="fas fa-search"></i>
-                                </div>
-
-
-                                <div class="columns-list" id="columnsList">
-                                    <!-- Column items will be generated here -->
-                                    <div class="column-item">
-                                        <label class="column-checkbox">
-                                            <input type="checkbox" value="client_logo" checked>
-                                            <span class="checkmark"></span>
-                                            <span class="column-name">شعار شركة العميل</span>
-                                        </label>
-                                    </div>
-                                    <div class="column-item">
-                                        <label class="column-checkbox">
-                                            <input type="checkbox" value="company_name" checked>
-                                            <span class="checkmark"></span>
-                                            <span class="column-name"> الشركة </span>
-                                        </label>
-                                    </div>
-                                    <div class="column-item">
-                                        <label class="column-checkbox">
-                                            <input type="checkbox" value="address" checked>
-                                            <span class="checkmark"></span>
-                                            <span class="column-name"> مقر الشركة</span>
-                                        </label>
-                                    </div>
-                                    <div class="column-item">
-                                        <label class="column-checkbox">
-                                            <input type="checkbox" value="contact_person" checked>
-                                            <span class="checkmark"></span>
-                                            <span class="column-name"> الشخص المسؤول</span>
-                                        </label>
-                                    </div>
-                                    <div class="column-item">
-                                        <label class="column-checkbox">
-                                            <input type="checkbox" value="contact_position" checked>
-                                            <span class="checkmark"></span>
-                                            <span class="column-name">المنصب الوظيفي </span>
-                                        </label>
-                                    </div>
-                                    <div class="column-item">
-                                        <label class="column-checkbox">
-                                            <input type="checkbox" value="phone" checked>
-                                            <span class="checkmark"></span>
-                                            <span class="column-name">رقم الجوال</span>
-                                        </label>
-                                    </div>
-                                    <div class="column-item">
-                                        <label class="column-checkbox">
-                                            <input type="checkbox" value="whatsapp_link" checked>
-                                            <span class="checkmark"></span>
-                                            <span class="column-name">رابط واتس اب مباشر</span>
-                                        </label>
-                                    </div>
-                                    <div class="column-item">
-                                        <label class="column-checkbox">
-                                            <input type="checkbox" value="interest_status" checked>
-                                            <span class="checkmark"></span>
-                                            <span class="column-name">حالة الاهتمام </span>
-                                        </label>
-                                    </div>
-                                    <div class="column-item">
-                                        <label class="column-checkbox">
-                                            <input type="checkbox" value="interested_service" checked>
-                                            <span class="checkmark"></span>
-                                            <span class="column-name">الخدمة المهتم بها</span>
-                                        </label>
-                                    </div>
-                                    <div class="column-item">
-                                        <label class="column-checkbox">
-                                            <input type="checkbox" value="last_contact_date" checked>
-                                            <span class="checkmark"></span>
-                                            <span class="column-name">تاریخ آخر تواصل </span>
-                                        </label>
-                                    </div>
-                                    <div class="column-item">
-                                        <label class="column-checkbox">
-                                            <input type="checkbox" value="contact_days_left" checked>
-                                            <span class="checkmark"></span>
-                                            <span class="column-name"> آخر تواصل منذ</span>
-                                        </label>
-                                    </div>
-                                    <div class="column-item">
-                                        <label class="column-checkbox">
-                                            <input type="checkbox" value="contact_count" checked>
-                                            <span class="checkmark"></span>
-                                            <span class="column-name"> عدد مرات التواصل </span>
-                                        </label>
-                                    </div>
-                                    <div class="column-item">
-                                        <label class="column-checkbox">
-                                            <input type="checkbox" value="requests_count" checked>
-                                            <span class="checkmark"></span>
-                                            <span class="column-name">طلبات العميل </span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="columns-modal-footer">
-                                <div class="columns-actions">
-                                    <button class="btn-select-all" onclick="toggleSelectAll()">تحديد الكل</button>
-                                    <button class="btn-select-all" onclick="resetSelection()">إعادة تعيين</button>
-                                </div>
-                                <div>
-                                    <button class="btn-cancel" onclick="closeColumnsModal()">إلغاء</button>
-                                    <button class="btn-apply" onclick="applyColumnSelection()">
-                                        <i class="fas fa-check"></i>
-                                        تطبيق
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div
-                </div>
             </div>
-            <div class="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
-                <div class="flex gap-4">
-                    <button class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200" onclick="toggleSelectAll()">تحديد الكل</button>
-                    <button class="text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200" onclick="resetSelection()">إعادة تعيين</button>
+            <div class="columns-modal-footer">
+                <div class="columns-actions">
+                    <button class="btn-select-all" onclick="toggleSelectAll()">تحديد الكل</button>
+                    <button class="btn-select-all" onclick="resetSelection()">إعادة تعيين</button>
                 </div>
-                <div class="flex gap-3">
-                    <button class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200" onclick="closeColumnsModal()">إلغاء</button>
-                    <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 flex items-center" onclick="applyColumnSelection()">
-                        <i class="fas fa-check ml-2"></i>
+                <div>
+                    <button class="btn-cancel" onclick="closeColumnsModal()">إلغاء</button>
+                    <button class="btn-apply" onclick="applyColumnSelection()">
+                        <i class="fas fa-check"></i>
                         تطبيق
                     </button>
                 </div>
@@ -686,22 +972,47 @@
             <div class="px-6 py-4">
                 <form id="editForm">
                     <input type="hidden" id="editClientId" name="client_id">
-                    <input type="hidden" id="editField" name="field">
                     <div class="mb-4">
-                        <label id="fieldLabel" class="block text-sm font-medium text-gray-700 mb-2"></label>
-                        <div id="inputContainer">
-                            <!-- Input field will be inserted here dynamically -->
-                        </div>
+                        <label for="editCompanyName" class="block text-sm font-medium text-gray-700 mb-2">اسم الشركة</label>
+                        <input type="text" id="editCompanyName" name="company_name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                     </div>
-                    <div class="flex justify-end gap-3">
-                        <button type="button" onclick="closeEditModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200">
-                            إلغاء
-                        </button>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200">
-                            حفظ
-                        </button>
+                    <div class="mb-4">
+                        <label for="editContactPerson" class="block text-sm font-medium text-gray-700 mb-2">الشخص المسؤول</label>
+                        <input type="text" id="editContactPerson" name="contact_person" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                    </div>
+                    <div class="mb-4">
+                        <label for="editContactPosition" class="block text-sm font-medium text-gray-700 mb-2">المنصب الوظيفي</label>
+                        <input type="text" id="editContactPosition" name="contact_position" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                    </div>
+                    <div class="mb-4">
+                        <label for="editPhone" class="block text-sm font-medium text-gray-700 mb-2">رقم الجوال</label>
+                        <input type="text" id="editPhone" name="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                    </div>
+                    <div class="mb-4">
+                        <label for="editAddress" class="block text-sm font-medium text-gray-700 mb-2">مقر الشركة</label>
+                        <input type="text" id="editAddress" name="address" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                    </div>
+                    <div class="mb-4">
+                        <label for="editInterestStatus" class="block text-sm font-medium text-gray-700 mb-2">حالة الاهتمام</label>
+                        <select id="editInterestStatus" name="interest_status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <option value="interested">مهتم</option>
+                            <option value="not interested">غير مهتم</option>
+                            <option value="neutral">مؤجل</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="editInterestedService" class="block text-sm font-medium text-gray-700 mb-2">الخدمة المهتم بها</label>
+                        <select id="editInterestedService" name="interested_service" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            @foreach($services as $service)
+                                <option value="{{ $service->id }}">{{ $service->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </form>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+                <button type="button" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors duration-200" onclick="closeEditModal()">إلغاء</button>
+                <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200" onclick="saveEdit()">حفظ التغييرات</button>
             </div>
         </div>
     </div>
@@ -709,42 +1020,159 @@
 
         @push('scripts')
             <script>
-                function resetFilters() {
-                    window.location.href = "{{ request()->url() }}";
-                }
+                flatpickr("#createdAtFilter", {
+                    locale: "ar",
+                    dateFormat: "Y-m-d",
+                    allowInput: true
+                });
 
-                function resetDate(fieldName) {
-                    document.querySelector(`[name="${fieldName}"]`).value = '';
-                    document.getElementById('filterForm').submit();
-                }
-
-                function resetDateRange() {
-                    document.querySelector('[name="from_date"]').value = '';
-                    document.querySelector('[name="to_date"]').value = '';
-                    document.getElementById('filterForm').submit();
-                }
-
-                // Initialize flatpickr
                 flatpickr("#fromDate", {
                     locale: "ar",
                     dateFormat: "Y-m-d",
-                    allowInput: true,
-                    defaultDate: "{{ request('from_date') }}",
+                    allowInput: true
                 });
 
                 flatpickr("#toDate", {
                     locale: "ar",
                     dateFormat: "Y-m-d",
-                    allowInput: true,
-                    defaultDate: "{{ request('to_date') }}",
+                    allowInput: true
                 });
 
-                flatpickr("#createdAtFilter", {
-                    locale: "ar",
-                    dateFormat: "Y-m-d",
-                    allowInput: true,
-                    defaultDate: "{{ request('created_date') }}",
+                // Dropdown functionality
+                document.addEventListener('DOMContentLoaded', function() {
+                    const exportBtn = document.getElementById('exportBtn');
+                    const dropdown = exportBtn.closest('.dropdown');
+
+                    exportBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        dropdown.classList.toggle('active');
+                    });
+
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', function(e) {
+                        if (!dropdown.contains(e.target)) {
+                            dropdown.classList.remove('active');
+                        }
+                    });
+
+                    // Export functionality
+                    document.querySelectorAll('.dropdown-item').forEach(item => {
+                        item.addEventListener('click', function() {
+                            const type = this.getAttribute('data-type');
+                            exportTable(type);
+                            dropdown.classList.remove('active');
+                        });
+                    });
+
+                    // Load table data
+                    loadTableData();
                 });
+
+                // Columns Modal Functions
+                function openColumnsModal() {
+                    const modal = document.getElementById('columnsModal');
+                    modal.classList.add('active');
+                }
+
+                function closeColumnsModal() {
+                    const modal = document.getElementById('columnsModal');
+                    modal.classList.remove('active');
+                }
+
+                function filterColumns() {
+                    const searchTerm = document.getElementById('columnsSearch').value.toLowerCase();
+                    const columnItems = document.querySelectorAll('.column-item');
+
+                    columnItems.forEach(item => {
+                        const columnName = item.querySelector('.column-name').textContent.toLowerCase();
+                        if (columnName.includes(searchTerm)) {
+                            item.style.display = 'flex';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                }
+
+                function toggleSelectAll() {
+                    const checkboxes = document.querySelectorAll('#columnsList input[type="checkbox"]');
+                    const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = !allChecked;
+                    });
+                }
+
+                function resetSelection() {
+                    const checkboxes = document.querySelectorAll('#columnsList input[type="checkbox"]');
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = true; // Reset to all selected
+                    });
+                }
+
+                function applyColumnSelection() {
+                    const checkboxes = document.querySelectorAll('#columnsList input[type="checkbox"]');
+                    const selectedColumns = [];
+
+                    checkboxes.forEach(checkbox => {
+                        if (checkbox.checked) {
+                            selectedColumns.push(checkbox.value);
+                        }
+                    });
+
+                    // Update columns badge
+                    document.getElementById('columnsBadge').textContent = selectedColumns.length;
+
+                    // Hide/show columns in table
+                    const tableHeaders = document.querySelectorAll('.data-table th');
+                    const tableRows = document.querySelectorAll('.data-table tbody tr');
+
+                    tableHeaders.forEach((header, index) => {
+                        const columnName = getColumnNameFromHeader(header.textContent);
+                        if (selectedColumns.includes(columnName)) {
+                            header.style.display = '';
+                            // Show corresponding cells in all rows
+                            tableRows.forEach(row => {
+                                const cells = row.querySelectorAll('td');
+                                if (cells[index]) {
+                                    cells[index].style.display = '';
+                                }
+                            });
+                        } else {
+                            header.style.display = 'none';
+                            // Hide corresponding cells in all rows
+                            tableRows.forEach(row => {
+                                const cells = row.querySelectorAll('td');
+                                if (cells[index]) {
+                                    cells[index].style.display = 'none';
+                                }
+                            });
+                        }
+                    });
+
+                    closeColumnsModal();
+                }
+
+                function getColumnNameFromHeader(headerText) {
+                    const columnMap = {
+                        'شعار شركة العميل': 'client_logo',
+                        'الشركة': 'company_name',
+                        'مقر الشركة': 'address',
+                        'الشخص المسؤول': 'contact_person',
+                        'المنصب الوظيفي': 'contact_position',
+                        'رقم الجوال': 'phone',
+                        'واتس اب مباشر': 'whatsapp_link',
+                        'حالة الاهتمام': 'interest_status',
+                        'الخدمة المهتم بها': 'interested_service',
+                        'عدد الخدمة': 'service_count',
+                        'آخر تواصل': 'last_contact_date',
+                        'آخر تواصل منذ': 'contact_days_left',
+                        'عدد مرات التواصل': 'contact_count',
+                        'طلبات العميل': 'requests_count',
+                        'الدردشة': 'chat'
+                    };
+
+                    return columnMap[headerText.trim()] || '';
+                }
             </script>
             <script>
                 const isAdmin = @json($isAdmin);
