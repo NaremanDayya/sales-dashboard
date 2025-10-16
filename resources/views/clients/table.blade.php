@@ -21,7 +21,38 @@
             color: #1e293b;
             direction: rtl;
         }
+        .modal-body {
+            overflow-y: auto;
+        }
+        .dropdown.active .dropdown-menu {
+            display: block !important;
+        }
 
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 180px;
+            margin-top: 4px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            z-index: 10;
+        }
+        #clientEditModal {
+            align-items: flex-start;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+
+        #clientEditModal > div {
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
         .clickable-cell {
             cursor: pointer;
             transition: all 0.2s ease;
@@ -638,22 +669,36 @@
                         </button>
 
                         <!-- Export Dropdown -->
-                        <div class="dropdown">
-                            <button class="btn btn-dark" id="exportBtn" type="button">
-                                تصدير البيانات
-                                <i class="fas fa-chevron-down mr-2 text-sm"></i>
-                            </button>
-                            <div class="dropdown-menu">
-                                <button class="dropdown-item flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-right" data-type="xlsx">
-                                    <i class="fas fa-file-excel ml-2 text-green-600"></i>
-                                    تصدير كملف Excel
-                                </button>
-                                <button class="dropdown-item flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-right" data-type="pdf">
-                                    <i class="fas fa-file-pdf ml-2 text-red-600"></i>
-                                    تصدير كملف PDF
-                                </button>
+                            <div class="export-options no-print">
+                                <div class="dropdown">
+                                    <button class="btn btn-dropdown" id="exportBtn" type="button">
+                                        تصدير البيانات
+                                        <svg width="12" height="8" viewBox="0 0 12 8" fill="none"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                        </svg>
+                                    </button>
+                                    <div class="dropdown-menu" id="exportDropdown">
+                                        <button class="dropdown-item" data-type="xlsx">
+                                            <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                 xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M4 6H20M4 12H20M4 18H11" stroke="currentColor" stroke-width="2"
+                                                      stroke-linecap="round" />
+                                            </svg>
+                                            تصدير كملف Excel
+                                        </button>
+                                        <button class="dropdown-item" data-type="pdf">
+                                            <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                 xmlns="http://www.w3.org/2000/svg">
+                                                <path
+                                                    d="M4 7V17C4 18.1046 4.89543 19 6 19H18C19.1046 19 20 18.1046 20 17V7M4 7H20M4 7L6 4H18L20 7"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                            </svg>
+                                            تصدير كملف PDF
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
                         <!-- Print Button -->
                         <button class="btn btn-gray no-print" onclick="window.print()">
@@ -795,19 +840,17 @@
             </div>
 
             <!-- Table Section -->
-            <div id="print-area" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <!-- PDF Header (Hidden by default) -->
-                <div class="pdf-header hidden">
-                    <div class="text-center py-4 border-b-2 border-gray-800 bg-gray-100">
-                        <div class="flex items-center justify-center gap-4 mb-2">
-                            <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="h-16" />
-                            <h2 class="text-2xl font-bold text-blue-600">تقرير العملاء</h2>
+            <div class="table-responsive">
+                <div class="pdf-content">
+                    <div class="pdf-header" style="display: none;">
+                        <div
+                            class="header-content d-flex align-items-center justify-content-between flex-wrap mb-4 p-3 shadow rounded bg-white">
+                            <div class="d-flex flex-column align-items-center text-center mx-auto">
+                                <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="header-logo mb-2" />
+                                <h2 class="header-text">تقرير العملاء</h2>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Improved Table Container -->
-                <div class="table-container">
                     <table class="data-table">
                         <thead>
                         <tr>
@@ -961,58 +1004,140 @@
     </div>
 
     <!-- Edit Modal -->
-    <div id="editModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h3 class="text-lg font-semibold text-gray-900" id="modalTitle">تعديل البيانات</h3>
-                <button class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeEditModal()">
+    <div id="clientEditModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-5xl mx-4 max-h-[90vh] overflow-hidden">
+            <!-- Modal Header -->
+            <div class="modal-header px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-800" id="modalClientName">تعديل بيانات العميل</h3>
+                <button class="text-gray-500 hover:text-gray-700 text-xl" onclick="closeClientEditModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="px-6 py-4">
-                <form id="editForm">
+
+            <!-- Modal Body -->
+            <div class="modal-body px-6 py-4 overflow-y-auto" style="max-height: calc(90vh - 200px)">
+                <form id="clientEditForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <input type="hidden" id="editClientId" name="client_id">
-                    <div class="mb-4">
-                        <label for="editCompanyName" class="block text-sm font-medium text-gray-700 mb-2">اسم الشركة</label>
-                        <input type="text" id="editCompanyName" name="company_name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                    <div class="col-span-2 flex justify-center mb-4">
+                        <img id="editClientLogo" src="" alt="Client Logo" class="max-h-32 max-w-full object-contain border rounded-lg p-2">
                     </div>
-                    <div class="mb-4">
-                        <label for="editContactPerson" class="block text-sm font-medium text-gray-700 mb-2">الشخص المسؤول</label>
-                        <input type="text" id="editContactPerson" name="contact_person" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">مندوب المبيعات</label>
+                        <input type="text" id="editSalesRep" name="sales_rep_name" readonly
+                               class="w-full px-3 py-2 border rounded-md bg-gray-100">
                     </div>
-                    <div class="mb-4">
-                        <label for="editContactPosition" class="block text-sm font-medium text-gray-700 mb-2">المنصب الوظيفي</label>
-                        <input type="text" id="editContactPosition" name="contact_position" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                    <!-- Company Information -->
+                    <div class="col-span-2">
+                        <h4 class="text-md font-medium text-gray-700 mb-3 border-b pb-2">معلومات الشركة</h4>
                     </div>
-                    <div class="mb-4">
-                        <label for="editPhone" class="block text-sm font-medium text-gray-700 mb-2">رقم الجوال</label>
-                        <input type="text" id="editPhone" name="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">اسم الشركة</label>
+                        <input type="text" id="editCompanyName" name="company_name"
+                               class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
                     </div>
-                    <div class="mb-4">
-                        <label for="editAddress" class="block text-sm font-medium text-gray-700 mb-2">مقر الشركة</label>
-                        <input type="text" id="editAddress" name="address" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">عنوان الشركة</label>
+                        <input type="text" id="editAddress" name="address"
+                               class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
                     </div>
-                    <div class="mb-4">
-                        <label for="editInterestStatus" class="block text-sm font-medium text-gray-700 mb-2">حالة الاهتمام</label>
-                        <select id="editInterestStatus" name="interest_status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+
+
+                    <!-- Contact Information -->
+                    <div class="col-span-2 mt-4">
+                        <h4 class="text-md font-medium text-gray-700 mb-3 border-b pb-2">معلومات الاتصال</h4>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">الشخص المسؤول</label>
+                        <input type="text" id="editContactPerson" name="contact_person"
+                               class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">المنصب الوظيفي</label>
+                        <input type="text" id="editContactPosition" name="contact_position"
+                               class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">رقم الجوال</label>
+                        <input type="tel" id="editPhone" name="phone" dir="ltr"
+                               class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    {{--                            <div>--}}
+                    {{--                                <label class="block text-sm font-medium text-gray-700 mb-1">رابط الواتساب</label>--}}
+                    {{--                                <input type="url" id="editWhatsappLink" name="whatsapp_link"--}}
+                    {{--                                       class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">--}}
+                    {{--                            </div>--}}
+
+                    <!-- Status Information -->
+                    <div class="col-span-2 mt-4">
+                        <h4 class="text-md font-medium text-gray-700 mb-3 border-b pb-2">حالة العميل</h4>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">حالة الاهتمام</label>
+                        <select id="editInterestStatus" name="interest_status"
+                                class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
                             <option value="interested">مهتم</option>
                             <option value="not interested">غير مهتم</option>
                             <option value="neutral">مؤجل</option>
                         </select>
                     </div>
-                    <div class="mb-4">
-                        <label for="editInterestedService" class="block text-sm font-medium text-gray-700 mb-2">الخدمة المهتم بها</label>
-                        <select id="editInterestedService" name="interested_service" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">الخدمة المهتم بها</label>
+                        <select id="editInterestedService" name="interested_service"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                            <option value="">اختر الخدمة</option>
                             @foreach($services as $service)
                                 <option value="{{ $service->id }}">{{ $service->name }}</option>
                             @endforeach
                         </select>
                     </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">عدد مرات التواصل</label>
+                        <input type="number" id="editContactCount" name="contact_count"
+                               class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">عدد الخدمة المهتم بها</label>
+                        <input type="number" id="editServiceCount" name="interested_service_count"
+                               class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="col-span-2 mt-4">
+                        <h4 class="text-md font-medium text-gray-700 mb-3 border-b pb-2">معلومات إضافية</h4>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">تاريخ آخر تواصل</label>
+                        <input type="date" id="editLastContactDate" name="last_contact_date"
+                               class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+
+
+
                 </form>
             </div>
-            <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
-                <button type="button" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors duration-200" onclick="closeEditModal()">إلغاء</button>
-                <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200" onclick="saveEdit()">حفظ التغييرات</button>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer px-6 py-4 border-t bg-gray-50 flex justify-end gap-3">
+                <button type="button" onclick="closeClientEditModal()"
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
+                    إلغاء
+                </button>
+                <button type="button" onclick="saveClientEdits()"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+                    حفظ التغييرات
+                </button>
             </div>
         </div>
     </div>
@@ -1039,34 +1164,42 @@
                 });
 
                 // Dropdown functionality
+                // Fixed Export Dropdown functionality
                 document.addEventListener('DOMContentLoaded', function() {
                     const exportBtn = document.getElementById('exportBtn');
-                    const dropdown = exportBtn.closest('.dropdown');
+                    const exportDropdown = document.getElementById('exportDropdown');
 
-                    exportBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        dropdown.classList.toggle('active');
-                    });
-
-                    // Close dropdown when clicking outside
-                    document.addEventListener('click', function(e) {
-                        if (!dropdown.contains(e.target)) {
-                            dropdown.classList.remove('active');
-                        }
-                    });
-
-                    // Export functionality
-                    document.querySelectorAll('.dropdown-item').forEach(item => {
-                        item.addEventListener('click', function() {
-                            const type = this.getAttribute('data-type');
-                            exportTable(type);
-                            dropdown.classList.remove('active');
+                    if (exportBtn && exportDropdown) {
+                        exportBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            exportDropdown.classList.toggle('active');
                         });
-                    });
 
-                    // Load table data
-                    loadTableData();
+                        // Close dropdown when clicking outside
+                        document.addEventListener('click', function(e) {
+                            if (!exportDropdown.contains(e.target)) {
+                                exportDropdown.classList.remove('active');
+                            }
+                        });
+                    }
                 });
+
+                // Simple export function
+                function exportTable(type) {
+                    const selectedColumns = getSelectedColumns();
+
+                    if (type === 'xlsx') {
+                        exportClients(selectedColumns);
+                    } else if (type === 'pdf') {
+                        exportToPDF(selectedColumns);
+                    }
+
+                    // Close dropdown after selection
+                    const exportDropdown = document.getElementById('exportDropdown');
+                    if (exportDropdown) {
+                        exportDropdown.classList.remove('active');
+                    }
+                }
 
                 // Columns Modal Functions
                 function openColumnsModal() {
@@ -1220,7 +1353,6 @@
                         });
                     });
 
-                    // Handle export option clicks
                     document.querySelectorAll('.dropdown-item').forEach(item => {
                         item.addEventListener('click', function() {
                             const exportType = this.getAttribute('data-type');
@@ -1244,17 +1376,7 @@
                         e.stopPropagation();
                     });
                 });
-                function toggleFakePlaceholder(input) {
-                    const placeholder = document.getElementById('fakePlaceholder');
-                    placeholder.style.display = input.value ? 'none' : 'block';
-                }
 
-                function resetDateFilter() {
-                    const input = document.getElementById('dateFilter');
-                    input.value = '';
-                    toggleFakePlaceholder(input);
-                    // add your reset logic here...
-                }
 
                 // Initialize on page load (in case date is pre-filled)
                 window.addEventListener('DOMContentLoaded', () => {
@@ -1430,7 +1552,7 @@
             </td>
 
             <!-- Message Link -->
-            <td class="px-4 py-2 text-sm text-center no-print">
+<td class="px-4 py-2 text-sm text-center no-print">
     <a href="/client/${client.client_id}/message" class="text-blue-600 hover:underline mr-2">
         <i class="fas fa-comments"></i>
     </a>
@@ -1439,8 +1561,7 @@
         <i class="fas fa-edit"></i>
     </button>
     ` : ''}
-</td>
-        `;
+</td>`;
                         tbody.appendChild(row);
                     });
                 }
@@ -1519,7 +1640,116 @@
                         }
                     });
                 }
+                function exportTable(type) {
+                    const selectedColumns = getSelectedColumns();
 
+                    if (type === 'xlsx') {
+                        exportClients(selectedColumns);
+                    } else if (type === 'pdf') {
+                        exportToPDF(selectedColumns);
+                    }
+                }
+
+                // Simple edit modal opener
+                function openEditModal(clientId) {
+                    const client = ClientsData.find(c => c.client_id == clientId);
+                    if (!client) {
+                        showNotification('لم يتم العثور على بيانات العميل', 'error');
+                        return;
+                    }
+
+                    // Populate the form
+                    document.getElementById('editClientId').value = client.client_id;
+                    document.getElementById('editCompanyName').value = client.company_name || '';
+                    document.getElementById('editContactPerson').value = client.contact_person || '';
+                    document.getElementById('editContactPosition').value = client.contact_position || '';
+                    document.getElementById('editPhone').value = client.phone || '';
+                    document.getElementById('editAddress').value = client.address || '';
+                    document.getElementById('editInterestStatus').value = client.interest_status || 'neutral';
+                    document.getElementById('editInterestedService').value = client.interested_service || '';
+
+                    // Show modal
+                    document.getElementById('editModal').classList.remove('hidden');
+                }
+
+                function closeEditModal() {
+                    document.getElementById('editModal').classList.add('hidden');
+                }
+
+                function saveEdit() {
+                    const clientId = document.getElementById('editClientId').value;
+                    const formData = {
+                        company_name: document.getElementById('editCompanyName').value,
+                        contact_person: document.getElementById('editContactPerson').value,
+                        contact_position: document.getElementById('editContactPosition').value,
+                        phone: document.getElementById('editPhone').value,
+                        address: document.getElementById('editAddress').value,
+                        interest_status: document.getElementById('editInterestStatus').value,
+                        interested_service: document.getElementById('editInterestedService').value
+                    };
+
+                    // Show loading state
+                    const saveBtn = document.querySelector('#editModal button[onclick="saveEdit()"]');
+                    const originalText = saveBtn.textContent;
+                    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+                    saveBtn.disabled = true;
+
+                    // Send AJAX request
+                    fetch(`/api/clients/${clientId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success) {
+                                // Update local data
+                                const clientIndex = ClientsData.findIndex(c => c.client_id == clientId);
+                                if (clientIndex !== -1) {
+                                    Object.assign(ClientsData[clientIndex], formData);
+                                }
+
+                                // Update filtered data
+                                const filteredIndex = currentFilteredClients.findIndex(c => c.client_id == clientId);
+                                if (filteredIndex !== -1) {
+                                    Object.assign(currentFilteredClients[filteredIndex], formData);
+                                }
+
+                                // Re-render table
+                                renderTable();
+
+                                showNotification('تم تحديث بيانات العميل بنجاح', 'success');
+                                closeEditModal();
+                            } else {
+                                throw new Error(result.message || 'فشل في حفظ التغييرات');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showNotification('حدث خطأ أثناء حفظ التغييرات', 'error');
+                        })
+                        .finally(() => {
+                            saveBtn.textContent = originalText;
+                            saveBtn.disabled = false;
+                        });
+                }
+
+                // Close modal when clicking outside
+                document.getElementById('editModal').addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeEditModal();
+                    }
+                });
+
+                // Close modal with Escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && !document.getElementById('editModal').classList.contains('hidden')) {
+                        closeEditModal();
+                    }
+                });
                 function toggleSelectAll() {
                     const checkboxes = document.querySelectorAll('.column-checkbox input');
                     const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
@@ -2006,146 +2236,6 @@
                     }
                 }
 
-                function startEditing(cell) {
-                    // If already in edit mode, do nothing
-                    if (cell.querySelector('.edit-form')) return;
-
-                    const value = cell.querySelector('.cell-value').textContent;
-                    const clientId = cell.getAttribute('data-client-id');
-                    const field = cell.getAttribute('data-field');
-
-                    // Special handling for whatsapp link
-                    let displayValue = value;
-                    if (field === 'whatsapp_link' && value !== '—') {
-                        const linkElement = cell.querySelector('a');
-                        displayValue = linkElement ? linkElement.getAttribute('href') : value;
-                    }
-
-                    cell.innerHTML = `
-        <div class="edit-form">
-            <input type="text" class="edit-input" value="${displayValue}" data-original-value="${displayValue}">
-            <div class="edit-actions">
-                <button class="edit-btn edit-save" onclick="saveEdit(this, ${clientId}, '${field}')">
-                    <i class="fas fa-check"></i>
-                </button>
-                <button class="edit-btn edit-cancel" onclick="cancelEdit(this)">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        </div>
-    `;
-
-                    // Focus the input
-                    cell.querySelector('.edit-input').focus();
-                }
-
-                // Special function for interest status (dropdown instead of text input)
-                function startEditingInterestStatus(cell) {
-                    // If already in edit mode, do nothing
-                    if (cell.querySelector('.edit-form')) return;
-
-                    const clientId = cell.getAttribute('data-client-id');
-                    const field = cell.getAttribute('data-field');
-                    const currentStatus = cell.querySelector('.cell-value span').textContent.trim();
-
-                    // Map display text to values
-                    const statusMap = {
-                        'مهتم': 'interested',
-                        'غير مهتم': 'not interested',
-                        'مؤجل': 'neutral'
-                    };
-
-                    const currentValue = statusMap[currentStatus] || 'neutral';
-
-                    cell.innerHTML = `
-        <div class="edit-form">
-            <select class="edit-input" data-original-value="${currentValue}">
-                <option value="interested" ${currentValue === 'interested' ? 'selected' : ''}>مهتم</option>
-                <option value="not interested" ${currentValue === 'not interested' ? 'selected' : ''}>غير مهتم</option>
-                <option value="neutral" ${currentValue === 'neutral' ? 'selected' : ''}>مؤجل</option>
-            </select>
-            <div class="edit-actions">
-                <button class="edit-btn edit-save" onclick="saveEdit(this, ${clientId}, '${field}')">
-                    <i class="fas fa-check"></i>
-                </button>
-                <button class="edit-btn edit-cancel" onclick="cancelEdit(this)">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        </div>
-    `;
-                }
-
-                function saveEdit(button, clientId, field) {
-                    const form = button.closest('.edit-form');
-                    const input = form.querySelector('.edit-input');
-                    let newValue;
-
-                    // Handle different input types
-                    if (input.tagName === 'SELECT') {
-                        newValue = input.value;
-                    } else {
-                        newValue = input.value.trim();
-                    }
-
-                    const originalValue = input.getAttribute('data-original-value');
-
-                    if (newValue === originalValue) {
-                        cancelEdit(button);
-                        return;
-                    }
-
-                    // Show loading state
-                    button.disabled = true;
-                    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-                    // Send AJAX request to update the value
-                    fetch(`/api/clients/${clientId}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({
-                            [field]: newValue
-                        })
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Update the cell with the new value
-                                const cell = button.closest('.editable-cell');
-                                updateCellDisplay(cell, field, newValue);
-
-                                // If phone was updated, also update the WhatsApp link
-                                if (field === 'phone') {
-                                    updateWhatsAppLink(clientId, newValue);
-                                }
-
-                                // Update the data in our local array
-                                const clientIndex = ClientsData.findIndex(c => c.client_id === clientId);
-                                if (clientIndex !== -1) {
-                                    ClientsData[clientIndex][field] = newValue;
-
-                                    // If phone was updated, update WhatsApp link in local data too
-                                    if (field === 'phone') {
-                                        const cleanPhone = newValue.replace(/\D/g, ''); // Remove non-digit characters
-                                        ClientsData[clientIndex].whatsapp_link = `https://wa.me/${cleanPhone}`;
-                                    }
-                                }
-
-                                // Show success message
-                                showNotification('تم تحديث البيانات بنجاح يا قمر', 'success');
-                            } else {
-                                throw new Error(data.message || 'فشل في التحديث');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            showNotification('حدث خطأ أثناء التحديث', 'error');
-                            cancelEdit(button);
-                        });
-                }
 
                 // New function to update WhatsApp link display
                 function updateWhatsAppLink(clientId, phoneNumber) {
@@ -2178,70 +2268,9 @@
                 }
 
 
-                function cancelEdit(button) {
-                    const cell = button.closest('.editable-cell');
-                    const field = cell.getAttribute('data-field');
-                    const clientId = cell.getAttribute('data-client-id');
-
-                    // Find the original value from our data
-                    const client = ClientsData.find(c => c.client_id == clientId);
-                    if (client) {
-                        updateCellDisplay(cell, field, client[field]);
-                    }
-                }
 
                 // Helper function to update cell display based on field type
-                function updateCellDisplay(cell, field, value) {
-                    switch (field) {
-                        case 'company_name':
-                            cell.innerHTML = `
-                <span class="cell-value">${value || '—'}</span>
-                <i class="fas fa-edit edit-icon"></i>
-            `;
-                            break;
 
-                        case 'phone':
-                            const formattedPhone = value ? (value.startsWith('+') ? value : '+' + value) : '—';
-                            cell.innerHTML = `
-                <span class="cell-value">
-                    <span dir="ltr" class="ltr-number">${formattedPhone}</span>
-                </span>
-                <i class="fas fa-edit edit-icon"></i>
-            `;
-                            break;
-
-
-
-                        case 'interest_status':
-                            const statusText = {
-                                'interested': 'مهتم',
-                                'not interested': 'غير مهتم',
-                                'neutral': 'مؤجل'
-                            }[value] || 'مؤجل';
-
-                            const statusClass = {
-                                'interested': 'bg-green-100 text-green-800',
-                                'not interested': 'bg-red-100 text-red-800',
-                                'neutral': 'bg-gray-100 text-gray-700'
-                            }[value] || 'bg-gray-100 text-gray-700';
-
-                            cell.innerHTML = `
-                <span class="cell-value">
-                    <span class="inline-block px-2 py-0.5 rounded-full ${statusClass}">
-                        ${statusText}
-                    </span>
-                </span>
-                <i class="fas fa-edit edit-icon"></i>
-            `;
-                            break;
-
-                        default:
-                            cell.innerHTML = `
-                <span class="cell-value">${value || '—'}</span>
-                <i class="fas fa-edit edit-icon"></i>
-            `;
-                    }
-                }
 
                 function showNotification(message, type) {
                     // Create notification element
@@ -2373,70 +2402,7 @@
                     document.getElementById('editModal').classList.add('hidden');
                 }
 
-                // Handle form submission
-                document.getElementById('editForm').addEventListener('submit', function(e) {
-                    e.preventDefault();
 
-                    const formData = new FormData(this);
-                    const clientId = formData.get('client_id');
-                    const field = formData.get('field');
-                    const value = formData.get('value');
-
-                    // Show loading state
-                    const submitBtn = this.querySelector('button[type="submit"]');
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = 'جاري الحفظ...';
-
-                    // Send AJAX request
-                    fetch(`/api/clients/${clientId}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ [field]: value })
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Update local data
-                                const clientIndex = ClientsData.findIndex(c => c.client_id == clientId);
-                                if (clientIndex !== -1) {
-                                    ClientsData[clientIndex][field] = value;
-                                }
-
-                                // Update current filtered data if needed
-                                const filteredIndex = currentFilteredClients.findIndex(c => c.client_id == clientId);
-                                if (filteredIndex !== -1) {
-                                    currentFilteredClients[filteredIndex][field] = value;
-                                }
-
-                                // Re-render table
-                                renderTable();
-
-                                // Show success message
-                                showNotification('تم تحديث البيانات بنجاح', 'success');
-                                closeEditModal();
-                            } else {
-                                throw new Error(data.message || 'فشل في التحديث');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            showNotification('حدث خطأ أثناء التحديث', 'error');
-                        })
-                        .finally(() => {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = 'حفظ';
-                        });
-                });
-
-                // Close modal when clicking outside
-                document.getElementById('editModal').addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        closeEditModal();
-                    }
-                });
             </script>
             <script>
                 flatpickr("#fromDate", {
@@ -2575,65 +2541,7 @@
                             saveBtn.disabled = false;
                         });
                 }
-                function saveAgreementEdits() {
-                    const formData = new FormData(document.getElementById('agreementEditForm'));
-                    const agreementId = formData.get('agreement_id');
 
-                    const data = {};
-                    for (let [key, value] of formData.entries()) {
-                        if (key !== 'agreement_id') {
-                            data[key] = value;
-                        }
-                    }
-
-                    // Show loading state
-                    const saveBtn = document.querySelector('#agreementEditModal .modal-footer button:last-child');
-                    const originalText = saveBtn.textContent;
-                    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
-                    saveBtn.disabled = true;
-
-                    // Send AJAX request - CORRECTED URL
-                    fetch(`/api/agreements/${agreementId}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify(data)
-                    })
-                        .then(response => response.json())
-                        .then(result => {
-                            if (result.success) {
-                                // Update local data
-                                const agreementIndex = AgreementsData.findIndex(a => a.agreement_id == agreementId);
-                                if (agreementIndex !== -1) {
-                                    Object.assign(AgreementsData[agreementIndex], data);
-                                }
-
-                                // Update current filtered data
-                                const filteredIndex = currentFilteredAgreements.findIndex(a => a.agreement_id == agreementId);
-                                if (filteredIndex !== -1) {
-                                    Object.assign(currentFilteredAgreements[filteredIndex], data);
-                                }
-
-                                // Re-render table
-                                renderTable();
-
-                                showNotification('تم تحديث بيانات الاتفاقية بنجاح', 'success');
-                                closeAgreementEditModal();
-                            } else {
-                                throw new Error(result.message || 'فشل في حفظ التغييرات');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            showNotification('حدث خطأ أثناء حفظ التغييرات', 'error');
-                        })
-                        .finally(() => {
-                            saveBtn.textContent = originalText;
-                            saveBtn.disabled = false;
-                        });
-                }
                 // Close modal when clicking outside
                 document.getElementById('clientEditModal').addEventListener('click', function(e) {
                     if (e.target === this) {
