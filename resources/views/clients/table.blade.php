@@ -7,15 +7,6 @@
             --primary-light: #6366f1;
             --secondary: #10b981;
             --danger: #ef4444;
-            --gray-100: #f8fafc;
-            --gray-200: #e2e8f0;
-            --gray-300: #cbd5e1;
-            --gray-400: #94a3b8;
-            --gray-500: #64748b;
-            --gray-600: #475569;
-            --gray-700: #334155;
-            --gray-800: #1e293b;
-            --gray-900: #0f172a;
         }
 
         * {
@@ -26,528 +17,34 @@
         }
 
         body {
-            background-color: var(--gray-100);
-            color: var(--gray-800);
+            background-color: #f8fafc;
+            color: #1e293b;
             direction: rtl;
-            padding: 20px;
-        }
-        .date-filter {
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
-        .date-filter input[type="date"] {
-            height: 38px;
-            border: 1px solid var(--gray-300);
-            border-radius: 6px;
-            padding: 0 12px;
-            font-family: 'Tajawal', sans-serif;
-        }
-        .clickable-cell {
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-        .clickable-cell:hover {
-            background-color: #f1f5f9; /* light hover background */
-            color: #4154f1; /* your brand blue */
-            text-decoration: underline; /* shows it's clickable */
-        }
-        .position-relative {
-            position: relative;
-        }
-        .hidden {
-            display: none !important;
-        }
-
-        #clientEditModal {
-            display: none;
-        }
-
-        #clientEditModal:not(.hidden) {
-            display: flex !important;
-        }
-        .position-absolute {
-            position: absolute;
-        }
-        .edit-dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .edit-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            z-index: 10;
-            min-width: 120px;
-        }
-
-        .edit-menu-item {
-            padding: 8px 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background-color 0.2s;
-        }
-
-        .edit-menu-item:hover {
-            background-color: #f9fafb;
-        }
-
-        .edit-dropdown:hover .edit-menu {
-            display: block;
-        }
-
-        /* Make cells clickable for redirect */
         .clickable-cell {
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.2s ease;
         }
 
         .clickable-cell:hover {
             background-color: #f1f5f9;
+            color: #4154f1;
         }
 
-        .top-0 {
-            top: 0;
+        .hidden {
+            display: none !important;
         }
 
-        .start-0 {
-            left: 0;
+        [x-cloak] {
+            display: none !important;
         }
 
-        .translate-middle {
-            transform: translate(-50%, -50%);
-        }
-
-        .badge {
+        .ltr-number {
+            direction: ltr;
+            unicode-bidi: embed;
             display: inline-block;
-            padding: 0.35em 0.65em;
-            font-size: 0.75em;
-            font-weight: 700;
-            line-height: 1;
-            text-align: center;
-            white-space: nowrap;
-            vertical-align: baseline;
-            border-radius: 0.375rem;
         }
-
-        .bg-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .rounded-pill {
-            border-radius: 50rem !important;
-        }
-        /* Replace the .table-filters and related styles with these */
-
-        .table-filters {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            padding: 15px 20px;
-            background-color: var(--gray-100);
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .filter-row {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            width: 100%;
-        }
-
-        /* First row - search on right, other filters on left */
-        .filter-row:first-child {
-            justify-content: space-between;
-        }
-
-        .search-box {
-            position: relative;
-            width: 250px;
-            margin-left: auto; /* Push search to right */
-        }
-
-        /* Second row - date filters on both sides */
-        .filter-row:last-child {
-            justify-content: space-between;
-        }
-
-        /* Left side date filter group */
-        .filter-row:last-child .filter-group:first-child {
-            margin-right: auto; /* Push to left */
-        }
-
-        /* Right side date filter group */
-        .filter-row:last-child .filter-group:last-child {
-            margin-left: auto; /* Push to right */
-        }
-
-        /* Search input RTL adjustment */
-        .search-input {
-            width: 100%;
-            padding: 8px 15px 8px 40px; /* Adjust padding for RTL */
-            border-radius: 6px;
-            border: 1px solid var(--gray-300);
-            font-size: 14px;
-            transition: all 0.2s ease;
-            text-align: right; /* RTL text alignment */
-        }
-
-        .search-icon {
-            position: absolute;
-            right: 15px; /* Changed from left to right for RTL */
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--gray-400);
-        }
-
-        /* Filter groups alignment */
-        .filter-group {
-            display: flex;
-            align-items: center;
-        }
-
-        /* Date input specific styles */
-        .date-input {
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid var(--gray-300);
-            direction: rtl;
-            text-align: right;
-            min-width: 120px;
-            font-size: 14px;
-        }
-
-        .date-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
-        }
-
-        .filter-btn {
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            min-width: auto;
-        }
-
-        .count-badge {
-            display: none;
-            font-size: 10px;
-            padding: 3px 6px;
-            background-color: var(--primary);
-            color: white;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 1200px) {
-            .filter-row {
-                gap: 10px;
-            }
-
-            .search-box {
-                width: 200px;
-            }
-
-            .date-input {
-                min-width: 100px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .table-filters {
-                padding: 10px;
-            }
-
-            .filter-row {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 10px;
-            }
-
-            .search-box {
-                width: 100%;
-                margin-left: 0;
-                order: -1; /* Move search to top on mobile */
-            }
-
-            .filter-group {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .filter-row:last-child .filter-group:first-child,
-            .filter-row:last-child .filter-group:last-child {
-                margin-right: 0;
-                margin-left: 0;
-            }
-
-            .form-select, .date-input {
-                flex: 1;
-                min-width: auto;
-            }
-        }
-
-        /* Button styles */
-        .btn-outline {
-            background-color: white;
-            color: var(--primary);
-            border: 1px solid var(--gray-300);
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 14px;
-        }
-
-        .btn-outline:hover {
-            background-color: var(--gray-100);
-            border-color: var(--primary);
-        }
-
-        /* Icon styles */
-        .text-secondary {
-            color: var(--gray-500);
-        }
-
-        /* Position utilities */
-        .position-relative {
-            position: relative;
-        }
-
-        .position-absolute {
-            position: absolute;
-        }
-        #logoPreview {
-            max-width: 100%;
-            height: auto;
-            object-fit: contain;
-        }
-
-        #logoPreviewContainer {
-            text-align: center;
-            border: 1px dashed #d1d5db;
-            border-radius: 0.375rem;
-            padding: 1rem;
-            background-color: #f9fafb;
-        }
-
-        .top-0 {
-            top: 0;
-        }
-
-        .start-0 {
-            left: 0;
-        }
-
-        .translate-middle {
-            transform: translate(-50%, -50%);
-        }
-
-        .rounded-pill {
-            border-radius: 50rem;
-        }
-
-        /* Flex utilities */
-        .d-flex {
-            display: flex;
-        }
-
-        .align-items-center {
-            align-items: center;
-        }
-
-        .gap-2 {
-            gap: 8px;
-        }
-
-        .gap-3 {
-            gap: 12px;
-        }
-
-        /* Button styles */
-        .btn-outline {
-            background-color: white;
-            color: var(--primary);
-            border: 1px solid var(--gray-300);
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 14px;
-        }
-
-        .btn-outline:hover {
-            background-color: var(--gray-100);
-            border-color: var(--primary);
-        }
-
-        /* Icon styles */
-        .text-secondary {
-            color: var(--gray-500);
-        }
-
-        /* Position utilities */
-        .position-relative {
-            position: relative;
-        }
-
-        .position-absolute {
-            position: absolute;
-        }
-
-        .top-0 {
-            top: 0;
-        }
-
-        .start-0 {
-            left: 0;
-        }
-
-        .translate-middle {
-            transform: translate(-50%, -50%);
-        }
-
-        .rounded-pill {
-            border-radius: 50rem;
-        }
-
-        /* Flex utilities */
-        .d-flex {
-            display: flex;
-        }
-
-        .align-items-center {
-            align-items: center;
-        }
-
-        .gap-2 {
-            gap: 8px;
-        }
-
-        .gap-3 {
-            gap: 12px;
-        }
-        .date-filter input[type="date"]:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
-        }
-        .table-html {
-            width: 100%;
-        }
-        .main, #main {
-            flex: 1 0 auto !important;
-            padding-bottom: 80px !important;
-        }
-        .table-html.no-sidebar #main-table {
-            margin-right: 0 !important;
-            width: 100% !important;
-        }
-
-
-        .edit-input:focus {
-            outline: none;
-            border-color: var(--primary-light);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-        }
-
-
-        .edit-btn {
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.2s ease;
-        }
-
-
-        .edit-save:hover {
-            background-color: #0da271;
-            transform: translateY(-1px);
-        }
-
-        .editable-cell {
-            position: relative;
-            cursor: pointer;
-        }
-
-        .editable-cell:hover {
-            background-color: #f9fafb;
-        }
-
-        .edit-icon {
-            opacity: 0;
-            transition: opacity 0.2s;
-            margin-right: 5px;
-            color: #6b7280;
-        }
-
-        .editable-cell:hover .edit-icon {
-            opacity: 1;
-        }
-
-        .edit-form {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .edit-input {
-            flex: 1;
-            padding: 4px 8px;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            font-size: 0.875rem;
-        }
-
-        .edit-actions {
-            display: flex;
-            gap: 4px;
-        }
-
-        .edit-btn {
-            padding: 4px 8px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.875rem;
-        }
-
-        .edit-save {
-            background-color: #10b981;
-            color: white;
-        }
-
-        .edit-cancel {
-            background-color: #ef4444;
-            color: white;
-        }
-
-        .edit-btn:hover {
-            opacity: 0.9;
-        }
-
-        .edit-cancel:hover {
-            background-color: var(--gray-400);
-            transform: translateY(-1px);
-        }
-
-
 
         /* Notification styles */
         .notification {
@@ -587,334 +84,7 @@
             border-left: 4px solid #dc2626;
         }
 
-        .notification.fade-out {
-            animation: fadeOut 0.5s ease forwards;
-        }
-
-        @keyframes fadeOut {
-            from {
-                opacity: 1;
-                transform: translateX(0);
-            }
-            to {
-                opacity: 0;
-                transform: translateX(100%);
-            }
-        }
-
-        /* Specific styles for different field types */
-        .edit-form input[type="tel"] {
-            direction: ltr;
-            text-align: left;
-        }
-
-        .edit-form select {
-            padding: 8px 12px;
-            border: 2px solid var(--primary);
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 700;
-            width: 100%;
-            background-color: white;
-            cursor: pointer;
-        }
-
-        .export-btn-group {
-            position: relative;
-            display: inline-block;
-        }
-
-        .export-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 6px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .export-btn:hover {
-            background-color: var(--primary-light);
-            transform: translateY(-1px);
-        }
-
-        .columns-badge {
-            background-color: white;
-            color: var(--primary);
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .columns-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .columns-modal-content {
-            background-color: white;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .columns-modal-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--gray-200);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .columns-modal-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--gray-800);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .columns-modal-close {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: var(--gray-500);
-            transition: color 0.2s;
-        }
-
-        .columns-modal-close:hover {
-            color: var(--danger);
-        }
-
-        .columns-modal-body {
-            padding: 15px;
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-
-        .columns-search {
-            position: relative;
-            margin-bottom: 15px;
-        }
-
-        .columns-search input {
-            width: 100%;
-            padding: 10px 15px 10px 40px;
-            border-radius: 6px;
-            border: 1px solid var(--gray-300);
-            font-size: 14px;
-        }
-
-        .columns-search i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--gray-400);
-        }
-
-        .columns-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .column-item {
-            padding: 5px 0;
-        }
-
-        .column-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            padding: 8px 10px;
-            border-radius: 6px;
-            transition: background-color 0.2s;
-        }
-
-        .column-checkbox:hover {
-            background-color: var(--gray-100);
-        }
-
-        .column-checkbox input {
-            display: none;
-        }
-
-        .checkmark {
-            width: 18px;
-            height: 18px;
-            border: 2px solid var(--gray-300);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .column-checkbox input:checked~.checkmark {
-            background-color: var(--primary);
-            border-color: var(--primary);
-        }
-
-        .checkmark:after {
-            content: "✓";
-            color: white;
-            font-size: 12px;
-            display: none;
-        }
-
-        .column-checkbox input:checked~.checkmark:after {
-            display: block;
-        }
-
-        .column-name {
-            font-size: 14px;
-            color: var(--gray-700);
-        }
-
-        .columns-modal-footer {
-            padding: 15px 20px;
-            border-top: 1px solid var(--gray-200);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .columns-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-select-all {
-            background: none;
-            border: none;
-            color: var(--primary);
-            font-size: 14px;
-            cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-        }
-
-        .btn-select-all:hover {
-            background-color: var(--gray-100);
-        }
-
-        .btn-cancel {
-            padding: 8px 16px;
-            border-radius: 6px;
-            background-color: white;
-            color: var(--gray-700);
-            border: 1px solid var(--gray-300);
-            cursor: pointer;
-            font-size: 14px;
-            margin-left: 10px;
-            transition: all 0.2s;
-        }
-
-        .btn-cancel:hover {
-            background-color: var(--gray-100);
-        }
-
-        .btn-apply {
-            padding: 8px 16px;
-            border-radius: 6px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-
-        .btn-apply:hover {
-            background-color: var(--primary-light);
-        }
-
-        .nice-button:hover {
-            background-color: #334ae2;
-        }
-
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .dropdown-select {
-            display: none;
-            position: absolute;
-            background-color: #f9f9f9;
-            min-width: 300px;
-            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-            z-index: 1;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 5px;
-            margin-top: 5px;
-        }
-
-        .dropdown-select option {
-            padding: 8px 12px;
-            cursor: pointer;
-        }
-
-        .dropdown-select option:hover {
-            background-color: #e9e9e9;
-        }
-
-        .btn-dropdown {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: #ffffff;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            color: #374151;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-dropdown:hover {
-            background: #f9fafb;
-            border-color: #9ca3af;
-        }
-
-        .btn-dropdown svg {
-            transition: transform 0.2s;
-        }
-
+        /* Modal and dropdown styles */
         .dropdown-menu {
             display: none;
             position: absolute;
@@ -929,459 +99,12 @@
             z-index: 10;
         }
 
-        .dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            width: 100%;
-            padding: 8px 12px;
-            text-align: left;
-            color: #374151;
-            font-size: 14px;
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
-
-        .dropdown-item:hover {
-            background: #f9fafb;
-        }
-
-        .dropdown-icon {
-            color: #6b7280;
-        }
-
-        /* Show dropdown when active */
-        .dropdown.active .btn-dropdown svg {
-            transform: rotate(180deg);
-        }
-
         .dropdown.active .dropdown-menu {
             display: block;
         }
 
-        .table-container {
-            background: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin: 1rem;
-        }
-
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.25rem;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .table-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1e293b;
-        }
-
-        .table-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 800 !important;
-            font-size: 14px !important;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: none;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-light);
-            transform: translateY(-1px);
-        }
-
-        .btn-outline {
-            background-color: white;
-            color: var(--primary);
-            border: 1px solid var(--gray-300);
-        }
-
-        .btn-outline:hover {
-            background-color: var(--gray-100);
-        }
-
-        .table-filters {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background-color: var(--gray-100);
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .search-box {
-            position: relative;
-            width: 300px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 8px 40px 8px 15px;
-            border-radius: 6px;
-            border: 1px solid var(--gray-300);
-            font-size: 14px;
-            transition: all 0.2s ease;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--gray-400);
-        }
-
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 800px;
-        }
-
-        .data-table thead th {
-            background-color: var(--gray-100);
-            color: var(--gray-600);
-            font-weight: 600;
-            padding: 5px 8px !important;
-            text-align: center;
-            border-bottom: 2px solid var(--gray-200);
-            position: sticky;
-            text-align: center !important;
-            vertical-align: middle !important;
-            top: 0;
-        }
-
-        .data-table tbody tr {
-            transition: background-color 0.2s ease;
-            page-break-inside: avoid;
-            break-inside: avoid;
-        }
-
-        .data-table tbody tr:hover {
-            background-color: var(--gray-100);
-        }
-
-        .data-table tbody td {
-            font-weight: 700;
-            font-size: 14px;
-            padding: 5px 8px !important;
-            border-bottom: 1px solid var(--gray-200);
-            text-align: center !important;
-            vertical-align: middle !important;
-        }
-        .data-table td > * {
-            justify-content: center !important;
-            text-align: center !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
-        }
-        .data-table td .flex {
-            justify-content: center !important;
-        }
-        .data-table td img {
-            display: block !important;
-            margin: 0 auto !important;
-        }
-
-
-        /* Center badges and status indicators */
-        .data-table .badge,
-        .data-table .status-badge,
-        .data-table [class*="bg-"] {
-            margin: 0 auto !important;
-            display: inline-flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-        }
-
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .status-active {
-            background-color: #ecfdf5;
-            color: #059669;
-        }
-
-        .status-pending {
-            background-color: #fffbeb;
-            color: #d97706;
-        }
-
-        .status-inactive {
-            background-color: #fee2e2;
-            color: #dc2626;
-        }
-
-        .action-btns {
-            display: flex;
-            justify-content: center !important;
-            gap: 8px;
-        }
-
-        .action-btn {
-            width: 30px;
-            height: 30px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background-color: transparent;
-            border: none;
-            color: var(--gray-500);
-        }
-
-        .action-btn:hover {
-            background-color: var(--gray-200);
-            color: var(--gray-700);
-        }
-
-        .action-btn.edit:hover {
-            color: var(--primary);
-        }
-
-        .action-btn.delete:hover {
-            color: var(--danger);
-        }
-        .ltr-number {
-            direction: ltr;
-            unicode-bidi: embed;
-            display: inline-block;
-        }
-        #clientEditModal {
-            font-family: 'Tajawal', sans-serif;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        input, select {
-            font-family: 'Tajawal', sans-serif;
-        }
-
-        /* Scrollbar styling for modal */
-        .modal-body::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .modal-body::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .modal-body::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 10px;
-        }
-
-        .modal-body::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-            border-top: 1px solid var(--gray-200);
-        }
-
-        .pagination-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 4px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background-color: transparent;
-            border: 1px solid var(--gray-300);
-            color: var(--gray-600);
-        }
-
-        .pagination-btn:hover:not(.disabled) {
-            background-color: var(--gray-100);
-        }
-
-        .pagination-btn.active {
-            background-color: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-        [x-cloak] { display: none !important; }
-
-        .pagination-btn.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .sidebar {
-            display: none !important;
-        }
-
-        .empty-state {
-            padding: 40px 20px;
-            text-align: center;
-            color: var(--gray-500);
-        }
-
-        .empty-icon {
-            font-size: 48px;
-            color: var(--gray-300);
-            margin-bottom: 15px;
-        }
-
-        .empty-text {
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .table-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
-            .search-box {
-                width: 100%;
-                justify-content:start;
-            }
-        }
-
-        .print-header,
-        .print-footer {
-            display: none;
-        }
-
-        /* Show only in print/PDF */
-        .pdf-header,
-        .pdf-footer {
-            display: block;
-            width: 100%;
-            text-align: center;
-            font-weight: bold;
-            font-size: 18px;
-            padding: 10px 0;
-            border-bottom: 2px solid #333;
-            border-top: 2px solid #333;
-            background-color: #f5f5f5;
-            color: #222;
-            position: relative;
-            margin-bottom: 20px;
-            margin-top: 20px;
-            font-family: "Arial", sans-serif;
-        }
-
-        .pdf-footer {
-            border-top: 2px solid #333;
-            border-bottom: none;
-            margin-top: 40px;
-        }
-
-        .header-content {
-            direction: rtl;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-weight: bold;
-            font-size: 20px;
-            color: #222;
-        }
-        .data-table th,
-        .data-table td {
-            text-align: center !important;
-        }
-
-        #clientEditModal {
-            font-family: 'Tajawal', sans-serif;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-            /* REMOVE display:block override if you had */
-        }
-
-        input, select {
-            font-family: 'Tajawal', sans-serif;
-        }
-
-        /* Scrollbar styling */
-        .modal-body {
-            max-height: 65vh; /* important */
-            overflow-y: auto; /* enable scroll */
-        }
-
-        .modal-body::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .modal-body::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .modal-body::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 10px;
-        }
-
-        .modal-body::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
-        .header-text {
-            color: #4154f1;
-        }
-
-        .header-logo {
-            max-height: 60px;
-            width: auto;
-            object-fit: contain;
-        }
-
+        /* Print styles */
         @media print {
-
-            /* Hide everything outside print-area */
             body * {
                 visibility: hidden;
             }
@@ -1391,7 +114,6 @@
                 visibility: visible;
             }
 
-            /* Position print-area at top left and full width */
             #print-area {
                 position: absolute;
                 left: 0;
@@ -1403,27 +125,19 @@
                 color: #000;
             }
 
-            /* Hide UI controls */
             #print-area .table-actions,
             #print-area .table-filters,
-            #print-area .pagination,
             #print-area .btn,
             #print-area select,
             #print-area input,
             #print-area .search-box,
-            #print-area .search-icon,
-            #print-area .fas.fa-plus,
-            #print-area .fas.fa-download,
-            #print-area .fas.fa-print {
+            #print-area .no-print {
                 display: none !important;
             }
 
-            /* Style the table */
             #print-area table.data-table {
                 width: 100% !important;
                 border-collapse: collapse;
-                text-align: center !important;
-
             }
 
             #print-area table.data-table th,
@@ -1433,29 +147,12 @@
                 text-align: center;
             }
 
-
             #print-area table.data-table thead {
                 background-color: #f0f0f0;
             }
 
-            /* Prevent page breaks inside rows */
-            #print-area tr {
-                page-break-inside: avoid;
-            }
-
-            /* Show footer in print */
             #print-area .pdf-footer {
                 display: block !important;
-                text-align: center;
-                margin-top: 30px;
-                font-size: 12px;
-                color: #444;
-            }
-
-            /* RTL support */
-            #print-area {
-                direction: rtl;
-                width: 100% !important
             }
 
             .no-print {
@@ -1465,84 +162,371 @@
             .pdf-header {
                 display: block !important;
             }
+        }
 
-            /* Optional: remove shadows, rounded borders in print for better clarity */
-            .pdf-header .header-content {
-                box-shadow: none !important;
-                border-radius: 0 !important;
-            }
+        /* Scrollbar styling */
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
 
-            .body {
-                margin: 0;
-                padding: 0;
-            }
+        .modal-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
 
-            .header-logo {
-                max-height: 80px;
-            }
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Ensure no word wrapping in table cells */
+        .data-table td,
+        .data-table th {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
     </style>
 @endpush
+
 @section('favicon')
     <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.jpg') }}">
     <link rel="shortcut icon" href="{{ asset('assets/img/favicon.jpg') }}">
 @endsection
-<body>
-@section('content')
-    <div class="table-html no-sidebar">
 
-        <div id="print-area" class="table-container">
-            <div class="table-header">
-                <h2 id="title" class="table-title">العملاء</h2>
-                <div class="table-actions d-flex align-items-center gap-2">
-                    @if(Auth::user()->role == 'salesRep')
-                        <a class="btn btn-primary" href="{{ route('sales-reps.clients.create', Auth::user()->salesRep->id) }}">
-                            <i class="fas fa-plus"></i> إضافة عميل
-                        </a>
-                    @endif
-                    @if(Auth::user()->role == 'admin')
-                        <a class="btn btn-primary" href="{{ route('admin.shared-companies') }}">
-                            <i class="fas fa-users"></i> العملاء المشتركين
-                        </a>
-                    @endif
-                    <div class="export-btn-group">
-                        <button id="columnsBtn" class="export-btn columns-btn" onclick="openColumnsModal()">
-                            <span class="btn-icon"><i class="fas fa-columns"></i></span>
-                            <span class="btn-text">اختيار الأعمدة</span>
-                            <span id="columnsBadge" class="columns-badge">13</span>
-                        </button>
+@section('content')
+    <div class="min-h-screen bg-gray-50 py-6">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Header -->
+            <div class="mb-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                    <div class="mb-4 sm:mb-0">
+                        <h1 class="text-2xl font-bold text-gray-900">العملاء</h1>
+                        <p class="text-gray-600 mt-1">إدارة وعرض جميع عملاء الشركة</p>
                     </div>
-                    <div class="export-options">
-                        <div class="dropdown">
-                            <button class="btn btn-dropdown" id="exportBtn" type="button">
-                                تصدير البيانات
-                                <svg width="12" height="8" viewBox="0 0 12 8" fill="none"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                                </svg>
-                            </button>
-                            <div class="dropdown-menu" id="exportDropdown">
-                                <button class="dropdown-item" data-type="xlsx">
-                                    <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                         xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M4 6H20M4 12H20M4 18H11" stroke="currentColor" stroke-width="2"
-                                              stroke-linecap="round" />
-                                    </svg>
-                                    تصدير كملف Excel
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap gap-3">
+                        @if(Auth::user()->role == 'salesRep')
+                            <a class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+                               href="{{ route('sales-reps.clients.create', Auth::user()->salesRep->id) }}">
+                                <i class="fas fa-plus ml-2"></i>
+                                إضافة عميل
+                            </a>
+                        @endif
+
+                        @if(Auth::user()->role == 'admin')
+                            <a class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                               href="{{ route('admin.shared-companies') }}">
+                                <i class="fas fa-users ml-2"></i>
+                                العملاء المشتركين
+                            </a>
+
+                            <!-- Late Days Settings Button -->
+                            <div class="late-days-btn-group" x-data="{ open: false }">
+                                <button @click="open = true" class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-white hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors duration-200">
+                                    <i class="fas fa-cog ml-2"></i>
+                                    أيام التأخير
                                 </button>
-                                <button class="dropdown-item" data-type="pdf">
-                                    <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                         xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M4 7V17C4 18.1046 4.89543 19 6 19H18C19.1046 19 20 18.1046 20 17V7M4 7H20M4 7L6 4H18L20 7"
-                                            stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                                    </svg>
-                                    تصدير كملف PDF
+
+                                <!-- Modal -->
+                                <div x-show="open" x-cloak class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 p-4">
+                                    <div @click.away="open = false" class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                                        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                                            <h3 class="text-lg font-semibold text-gray-900">تعديل عدد أيام التأخير</h3>
+                                            <button @click="open = false" class="text-gray-400 hover:text-gray-600 transition-colors">
+                                                <i class="fas fa-times text-lg"></i>
+                                            </button>
+                                        </div>
+                                        <div class="px-6 py-4">
+                                            <form action="{{ route('settings.update') }}" method="POST">
+                                                @csrf
+                                                <div class="mb-4">
+                                                    <label for="late_customer_days" class="block text-sm font-medium text-gray-700 mb-2">
+                                                        عدد الأيام اللازمة لاعتبار العميل متأخراً
+                                                    </label>
+                                                    <input type="number"
+                                                           name="late_customer_days"
+                                                           id="late_customer_days"
+                                                           min="1"
+                                                           max="30"
+                                                           required
+                                                           value="{{ old('late_customer_days', \App\Models\Setting::where('key', 'late_customer_days')->value('value') ?? 3) }}"
+                                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                                                </div>
+                                                <div class="flex justify-end gap-3">
+                                                    <button type="button"
+                                                            @click="open = false"
+                                                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors duration-200">
+                                                        إلغاء
+                                                    </button>
+                                                    <button type="submit"
+                                                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200">
+                                                        حفظ الإعدادات
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Export and Columns -->
+                        <div class="flex gap-3">
+                            <!-- Columns Selection -->
+                            <div class="export-btn-group">
+                                <button id="columnsBtn" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200" onclick="openColumnsModal()">
+                                    <i class="fas fa-columns ml-2"></i>
+                                    اختيار الأعمدة
+                                    <span id="columnsBadge" class="bg-white text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-2">13</span>
                                 </button>
                             </div>
+
+                            <!-- Export Dropdown -->
+                            <div class="export-options">
+                                <div class="dropdown relative">
+                                    <button class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-white hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200" id="exportBtn" type="button">
+                                        تصدير البيانات
+                                        <i class="fas fa-chevron-down mr-2 text-sm"></i>
+                                    </button>
+                                    <div class="dropdown-menu absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
+                                        <button class="dropdown-item flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-right" data-type="xlsx">
+                                            <i class="fas fa-file-excel ml-2 text-green-600"></i>
+                                            تصدير كملف Excel
+                                        </button>
+                                        <button class="dropdown-item flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-right" data-type="pdf">
+                                            <i class="fas fa-file-pdf ml-2 text-red-600"></i>
+                                            تصدير كملف PDF
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Print Button -->
+                            <button class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200 no-print" onclick="window.print()">
+                                <i class="fas fa-print ml-2"></i>
+                                طباعة
+                            </button>
                         </div>
                     </div>
-                    <!-- Columns Selection Modal -->
+                </div>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+                <div class="p-6">
+                    <form method="GET" action="{{ request()->url() }}" id="filterForm">
+                        <!-- First Row: Search and Main Filters -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                            <!-- Search Box -->
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
+                                <input type="text"
+                                       class="block w-full pr-10 pl-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                       placeholder="بحث في العملاء..."
+                                       id="searchInput"
+                                       name="search"
+                                       value="{{ request('search') }}">
+                            </div>
+
+                            <!-- Main Filters -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <!-- Interest Status -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">حالة الاهتمام</label>
+                                    <select id="filterSelect" name="interest_status" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
+                                        <option value="">الكل</option>
+                                        <option value="interested" {{ request('interest_status') == 'interested' ? 'selected' : '' }}>مهتم</option>
+                                        <option value="not interested" {{ request('interest_status') == 'not interested' ? 'selected' : '' }}>غير مهتم</option>
+                                        <option value="neutral" {{ request('interest_status') == 'neutral' ? 'selected' : '' }}>مؤجل</option>
+                                        <option value="late" {{ request('interest_status') == 'late' ? 'selected' : '' }}>متأخرين</option>
+                                        <option value="late_interested" {{ request('interest_status') == 'late_interested' ? 'selected' : '' }}>متأخرين مهتمين</option>
+                                        <option value="late_not_interested" {{ request('interest_status') == 'late_not_interested' ? 'selected' : '' }}>متأخرين غير مهتمين</option>
+                                        <option value="late_neutral" {{ request('interest_status') == 'late_neutral' ? 'selected' : '' }}>متأخرين مؤجلين</option>
+                                    </select>
+                                </div>
+
+                                <!-- Service Type -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">نوع الخدمة</label>
+                                    <select id="serviceTypeFilter" name="service" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
+                                        <option value="">الكل</option>
+                                        @foreach($services as $service)
+                                            <option value="{{ $service->id }}" {{ request('service') == $service->id ? 'selected' : '' }}>{{ $service->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Sales Rep -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">مندوب المبيعات</label>
+                                    <select id="salesRepFilter" name="sales_rep" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
+                                        <option value="">كل المندوبين</option>
+                                        @foreach($sales_rep_names as $name)
+                                            <option value="{{ $name }}" {{ request('sales_rep') == $name ? 'selected' : '' }}>{{ $name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Late Days -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">أيام التأخير</label>
+                                    <input type="number"
+                                           name="late_days"
+                                           value="{{ request('late_days', \App\Models\Setting::where('key', 'late_customer_days')->value('value') ?? 3) }}"
+                                           class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                           placeholder="أيام التأخر"
+                                           min="1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Second Row: Date Filters -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Created Date Filter -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">تاريخ الإنشاء</label>
+                                <div class="flex gap-2">
+                                    <input type="text"
+                                           id="createdAtFilter"
+                                           class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                           placeholder="تاريخ الإنشاء"
+                                           name="created_date"
+                                           value="{{ request('created_date') }}">
+                                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                    <button type="button" onclick="resetDate('created_date')" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-200">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Contact Date Range -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">نطاق تاريخ التواصل</label>
+                                <div class="flex gap-2">
+                                    <input type="text"
+                                           id="fromDate"
+                                           class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                           placeholder="من تاريخ"
+                                           name="from_date"
+                                           value="{{ request('from_date') }}">
+                                    <input type="text"
+                                           id="toDate"
+                                           class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                           placeholder="إلى تاريخ"
+                                           name="to_date"
+                                           value="{{ request('to_date') }}">
+                                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200">
+                                        <i class="fas fa-filter"></i>
+                                    </button>
+                                    <button type="button" onclick="resetDateRange()" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-200">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+                            <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 font-medium">
+                                <i class="fas fa-filter ml-2"></i>
+                                تطبيق الفلتر
+                            </button>
+                            <button type="button" onclick="resetFilters()" class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200 font-medium">
+                                <i class="fas fa-redo ml-2"></i>
+                                إعادة تعيين
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Table Section -->
+            <div id="print-area" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <!-- PDF Header (Hidden by default) -->
+                <div class="pdf-header hidden">
+                    <div class="text-center py-4 border-b-2 border-gray-800 bg-gray-100">
+                        <div class="flex items-center justify-center gap-4 mb-2">
+                            <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="h-16" />
+                            <h2 class="text-2xl font-bold text-blue-600">تقرير العملاء</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Container -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 data-table">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">شعار شركة العميل</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الشركة</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">مقر الشركة</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الشخص المسؤول</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المنصب الوظيفي</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">رقم الجوال</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider no-print">واتس اب مباشر</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">حالة الاهتمام</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الخدمة المهتم بها</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عدد الخدمة</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">آخر تواصل</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">آخر تواصل منذ</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عدد مرات التواصل</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">طلبات العميل</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider no-print">الدردشة</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PDF Footer -->
+                <div class="pdf-footer hidden border-t-2 border-gray-800 mt-8 py-4 text-center">
+                    <p class="text-gray-600">جميع الحقوق محفوظة &copy; شركة آفاق الخليج {{ date('Y') }}</p>
+                </div>
+            </div>
+
+            <!-- Hidden Input -->
+            <input type="hidden" id="current_sales_rep_id" value="{{ $Clients[0]['sales_rep_id'] ?? '' }}">
+        </div>
+    </div>
+
+    <!-- Columns Selection Modal -->
+    <div id="columnsModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-columns ml-2 text-purple-600"></i>
+                    اختيار الأعمدة للعرض
+                </h3>
+                <button class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeColumnsModal()">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto">
+                <div class="mb-4">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text"
+                               id="columnsSearch"
+                               placeholder="بحث عن عمود..."
+                               class="block w-full pr-10 pl-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                               onkeyup="filterColumns()">
+                    </div>
+                </div>
+                <div class="columns-list grid grid-cols-1 gap-2" id="columnsList">
                     <div id="columnsModal" class="columns-modal">
                         <div class="columns-modal-content">
                             <div class="columns-modal-header">
@@ -1671,339 +655,97 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <button class="btn btn-outline" onclick="window.print()" title="طباعة التقرير">
-                        <i class="fas fa-print"></i>
+                    </div
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+                <div class="flex gap-4">
+                    <button class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200" onclick="toggleSelectAll()">تحديد الكل</button>
+                    <button class="text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200" onclick="resetSelection()">إعادة تعيين</button>
+                </div>
+                <div class="flex gap-3">
+                    <button class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200" onclick="closeColumnsModal()">إلغاء</button>
+                    <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 flex items-center" onclick="applyColumnSelection()">
+                        <i class="fas fa-check ml-2"></i>
+                        تطبيق
                     </button>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="table-filters">
-                <div class="filter-row">
-                    <div class="search-box">
-                        <input type="text" class="search-input" placeholder="بحث..." id="searchInput">
-                        <i class="fas fa-search search-icon"></i>
-                    </div>
-                    <div class="filter-group">
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="fas fa-filter text-secondary"></i>
-                            <select id="filterSelect" onchange="applyFilter()" class="form-select" style="font-weight: 700; font-size: 14px; min-width: 120px;">
-                                <option value="">الكل</option>
-                                <option value="interested">مهتم</option>
-                                <option value="not interested">غير مهتم</option>
-                                <option value="late">متأخرين</option>
-                                <option value="late_interested">متأخرين مهتمين</option>
-                                <option value="late_not_interested">متأخرين غير مهتمين</option>
-                                <option value="late_neutral">متأخرين مؤجلين</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="filter-group">
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="fas fa-cog text-secondary"></i>
-                            <select id="serviceTypeFilter" onchange="applyFilter()" class="form-select" style="font-size: 14px; font-weight: 800; min-width: 150px;">
-                                <option value="">الكل</option>
-                                @foreach($services as $service)
-                                    <option value="{{ $service->id }}">{{ $service->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="filter-group">
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="fas fa-user-tie text-secondary"></i>
-                            <select id="salesRepFilter" onchange="applyFilter()" class="form-select" style="font-size: 14px; font-weight: 800; min-width: 150px;">
-                                <option value="">كل المندوبين</option>
-                                @foreach($sales_rep_names as $name)
-                                    <option value="{{ $name }}">{{ $name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    @if(Auth::user()->role == 'admin')
-                        <div class="filter-group">
-                            <div x-data="{ open: false }">
-                                <button @click="open = true" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded shadow text-sm">
-                                    أيام التأخير
-                                </button>
-                                <!-- Modal -->
-                                <div x-show="open" x-cloak class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
-                                    <div @click.away="open = false" class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-
-                                        <h3 class="text-lg font-bold mb-4">تعديل عدد الأيام لتأخير العميل</h3>
-
-                                        <form action="{{ route('settings.update') }}" method="POST">
-                                            @csrf
-                                            <div class="mb-4">
-                                                <label for="late_customer_days" class="block text-sm font-medium text-gray-700">عدد الأيام</label>
-                                                <input type="number" name="late_customer_days" id="late_customer_days" min="1" max="30" required
-                                                       value="{{ old('late_customer_days', \App\Models\Setting::where('key', 'late_customer_days')->value('value') ?? 3) }}"
-                                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500">
-                                            </div>
-                                            <div class="flex justify-end space-x-2">
-                                                <button type="button" @click="open = false"
-                                                        class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">إلغاء</button>
-                                                <button type="submit"
-                                                        class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">حفظ</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            @endif
-                        </div>
-                        <!-- Second Row: Date Filters -->
-                        <div class="filter-row">
-                            <!-- Left side: Created At Date Filter -->
-                            <div class="filter-group pl-10">
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="fas fa-calendar-plus text-secondary"></i>
-                                    <div class="position-relative">
-                                        <input type="text" id="createdAtFilter" class="form-input date-input" placeholder="تاريخ الإنشاء">
-                                        <span id="createdAtCount" class="position-absolute top-0 start-0 translate-middle badge bg-primary rounded-pill count-badge">
-                    0
-                </span>
-                                    </div>
-                                    <button onclick="filterByCreatedDate()" class="btn btn-outline filter-btn">🔍</button>
-                                    <button onclick="resetCreatedDateFilter()" class="btn btn-outline filter-btn">❌</button>
-                                </div>
-                            </div>
-
-                            <!-- Right side: Contact Date Range Filter -->
-                            <div class="filter-group">
-                                <div class="d-flex align-items-center gap-2" dir="rtl">
-                                    <i class="fas fa-calendar-alt text-secondary"></i>
-                                    <input type="text" id="fromDate" class="form-input date-input" placeholder="من تاريخ">
-                                    <input type="text" id="toDate" class="form-input date-input" placeholder="إلى تاريخ">
-                                    <button onclick="filterByDate()" class="btn btn-outline filter-btn">🔍 تصفية</button>
-                                    <button onclick="resetDateFilter()" class="btn btn-outline filter-btn">❌ إعادة</button>
-                                </div>
-                            </div>
-                        </div>
-                </div>
-
-                <div class="table-responsive">
-                    <div class="pdf-content">
-                        <div class="pdf-header" style="display: none;">
-                            <div
-                                class="header-content d-flex align-items-center justify-content-between flex-wrap mb-4 p-3 shadow rounded bg-white">
-                                <div class="d-flex flex-column align-items-center text-center mx-auto">
-                                    <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="header-logo mb-2" />
-                                    <h2 class="header-text">تقرير العملاء</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <table class="data-table">
-                            <thead>
-                            <tr>
-                                <th>شعار شركة العميل</th>
-                                <th> الشركة </th>
-                                <th>مقر الشركة </th>
-                                <th> الشخص المسؤول </th>
-                                <th>المنصب الوظيفي </th>
-                                <th>رقم الجوال </th>
-                                <th class="no-print">واتس اب مباشر </th>
-                                <th>حالة الاهتمام </th>
-                                <th>الخدمة المهتم بها</th>
-                                <th>عدد الخدمة </th>
-                                <th>آخر تواصل </th>
-                                <th> آخر تواصل منذ</th>
-                                <th>عدد مرات التواصل </th>
-                                <th>طلبات العميل </th>
-                                <th class="no-print">الدردشة</th>
-                            </tr>
-                            </thead>
-
-                            <tbody id="tableBody">
-
-                            <!-- Data will be inserted here -->
-                            </tbody>
-                        </table>
-                        <div class="pdf-footer" style="display: none;">
-                            <p>جميع الحقوق محفوظة &copy; شركة آفاق الخليج {{ date('Y') }}</p>
-                        </div>
-                    </div>
-                </div>
-                <input type="hidden" id="current_sales_rep_id" value="{{ $Clients[0]['sales_rep_id'] ?? '' }}">
-
-                <div class="pagination" id="pagination"></div>
-                <div id="clientEditModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 hidden">
-                    <div class="bg-white rounded-lg shadow-lg w-full max-w-5xl mx-4 max-h-[90vh] overflow-hidden">
-                        <!-- Modal Header -->
-                        <div class="modal-header px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
-                            <h3 class="text-lg font-semibold text-gray-800" id="modalClientName">تعديل بيانات العميل</h3>
-                            <button class="text-gray-500 hover:text-gray-700 text-xl" onclick="closeClientEditModal()">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-
-                        <!-- Modal Body -->
-                        <div class="modal-body px-6 py-4 overflow-y-auto max-h-[65vh]">
-                            <form id="clientEditForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <input type="hidden" id="editClientId" name="client_id">
-                                <div class="col-span-2 flex justify-center mb-4">
-                                    <img id="editClientLogo" src="" alt="Client Logo" class="max-h-32 max-w-full object-contain border rounded-lg p-2">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">مندوب المبيعات</label>
-                                    <input type="text" id="editSalesRep" name="sales_rep_name" readonly
-                                           class="w-full px-3 py-2 border rounded-md bg-gray-100">
-                                </div>
-                                <!-- Company Information -->
-                                <div class="col-span-2">
-                                    <h4 class="text-md font-medium text-gray-700 mb-3 border-b pb-2">معلومات الشركة</h4>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">اسم الشركة</label>
-                                    <input type="text" id="editCompanyName" name="company_name"
-                                           class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">عنوان الشركة</label>
-                                    <input type="text" id="editAddress" name="address"
-                                           class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                                </div>
-
-
-                                <!-- Contact Information -->
-                                <div class="col-span-2 mt-4">
-                                    <h4 class="text-md font-medium text-gray-700 mb-3 border-b pb-2">معلومات الاتصال</h4>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">الشخص المسؤول</label>
-                                    <input type="text" id="editContactPerson" name="contact_person"
-                                           class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">المنصب الوظيفي</label>
-                                    <input type="text" id="editContactPosition" name="contact_position"
-                                           class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">رقم الجوال</label>
-                                    <input type="tel" id="editPhone" name="phone" dir="ltr"
-                                           class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                                </div>
-
-                                {{--                            <div>--}}
-                                {{--                                <label class="block text-sm font-medium text-gray-700 mb-1">رابط الواتساب</label>--}}
-                                {{--                                <input type="url" id="editWhatsappLink" name="whatsapp_link"--}}
-                                {{--                                       class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">--}}
-                                {{--                            </div>--}}
-
-                                <!-- Status Information -->
-                                <div class="col-span-2 mt-4">
-                                    <h4 class="text-md font-medium text-gray-700 mb-3 border-b pb-2">حالة العميل</h4>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">حالة الاهتمام</label>
-                                    <select id="editInterestStatus" name="interest_status"
-                                            class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                                        <option value="interested">مهتم</option>
-                                        <option value="not interested">غير مهتم</option>
-                                        <option value="neutral">مؤجل</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">الخدمة المهتم بها</label>
-                                    <select id="editInterestedService" name="interested_service"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
-                                        <option value="">اختر الخدمة</option>
-                                        @foreach($services as $service)
-                                            <option value="{{ $service->id }}">{{ $service->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">عدد مرات التواصل</label>
-                                    <input type="number" id="editContactCount" name="contact_count"
-                                           class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">عدد الخدمة المهتم بها</label>
-                                    <input type="number" id="editServiceCount" name="interested_service_count"
-                                           class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                                </div>
-
-                                <!-- Additional Information -->
-                                <div class="col-span-2 mt-4">
-                                    <h4 class="text-md font-medium text-gray-700 mb-3 border-b pb-2">معلومات إضافية</h4>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">تاريخ آخر تواصل</label>
-                                    <input type="date" id="editLastContactDate" name="last_contact_date"
-                                           class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                                </div>
-
-
-
-
-                            </form>
-                        </div>
-
-                        <!-- Modal Footer -->
-                        <div class="modal-footer px-6 py-4 border-t bg-gray-50 flex justify-end gap-3">
-                            <button type="button" onclick="closeClientEditModal()"
-                                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
-                                إلغاء
-                            </button>
-                            <button type="button" onclick="saveClientEdits()"
-                                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
-                                حفظ التغييرات
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
+    <!-- Edit Modal -->
+    <div id="editModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-900" id="modalTitle">تعديل البيانات</h3>
+                <button class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeEditModal()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <!-- Edit Modal -->
-            <div id="editModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 hidden">
-                <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4">
-                    <div class="modal-header px-6 py-4 border-b">
-                        <h3 class="text-lg font-semibold" id="modalTitle">تعديل البيانات</h3>
-                        <button class="absolute left-4 top-4 text-gray-500 hover:text-gray-700" onclick="closeEditModal()">
-                            <i class="fas fa-times"></i>
+            <div class="px-6 py-4">
+                <form id="editForm">
+                    <input type="hidden" id="editClientId" name="client_id">
+                    <input type="hidden" id="editField" name="field">
+                    <div class="mb-4">
+                        <label id="fieldLabel" class="block text-sm font-medium text-gray-700 mb-2"></label>
+                        <div id="inputContainer">
+                            <!-- Input field will be inserted here dynamically -->
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <button type="button" onclick="closeEditModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                            إلغاء
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200">
+                            حفظ
                         </button>
                     </div>
-                    <div class="modal-body px-6 py-4">
-                        <form id="editForm">
-                            <input type="hidden" id="editClientId" name="client_id">
-                            <input type="hidden" id="editField" name="field">
-
-                            <div class="mb-4">
-                                <label id="fieldLabel" class="block text-sm font-medium text-gray-700 mb-2"></label>
-                                <div id="inputContainer">
-                                    <!-- Input field will be inserted here dynamically -->
-                                </div>
-                            </div>
-
-                            <div class="flex justify-end gap-3">
-                                <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
-                                    إلغاء
-                                </button>
-                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                    حفظ
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                </form>
             </div>
         </div>
-        @endsection
+    </div>
+@endsection
+
         @push('scripts')
+            <script>
+                function resetFilters() {
+                    window.location.href = "{{ request()->url() }}";
+                }
+
+                function resetDate(fieldName) {
+                    document.querySelector(`[name="${fieldName}"]`).value = '';
+                    document.getElementById('filterForm').submit();
+                }
+
+                function resetDateRange() {
+                    document.querySelector('[name="from_date"]').value = '';
+                    document.querySelector('[name="to_date"]').value = '';
+                    document.getElementById('filterForm').submit();
+                }
+
+                // Initialize flatpickr
+                flatpickr("#fromDate", {
+                    locale: "ar",
+                    dateFormat: "Y-m-d",
+                    allowInput: true,
+                    defaultDate: "{{ request('from_date') }}",
+                });
+
+                flatpickr("#toDate", {
+                    locale: "ar",
+                    dateFormat: "Y-m-d",
+                    allowInput: true,
+                    defaultDate: "{{ request('to_date') }}",
+                });
+
+                flatpickr("#createdAtFilter", {
+                    locale: "ar",
+                    dateFormat: "Y-m-d",
+                    allowInput: true,
+                    defaultDate: "{{ request('created_date') }}",
+                });
+            </script>
             <script>
                 const isAdmin = @json($isAdmin);
 

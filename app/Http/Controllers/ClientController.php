@@ -45,12 +45,37 @@ class ClientController extends Controller
 
         // Apply interest status filter
         if ($request->has('interest_status') && !empty($request->interest_status)) {
-            $query->where('interest_status', $request->interest_status);
+            $status = $request->interest_status;
+            $lateDays = $request->get('late_days', 7); // Default to 7 days
+
+            if (in_array($status, ['interested', 'not interested', 'neutral'])) {
+                $query->where('interest_status', $status);
+            } else {
+                $lateThreshold = now()->subDays($lateDays);
+
+                $lateCondition = function($q) use ($lateThreshold) {
+                    $q->whereNull('last_contact_date')
+                        ->orWhere('last_contact_date', '<', $lateThreshold);
+                };
+
+                $interestMap = [
+                    'late_interested' => 'interested',
+                    'late_not_interested' => 'not interested',
+                    'late_neutral' => 'neutral'
+                ];
+
+                if ($status === 'late') {
+                    $query->where($lateCondition);
+                } elseif (array_key_exists($status, $interestMap)) {
+                    $query->where('interest_status', $interestMap[$status])
+                        ->where($lateCondition);
+                }
+            }
         }
 
         // Apply service type filter
-        if ($request->has('service_type') && !empty($request->service_type)) {
-            $query->where('interested_service', $request->service_type);
+        if ($request->has('service') && !empty($request->service)) {
+            $query->where('interested_service', $request->service);
         }
 
         // Apply date range filter
@@ -60,6 +85,11 @@ class ClientController extends Controller
 
         if ($request->has('to_date') && !empty($request->to_date)) {
             $query->whereDate('last_contact_date', '<=', $request->to_date);
+        }
+        if ($request->has('sales_rep') && !empty($request->sales_rep)) {
+            $query->whereHas('salesRep', function($q) use ($request) {
+                $q->where('name', $request->sales_rep); // Changed $query to $q
+            });
         }
 
         // Apply late customer filter
@@ -127,11 +157,41 @@ class ClientController extends Controller
         }
 
         if ($request->has('interest_status') && !empty($request->interest_status)) {
-            $query->where('interest_status', $request->interest_status);
+            $status = $request->interest_status;
+            $lateDays = $request->get('late_days', 7); // Default to 7 days
+
+            if (in_array($status, ['interested', 'not interested', 'neutral'])) {
+                $query->where('interest_status', $status);
+            } else {
+                $lateThreshold = now()->subDays($lateDays);
+
+                $lateCondition = function($q) use ($lateThreshold) {
+                    $q->whereNull('last_contact_date')
+                        ->orWhere('last_contact_date', '<', $lateThreshold);
+                };
+
+                $interestMap = [
+                    'late_interested' => 'interested',
+                    'late_not_interested' => 'not interested',
+                    'late_neutral' => 'neutral'
+                ];
+
+                if ($status === 'late') {
+                    $query->where($lateCondition);
+                } elseif (array_key_exists($status, $interestMap)) {
+                    $query->where('interest_status', $interestMap[$status])
+                        ->where($lateCondition);
+                }
+            }
         }
 
-        if ($request->has('service_type') && !empty($request->service_type)) {
-            $query->where('interested_service', $request->service_type);
+        if ($request->has('service') && !empty($request->service)) {
+            $query->where('interested_service', $request->service);
+        }
+        if ($request->has('sales_rep') && !empty($request->sales_rep)) {
+            $query->whereHas('salesRep', function($q) use ($request) {
+                $q->where('name', $request->sales_rep);
+            });
         }
 
         if ($request->has('from_date') && !empty($request->from_date)) {
