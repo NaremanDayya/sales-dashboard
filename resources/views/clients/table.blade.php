@@ -28,7 +28,7 @@
             display: block !important;
         }
         .cell-value {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 700;
             /*white-space: nowrap;*/
         }
@@ -1659,7 +1659,7 @@
             </td>
 
             <!-- Company Name -->
-<td class="px-4 py-2 text-sm font-bold text-black">
+<td class="px-4 py-2 text-sm" style="font-weight: 600; color: black;">
     <div class="flex flex-col items-center">
         <!-- Clickable company name -->
         <span class="cell-value clickable-cell text-center mb-1"
@@ -1668,46 +1668,41 @@
         </span>
 
         <!-- Sales rep name -->
-        <div class="text-xs text-gray-500">
+        <div class="text-xs" style="color: #6b7280;">
             ${client.sales_rep_name || '—'}
         </div>
-
-
     </div>
 </td>
 
 <!-- Address Cell -->
-<td class="px-4 py-2 text-sm text-gray-600">
+<td class="px-4 py-2 text-sm" style="color: #4b5563;">
     <div class="flex items-center justify-between">
-        <span class="cell-value clickable-cell text-center"
+        <span class="cell-value clickable-cell text-center" style="font-weight: 600;"
               onclick="redirectToClient(${client.sales_rep_id}, ${client.client_id})">
             ${client.address || '—'}
         </span>
-
     </div>
 </td>
-            <!-- Contact Person -->
-<td class="px-4 py-2 text-sm text-gray-700">
+
+<!-- Contact Person -->
+<td class="px-4 py-2 text-sm" style="color: #374151;">
     <div class="flex items-center justify-between">
-        <span class="cell-value clickable-cell text-center"
+        <span class="cell-value clickable-cell text-center" style="font-weight: 600;"
               onclick="redirectToClient(${client.sales_rep_id}, ${client.client_id})">
             ${client.contact_person || '—'}
         </span>
-
     </div>
 </td>
 
 <!-- Contact Position Cell -->
-<td class="px-4 py-2 text-sm text-gray-700">
+<td class="px-4 py-2 text-sm" style="color: #374151;">
     <div class="flex items-center justify-between">
-        <span class="cell-value clickable-cell text-center"
+        <span class="cell-value clickable-cell text-center" style="font-weight: 600;"
               onclick="redirectToClient(${client.sales_rep_id}, ${client.client_id})">
             ${client.contact_position || '—'}
         </span>
-
     </div>
 </td>
-
 <!-- Phone Cell -->
 <td class="px-4 py-2 text-sm text-blue-700 font-bold">
     <div class="flex items-center justify-between">
@@ -1746,13 +1741,13 @@
 </td>
 
             <!-- Interested Service -->
-           <td class="px-4 py-2 text-sm font-medium text-blue-700" dir="rtl">
+           <td class="px-4 py-2 text-blue-700" dir="rtl" style="font-weight: 600;">
     ${client.interested_service ? client.interested_service : '—'}
 </td>
 
 <td class="px-4 py-2 text-sm font-medium text-gray-600" dir="rtl">
     ${client.interested_service_count > 0 ? `
-        <span class="inline-flex items-center px-2 py-0.5 rounded bg-green-100 text-blue-800">
+        <span class="inline-flex items-center px-2 py-0.5 rounded bg-green-100 text-blue-800" style="font-weight: 600;">
             ${client.interested_service_count}
         </span>
     ` : '-'}
@@ -1762,12 +1757,12 @@
 
 
             <!-- Last Contact Date -->
-            <td class="px-4 py-2 text-sm text-center ${ client.is_late_customer ? 'text-red-600 font-bold' : 'text-green-600 font-bold' }">
+            <td class="px-4 py-2 text-sm text-center ${ client.is_late_customer ? 'text-red-600' : 'text-green-600' }" style="font-weight: 600;">
                 ${formatDateForDisplay(client.last_contact_date) || '—'}
             </td>
 
             <!-- Days Left -->
-            <td class="px-4 py-2 text-sm text-center ${client.is_late_customer ? 'text-red-600 font-bold' : 'text-green-600 font-bold'}">
+            <td class="px-4 py-2 text-sm text-center ${client.is_late_customer ? 'text-red-600' : 'text-green-600'}" style="font-weight: 600;">
                 ${client.contact_days_left ?
                             `${client.contact_days_left} ${getArabicDaysWord(client.contact_days_left)}` :
                             '—'
@@ -1776,7 +1771,7 @@
 
             <!-- Contact Count -->
             <td class="px-4 py-2 text-sm text-center">
-                <span class="inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-blue-800">
+                <span class="inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-blue-800" style="font-weight: 600;">
                     ${client.contact_count || 0}
                 </span>
             </td>
@@ -1784,7 +1779,7 @@
             <!-- Requests Count -->
             <td class="px-4 py-2 text-sm text-center text-gray-400 cursor-pointer"
                 onclick="window.location.href='/salesrep/' + ${client.sales_rep_id} + '/MyRequests'">
-                <span class="inline-flex items-center px-2 py-0.5 rounded bg-purple-100 text-blue-800">
+                <span class="inline-flex items-center px-2 py-0.5 rounded bg-purple-100 text-blue-800" style="font-weight: 600;">
                     ${client.requests_count || 0}
                 </span>
             </td>
