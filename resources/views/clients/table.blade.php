@@ -1662,7 +1662,7 @@
 <td class="px-4 py-2 text-sm" style="font-weight: 600; color: black;">
     <div class="flex flex-col items-center">
         <!-- Clickable company name -->
-        <span class="cell-value clickable-cell text-center mb-1"
+        <span class="cell-value clickable-cell text-center mb-1" style="font-weight: 600; color: black;"
               onclick="redirectToClient(${client.sales_rep_id}, ${client.client_id})">
             ${client.company_name || '—'}
         </span>
