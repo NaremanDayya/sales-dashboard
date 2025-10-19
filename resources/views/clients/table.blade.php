@@ -27,7 +27,11 @@
         .dropdown.active .dropdown-menu {
             display: block !important;
         }
-
+        .cell-value {
+            font-size: 16px;
+            font-weight: 700;
+            /*white-space: nowrap;*/
+        }
         .dropdown-menu {
             display: none;
             position: absolute;
@@ -622,7 +626,7 @@
                                 <div x-show="open" x-cloak class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 p-4">
                                     <div @click.away="open = false" class="bg-white rounded-lg shadow-xl w-full max-w-md">
                                         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                                            <h3 class="text-lg font-semibold text-gray-900">تعديل عدد أيام التأخير</h3>
+                                            <h3 class="text-lg font-bold text-gray-900">تعديل عدد أيام التأخير</h3>
                                             <button @click="open = false" class="text-gray-400 hover:text-gray-600 transition-colors">
                                                 <i class="fas fa-times text-lg"></i>
                                             </button>
@@ -712,130 +716,129 @@
             <!-- Improved Filters Section -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
                 <div class="p-6">
-                    <form method="GET" action="{{ request()->url() }}" id="filterForm">
-                        <div class="filters-grid">
-                            <!-- Search Box -->
-                            <div class="filter-item">
-                                <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2">بحث سريع</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                        <i class="fas fa-search text-gray-400"></i>
-                                    </div>
-                                    <input type="text"
-                                           class="block w-full pr-10 pl-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                                           placeholder="ابحث في العملاء..."
-                                           id="searchInput"
-                                           name="search"
-                                           value="{{ request('search') }}">
+                    <div class="filters-grid">
+                        <!-- Search Box -->
+                        <div class="filter-item">
+                            <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2">بحث سريع</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-search text-gray-400"></i>
                                 </div>
-                            </div>
-
-                            <!-- Main Filters -->
-                            <div class="filter-group">
-                                <div class="filter-item">
-                                    <label for="filterSelect" class="block text-sm font-medium text-gray-700 mb-2">حالة الاهتمام</label>
-                                    <select id="filterSelect" name="interest_status" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
-                                        <option value="">الكل</option>
-                                        <option value="interested" {{ request('interest_status') == 'interested' ? 'selected' : '' }}>مهتم</option>
-                                        <option value="not interested" {{ request('interest_status') == 'not interested' ? 'selected' : '' }}>غير مهتم</option>
-                                        <option value="neutral" {{ request('interest_status') == 'neutral' ? 'selected' : '' }}>مؤجل</option>
-                                        <option value="late" {{ request('interest_status') == 'late' ? 'selected' : '' }}>متأخرين</option>
-                                        <option value="late_interested" {{ request('interest_status') == 'late_interested' ? 'selected' : '' }}>متأخرين مهتمين</option>
-                                        <option value="late_not_interested" {{ request('interest_status') == 'late_not_interested' ? 'selected' : '' }}>متأخرين غير مهتمين</option>
-                                        <option value="late_neutral" {{ request('interest_status') == 'late_neutral' ? 'selected' : '' }}>متأخرين مؤجلين</option>
-                                    </select>
-                                </div>
-
-                                <div class="filter-item">
-                                    <label for="serviceTypeFilter" class="block text-sm font-medium text-gray-700 mb-2">نوع الخدمة</label>
-                                    <select id="serviceTypeFilter" name="service" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
-                                        <option value="">الكل</option>
-                                        @foreach($services as $service)
-                                            <option value="{{ $service->id }}" {{ request('service') == $service->id ? 'selected' : '' }}>{{ $service->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="filter-item">
-                                    <label for="salesRepFilter" class="block text-sm font-medium text-gray-700 mb-2">مندوب المبيعات</label>
-                                    <select id="salesRepFilter" name="sales_rep" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
-                                        <option value="">كل المندوبين</option>
-                                        @foreach($sales_rep_names as $name)
-                                            <option value="{{ $name }}" {{ request('sales_rep') == $name ? 'selected' : '' }}>{{ $name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="filter-item">
-                                    <label for="lateDaysInput" class="block text-sm font-medium text-gray-700 mb-2">أيام التأخير</label>
-                                    <input type="number"
-                                           id="lateDaysInput"
-                                           name="late_days"
-                                           value="{{ request('late_days', \App\Models\Setting::where('key', 'late_customer_days')->value('value') ?? 3) }}"
-                                           class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                                           placeholder="أيام التأخر"
-                                           min="1">
-                                </div>
+                                <input type="text"
+                                       class="block w-full pr-10 pl-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                       placeholder="ابحث في العملاء..."
+                                       id="searchInput"
+                                       name="search"
+                                       value="{{ request('search') }}"
+                                       oninput="applyLiveFilters()">
                             </div>
                         </div>
 
-                        <!-- Date Filters -->
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                        <!-- Main Filters -->
+                        <div class="filter-group">
                             <div class="filter-item">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الإنشاء</label>
-                                <div class="flex gap-2">
-                                    <input type="text"
-                                           id="createdAtFilter"
-                                           class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                                           placeholder="تاريخ الإنشاء"
-                                           name="created_date"
-                                           value="{{ request('created_date') }}">
-                                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200">
-                                        <i class="fas fa-search"></i>
-                                    </button>
-                                    <button type="button" onclick="resetDate('created_date')" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-200">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
+                                <label for="filterSelect" class="block text-sm font-medium text-gray-700 mb-2">حالة الاهتمام</label>
+                                <select id="filterSelect" name="interest_status"
+                                        class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                        onchange="applyLiveFilters()">
+                                    <option value="">الكل</option>
+                                    <option value="interested" {{ request('interest_status') == 'interested' ? 'selected' : '' }}>مهتم</option>
+                                    <option value="not interested" {{ request('interest_status') == 'not interested' ? 'selected' : '' }}>غير مهتم</option>
+                                    <option value="neutral" {{ request('interest_status') == 'neutral' ? 'selected' : '' }}>مؤجل</option>
+                                    <option value="late" {{ request('interest_status') == 'late' ? 'selected' : '' }}>متأخرين</option>
+                                    <option value="late_interested" {{ request('interest_status') == 'late_interested' ? 'selected' : '' }}>متأخرين مهتمين</option>
+                                    <option value="late_not_interested" {{ request('interest_status') == 'late_not_interested' ? 'selected' : '' }}>متأخرين غير مهتمين</option>
+                                    <option value="late_neutral" {{ request('interest_status') == 'late_neutral' ? 'selected' : '' }}>متأخرين مؤجلين</option>
+                                </select>
                             </div>
 
                             <div class="filter-item">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">نطاق تاريخ التواصل</label>
-                                <div class="date-range-group">
-                                    <input type="text"
-                                           id="fromDate"
-                                           class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                                           placeholder="من تاريخ"
-                                           name="from_date"
-                                           value="{{ request('from_date') }}">
-                                    <input type="text"
-                                           id="toDate"
-                                           class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                                           placeholder="إلى تاريخ"
-                                           name="to_date"
-                                           value="{{ request('to_date') }}">
-                                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200">
-                                        <i class="fas fa-filter"></i>
-                                    </button>
-                                    <button type="button" onclick="resetDateRange()" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-200">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
+                                <label for="serviceTypeFilter" class="block text-sm font-medium text-gray-700 mb-2">نوع الخدمة</label>
+                                <select id="serviceTypeFilter" name="service"
+                                        class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                        onchange="applyLiveFilters()">
+                                    <option value="">الكل</option>
+                                    @foreach($services as $service)
+                                        <option value="{{ $service->id }}" {{ request('service') == $service->id ? 'selected' : '' }}>{{ $service->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="filter-item">
+                                <label for="salesRepFilter" class="block text-sm font-medium text-gray-700 mb-2">مندوب المبيعات</label>
+                                <select id="salesRepFilter" name="sales_rep"
+                                        class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                        onchange="applyLiveFilters()">
+                                    <option value="">كل المندوبين</option>
+                                    @foreach($sales_rep_names as $name)
+                                        <option value="{{ $name }}" {{ request('sales_rep') == $name ? 'selected' : '' }}>{{ $name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="filter-item">
+                                <label for="lateDaysInput" class="block text-sm font-medium text-gray-700 mb-2">أيام التأخير</label>
+                                <input type="number"
+                                       id="lateDaysInput"
+                                       name="late_days"
+                                       value="{{ request('late_days', \App\Models\Setting::where('key', 'late_customer_days')->value('value') ?? 3) }}"
+                                       class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                       placeholder="أيام التأخر"
+                                       min="1"
+                                       oninput="applyLiveFilters()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Date Filters -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                        <div class="filter-item">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الإنشاء</label>
+                            <div class="flex gap-2">
+                                <input type="text"
+                                       id="createdAtFilter"
+                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                       placeholder="تاريخ الإنشاء"
+                                       name="created_date"
+                                       value="{{ request('created_date') }}"
+                                       onchange="applyLiveFilters()">
+                                <button type="button" onclick="resetDate('created_date')" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-200">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
                         </div>
 
-                        <!-- Action Buttons -->
-                        <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-filter"></i>
-                                تطبيق الفلتر
-                            </button>
-                            <button type="button" onclick="resetFilters()" class="btn btn-gray">
-                                <i class="fas fa-redo"></i>
-                                إعادة تعيين
-                            </button>
+                        <div class="filter-item">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">نطاق تاريخ التواصل</label>
+                            <div class="date-range-group">
+                                <input type="text"
+                                       id="fromDate"
+                                       class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                       placeholder="من تاريخ"
+                                       name="from_date"
+                                       value="{{ request('from_date') }}"
+                                       onchange="applyLiveFilters()">
+                                <input type="text"
+                                       id="toDate"
+                                       class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                       placeholder="إلى تاريخ"
+                                       name="to_date"
+                                       value="{{ request('to_date') }}"
+                                       onchange="applyLiveFilters()">
+                                <button type="button" onclick="resetDateRange()" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-200">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
                         </div>
-                    </form>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+                        <button type="button" onclick="resetFilters()" class="btn btn-gray">
+                            <i class="fas fa-redo"></i>
+                            إعادة تعيين
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -871,7 +874,7 @@
                             <th class="no-print">الدردشة</th>
                         </tr>
                         </thead>
-                        <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
+                        <tbody id="tableBody" class="bg-white divide-y divide-gray-200 font-bold">
                         <!-- Data will be populated by JavaScript -->
                         </tbody>
                     </table>
@@ -1008,7 +1011,7 @@
         <div class="bg-white rounded-lg shadow-lg w-full max-w-5xl mx-4 max-h-[90vh] overflow-hidden">
             <!-- Modal Header -->
             <div class="modal-header px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
-                <h3 class="text-lg font-semibold text-gray-800" id="modalClientName">تعديل بيانات العميل</h3>
+                <h3 class="text-lg font-bold text-gray-800" id="modalClientName">تعديل بيانات العميل</h3>
                 <button class="text-gray-500 hover:text-gray-700 text-xl" onclick="closeClientEditModal()">
                     <i class="fas fa-times"></i>
                 </button>
@@ -1145,23 +1148,258 @@
 
         @push('scripts')
             <script>
-                flatpickr("#createdAtFilter", {
-                    locale: "ar",
-                    dateFormat: "Y-m-d",
-                    allowInput: true
-                });
+                // Live filtering function
+                function applyLiveFilters() {
+                    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                    const interestStatus = document.getElementById('filterSelect').value;
+                    const serviceType = document.getElementById('serviceTypeFilter').value;
+                    const salesRep = document.getElementById('salesRepFilter').value;
+                    const lateDays = document.getElementById('lateDaysInput').value;
+                    const createdDate = document.getElementById('createdAtFilter').value;
+                    const fromDate = document.getElementById('fromDate').value;
+                    const toDate = document.getElementById('toDate').value;
 
-                flatpickr("#fromDate", {
-                    locale: "ar",
-                    dateFormat: "Y-m-d",
-                    allowInput: true
-                });
+                    let filteredData = [...ClientsData];
 
-                flatpickr("#toDate", {
-                    locale: "ar",
-                    dateFormat: "Y-m-d",
-                    allowInput: true
+                    // Apply search filter
+                    if (searchTerm) {
+                        filteredData = filteredData.filter(client => {
+                            return (
+                                (client.company_name && client.company_name.toLowerCase().includes(searchTerm)) ||
+                                (client.address && client.address.toLowerCase().includes(searchTerm)) ||
+                                (client.contact_person && client.contact_person.toLowerCase().includes(searchTerm)) ||
+                                (client.phone && client.phone.toLowerCase().includes(searchTerm)) ||
+                                (client.interest_status && client.interest_status.toLowerCase().includes(searchTerm))
+                            );
+                        });
+                    }
+
+                    // Apply interest status filter
+                    if (interestStatus) {
+                        const lateDaysThreshold = parseInt(lateDays) || 3;
+
+                        switch (interestStatus.toLowerCase()) {
+                            case 'neutral':
+                                filteredData = filteredData.filter(client =>
+                                    client.interest_status && client.interest_status.toLowerCase() === 'neutral'
+                                );
+                                break;
+
+                            case 'interested':
+                                filteredData = filteredData.filter(client =>
+                                    client.interest_status &&
+                                    (client.interest_status.toLowerCase() === 'interested' ||
+                                        client.interest_status.toLowerCase() === 'intersted')
+                                );
+                                break;
+
+                            case 'not interested':
+                                filteredData = filteredData.filter(client =>
+                                    client.interest_status &&
+                                    (client.interest_status.toLowerCase() === 'not interested' ||
+                                        client.interest_status.toLowerCase() === 'not_interested' ||
+                                        client.interest_status.toLowerCase() === 'notinterested')
+                                );
+                                break;
+
+                            case 'late':
+                                filteredData = filteredData.filter(client =>
+                                    client.is_late_customer === true
+                                );
+                                break;
+
+                            case 'late_interested':
+                                filteredData = filteredData.filter(client =>
+                                    client.is_late_customer === true &&
+                                    client.interest_status &&
+                                    (client.interest_status.toLowerCase() === 'interested' ||
+                                        client.interest_status.toLowerCase() === 'intersted')
+                                );
+                                break;
+
+                            case 'late_not_interested':
+                                filteredData = filteredData.filter(client =>
+                                    client.is_late_customer === true &&
+                                    client.interest_status &&
+                                    (client.interest_status.toLowerCase() === 'not interested' ||
+                                        client.interest_status.toLowerCase() === 'not_interested' ||
+                                        client.interest_status.toLowerCase() === 'notinterested')
+                                );
+                                break;
+
+                            case 'late_neutral':
+                                filteredData = filteredData.filter(client =>
+                                    client.is_late_customer === true &&
+                                    client.interest_status &&
+                                    client.interest_status.toLowerCase() === 'neutral'
+                                );
+                                break;
+                        }
+                    }
+
+                    // Apply service type filter
+                    if (serviceType) {
+                        const serviceTypeMap = {
+                            @foreach($services as $service)
+                            '{{ $service->id }}': '{{ $service->name }}',
+                            @endforeach
+                        };
+
+                        const serviceName = serviceTypeMap[serviceType];
+                        if (serviceName) {
+                            filteredData = filteredData.filter(client => {
+                                if (!client.interested_service) return false;
+                                const clientService = client.interested_service.trim();
+                                const targetService = serviceName.trim();
+                                return clientService.localeCompare(targetService, undefined, {
+                                    sensitivity: 'base',
+                                    ignorePunctuation: true
+                                }) === 0;
+                            });
+                        }
+                    }
+
+                    // Apply sales rep filter
+                    if (salesRep) {
+                        filteredData = filteredData.filter(client =>
+                            client.sales_rep_name === salesRep
+                        );
+                    }
+
+                    // Apply created date filter
+                    if (createdDate) {
+                        filteredData = filteredData.filter(client => {
+                            if (!client.client_created_at) return false;
+                            const clientDate = new Date(client.client_created_at).toISOString().split('T')[0];
+                            return clientDate === createdDate;
+                        });
+                    }
+
+                    // Apply date range filter
+                    if (fromDate || toDate) {
+                        filteredData = filteredData.filter(client => {
+                            if (!client.last_contact_date) return false;
+                            const contactDate = client.last_contact_date;
+
+                            if (fromDate && toDate) {
+                                return contactDate >= fromDate && contactDate <= toDate;
+                            } else if (fromDate) {
+                                return contactDate >= fromDate;
+                            } else if (toDate) {
+                                return contactDate <= toDate;
+                            }
+                            return true;
+                        });
+                    }
+
+                    currentFilteredClients = filteredData;
+                    renderTable(currentFilteredClients);
+
+                    // Update URL without reloading page (optional)
+                    updateURLParams();
+                }
+
+                // Update URL parameters without page reload
+                function updateURLParams() {
+                    const params = new URLSearchParams();
+
+                    const search = document.getElementById('searchInput').value;
+                    const interestStatus = document.getElementById('filterSelect').value;
+                    const serviceType = document.getElementById('serviceTypeFilter').value;
+                    const salesRep = document.getElementById('salesRepFilter').value;
+                    const lateDays = document.getElementById('lateDaysInput').value;
+                    const createdDate = document.getElementById('createdAtFilter').value;
+                    const fromDate = document.getElementById('fromDate').value;
+                    const toDate = document.getElementById('toDate').value;
+
+                    if (search) params.set('search', search);
+                    if (interestStatus) params.set('interest_status', interestStatus);
+                    if (serviceType) params.set('service', serviceType);
+                    if (salesRep) params.set('sales_rep', salesRep);
+                    if (lateDays) params.set('late_days', lateDays);
+                    if (createdDate) params.set('created_date', createdDate);
+                    if (fromDate) params.set('from_date', fromDate);
+                    if (toDate) params.set('to_date', toDate);
+
+                    const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+                    window.history.replaceState({}, '', newUrl);
+                }
+
+                // Reset functions
+                function resetFilters() {
+                    document.getElementById('searchInput').value = '';
+                    document.getElementById('filterSelect').value = '';
+                    document.getElementById('serviceTypeFilter').value = '';
+                    document.getElementById('salesRepFilter').value = '';
+                    document.getElementById('lateDaysInput').value = '{{ \App\Models\Setting::where('key', 'late_customer_days')->value('value') ?? 3 }}';
+                    document.getElementById('createdAtFilter').value = '';
+                    document.getElementById('fromDate').value = '';
+                    document.getElementById('toDate').value = '';
+
+                    currentFilteredClients = [...ClientsData];
+                    renderTable(currentFilteredClients);
+                    window.history.replaceState({}, '', window.location.pathname);
+                }
+
+                function resetDate(field) {
+                    if (field === 'created_date') {
+                        document.getElementById('createdAtFilter').value = '';
+                    }
+                    applyLiveFilters();
+                }
+
+                function resetDateRange() {
+                    document.getElementById('fromDate').value = '';
+                    document.getElementById('toDate').value = '';
+                    applyLiveFilters();
+                }
+
+                // Initialize date pickers with change event
+                document.addEventListener('DOMContentLoaded', function() {
+                    flatpickr("#createdAtFilter", {
+                        locale: "ar",
+                        dateFormat: "Y-m-d",
+                        allowInput: true,
+                        onChange: function(selectedDates, dateStr) {
+                            applyLiveFilters();
+                        }
+                    });
+
+                    flatpickr("#fromDate", {
+                        locale: "ar",
+                        dateFormat: "Y-m-d",
+                        allowInput: true,
+                        onChange: function(selectedDates, dateStr) {
+                            applyLiveFilters();
+                        }
+                    });
+
+                    flatpickr("#toDate", {
+                        locale: "ar",
+                        dateFormat: "Y-m-d",
+                        allowInput: true,
+                        onChange: function(selectedDates, dateStr) {
+                            applyLiveFilters();
+                        }
+                    });
                 });
+                // flatpickr("#createdAtFilter", {
+                //     locale: "ar",
+                //     dateFormat: "Y-m-d",
+                //     allowInput: true
+                // });
+                //
+                // flatpickr("#fromDate", {
+                //     locale: "ar",
+                //     dateFormat: "Y-m-d",
+                //     allowInput: true
+                // });
+                //
+                // flatpickr("#toDate", {
+                //     locale: "ar",
+                //     dateFormat: "Y-m-d",
+                //     allowInput: true
+                // });
 
                 // Dropdown functionality
                 // Fixed Export Dropdown functionality
@@ -1421,7 +1659,7 @@
             </td>
 
             <!-- Company Name -->
-<td class="px-4 py-2 text-sm font-semibold text-gray-800">
+<td class="px-4 py-2 text-sm font-bold text-black">
     <div class="flex flex-col items-center">
         <!-- Clickable company name -->
         <span class="cell-value clickable-cell text-center mb-1"
@@ -1441,7 +1679,7 @@
 <!-- Address Cell -->
 <td class="px-4 py-2 text-sm text-gray-600">
     <div class="flex items-center justify-between">
-        <span class="cell-value clickable-cell"
+        <span class="cell-value clickable-cell text-center"
               onclick="redirectToClient(${client.sales_rep_id}, ${client.client_id})">
             ${client.address || '—'}
         </span>
@@ -1451,7 +1689,7 @@
             <!-- Contact Person -->
 <td class="px-4 py-2 text-sm text-gray-700">
     <div class="flex items-center justify-between">
-        <span class="cell-value clickable-cell"
+        <span class="cell-value clickable-cell text-center"
               onclick="redirectToClient(${client.sales_rep_id}, ${client.client_id})">
             ${client.contact_person || '—'}
         </span>
@@ -1462,7 +1700,7 @@
 <!-- Contact Position Cell -->
 <td class="px-4 py-2 text-sm text-gray-700">
     <div class="flex items-center justify-between">
-        <span class="cell-value clickable-cell"
+        <span class="cell-value clickable-cell text-center"
               onclick="redirectToClient(${client.sales_rep_id}, ${client.client_id})">
             ${client.contact_position || '—'}
         </span>
