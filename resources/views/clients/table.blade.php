@@ -1455,7 +1455,7 @@
                         onChange: function(selectedDates, dateStr) {
                             applyLiveFilters();
                         }
-                    });
+
                 });
                 // flatpickr("#createdAtFilter", {
                 //     locale: "ar",
@@ -1647,7 +1647,9 @@
                                 (client.response_status && client.response_status.toLowerCase().includes(searchTerm))
                             );
                         });
+                        currentFilteredClients = filteredData;
                         renderTable(filteredData);
+                        updateClientCounter();
                     });
                     // Export dropdown functionality
                     const exportBtn = document.getElementById('exportBtn');
@@ -1692,7 +1694,7 @@
 
                 // Initialize on page load (in case date is pre-filled)
                 window.addEventListener('DOMContentLoaded', () => {
-                    toggleFakePlaceholder(document.getElementById('dateFilter'));
+                    // toggleFakePlaceholder(document.getElementById('dateFilter'));
                 });
 
                 function renderTable(data = currentFilteredClients) {
