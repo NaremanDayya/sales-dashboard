@@ -513,7 +513,15 @@
             gap: 0.75rem;
             align-items: center;
         }
+        #clientCounter {
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+        }
 
+        #clientCounter:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.15);
+        }
         .btn {
             display: inline-flex;
             align-items: center;
@@ -595,9 +603,28 @@
             <!-- Header -->
             <div class="mb-6">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-900">العملاء</h1>
-                        <p class="text-gray-600 mt-1">إدارة وعرض جميع عملاء الشركة</p>
+                    <div class="flex items-center gap-4">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">العملاء</h1>
+                            <p class="text-gray-600 mt-1">إدارة وعرض جميع عملاء الشركة</p>
+                        </div>
+
+                        <!-- Client Counter Badge -->
+                        <div id="clientCounter" class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
+                            <div class="flex items-center gap-2">
+                                <div class="bg-blue-100 p-1 rounded-full">
+                                    <i class="fas fa-users text-blue-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-blue-900">العملاء المعروضين</div>
+                                    <div class="text-lg font-bold text-blue-700">
+                                        <span id="displayedCount">0</span>
+                                        <span class="text-sm font-normal">/</span>
+                                        <span id="totalCount" class="text-sm font-normal">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Action Buttons -->
@@ -805,6 +832,9 @@
                                 <button type="button" onclick="resetDate('created_date')" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-200">
                                     <i class="fas fa-times"></i>
                                 </button>
+                            </div>
+                            <div id="createdAtCountBadge" class="mt-2 text-sm text-blue-600 font-semibold hidden">
+                                عدد العملاء: <span id="createdAtCount">0</span>
                             </div>
                         </div>
 
@@ -1294,11 +1324,29 @@
 
                     currentFilteredClients = filteredData;
                     renderTable(currentFilteredClients);
+                    updateClientCounter();
 
                     // Update URL without reloading page (optional)
                     updateURLParams();
                 }
 
+                function updateClientCounter() {
+                    const displayedCount = currentFilteredClients.length;
+                    const totalCount = ClientsData.length;
+
+                    document.getElementById('displayedCount').textContent = displayedCount;
+                    document.getElementById('totalCount').textContent = totalCount;
+
+                    // Optional: Add color change based on filtered results
+                    const counter = document.getElementById('clientCounter');
+                    if (displayedCount === totalCount) {
+                        counter.classList.remove('bg-blue-50', 'border-blue-200');
+                        counter.classList.add('bg-green-50', 'border-green-200');
+                    } else {
+                        counter.classList.remove('bg-green-50', 'border-green-200');
+                        counter.classList.add('bg-blue-50', 'border-blue-200');
+                    }
+                }
                 // Update URL parameters without page reload
                 function updateURLParams() {
                     const params = new URLSearchParams();
@@ -1336,18 +1384,20 @@
                     document.getElementById('fromDate').value = '';
                     document.getElementById('toDate').value = '';
 
+                    hideClientCountBadge();
                     currentFilteredClients = [...ClientsData];
                     renderTable(currentFilteredClients);
+                    updateClientCounter();
                     window.history.replaceState({}, '', window.location.pathname);
                 }
 
                 function resetDate(field) {
                     if (field === 'created_date') {
                         document.getElementById('createdAtFilter').value = '';
+                        hideClientCountBadge();
                     }
                     applyLiveFilters();
                 }
-
                 function resetDateRange() {
                     document.getElementById('fromDate').value = '';
                     document.getElementById('toDate').value = '';
@@ -1355,15 +1405,39 @@
                 }
 
                 // Initialize date pickers with change event
-                document.addEventListener('DOMContentLoaded', function() {
-                    flatpickr("#createdAtFilter", {
-                        locale: "ar",
-                        dateFormat: "Y-m-d",
-                        allowInput: true,
-                        onChange: function(selectedDates, dateStr) {
-                            applyLiveFilters();
+                flatpickr("#createdAtFilter", {
+                    locale: "ar",
+                    dateFormat: "Y-m-d",
+                    allowInput: true,
+                    onChange: function(selectedDates, dateStr) {
+                        updateClientCountBadge(dateStr);
+                        applyLiveFilters();
+                    },
+                    onOpen: function(selectedDates, dateStr) {
+                        // Show count for current selected date when opening picker
+                        if (dateStr) {
+                            updateClientCountBadge(dateStr);
                         }
-                    });
+                    },
+                    onDayCreate: function(dObj, dStr, fp, dayElem) {
+                        // Add hover event to each day
+                        dayElem.addEventListener('mouseenter', function() {
+                            const dateStr = dayElem.dateObj.toISOString().split('T')[0];
+                            updateClientCountBadge(dateStr);
+                        });
+
+                        dayElem.addEventListener('mouseleave', function() {
+                            // When mouse leaves, show count for currently selected date (not hovered date)
+                            const selectedDate = fp.selectedDates[0];
+                            if (selectedDate) {
+                                const selectedDateStr = selectedDate.toISOString().split('T')[0];
+                                updateClientCountBadge(selectedDateStr);
+                            } else {
+                                hideClientCountBadge();
+                            }
+                        });
+                    }
+                });
 
                     flatpickr("#fromDate", {
                         locale: "ar",
@@ -1560,7 +1634,7 @@
 
                     // Render initial table
                     renderTable();
-
+                    updateClientCounter();
                     // Setup event listeners
                     document.getElementById('searchInput').addEventListener('input', function(e) {
                         const searchTerm = e.target.value.toLowerCase();
@@ -1797,6 +1871,7 @@
 </td>`;
                         tbody.appendChild(row);
                     });
+                    updateClientCounter();
                 }
 
                 function addNewClient() {
@@ -2788,5 +2863,27 @@
                         closeClientEditModal();
                     }
                 });
+                function updateClientCountBadge(dateStr) {
+                    if (!dateStr) {
+                        document.getElementById('createdAtCountBadge').classList.add('hidden');
+                        return;
+                    }
+
+                    const count = ClientsData.filter(client => {
+                        if (!client.client_created_at) return false;
+                        // Convert both dates to same format for accurate comparison
+                        const clientDate = new Date(client.client_created_at);
+                        const selectedDate = new Date(dateStr);
+
+                        return clientDate.toISOString().split('T')[0] === selectedDate.toISOString().split('T')[0];
+                    }).length;
+
+                    document.getElementById('createdAtCount').textContent = count;
+                    document.getElementById('createdAtCountBadge').classList.remove('hidden');
+                }
+                // Function to hide the badge
+                function hideClientCountBadge() {
+                    document.getElementById('createdAtCountBadge').classList.add('hidden');
+                }
             </script>
 @endpush
