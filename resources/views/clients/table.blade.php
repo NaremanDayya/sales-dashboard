@@ -833,6 +833,7 @@
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
+                            <!-- Client count badge -->
                             <div id="createdAtCountBadge" class="mt-2 text-sm text-blue-600 font-semibold hidden">
                                 عدد العملاء: <span id="createdAtCount">0</span>
                             </div>
@@ -1178,7 +1179,6 @@
 
         @push('scripts')
             <script>
-                // Live filtering function
                 function applyLiveFilters() {
                     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
                     const interestStatus = document.getElementById('filterSelect').value;
@@ -1439,41 +1439,24 @@
                     }
                 });
 
-                    flatpickr("#fromDate", {
-                        locale: "ar",
-                        dateFormat: "Y-m-d",
-                        allowInput: true,
-                        onChange: function(selectedDates, dateStr) {
-                            applyLiveFilters();
-                        }
-                    });
-
-                    flatpickr("#toDate", {
-                        locale: "ar",
-                        dateFormat: "Y-m-d",
-                        allowInput: true,
-                        onChange: function(selectedDates, dateStr) {
-                            applyLiveFilters();
-                        }
-
+                flatpickr("#fromDate", {
+                    locale: "ar",
+                    dateFormat: "Y-m-d",
+                    allowInput: true,
+                    onChange: function(selectedDates, dateStr) {
+                        applyLiveFilters();
+                    }
                 });
-                // flatpickr("#createdAtFilter", {
-                //     locale: "ar",
-                //     dateFormat: "Y-m-d",
-                //     allowInput: true
-                // });
-                //
-                // flatpickr("#fromDate", {
-                //     locale: "ar",
-                //     dateFormat: "Y-m-d",
-                //     allowInput: true
-                // });
-                //
-                // flatpickr("#toDate", {
-                //     locale: "ar",
-                //     dateFormat: "Y-m-d",
-                //     allowInput: true
-                // });
+
+                flatpickr("#toDate", {
+                    locale: "ar",
+                    dateFormat: "Y-m-d",
+                    allowInput: true,
+                    onChange: function(selectedDates, dateStr) {
+                        applyLiveFilters();
+                    }
+                });
+
 
                 // Dropdown functionality
                 // Fixed Export Dropdown functionality
@@ -2733,15 +2716,62 @@
                     locale: "ar",
                     dateFormat: "Y-m-d",
                     allowInput: true,
-                    defaultDate: null,
                     onChange: function(selectedDates, dateStr) {
                         if (dateStr) {
-                            updateCreatedAtCount(dateStr);
+                            updateClientCountBadge(dateStr);
+                            applyLiveFilters();
                         } else {
-                            hideCreatedAtCount();
+                            hideClientCountBadge();
                         }
+                    },
+                    onOpen: function(selectedDates, dateStr) {
+                        // Show count for current selected date when opening picker
+                        if (dateStr) {
+                            updateClientCountBadge(dateStr);
+                        }
+                    },
+                    onDayCreate: function(dObj, dStr, fp, dayElem) {
+                        // Add hover event to each day
+                        dayElem.addEventListener('mouseenter', function() {
+                            const dateStr = dayElem.dateObj.toISOString().split('T')[0];
+                            updateClientCountBadge(dateStr);
+                        });
+
+                        dayElem.addEventListener('mouseleave', function() {
+                            // When mouse leaves, show count for currently selected date (not hovered date)
+                            const selectedDate = fp.selectedDates[0];
+                            if (selectedDate) {
+                                const selectedDateStr = selectedDate.toISOString().split('T')[0];
+                                updateClientCountBadge(selectedDateStr);
+                            } else {
+                                hideClientCountBadge();
+                            }
+                        });
                     }
                 });
+                function updateClientCountBadge(dateStr) {
+                    if (!dateStr) {
+                        document.getElementById('createdAtCountBadge').classList.add('hidden');
+                        return;
+                    }
+
+                    const count = ClientsData.filter(client => {
+                        if (!client.client_created_at) return false;
+                        // Convert both dates to same format for accurate comparison
+                        const clientDate = new Date(client.client_created_at);
+                        const selectedDate = new Date(dateStr);
+
+                        return clientDate.toISOString().split('T')[0] === selectedDate.toISOString().split('T')[0];
+                    }).length;
+
+                    document.getElementById('createdAtCount').textContent = count;
+                    document.getElementById('createdAtCountBadge').classList.remove('hidden');
+                }
+
+                // Function to hide the badge
+                function hideClientCountBadge() {
+                    document.getElementById('createdAtCountBadge').classList.add('hidden');
+                }
             </script>
 
 
