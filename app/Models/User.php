@@ -128,12 +128,12 @@ class User extends Authenticatable
     {
         $path = $this->attributes['personal_image'] ?? null;
 
-        dd([
-            'original_path' => $path,
-            'is_full_url' => filter_var($path, FILTER_VALIDATE_URL),
-            'exists_local' => Storage::disk('public')->exists($path),
-            'exists_s3' => Storage::disk('s3')->exists($path),
-        ]);
+//        dd([
+//            'original_path' => $path,
+//            'is_full_url' => filter_var($path, FILTER_VALIDATE_URL),
+//            'exists_local' => Storage::disk('public')->exists($path),
+//            'exists_s3' => Storage::disk('s3')->exists($path),
+//        ]);
 
 
         // If already a full URL, return it
