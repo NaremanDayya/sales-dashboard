@@ -98,6 +98,7 @@ public function show()
         // Update user record
         $user->personal_image = $path;
         $user->save();
+        return redirect()->back();
     }
 
 }
