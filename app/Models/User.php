@@ -128,14 +128,26 @@ class User extends Authenticatable
     {
         $path = $this->attributes['personal_image'] ?? null;
 
+        if (!$path) {
+            return asset('images/default-avatar.png');
+        }
+
+        // If already a full URL, return it
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+
+        // Check if exists in local storage
         if (Storage::disk('public')->exists($path)) {
             return Storage::url($path);
         }
 
+        // Check if exists in S3 and generate temporary URL
         if (Storage::disk('s3')->exists($path)) {
-            return Storage::disk('s3')->url($path);
+            return Storage::disk('s3')->temporaryUrl($path, now()->addMinutes(5));
         }
 
+        // Fallback
         return asset('images/default-avatar.png');
     }
     public function temporaryPermissions()
