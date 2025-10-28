@@ -100,7 +100,7 @@ public function show()
         $user->personal_image = $path;
 //        dd($path);
         $user->save();
-        dd($path,$user->personal_image);
+//        dd($path,$user->personal_image);
 
         return redirect()->back()->with('success', 'تم تحديث الصورة الشخصية بنجاح.');
     }
