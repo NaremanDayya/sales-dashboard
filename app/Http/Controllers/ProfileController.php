@@ -106,8 +106,6 @@ public function show()
         // Update user record
         $user->personal_image = $path;
         $user->save();
-
-        // Debug output
         dd([
             'path' => $path,
             'exists_in_s3' => $exists,
