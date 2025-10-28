@@ -126,7 +126,8 @@ class User extends Authenticatable
     }
     public function getPersonalImageAttribute()
     {
-        $path = $this->personal_image;
+        $path = $this->attributes['personal_image'] ?? null;
+
         // Check local first
         if (Storage::disk('public')->exists($path)) {
             return Storage::url($path);
