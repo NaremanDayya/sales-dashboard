@@ -408,7 +408,7 @@ Storage::put($csvPath, implode("\n", $newContent));
         // Update user record
         $user->profile_photo_url = $path;
         $user->save();
-
+dd($path);
         return redirect()->back()->with('success', 'تم تحديث الصورة الشخصية بنجاح.');
     }
     public function show(SalesRep $salesRep)
