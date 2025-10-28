@@ -93,7 +93,7 @@ public function show()
 
         // Store in local storage (public disk)
         $file = $request->file('profile_photo_path');
-        $path = $file->store('profile-photos', 'public'); // stored in storage/app/public/profile-photos
+        $path = $file->store('profile_photos', 'public');
 
         // Update user record
         $user->personal_image = $path;

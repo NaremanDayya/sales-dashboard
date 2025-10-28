@@ -23,9 +23,7 @@
                     <div class="avatar-edit-container text-center">
                         <div class="avatar-wrapper mb-2 position-relative">
 
-<img src="{{ $user->personal_image
-    ? Storage::disk('s3')->temporaryUrl($user->personal_image, now()->addMinutes(5))
-    : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=random' }}"
+<img src="{{ $user->personal_image}}"
                                  alt="صورة الملف الشخصي"
                                  class="rounded-circle"
                                  width="120"
