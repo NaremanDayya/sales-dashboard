@@ -387,7 +387,7 @@ Storage::put($csvPath, implode("\n", $newContent));
     return redirect()->route('sales-reps.index')
         ->with('success', "تم تحديث بيانات المندوب {$salesRep->name} بنجاح");
 }
- public function updatePhoto(Request $request, SalesRep $salesRep)
+    public function updatePhoto(Request $request, SalesRep $salesRep)
     {
         $request->validate([
             'profile_photo_url' => 'required|image|max:2048', // 2MB max
@@ -395,13 +395,17 @@ Storage::put($csvPath, implode("\n", $newContent));
 
         $user = $salesRep->user;
 
-        // Delete old photo if exists
-        if ($user->profile_photo_url && Storage::exists('public/' . $user->profile_photo_url)) {
-            Storage::delete('public/' . $user->profile_photo_url);
+        // Delete old photo from S3 if exists
+        if ($user->profile_photo_url && Storage::disk('s3')->exists($user->profile_photo_url)) {
+            Storage::disk('s3')->delete($user->profile_photo_url);
         }
 
-        $path = $request->file('profile_photo_url')->store('profile-photos', 'public');
+        // Upload new photo to S3 (same as creation logic)
+        $file = $request->file('profile_photo_url');
+        $path = 'profile-photos/' . $file->hashName();
+        Storage::disk('s3')->putFileAs('profile-photos', $file, $file->hashName());
 
+        // Update user record
         $user->profile_photo_url = $path;
         $user->save();
 
