@@ -95,8 +95,11 @@ public function show()
         $file = $request->file('profile_photo_path');
         $path = 'profile-photos/' . $file->hashName();
 
-        Storage::disk('s3')->putFileAs('profile-photos', $file, $file->hashName());
-
+        Storage::disk('s3')->putFileAs(
+            'profile-photos',
+            $file,
+            $file->hashName(),
+        );
         // Check if the file exists in S3
         $exists = Storage::disk('s3')->exists($path);
 
