@@ -128,7 +128,7 @@ class User extends Authenticatable
     {
         $path = $this->personal_image;
 
-
+//test
         // Check local first
         if (Storage::disk('public')->exists($path)) {
             return Storage::url($path);
