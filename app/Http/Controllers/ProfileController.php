@@ -74,7 +74,7 @@ public function show()
         $salesRep = $user->salesRep; // assuming hasOne relationship
 
     }
-dd($user->personal_image);
+//dd($user->personal_image);
     return view('profile.show', compact('user', 'salesRep', 'translatedPermissions'));
 }
 
