@@ -98,7 +98,7 @@ public function show()
         // Update user record
         $user->personal_image = $path;
         $user->save();
-
+//test
         // Debug info to confirm path and existence
         dd([
             'path' => $path,
