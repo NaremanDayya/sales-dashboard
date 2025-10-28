@@ -86,34 +86,25 @@ public function show()
 
         $user = Auth::user();
 
-        // Delete old photo from S3 if it exists
-        if ($user->personal_image && Storage::disk('s3')->exists($user->personal_image)) {
-            Storage::disk('s3')->delete($user->personal_image);
+        // Delete old photo if exists (local only)
+        if ($user->personal_image && Storage::disk('public')->exists($user->personal_image)) {
+            Storage::disk('public')->delete($user->personal_image);
         }
 
-        // Upload new photo
+        // Store in local storage (public disk)
         $file = $request->file('profile_photo_path');
-        $path = 'profile-photos/' . $file->hashName();
-
-        Storage::disk('s3')->putFileAs(
-            'profile-photos',
-            $file,
-            $file->hashName(),
-        );
-        // Check if the file exists in S3
-        $exists = Storage::disk('s3')->exists($path);
+        $path = $file->store('profile-photos', 'public'); // stored in storage/app/public/profile-photos
 
         // Update user record
         $user->personal_image = $path;
         $user->save();
+
+        // Debug info to confirm path and existence
         dd([
             'path' => $path,
-            'exists_in_s3' => $exists,
-            'public_url' => Storage::disk('s3')->url($path),
+            'exists_in_local' => Storage::disk('public')->exists($path),
+            'public_url' => Storage::url($path),
         ]);
-
-        return redirect()->back()->with('success', 'تم تحديث الصورة الشخصية بنجاح.');
     }
-
 
 }
