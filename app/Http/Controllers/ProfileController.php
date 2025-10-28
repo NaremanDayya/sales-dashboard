@@ -81,27 +81,35 @@ public function show()
     public function updatePhoto(Request $request)
     {
         $request->validate([
-            'profile_photo_path' => 'required|image|max:2048', // max 2MB
+            'profile_photo_path' => 'required|image|max:2048',
         ]);
 
         $user = Auth::user();
 
-        // Delete old photo from S3 if exists
-        if ($user->personal_image && Storage::disk('s3')->exists($user->personal_image)) {
-            Storage::disk('s3')->delete($user->personal_image);
+        // Delete old photo from S3 if it exists
+        if ($user->profile_photo_url && Storage::disk('s3')->exists($user->profile_photo_url)) {
+            Storage::disk('s3')->delete($user->profile_photo_url);
         }
 
-        // Upload new photo to S3 (same logic as creation)
+        // Upload new photo
         $file = $request->file('profile_photo_path');
         $path = 'profile-photos/' . $file->hashName();
 
         Storage::disk('s3')->putFileAs('profile-photos', $file, $file->hashName());
 
+        // Check if the file exists in S3
+        $exists = Storage::disk('s3')->exists($path);
+
         // Update user record
-        $user->personal_image = $path;
-//        dd($path);
+        $user->profile_photo_url = $path;
         $user->save();
-//        dd($path,$user->personal_image);
+
+        // Debug output
+        dd([
+            'path' => $path,
+            'exists_in_s3' => $exists,
+            'public_url' => Storage::disk('s3')->url($path),
+        ]);
 
         return redirect()->back()->with('success', 'تم تحديث الصورة الشخصية بنجاح.');
     }
