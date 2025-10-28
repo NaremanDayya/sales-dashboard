@@ -77,24 +77,29 @@ public function show()
     return view('profile.show', compact('user', 'salesRep', 'translatedPermissions'));
 }
 
-public function updatePhoto(Request $request)
-{
-    $request->validate([
-        'profile_photo_path' => 'required|image|max:2048',
-    ]);
+    public function updatePhoto(Request $request, SalesRep $salesRep)
+    {
+        $request->validate([
+            'profile_photo_url' => 'required|image|max:2048', // 2MB max
+        ]);
 
-    $user = Auth::user();
+        $user = $salesRep->user;
 
-    if ($user->personal_image && Storage::exists('public/' . $user->personal_image)) {
-        Storage::delete('public/' . $user->personal_image);
+        // Delete old photo from S3 if exists
+        if ($user->profile_photo_url && Storage::disk('s3')->exists($user->profile_photo_url)) {
+            Storage::disk('s3')->delete($user->profile_photo_url);
+        }
+
+        // Upload new photo to S3 (same as creation logic)
+        $file = $request->file('profile_photo_url');
+        $path = 'profile-photos/' . $file->hashName();
+        Storage::disk('s3')->putFileAs('profile-photos', $file, $file->hashName());
+
+        // Update user record
+        $user->profile_photo_url = $path;
+        $user->save();
+
+        return redirect()->back()->with('success', 'تم تحديث الصورة الشخصية بنجاح.');
     }
-
-    $path = $request->file('profile_photo_path')->store('profile_photos', 'public');
-
-    $user->personal_image = $path;
-    $user->save();
-
-    return redirect()->back()->with('success', 'تم تحديث الصورة الشخصية بنجاح.');
-}
 
 }
