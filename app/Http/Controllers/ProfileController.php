@@ -86,8 +86,8 @@ public function show()
         $user = Auth::user();
 
         // Delete old photo from S3 if exists
-        if ($user->profile_photo_url && Storage::disk('s3')->exists($user->profile_photo_url)) {
-            Storage::disk('s3')->delete($user->profile_photo_url);
+        if ($user->personal_image && Storage::disk('s3')->exists($user->personal_image)) {
+            Storage::disk('s3')->delete($user->personal_image);
         }
 
         // Upload new photo to S3 (same logic as creation)
@@ -97,7 +97,8 @@ public function show()
         Storage::disk('s3')->putFileAs('profile-photos', $file, $file->hashName());
 
         // Update user record
-        $user->profile_photo_url = $path;
+        $user->personal_image = $path;
+        dd($path);
         $user->save();
 
         return redirect()->back()->with('success', 'تم تحديث الصورة الشخصية بنجاح.');
