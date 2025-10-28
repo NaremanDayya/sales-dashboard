@@ -128,12 +128,10 @@ class User extends Authenticatable
     {
         $path = $this->attributes['personal_image'] ?? null;
 
-        // Check local first
         if (Storage::disk('public')->exists($path)) {
             return Storage::url($path);
         }
 
-        // Then check S3
         if (Storage::disk('s3')->exists($path)) {
             return Storage::disk('s3')->url($path);
         }
