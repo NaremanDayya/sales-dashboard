@@ -83,7 +83,7 @@ public function show()
         $request->validate([
             'profile_photo_path' => 'required|image',
         ]);
-        dd("validation passed");
+//        dd("validation passed");
         $user = Auth::user();
 
         if ($user->personal_image && Storage::disk('public')->exists($user->personal_image)) {
@@ -95,7 +95,7 @@ public function show()
 
         $user->personal_image = $path;
         $user->save();
-
+dd($user);
         return redirect()->back()->with('success', 'تم تحديث الصورة الشخصية بنجاح.');
     }
 
