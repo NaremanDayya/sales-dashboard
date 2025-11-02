@@ -83,7 +83,6 @@ public function show()
         $request->validate([
             'profile_photo_path' => 'required|image',
         ]);
-//        dd("validation passed");
         $user = Auth::user();
 
         if ($user->personal_image && Storage::disk('public')->exists($user->personal_image)) {
