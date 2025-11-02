@@ -81,7 +81,7 @@ public function show()
     public function updatePhoto(Request $request)
     {
         $request->validate([
-            'personal_image' => 'required|image',
+            'profile_photo_path' => 'required|image',
         ]);
         dd("validation passed");
         $user = Auth::user();
@@ -90,7 +90,7 @@ public function show()
             Storage::disk('public')->delete($user->personal_image);
         }
 
-        $file = $request->file('personal_image');
+        $file = $request->file('profile_photo_path');
         $path = $file->store('profile-photos', 'public');
 
         $user->personal_image = $path;
