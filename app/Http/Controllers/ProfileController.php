@@ -81,24 +81,22 @@ public function show()
     public function updatePhoto(Request $request)
     {
         $request->validate([
-            'profile_photo_path' => 'required|image|max:2048',
+            'personal_image' => 'required|image',
         ]);
-
+        dd("validation passed");
         $user = Auth::user();
 
-        // Delete old photo if exists (local only)
         if ($user->personal_image && Storage::disk('public')->exists($user->personal_image)) {
             Storage::disk('public')->delete($user->personal_image);
         }
 
-        // Store in local storage (public disk)
-        $file = $request->file('profile_photo_path');
-        $path = $file->store('profile_photos', 'public');
+        $file = $request->file('personal_image');
+        $path = $file->store('profile-photos', 'public');
 
-        // Update user record
         $user->personal_image = $path;
         $user->save();
-        return redirect()->back();
+
+        return redirect()->back()->with('success', 'تم تحديث الصورة الشخصية بنجاح.');
     }
 
 }
