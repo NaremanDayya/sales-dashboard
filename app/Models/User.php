@@ -137,17 +137,21 @@ class User extends Authenticatable
             return $path;
         }
 
-        // Local storage
-        if (Storage::disk('public')->exists($path)) {
-            return Storage::url($path);
+        try {
+            // Check S3 first
+            if (Storage::disk('s3')->exists($path)) {
+                return Storage::disk('s3')->temporaryUrl($path, now()->addMinutes(5));
+            }
+
+            // Check local storage as fallback
+            if (Storage::disk('public')->exists($path)) {
+                return Storage::url($path);
+            }
+        } catch (\Exception $e) {
+            // Log error and fallback to default
+            \Log::error('Error accessing storage for image: ' . $e->getMessage());
         }
 
-        // S3 storage
-        if (Storage::disk('s3')->exists($path)) {
-            return Storage::disk('s3')->temporaryUrl($path, now()->addMinutes(5));
-        }
-
-        // Fallback
         return asset('images/default-avatar.png');
     }
     public function temporaryPermissions()
