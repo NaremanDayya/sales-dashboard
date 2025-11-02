@@ -145,6 +145,7 @@ class User extends Authenticatable
 
             // Check local storage as fallback
             if (Storage::disk('public')->exists($path)) {
+                dd('Local storage path found:', $path, 'Full URL:', Storage::url($path));
                 return Storage::url($path);
             }
         } catch (\Exception $e) {
