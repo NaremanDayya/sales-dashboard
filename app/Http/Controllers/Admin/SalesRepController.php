@@ -389,7 +389,7 @@ Storage::put($csvPath, implode("\n", $newContent));
         $request->validate([
             'personal_image' => 'required|image',
         ]);
-
+dd("validation passed");
         $user = $salesRep->user;
 
         if ($user->personal_image && Storage::disk('public')->exists($user->personal_image)) {
