@@ -44,10 +44,7 @@ class SalesRepController extends Controller
                 'active_agreements_count' =>(int) ($rep->active_agreements_count),
 		'inactive_agreements_count' => (int) ($rep->inactive_agreements_count),
 
-                'personal_image' => !empty($rep->user?->personal_image)
-                    ? Storage::disk('s3')->temporaryUrl($rep->user->personal_image, now()->addMinutes(10))
-                    : 'https://ui-avatars.com/api/?name=' . urlencode($rep->user?->name ?? 'User') . '&background=random',
-
+                'personal_image' =>$rep->user?->personal_image,
                 'account_status' => $rep->user->account_status,
 
             ];
@@ -408,7 +405,7 @@ Storage::put($csvPath, implode("\n", $newContent));
         // Update user record
         $user->profile_photo_url = $path;
         $user->save();
-dd($path);
+//dd($path);
         return redirect()->back()->with('success', 'تم تحديث الصورة الشخصية بنجاح.');
     }
     public function show(SalesRep $salesRep)
