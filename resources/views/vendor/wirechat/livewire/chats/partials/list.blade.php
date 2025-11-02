@@ -57,14 +57,12 @@
                 'dark:bg-[var(--wc-dark-secondary)] bg-[var(--wc-light-secondary)] border-r-4  border-opacity-20 border-[var(--wc-brand-primary)]'">
 
             <div class="shrink-0">
- <x-wirechat::avatar
+                <x-wirechat::avatar
                     disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
                     group="{{ $conversation->isGroup() }}"
                     src="{!! $group
         ? ($group->cover_url)
-        : ($receiver?->personal_image
-            ? Storage::disk('s3')->temporaryUrl($receiver->personal_image, now()->addMinutes(5))
-            : null) !!}"
+        : ($receiver?->personal_image ? $receiver->personal_image : null) !!}"
                     class="w-12 h-12"
                 />
             </div>
