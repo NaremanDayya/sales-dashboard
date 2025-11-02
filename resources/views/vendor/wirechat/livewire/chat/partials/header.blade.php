@@ -49,7 +49,7 @@
                         <div class="flex items-center gap-2 cursor-pointer ">
                             <x-wirechat::avatar disappearing="{{ $conversation->hasDisappearingTurnedOn() }}"
                                 :group="false" :src="($receiver?->personal_image
-        ? Storage::disk('s3')->temporaryUrl($receiver->personal_image, now()->addMinutes(5))
+        ?$receiver->personal_image
             : null)"
                                 class="h-8 w-8 lg:w-10 lg:h-10 " />
                             <h6 class="font-bold text-base text-gray-800 dark:text-white w-full truncate">
