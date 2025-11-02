@@ -95,7 +95,6 @@ public function show()
 
         $user->personal_image = $path;
         $user->save();
-dd($user);
         return redirect()->back()->with('success', 'تم تحديث الصورة الشخصية بنجاح.');
     }
 
