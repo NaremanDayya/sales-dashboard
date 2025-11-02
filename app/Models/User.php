@@ -128,6 +128,10 @@ class User extends Authenticatable
     {
         $path = $this->attributes['personal_image'] ?? null;
 
+        // Debug the raw path from database
+        \Log::info('Raw personal_image path: ' . $path);
+        dd('Raw path from DB:', $path, 'Type:', gettype($path));
+
         if (!$path) {
             return asset('images/default-avatar.png');
         }
@@ -140,21 +144,32 @@ class User extends Authenticatable
         try {
             // Check S3 first
             if (Storage::disk('s3')->exists($path)) {
+                \Log::info('Image found in S3: ' . $path);
                 return Storage::disk('s3')->temporaryUrl($path, now()->addMinutes(5));
             }
 
             // Check local storage as fallback
-            if (Storage::disk('public')->exists($path)) {
-                dd('Local storage path found:', $path, 'Full URL:', Storage::url($path));
-                return Storage::url($path);
+            $localExists = Storage::disk('public')->exists($path);
+            \Log::info('Local storage check - Path: ' . $path . ' - Exists: ' . ($localExists ? 'YES' : 'NO'));
+
+            if ($localExists) {
+                $url = Storage::url($path);
+                dd('Local storage details:', [
+                    'database_path' => $path,
+                    'storage_path' => storage_path('app/public/' . $path),
+                    'public_path' => public_path('storage/' . $path),
+                    'generated_url' => $url,
+                    'file_exists' => file_exists(storage_path('app/public/' . $path))
+                ]);
+                return $url;
             }
         } catch (\Exception $e) {
-            // Log error and fallback to default
             \Log::error('Error accessing storage for image: ' . $e->getMessage());
         }
 
         return asset('images/default-avatar.png');
     }
+
     public function temporaryPermissions()
     {
         return $this->hasMany(TemporaryPermission::class);
