@@ -8,30 +8,43 @@
          x-data="{
         loading: @entangle('loading'),
         hasMore: @entangle('hasMore'),
+        throttle: false,
+        observer: null,
         init() {
             const container = this.$el;
+            const sentinel = this.$refs.sentinel;
 
             // Ensure scroll is visible
             container.style.overflowY = 'auto';
             container.style.overflowX = 'hidden';
 
-            container.addEventListener('scroll', () => {
-                if (this.loading || !this.hasMore) return;
-
-                const scrollTop = container.scrollTop;
-                const scrollHeight = container.scrollHeight;
-                const clientHeight = container.clientHeight;
-
-                // Load more when near bottom (100px from bottom)
-                if (scrollHeight - scrollTop <= clientHeight + 100) {
-                    @this.loadMore();
-                }
-            });
+            // IntersectionObserver to trigger loadMore when sentinel enters view
+            const options = { root: container, rootMargin: '0px 0px 200px 0px', threshold: 0 };
+            this.observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !this.loading && this.hasMore && !this.throttle) {
+                        this.throttle = true;
+                        @this.loadMore();
+                        setTimeout(() => { this.throttle = false; }, 400);
+                    }
+                });
+            }, options);
+            if (sentinel) this.observer.observe(sentinel);
 
             // Listen for real-time updates
-            Livewire.on('conversationUpdated', (data) => {
+            Livewire.on('conversationUpdated', () => {
                 @this.refresh();
             });
+
+            // Stop observing when no more data
+            this.$watch('hasMore', (val) => {
+                if (!val && this.observer && sentinel) {
+                    this.observer.unobserve(sentinel);
+                }
+            });
+        },
+        destroy() {
+            if (this.observer) this.observer.disconnect();
         }
      }"
          style="overflow-y: auto; overflow-x: hidden;">
@@ -48,6 +61,7 @@
                 @endphp
 
                 <a
+                    wire:key="conv-{{ $conversation->id }}"
                     href="{{ route('client.chat', ['client' => $client->id ?? '', 'conversation' => $conversation->id]) }}"
                     class="flex items-center p-4 transition-colors duration-200 cursor-pointer group {{ $conversation->id === ($selectedConversation->id ?? null) ? 'bg-blue-50 border-r-4 border-blue-500' : 'hover:bg-gray-50' }}">
 
@@ -103,6 +117,9 @@
                 </a>
             @endforeach
         </div>
+
+        <!-- Sentinel for IntersectionObserver -->
+        <div x-ref="sentinel" x-show="hasMore" class="h-1"></div>
 
         <!-- Loading More -->
         <div x-show="loading" class="p-4 text-center" x-cloak>

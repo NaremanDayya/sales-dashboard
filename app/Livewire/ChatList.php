@@ -17,6 +17,7 @@ class ChatList extends Component
     public $loading = false;
     public $page = 1;
     public $allConversations; // This will store Conversation objects
+    private $lastBatchHasMore = false; // track availability of more data based on server fetch
 
     protected $listeners = [
         'conversationUpdated' => 'handleConversationUpdate',
@@ -33,6 +34,8 @@ class ChatList extends Component
     public function loadInitialConversations()
     {
         $this->allConversations = $this->getConversations(1);
+        // hasMore is determined by server-side over-fetching
+        $this->hasMore = $this->lastBatchHasMore;
     }
 
     public function loadMore()
@@ -46,12 +49,14 @@ class ChatList extends Component
 
         $additionalConversations = $this->getConversations($this->page);
 
-        if ($additionalConversations->count() < $this->perPage) {
-            $this->hasMore = false;
-        }
+        // hasMore is determined by server-side over-fetching
+        $this->hasMore = $this->lastBatchHasMore;
 
-        // Merge new conversations with existing ones (keep as Collection)
-        $this->allConversations = $this->allConversations->merge($additionalConversations);
+        // Merge new conversations with existing ones (dedupe by id, keep as Collection)
+        $this->allConversations = $this->allConversations
+            ->concat($additionalConversations)
+            ->unique('id')
+            ->values();
         $this->loading = false;
     }
 
@@ -106,8 +111,15 @@ class ChatList extends Component
             ->orderBy('updated_at', 'desc')
             ->orderBy('created_at', 'desc')
             ->skip($offset)
-            ->take($this->perPage)
+            // Fetch one extra record to determine if there are more without another query
+            ->take($this->perPage + 1)
             ->get();
+
+        // Determine hasMore for this batch and trim to perPage
+        $this->lastBatchHasMore = $conversations->count() > $this->perPage;
+        if ($this->lastBatchHasMore) {
+            $conversations = $conversations->slice(0, $this->perPage)->values();
+        }
 
         return $this->enhanceConversationsWithMessages($conversations);
     }
