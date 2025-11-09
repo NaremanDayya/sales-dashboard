@@ -86,6 +86,13 @@ class ClientController extends Controller
         if ($request->has('to_date') && !empty($request->to_date)) {
             $query->whereDate('last_contact_date', '<=', $request->to_date);
         }
+        if ($request->has('created_from_date') && !empty($request->created_from_date)) {
+            $query->whereDate('created_at', '>=', $request->created_from_date);
+        }
+
+        if ($request->has('created_to_date') && !empty($request->created_to_date)) {
+            $query->whereDate('created_at', '<=', $request->created_to_date);
+        }
         if ($request->has('sales_rep') && !empty($request->sales_rep)) {
             $query->whereHas('salesRep', function($q) use ($request) {
                 $q->where('name', $request->sales_rep); // Changed $query to $q
@@ -155,7 +162,13 @@ class ClientController extends Controller
                     ->orWhere('phone', 'LIKE', "%{$search}%");
             });
         }
+        if ($request->has('created_from_date') && !empty($request->created_from_date)) {
+            $query->whereDate('created_at', '>=', $request->created_from_date);
+        }
 
+        if ($request->has('created_to_date') && !empty($request->created_to_date)) {
+            $query->whereDate('created_at', '<=', $request->created_to_date);
+        }
         if ($request->has('interest_status') && !empty($request->interest_status)) {
             $status = $request->interest_status;
             $lateDays = $request->get('late_days', 7); // Default to 7 days
