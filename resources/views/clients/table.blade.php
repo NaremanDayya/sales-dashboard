@@ -820,22 +820,25 @@
                     <!-- Date Filters -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                         <div class="filter-item">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الإنشاء</label>
-                            <div class="flex gap-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">نطاق تاريخ الإنشاء</label>
+                            <div class="date-range-group">
                                 <input type="text"
-                                       id="createdAtFilter"
-                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                                       placeholder="تاريخ الإنشاء"
-                                       name="created_date"
-                                       value="{{ request('created_date') }}"
+                                       id="createdFromDate"
+                                       class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                       placeholder="من تاريخ"
+                                       name="created_from_date"
+                                       value="{{ request('created_from_date') }}"
                                        onchange="applyLiveFilters()">
-                                <button type="button" onclick="resetDate('created_date')" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-200">
+                                <input type="text"
+                                       id="createdToDate"
+                                       class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                       placeholder="إلى تاريخ"
+                                       name="created_to_date"
+                                       value="{{ request('created_to_date') }}"
+                                       onchange="applyLiveFilters()">
+                                <button type="button" onclick="resetCreatedDateRange()" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-200">
                                     <i class="fas fa-times"></i>
                                 </button>
-                            </div>
-                            <!-- Client count badge -->
-                            <div id="createdAtCountBadge" class="mt-2 text-sm text-blue-600 font-semibold hidden">
-                                عدد العملاء: <span id="createdAtCount">0</span>
                             </div>
                         </div>
 
@@ -1183,6 +1186,8 @@
                     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
                     const interestStatus = document.getElementById('filterSelect').value;
                     const serviceType = document.getElementById('serviceTypeFilter').value;
+                    const createdFromDate = document.getElementById('createdFromDate').value;
+                    const createdToDate = document.getElementById('createdToDate').value;
                     const salesRep = document.getElementById('salesRepFilter').value;
                     const lateDays = document.getElementById('lateDaysInput').value;
                     const createdDate = document.getElementById('createdAtFilter').value;
@@ -1203,7 +1208,21 @@
                             );
                         });
                     }
+                    if (createdFromDate || createdToDate) {
+                        filteredData = filteredData.filter(client => {
+                            if (!client.client_created_at) return false;
+                            const createdDate = client.client_created_at;
 
+                            if (createdFromDate && createdToDate) {
+                                return createdDate >= createdFromDate && createdDate <= createdToDate;
+                            } else if (createdFromDate) {
+                                return createdDate >= createdFromDate;
+                            } else if (createdToDate) {
+                                return createdDate <= createdToDate;
+                            }
+                            return true;
+                        });
+                    }
                     // Apply interest status filter
                     if (interestStatus) {
                         const lateDaysThreshold = parseInt(lateDays) || 3;
@@ -1357,6 +1376,8 @@
                     const salesRep = document.getElementById('salesRepFilter').value;
                     const lateDays = document.getElementById('lateDaysInput').value;
                     const createdDate = document.getElementById('createdAtFilter').value;
+                    const createdFromDate = document.getElementById('createdFromDate').value;
+                    const createdToDate = document.getElementById('createdToDate').value;
                     const fromDate = document.getElementById('fromDate').value;
                     const toDate = document.getElementById('toDate').value;
 
@@ -1366,6 +1387,8 @@
                     if (salesRep) params.set('sales_rep', salesRep);
                     if (lateDays) params.set('late_days', lateDays);
                     if (createdDate) params.set('created_date', createdDate);
+                    if (createdFromDate) params.set('created_from_date', createdFromDate);
+                    if (createdToDate) params.set('created_to_date', createdToDate);
                     if (fromDate) params.set('from_date', fromDate);
                     if (toDate) params.set('to_date', toDate);
 
@@ -1381,6 +1404,8 @@
                     document.getElementById('salesRepFilter').value = '';
                     document.getElementById('lateDaysInput').value = '{{ \App\Models\Setting::where('key', 'late_customer_days')->value('value') ?? 3 }}';
                     document.getElementById('createdAtFilter').value = '';
+                    document.getElementById('createdFromDate').value = '';
+                    document.getElementById('createdToDate').value = '';
                     document.getElementById('fromDate').value = '';
                     document.getElementById('toDate').value = '';
 
@@ -1403,7 +1428,28 @@
                     document.getElementById('toDate').value = '';
                     applyLiveFilters();
                 }
+                function resetCreatedDateRange() {
+                    document.getElementById('createdFromDate').value = '';
+                    document.getElementById('createdToDate').value = '';
+                    applyLiveFilters();
+                }
+                flatpickr("#createdFromDate", {
+                    locale: "ar",
+                    dateFormat: "Y-m-d",
+                    allowInput: true,
+                    onChange: function(selectedDates, dateStr) {
+                        applyLiveFilters();
+                    }
+                });
 
+                flatpickr("#createdToDate", {
+                    locale: "ar",
+                    dateFormat: "Y-m-d",
+                    allowInput: true,
+                    onChange: function(selectedDates, dateStr) {
+                        applyLiveFilters();
+                    }
+                });
                 // Initialize date pickers with change event
                 flatpickr("#createdAtFilter", {
                     locale: "ar",
@@ -1453,7 +1499,7 @@
                     dateFormat: "Y-m-d",
                     allowInput: true,
                     onChange: function(selectedDates, dateStr) {
-                        applyLiveFilters();
+                      applyLiveFilters();
                     }
                 });
 
@@ -1614,7 +1660,8 @@
                     currentFilteredClients = [...ClientsData];
 
                     console.log("Clients Data:", ClientsData);
-
+                    // Debug the data
+                    debugClientData();
                     // Render initial table
                     renderTable();
                     updateClientCounter();
@@ -2749,23 +2796,74 @@
                         });
                     }
                 });
+                // Function to update client count badge when hovering over dates - shows FILTERED clients
                 function updateClientCountBadge(dateStr) {
                     if (!dateStr) {
                         document.getElementById('createdAtCountBadge').classList.add('hidden');
                         return;
                     }
 
-                    const count = ClientsData.filter(client => {
-                        if (!client.client_created_at) return false;
-                        // Convert both dates to same format for accurate comparison
-                        const clientDate = new Date(client.client_created_at);
-                        const selectedDate = new Date(dateStr);
+                    console.log("=== HOVER DEBUG ===");
+                    console.log("Hovered date:", dateStr);
+                    console.log("currentFilteredClients length:", currentFilteredClients.length);
+                    console.log("ClientsData length:", ClientsData.length);
 
-                        return clientDate.toISOString().split('T')[0] === selectedDate.toISOString().split('T')[0];
-                    }).length;
+                    // Check if we have any filtered clients
+                    if (currentFilteredClients.length === 0) {
+                        console.log("WARNING: currentFilteredClients is empty! Using full dataset.");
+                        // Fallback to full dataset
+                        currentFilteredClients = [...ClientsData];
+                    }
 
+                    const matchingClients = currentFilteredClients.filter(client => {
+                        if (!client.client_created_at) {
+                            return false;
+                        }
+
+                        const clientDate = new Date(client.client_created_at).toISOString().split('T')[0];
+                        const isMatch = clientDate === dateStr;
+
+                        return isMatch;
+                    });
+
+                    console.log("Matching clients:", matchingClients.length);
+                    console.log("Sample matches:", matchingClients.slice(0, 3).map(c => ({
+                        id: c.client_id,
+                        company: c.company_name,
+                        date: c.client_created_at
+                    })));
+                    console.log("=== END DEBUG ===");
+
+                    const count = matchingClients.length;
                     document.getElementById('createdAtCount').textContent = count;
-                    document.getElementById('createdAtCountBadge').classList.remove('hidden');
+
+                    if (count > 0) {
+                        document.getElementById('createdAtCountBadge').classList.remove('hidden');
+                    } else {
+                        document.getElementById('createdAtCountBadge').classList.add('hidden');
+                    }
+
+                    updateHoverClientCounter(count, dateStr);
+                }
+                function debugClientData() {
+                    console.log("=== CLIENT DATA STRUCTURE DEBUG ===");
+                    if (ClientsData.length > 0) {
+                        const sampleClient = ClientsData[0];
+                        console.log("Sample client structure:", Object.keys(sampleClient));
+                        console.log("Sample client created_at:", sampleClient.client_created_at);
+                        console.log("Sample client date type:", typeof sampleClient.client_created_at);
+
+                        // Check first 5 clients' dates
+                        ClientsData.slice(0, 5).forEach((client, index) => {
+                            console.log(`Client ${index}:`, {
+                                id: client.client_id,
+                                company: client.company_name,
+                                created_at: client.client_created_at,
+                                formatted: client.client_created_at ? new Date(client.client_created_at).toISOString().split('T')[0] : 'NO DATE'
+                            });
+                        });
+                    }
+                    console.log("=== END DATA DEBUG ===");
                 }
 
                 // Function to hide the badge

@@ -193,6 +193,13 @@ class ClientController extends Controller
                 $q->where('name', $request->sales_rep);
             });
         }
+        if ($request->has('created_from_date') && !empty($request->created_from_date)) {
+            $query->whereDate('created_at', '>=', $request->created_from_date);
+        }
+
+        if ($request->has('created_to_date') && !empty($request->created_to_date)) {
+            $query->whereDate('created_at', '<=', $request->created_to_date);
+        }
 
         if ($request->has('from_date') && !empty($request->from_date)) {
             $query->whereDate('last_contact_date', '>=', $request->from_date);
