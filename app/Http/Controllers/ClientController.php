@@ -171,13 +171,15 @@ class ClientController extends Controller
         }
         if ($request->has('interest_status') && !empty($request->interest_status)) {
             $status = $request->interest_status;
-            $lateDays = $request->get('late_days', 7); // Default to 7 days
+            $lateDays = $request->get('late_days', 3); // Use the same default as in settings
+
+            // Get late days threshold from settings
+            $lateDaysThreshold = Setting::where('key', 'late_customer_days')->value('value') ?? 3;
+            $lateThreshold = now()->subDays($lateDaysThreshold);
 
             if (in_array($status, ['interested', 'not interested', 'neutral'])) {
                 $query->where('interest_status', $status);
             } else {
-                $lateThreshold = now()->subDays($lateDays);
-
                 $lateCondition = function($q) use ($lateThreshold) {
                     $q->whereNull('last_contact_date')
                         ->orWhere('last_contact_date', '<', $lateThreshold);
