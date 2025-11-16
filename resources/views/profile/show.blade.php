@@ -275,7 +275,7 @@
                                             </div>
 <a href="{{ route('sales-reps.clients.index', $user->salesRep->id) }}?filter=late" class="block no-underline text-gray-800 hover:text-red-600">
     <h6 class="metric-title">العملاء المتأخرين</h6>
-    <p class="metric-value text-danger">{{ $user->salesRep->lateCustomers }}</p>
+    <p class="metric-value text-danger">{{ $user->salesRep->lateCustomers('interested')+$user->salesRep->lateCustomers('not interested')+$user->salesRep->lateCustomers('neutral') }}</p>
 </a>
                                         </div>
                                     </div>
