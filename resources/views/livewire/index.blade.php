@@ -14,7 +14,7 @@ $salesRepId = Auth::user()->salesRep->id;
         <div class="header-brand flex-shrink-0">
             <a href="{{ route('dashboard') }}" class="logo block transition-transform hover:scale-105">
                 <div class="flex items-center space-x-2 space-x-reverse">
-                    
+
 <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="logo-img h-16 w-auto">
                 </div>
             </a>
@@ -166,10 +166,11 @@ $salesRepId = Auth::user()->salesRep->id;
                     <span class="sr-only">Open user menu</span>
 
                     <div class="relative h-10 w-10 rounded-full overflow-hidden border-2 border-white/30 group-hover:border-white/50 transition-all duration-300">
-                      
-<img class="h-full w-full object-cover"
-     src="{{ Auth::user()->personal_image ? Storage::disk('s3')->temporaryUrl(Auth::user()->personal_image, now()->addMinutes(60)) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=random' }}"
-     alt="{{ Auth::user()->name }}">
+
+                        <img class="h-full w-full object-cover"
+                             src="{{ Auth::user()->personal_image}}"
+                             alt="{{ Auth::user()->name }}">
+
                         <div class="absolute inset-0 bg-white/10 group-hover:bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
 
