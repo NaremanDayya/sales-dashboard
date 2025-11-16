@@ -3,7 +3,17 @@
         <h5 class="font-extrabold text-2xl">المحادثات</h5>
     </div>
 
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-3">
+        <!-- Filter Dropdown -->
+        <div class="relative">
+            <select wire:model.live="filter"
+                    class="text-sm rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-8 py-1">
+                <option value="newest">الأحدث</option>
+                <option value="oldest">الأقدم</option>
+                <option value="unread">غير المقروءة</option>
+                <option value="read">المقروءة</option>
+            </select>
+        </div>
         <!-- New Chat Button with Animation -->
         <button id="newChatBtn" class=" flex items-center focus:outline-hidden">
             <svg class="w-8 h-8 -mb-1 text-gray-500 cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 dark:text-gray-300"

@@ -4,22 +4,24 @@
     </header>
 
     <!-- Conversations List -->
-    <div class="flex-1 overflow-y-auto"
+    <div class="flex-1 overflow-y-auto" x-ref="container"
          x-data="{
         loading: @entangle('loading'),
         hasMore: @entangle('hasMore'),
         throttle: false,
         observer: null,
-        init() {
-            const container = this.$el;
+        setupObserver() {
+            const container = this.$refs.container || this.$el;
             const sentinel = this.$refs.sentinel;
 
-            // Ensure scroll is visible
-            container.style.overflowY = 'auto';
-            container.style.overflowX = 'hidden';
+            // Pick appropriate root: if container isn't scrollable here, fall back to viewport
+            const style = getComputedStyle(container);
+            const isScrollable = ['auto', 'scroll'].includes(style.overflowY);
+            const rootEl = isScrollable ? container : null; // null => viewport
 
-            // IntersectionObserver to trigger loadMore when sentinel enters view
-            const options = { root: container, rootMargin: '0px 0px 200px 0px', threshold: 0 };
+            if (this.observer) this.observer.disconnect();
+
+            const options = { root: rootEl, rootMargin: '0px 0px 200px 0px', threshold: 0 };
             this.observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting && !this.loading && this.hasMore && !this.throttle) {
@@ -30,6 +32,14 @@
                 });
             }, options);
             if (sentinel) this.observer.observe(sentinel);
+        },
+        init() {
+            const container = this.$refs.container || this.$el;
+            // Ensure scroll is visible when used as its own scroll root
+            container.style.overflowX = 'hidden';
+            if (!container.style.overflowY) container.style.overflowY = 'auto';
+
+            this.setupObserver();
 
             // Listen for real-time updates
             Livewire.on('conversationUpdated', () => {
@@ -38,10 +48,47 @@
 
             // Stop observing when no more data
             this.$watch('hasMore', (val) => {
+                const sentinel = this.$refs.sentinel;
                 if (!val && this.observer && sentinel) {
                     this.observer.unobserve(sentinel);
                 }
             });
+
+            // Re-attach observer after Livewire DOM updates (e.g., when selecting a conversation)
+            if (window.Livewire && typeof window.Livewire.hook === 'function') {
+                window.Livewire.hook('message.processed', (message, component) => {
+                    // Only for this component instance
+                    try {
+                        if (component.id === this.$wire.__instance.id) {
+                            this.$nextTick(() => this.setupObserver());
+                        }
+                    } catch (e) { /* noop */ }
+                });
+            }
+
+            // Prefetch if list doesn't fill container
+            const prefetchIfShort = () => {
+                const root = this.$refs.container || this.$el;
+                if (this.hasMore && !this.loading && root.scrollHeight <= root.clientHeight + 50) {
+                    @this.loadMore();
+                    setTimeout(prefetchIfShort, 200);
+                }
+            };
+            setTimeout(prefetchIfShort, 200);
+
+            // Fallback: manually detect scroll bottom on container
+            const onScroll = () => {
+                try {
+                    const el = this.$refs.container || this.$el;
+                    const atBottom = (el.scrollTop + el.clientHeight) >= (el.scrollHeight - 2);
+                    if (atBottom && this.hasMore && !this.loading && !this.throttle) {
+                        this.throttle = true;
+                        @this.loadMore();
+                        setTimeout(() => { this.throttle = false; }, 400);
+                    }
+                } catch (e) { /* noop */ }
+            };
+            container.addEventListener('scroll', onScroll, { passive: true });
         },
         destroy() {
             if (this.observer) this.observer.disconnect();

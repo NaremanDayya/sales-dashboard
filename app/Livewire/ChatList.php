@@ -18,6 +18,8 @@ class ChatList extends Component
     public $page = 1;
     public $allConversations; // This will store Conversation objects
     private $lastBatchHasMore = false; // track availability of more data based on server fetch
+    // Filter options: unread, read, oldest, newest
+    public $filter = 'newest';
 
     protected $listeners = [
         'conversationUpdated' => 'handleConversationUpdate',
@@ -80,12 +82,18 @@ class ChatList extends Component
         $this->loadInitialConversations();
     }
 
+    public function updatedFilter()
+    {
+        // Reset pagination and reload when filter changes
+        $this->refresh();
+    }
+
     private function getConversations($page = 1)
     {
         $user = Auth::user();
         $offset = ($page - 1) * $this->perPage;
 
-        $conversations = Conversation::with([
+        $query = Conversation::with([
             'client:id,sales_rep_id,company_name,company_logo',
             'client.salesRep:id,name',
         ])
@@ -100,16 +108,36 @@ class ChatList extends Component
                             $q2->where('name', 'like', '%' . $this->search . '%');
                         });
                 });
-            })
-            // Add unread messages count for ordering
-            ->withCount(['messages as unread_count' => function ($query) use ($user) {
-                $query->where('read_at', null)
-                    ->where('sender_id', '!=', $user->id);
-            }])
-            // Order by: unread messages first (desc), then updated_at (desc), then created_at (desc)
-            ->orderBy('unread_count', 'desc')
-            ->orderBy('updated_at', 'desc')
-            ->orderBy('created_at', 'desc')
+            });
+
+        // Add unread messages count for filtering/sorting
+        $query->withCount(['messages as unread_count' => function ($sub) use ($user) {
+            $sub->whereNull('read_at')
+                ->where('sender_id', '!=', $user->id);
+        }]);
+
+        // Apply filter conditions
+        $query->when($this->filter === 'unread', function ($q) {
+            $q->having('unread_count', '>', 0);
+        });
+
+        $query->when($this->filter === 'read', function ($q) {
+            $q->having('unread_count', '=', 0);
+        });
+
+        // Apply ordering
+        if ($this->filter === 'oldest') {
+            // Oldest by updated_at asc
+            $query->orderBy('updated_at', 'asc')
+                  ->orderBy('created_at', 'asc');
+        } else {
+            // Default/newest: keep unread first then latest updated
+            $query->orderBy('unread_count', 'desc')
+                  ->orderBy('updated_at', 'desc')
+                  ->orderBy('created_at', 'desc');
+        }
+
+        $conversations = $query
             ->skip($offset)
             // Fetch one extra record to determine if there are more without another query
             ->take($this->perPage + 1)
