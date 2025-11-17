@@ -16,9 +16,8 @@ class ChatList extends Component
     public $hasMore = true;
     public $loading = false;
     public $page = 1;
-    public $allConversations; // This will store Conversation objects
-    private $lastBatchHasMore = false; // track availability of more data based on server fetch
-    // Filter options: unread, read, oldest, newest
+    public $allConversations;
+    private $lastBatchHasMore = false;
     public $filter = 'newest';
 
     protected $listeners = [
@@ -36,7 +35,6 @@ class ChatList extends Component
     public function loadInitialConversations()
     {
         $this->allConversations = $this->getConversations(1);
-        // hasMore is determined by server-side over-fetching
         $this->hasMore = $this->lastBatchHasMore;
     }
 
@@ -50,11 +48,8 @@ class ChatList extends Component
         $this->page++;
 
         $additionalConversations = $this->getConversations($this->page);
-
-        // hasMore is determined by server-side over-fetching
         $this->hasMore = $this->lastBatchHasMore;
 
-        // Merge new conversations with existing ones (dedupe by id, keep as Collection)
         $this->allConversations = $this->allConversations
             ->concat($additionalConversations)
             ->unique('id')
@@ -64,13 +59,11 @@ class ChatList extends Component
 
     public function handleConversationUpdate($conversationId)
     {
-        // Refresh the entire list to get updated data
         $this->refresh();
     }
 
     public function handleNewMessage($data)
     {
-        // Refresh to show new messages and updated order
         $this->refresh();
     }
 
@@ -84,7 +77,6 @@ class ChatList extends Component
 
     public function updatedFilter()
     {
-        // Reset pagination and reload when filter changes
         $this->refresh();
     }
 
@@ -92,6 +84,10 @@ class ChatList extends Component
     {
         $user = Auth::user();
         $offset = ($page - 1) * $this->perPage;
+
+        // First, get the latest message for each conversation to use for sorting
+        $latestMessageSubquery = Message::select('conversation_id', \DB::raw('MAX(created_at) as latest_message_date'))
+            ->groupBy('conversation_id');
 
         $query = Conversation::with([
             'client:id,sales_rep_id,company_name,company_logo',
@@ -108,9 +104,13 @@ class ChatList extends Component
                             $q2->where('name', 'like', '%' . $this->search . '%');
                         });
                 });
+            })
+            // Join with latest messages for sorting
+            ->leftJoinSub($latestMessageSubquery, 'latest_messages', function ($join) {
+                $join->on('conversations.id', '=', 'latest_messages.conversation_id');
             });
 
-        // Add unread messages count for filtering/sorting
+        // Add unread messages count
         $query->withCount(['messages as unread_count' => function ($sub) use ($user) {
             $sub->whereNull('read_at')
                 ->where('sender_id', '!=', $user->id);
@@ -125,25 +125,24 @@ class ChatList extends Component
             $q->having('unread_count', '=', 0);
         });
 
-        // Apply ordering
+        // Apply ordering - FIXED: Sort by unread count first, then by latest message date
         if ($this->filter === 'oldest') {
-            // Oldest by updated_at asc
-            $query->orderBy('updated_at', 'asc')
-                  ->orderBy('created_at', 'asc');
+            // Oldest by latest message date
+            $query->orderBy('latest_messages.latest_message_date', 'asc')
+                ->orderBy('conversations.created_at', 'asc');
         } else {
-            // Default/newest: keep unread first then latest updated
+            // Default/newest: unread first, then by latest message date
             $query->orderBy('unread_count', 'desc')
-                  ->orderBy('updated_at', 'desc')
-                  ->orderBy('created_at', 'desc');
+                ->orderBy('latest_messages.latest_message_date', 'desc')
+                ->orderBy('conversations.created_at', 'desc');
         }
 
         $conversations = $query
+            ->select('conversations.*', 'latest_messages.latest_message_date')
             ->skip($offset)
-            // Fetch one extra record to determine if there are more without another query
             ->take($this->perPage + 1)
             ->get();
 
-        // Determine hasMore for this batch and trim to perPage
         $this->lastBatchHasMore = $conversations->count() > $this->perPage;
         if ($this->lastBatchHasMore) {
             $conversations = $conversations->slice(0, $this->perPage)->values();
@@ -160,7 +159,7 @@ class ChatList extends Component
 
         $conversationIds = $conversations->pluck('id');
 
-        // Get latest messages
+        // Get latest messages with full details
         $latestMessages = Message::whereIn('conversation_id', $conversationIds)
             ->whereIn('id', function($query) use ($conversationIds) {
                 $query->select(\DB::raw('MAX(id)'))
@@ -168,7 +167,7 @@ class ChatList extends Component
                     ->whereIn('conversation_id', $conversationIds)
                     ->groupBy('conversation_id');
             })
-            ->select('id', 'conversation_id', 'message', 'created_at', 'sender_id')
+            ->with('sender:id,name')
             ->get()
             ->keyBy('conversation_id');
 
@@ -179,6 +178,7 @@ class ChatList extends Component
             $conversation->latest_message_text = $latestMessage ? $latestMessage->message : '';
             $conversation->latest_message_time = $latestMessage ? $latestMessage->created_at : null;
             $conversation->latest_message_sender_id = $latestMessage ? $latestMessage->sender_id : null;
+            $conversation->latest_message_sender_name = $latestMessage && $latestMessage->sender ? $latestMessage->sender->name : null;
             $conversation->receiver_name = $conversation->getReceiver()->name;
             $conversation->unread_messages_count = $conversation->unreadMessagesCount();
             $conversation->is_last_message_read = $conversation->isLastMessageReadByUser();
