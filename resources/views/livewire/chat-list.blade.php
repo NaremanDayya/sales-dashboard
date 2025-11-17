@@ -10,11 +10,21 @@
         hasMore: @entangle('hasMore'),
         throttle: false,
         observer: null,
+        scrollParent: null,
+        getScrollParent(el) {
+            let p = el.parentElement;
+            while (p) {
+                const style = getComputedStyle(p);
+                if (['auto','scroll'].includes(style.overflowY)) return p;
+                p = p.parentElement;
+            }
+            return window;
+        },
         setupObserver() {
             const container = this.$refs.container || this.$el;
             const sentinel = this.$refs.sentinel;
 
-            // Pick appropriate root: if container isn't scrollable here, fall back to viewport
+            // Determine scroll root: nearest scrollable ancestor or viewport
             const style = getComputedStyle(container);
             const isScrollable = ['auto', 'scroll'].includes(style.overflowY);
             const rootEl = isScrollable ? container : null; // null => viewport
@@ -38,6 +48,9 @@
             // Ensure scroll is visible when used as its own scroll root
             container.style.overflowX = 'hidden';
             if (!container.style.overflowY) container.style.overflowY = 'auto';
+
+            // Cache nearest scrollable ancestor (or window)
+            this.scrollParent = this.getScrollParent(container);
 
             this.setupObserver();
 
@@ -79,8 +92,11 @@
             // Fallback: manually detect scroll bottom on container
             const onScroll = () => {
                 try {
-                    const el = this.$refs.container || this.$el;
-                    const atBottom = (el.scrollTop + el.clientHeight) >= (el.scrollHeight - 2);
+                    const el = this.scrollParent === window ? document.documentElement : this.scrollParent;
+                    const scrollTop = this.scrollParent === window ? (window.pageYOffset || document.documentElement.scrollTop) : el.scrollTop;
+                    const clientHeight = this.scrollParent === window ? window.innerHeight : el.clientHeight;
+                    const scrollHeight = this.scrollParent === window ? document.documentElement.scrollHeight : el.scrollHeight;
+                    const atBottom = (scrollTop + clientHeight) >= (scrollHeight - 2);
                     if (atBottom && this.hasMore && !this.loading && !this.throttle) {
                         this.throttle = true;
                         @this.loadMore();
@@ -88,7 +104,7 @@
                     }
                 } catch (e) { /* noop */ }
             };
-            container.addEventListener('scroll', onScroll, { passive: true });
+            (this.scrollParent === window ? window : this.scrollParent).addEventListener('scroll', onScroll, { passive: true });
         },
         destroy() {
             if (this.observer) this.observer.disconnect();
@@ -177,6 +193,13 @@
                 </svg>
                 <span class="text-sm text-gray-600">جاري تحميل المزيد...</span>
             </div>
+        </div>
+
+        <!-- Manual Load More Fallback -->
+        <div x-show="!loading && hasMore" class="p-4 text-center" x-cloak>
+            <button @click="$wire.loadMore()" class="px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700">
+                تحميل المزيد
+            </button>
         </div>
 
         <!-- No Conversations -->
