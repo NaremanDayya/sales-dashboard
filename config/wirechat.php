@@ -166,7 +166,7 @@ return [
     */
     'attachments' => [
         'storage_folder' => 'attachments',
-        'storage_disk' => 's3',
+        'storage_disk' => 'local',
         'disk_visibility' => 'private',
 
         'max_uploads' => 10,
