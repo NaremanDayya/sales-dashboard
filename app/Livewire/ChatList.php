@@ -108,7 +108,12 @@ class ChatList extends Component
                             $q2->where('name', 'like', '%' . $this->search . '%');
                         });
                 });
-            });
+            })
+            // compute latest message created_at for ordering
+            ->addSelect([
+                'latest_message_created_at' => Message::selectRaw('MAX(created_at)')
+                    ->whereColumn('conversation_id', 'conversations.id')
+            ]);
 
         // Add unread messages count for filtering/sorting
         $query->withCount(['messages as unread_count' => function ($sub) use ($user) {
@@ -125,15 +130,16 @@ class ChatList extends Component
             $q->having('unread_count', '=', 0);
         });
 
-        // Apply ordering
+        // Apply ordering using latest message timestamp
         if ($this->filter === 'oldest') {
-            // Oldest by updated_at asc
-            $query->orderBy('updated_at', 'asc')
+            // Oldest conversations first by latest message time
+            $query->orderBy('unread_count', 'desc')
+                  ->orderBy('latest_message_created_at', 'asc')
                   ->orderBy('created_at', 'asc');
         } else {
-            // Default/newest: keep unread first then latest updated
+            // Default/newest + other filters: unread first then latest message time desc
             $query->orderBy('unread_count', 'desc')
-                  ->orderBy('updated_at', 'desc')
+                  ->orderBy('latest_message_created_at', 'desc')
                   ->orderBy('created_at', 'desc');
         }
 
