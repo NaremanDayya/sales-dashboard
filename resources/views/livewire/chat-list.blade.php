@@ -170,8 +170,8 @@
                                 <span>{{ ($conversation->latest_message_text ?? '') === 'like' ? '👍' : ($conversation->latest_message_text ?? '') }}</span>
                             </p>
 
-                            @if(($conversation->unread_messages_count ?? 0) > 0)
-                                <span class="bg-blue-500 text-white text-xs rounded-full px-2 py-1 min-w-5 text-center">{{ $conversation->unread_messages_count }}</span>
+                            @if(($conversation->unread_count ?? 0) > 0)
+                                <span class="bg-blue-500 text-white text-xs rounded-full px-2 py-1 min-w-5 text-center">{{ $conversation->unread_count }}</span>
                             @endif
                         </div>
 

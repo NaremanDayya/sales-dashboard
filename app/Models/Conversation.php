@@ -35,6 +35,14 @@ class Conversation extends Model
     {
         return $this->hasMany(Message::class);
     }
+    public function getUnreadMessagesCountAttribute()
+    {
+        if (array_key_exists('unread_count', $this->attributes)) {
+            return $this->attributes['unread_count'];
+        }
+
+        return $this->unreadMessagesCount();
+    }
 
     public function getReceiver()
     {
