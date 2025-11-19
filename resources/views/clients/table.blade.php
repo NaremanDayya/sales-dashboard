@@ -126,8 +126,8 @@
             background-color: #f9fafb;
         }
         .pdf-header .header-logo {
-            max-height: 80px !important;
-            max-width: 200px !important;
+            max-height: 180px !important;
+            max-width: 300px !important;
             height: auto !important;
             width: auto !important;
             object-fit: contain !important;
