@@ -125,17 +125,9 @@
         .data-table tr:nth-child(even) td {
             background-color: #f9fafb;
         }
-        .pdf-header {
-            display: block !important;
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 25px;
-            border-bottom: 3px solid #333;
-        }
-
         .pdf-header .header-logo {
-            max-height: 150px !important;
-            max-width: 350px !important;
+            max-height: 80px !important;
+            max-width: 200px !important;
             height: auto !important;
             width: auto !important;
             object-fit: contain !important;
@@ -316,7 +308,13 @@
                 display: none !important;
             }
 
-
+            .pdf-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 20px;
+                padding: 15px;
+                border-bottom: 2px solid #333;
+            }
         }
 
         /* Scrollbar styling */
