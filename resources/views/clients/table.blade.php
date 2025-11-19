@@ -125,6 +125,13 @@
         .data-table tr:nth-child(even) td {
             background-color: #f9fafb;
         }
+        .pdf-header .header-logo {
+            max-height: 60px !important;
+            max-width: 180px !important;
+            height: auto !important;
+            width: auto !important;
+            object-fit: contain !important;
+        }
 
         /* Make specific content bolder */
         .company-name {
@@ -303,6 +310,10 @@
 
             .pdf-header {
                 display: block !important;
+                text-align: center;
+                margin-bottom: 20px;
+                padding: 15px;
+                border-bottom: 2px solid #333;
             }
         }
 
