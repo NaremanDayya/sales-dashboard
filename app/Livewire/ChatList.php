@@ -187,15 +187,15 @@ class ChatList extends Component
             $conversation->latest_message_sender_id = $latestMessage ? $latestMessage->sender_id : null;
             $conversation->receiver_name = $conversation->getReceiver()->name;
             $conversation->is_last_message_read = $conversation->isLastMessageReadByUser();
-            // Don't override unread_count if it's already set
+
+
             if (!isset($conversation->unread_count)) {
                 $conversation->unread_count = $conversation->unreadMessagesCount();
             }
         });
 
         return $conversations;
-    }
-    public function updatedSearch()
+    }    public function updatedSearch()
     {
         $this->refresh();
     }
