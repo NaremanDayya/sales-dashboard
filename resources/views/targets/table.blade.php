@@ -47,7 +47,10 @@
         padding: 1.25rem;
         border-bottom: 1px solid #e2e8f0;
     }
-
+    .pdf-header,
+    .pdf-footer {
+        display: none !important;
+    }
     .table-title {
         font-size: 1.25rem;
         font-weight: 600;
@@ -608,7 +611,7 @@ value="{{ old('commission_threshold', \App\Models\Setting::where('key', 'commiss
 
         <div class="table-responsive" dir="rtl">
             <div class="pdf-content">
-                <div class="pdf-header" style="display: none;">
+                <div class="pdf-header">
                     <div
                         class="header-content d-flex align-items-center justify-content-between flex-wrap mb-4 p-3 shadow rounded bg-white">
                         <div class="d-flex flex-column align-items-center text-center mx-auto">
@@ -656,7 +659,7 @@ value="{{ old('commission_threshold', \App\Models\Setting::where('key', 'commiss
                         <!-- Data will be inserted here -->
                     </tbody>
                 </table>
-<div class="pdf-footer" style="display: none;">
+<div class="pdf-footer">
                     <p>جميع الحقوق محفوظة &copy; شركة آفاق الخليج {{ date('Y') }}</p>
                 </div>
             </div>
@@ -1231,7 +1234,11 @@ function applyFilter() {
             const footer = document.querySelector('.pdf-footer');
             const element = document.querySelector('.pdf-content');
 
-            // Safety checks in case header/footer don't exist
+            // Store original display states
+            const headerOriginalDisplay = header ? header.style.display : 'none';
+            const footerOriginalDisplay = footer ? footer.style.display : 'none';
+
+            // Temporarily show header and footer for PDF
             if (header) header.style.display = 'block';
             if (footer) footer.style.display = 'block';
 
@@ -1253,14 +1260,18 @@ function applyFilter() {
             };
 
             html2pdf().set(options).from(element).save().then(() => {
-                if (header) header.style.display = 'none';
-                if (footer) footer.style.display = 'none';
+                // Restore original display states
+                if (header) header.style.display = headerOriginalDisplay;
+                if (footer) footer.style.display = footerOriginalDisplay;
             }).catch(error => {
                 console.error("PDF generation failed:", error);
-                if (header) header.style.display = 'none';
-                if (footer) footer.style.display = 'none';
+                // Restore original display states even on error
+                if (header) header.style.display = headerOriginalDisplay;
+                if (footer) footer.style.display = footerOriginalDisplay;
             });
         }
+
+
       let commissionId = null;
     let achievedAmount = 0;
 
