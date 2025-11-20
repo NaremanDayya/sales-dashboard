@@ -21,7 +21,7 @@ class GenericClientRequestApprovedNotification extends Notification implements S
 
     public function via($notifiable)
     {
-        return ['database', 'broadcast'];
+        return ['database'];
     }
 
     public function toDatabase($notifiable)
@@ -35,14 +35,14 @@ class GenericClientRequestApprovedNotification extends Notification implements S
 	    'url' =>route('sales-reps.clientRequests.show', [
 		'client' => $this->clientRequest->client_id,
  		'client_request' => $this->clientRequest->id
-	]),        
+	]),
 		];
     }
 
     public function toBroadcast($notifiable)
     {
         return new BroadcastMessage([
-            'message' => "تمت الموافقة على طلب العميل  {$this->clientRequest->client->company_name}.", 
+            'message' => "تمت الموافقة على طلب العميل  {$this->clientRequest->client->company_name}.",
             'client_request_id' => $this->clientRequest->id,
             'client_id' => $this->clientRequest->client_id,
             'request_type' => $this->clientRequest->request_type,

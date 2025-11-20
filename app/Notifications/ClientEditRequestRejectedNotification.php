@@ -21,7 +21,7 @@ class ClientEditRequestRejectedNotification extends Notification implements Shou
 
     public function via($notifiable)
     {
-        return ['database', 'broadcast'];
+        return ['database'];
     }
 
 
@@ -58,7 +58,7 @@ protected function getReadableType($type)
 
 return [
 
-    'message' => "✅ تم رفض طلب تعديل بيانات العميل \"{$this->clientEditRequest->client->company_name}\" - نوع التعديل: " . $this->getReadableType($this->clientEditRequest->edited_field), 
+    'message' => "✅ تم رفض طلب تعديل بيانات العميل \"{$this->clientEditRequest->client->company_name}\" - نوع التعديل: " . $this->getReadableType($this->clientEditRequest->edited_field),
 
     'client_edit_request_id' => $this->clientEditRequest->id,
 

@@ -22,13 +22,13 @@ class AgreementEditRequestApprovedNotification extends Notification implements S
 
     public function via($notifiable)
     {
-        return ['database', 'broadcast'];
+        return ['database'];
     }
 
     public function toDatabase($notifiable)
     {
      return [
-   	'message' => "تمت الموافقة على طلب التعديل على الاتفاقية الخاصة بالعميل  #{$this->agreementEditRequest->client->company_name} بخصوص الحقل: \"{$this->agreementEditRequest->edited_field}\".", 
+   	'message' => "تمت الموافقة على طلب التعديل على الاتفاقية الخاصة بالعميل  #{$this->agreementEditRequest->client->company_name} بخصوص الحقل: \"{$this->agreementEditRequest->edited_field}\".",
     	'agreement_edit_request_id' => $this->agreementEditRequest->id,
     	'agreement_id' => $this->agreementEditRequest->agreement_id,
     	'edited_field' => $this->agreementEditRequest->edited_field,

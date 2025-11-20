@@ -21,7 +21,7 @@ class AgreementEditRequestRejectedNotification extends Notification implements S
 
     public function via($notifiable)
     {
-        return ['database', 'broadcast'];
+        return ['database'];
     }
 
     public function toDatabase($notifiable)

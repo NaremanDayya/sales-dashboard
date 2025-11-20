@@ -43,28 +43,76 @@ class ClientEditRequestController extends Controller
             'status' => 'required|in:approved,rejected',
         ]);
 
-        $client_request->update([
-            'status' => $request->status,
-            'response_status' => $request->status,
-            'response_date' => now(),
-        ]);
-        $user = User::where('id', $client_request->sales_rep_id)->first();
+        try {
+            \DB::beginTransaction();
 
-        if ($client_request->status == 'approved') {
-            TemporaryPermission::create([
-                'user_id' => $client_request->sales_rep_id,
-                'permissible_type' => Client::class,
-                'permissible_id' => $client_request->client_id,
-                'field' => $client_request->edited_field,
-                'expires_at' => now()->addHours(24),
+            $client_request->update([
+                'status' => $request->status,
+                'response_status' => $request->status,
+                'response_date' => now(),
             ]);
-            $user->notify(new ClientEditRequestApprovedNotification($client_request));
-        } else if ($client_request->status == 'rejected') {
-            $user->notify(new ClientEditRequestRejectedNotification($client_request));
-        }
-        return redirect()->route('admin.allRequests');
-    }
 
+            $user = User::where('id', $client_request->sales_rep_id)->first();
+
+            if ($client_request->status == 'approved') {
+                // Handle temporary permission
+                $existingPermission = TemporaryPermission::where([
+                    'user_id' => $client_request->sales_rep_id,
+                    'permissible_type' => Client::class,
+                    'permissible_id' => $client_request->client_id,
+                    'field' => $client_request->edited_field,
+                ])->first();
+
+                if ($existingPermission) {
+                    $existingPermission->update([
+                        'expires_at' => now()->addHours(24)
+                    ]);
+                } else {
+                    TemporaryPermission::create([
+                        'user_id' => $client_request->sales_rep_id,
+                        'permissible_type' => Client::class,
+                        'permissible_id' => $client_request->client_id,
+                        'field' => $client_request->edited_field,
+                        'expires_at' => now()->addHours(24),
+                    ]);
+                }
+
+                if ($user) {
+                    $user->notify(new ClientEditRequestApprovedNotification($client_request));
+                }
+            } else if ($client_request->status == 'rejected') {
+                if ($user) {
+                    $user->notify(new ClientEditRequestRejectedNotification($client_request));
+                }
+            }
+
+            \DB::commit();
+
+            // Return JSON response for AJAX requests
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'تم تحديث حالة الطلب بنجاح',
+                    'status' => $request->status
+                ]);
+            }
+
+            return redirect()->route('admin.allRequests')->with('success', 'تم تحديث حالة الطلب بنجاح');
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+
+            // Return JSON response for AJAX requests
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'فشل في تحديث حالة الطلب: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'فشل في تحديث حالة الطلب');
+        }
+    }
     public function review(Client $client, ClientEditRequest $client_request)
     {
         $client_request->load(['client', 'salesRep']);

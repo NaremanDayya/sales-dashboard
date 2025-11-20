@@ -35,20 +35,50 @@ class ClientRequestController extends Controller
             'status' => 'required|in:approved,rejected',
         ]);
 
-        $client_request->update([
-            'status' => $request->status,
-            'updated_at' => now(),
-        ]);
+        try {
+            \DB::beginTransaction();
 
-        $user = User::find($client_request->sales_rep_id);
+            $client_request->update([
+                'status' => $request->status,
+                'updated_at' => now(),
+            ]);
 
-        if ($request->status === 'approved') {
-            $user->notify(new GenericClientRequestApprovedNotification($client_request));
-        } elseif ($request->status === 'rejected') {
-            $user->notify(new GenericClientRequestRejectedNotification($client_request));
+            $user = User::find($client_request->sales_rep_id);
+
+            if ($request->status === 'approved') {
+                if ($user) {
+                    $user->notify(new GenericClientRequestApprovedNotification($client_request));
+                }
+            } elseif ($request->status === 'rejected') {
+                if ($user) {
+                    $user->notify(new GenericClientRequestRejectedNotification($client_request));
+                }
+            }
+
+            \DB::commit();
+
+            // Return JSON response for AJAX requests
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'تم تحديث حالة الطلب بنجاح',
+                    'status' => $request->status
+                ]);
+            }
+
+            return back()->with('success', 'تم تقييم الطلب بنجاح.');
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+
+            // Return JSON response for AJAX requests
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'فشل في تحديث حالة الطلب: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return back()->with('error', 'فشل في تقييم الطلب.');
         }
-	return back()->with('success', 'تم تقييم الطلب بنجاح.');
-
-
-    }
-}
+    }}

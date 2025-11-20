@@ -21,7 +21,7 @@ class ClientEditRequestApprovedNotification extends Notification implements Shou
 
     public function via($notifiable)
     {
-        return ['database', 'broadcast'];
+        return ['database'];
     }
 protected function getReadableType($type)
 {

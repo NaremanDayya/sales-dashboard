@@ -815,7 +815,7 @@
                             </td>
 
                             @if(auth()->user()->role == 'admin')
-                                <td class="no-print">
+                                <td class="no-print" id="request-actions-{{ $request->id }}">
                                     <div class="flex space-x-2">
                                         @if ($request->status === 'pending')
                                             @php
@@ -839,28 +839,32 @@
                                             @endphp
 
                                             @if ($updateRoute !== '#')
-                                                <form action="{{ $updateRoute }}" method="POST" class="inline-flex gap-2">
-                                                    @csrf
-                                                    @method('PUT')
-                                                    <button type="submit" name="status" value="approved"
-                                                            class="px-3 py-1 bg-green-100 text-green-800 rounded-md text-sm hover:bg-green-200 transition-colors">
-                                                        قبول
-                                                    </button>
-                                                    <button type="submit" name="status" value="rejected"
-                                                            class="px-3 py-1 bg-red-100 text-red-800 rounded-md text-sm hover:bg-red-200 transition-colors">
-                                                        رفض
-                                                    </button>
-                                                </form>
+                                                <div class="request-actions">
+                                                    <form action="{{ $updateRoute }}" method="POST" class="inline-flex gap-2 ajax-update-form" data-request-id="{{ $request->id }}">
+                                                        @csrf
+                                                        @method('PUT')
+
+                                                        <button type="button" data-status="approved"
+                                                                class="update-status px-3 py-1 bg-green-100 text-green-800 rounded-md text-sm hover:bg-green-200 transition-colors">
+                                                            قبول
+                                                        </button>
+
+                                                        <button type="button" data-status="rejected"
+                                                                class="update-status px-3 py-1 bg-red-100 text-red-800 rounded-md text-sm hover:bg-red-200 transition-colors">
+                                                            رفض
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             @endif
                                         @else
                                             @if ($request->status === 'approved')
                                                 <span class="px-3 py-1 bg-green-100 text-green-800 rounded-md text-sm">
-                            مقبول
-                        </span>
+                        مقبول
+                    </span>
                                             @elseif ($request->status === 'rejected')
                                                 <span class="px-3 py-1 bg-red-100 text-red-800 rounded-md text-sm">
-                            مرفوض
-                        </span>
+                        مرفوض
+                    </span>
                                             @endif
                                         @endif
                                     </div>
@@ -889,10 +893,148 @@
     </div>
 
     @push('scripts')
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Setup event listeners
+                // Setup event listeners for status update buttons
+                document.querySelectorAll('.update-status').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const form = this.closest('form');
+                        const requestId = form.getAttribute('data-request-id');
+                        const url = form.getAttribute('action');
+                        const status = this.getAttribute('data-status');
+                        const container = document.getElementById(`request-actions-${requestId}`);
+
+                        console.log('=== DEBUG AJAX REQUEST ===');
+                        console.log('Request ID:', requestId);
+                        console.log('URL:', url);
+                        console.log('Status:', status);
+                        console.log('CSRF Token:', form.querySelector('input[name="_token"]').value);
+
+                        // Disable buttons during request
+                        const buttons = form.querySelectorAll('button');
+                        buttons.forEach(btn => {
+                            btn.disabled = true;
+                            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                        });
+
+                        fetch(url, {
+                            method: "POST",
+                            headers: {
+                                "X-CSRF-TOKEN": form.querySelector('input[name="_token"]').value,
+                                "Content-Type": "application/json",
+                                "X-Requested-With": "XMLHttpRequest",
+                                "Accept": "application/json"
+                            },
+                            body: JSON.stringify({
+                                _method: "PUT",
+                                status: status
+                            })
+                        })
+                            .then(response => {
+                                console.log('Response Status:', response.status);
+                                console.log('Response OK:', response.ok);
+
+                                // Check if response is JSON
+                                const contentType = response.headers.get('content-type');
+                                console.log('Content-Type:', contentType);
+
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                }
+
+                                if (contentType && contentType.includes('application/json')) {
+                                    return response.json();
+                                } else {
+                                    // If it's not JSON, it might be a redirect HTML
+                                    return response.text().then(text => {
+                                        console.log('Non-JSON Response:', text.substring(0, 200));
+                                        throw new Error('Server returned HTML instead of JSON. Check your controller.');
+                                    });
+                                }
+                            })
+                            .then(data => {
+                                console.log('Parsed Data:', data);
+
+                                if (data.success) {
+                                    // Update the UI with the new status
+                                    let statusText = '';
+                                    let statusClass = '';
+
+                                    if (status === "approved") {
+                                        statusText = 'مقبول';
+                                        statusClass = 'bg-green-100 text-green-800';
+                                    } else {
+                                        statusText = 'مرفوض';
+                                        statusClass = 'bg-red-100 text-red-800';
+                                    }
+
+                                    container.innerHTML = `
+                            <span class="px-3 py-1 ${statusClass} rounded-md text-sm">
+                                ${statusText}
+                            </span>
+                        `;
+
+                                    // Show success notification
+                                    showNotification(`تم ${status === 'approved' ? 'قبول' : 'رفض'} الطلب بنجاح`, 'success');
+                                } else {
+                                    throw new Error(data.message || 'Failed to update status');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Full Error Details:', error);
+                                console.error('Error Name:', error.name);
+                                console.error('Error Message:', error.message);
+
+                                // Re-enable buttons
+                                buttons.forEach(btn => {
+                                    btn.disabled = false;
+                                    btn.innerHTML = btn.getAttribute('data-status') === 'approved' ? 'قبول' : 'رفض';
+                                });
+
+                                // Show detailed error notification
+                                showNotification(`حدث خطأ أثناء تحديث حالة الطلب: ${error.message}`, 'error');
+                            });
+                    });
+                });
+
+                // Add notification function
+                function showNotification(message, type) {
+                    // Remove existing notifications
+                    const existingNotifications = document.querySelectorAll('.custom-notification');
+                    existingNotifications.forEach(notification => notification.remove());
+
+                    // Create notification element
+                    const notification = document.createElement('div');
+                    notification.className = `custom-notification fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 ${
+                        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+                    }`;
+                    notification.textContent = message;
+                    notification.style.fontWeight = '600';
+                    notification.style.transform = 'translateX(100%)';
+                    notification.style.opacity = '0';
+
+                    // Add to page
+                    document.body.appendChild(notification);
+
+                    // Animate in
+                    setTimeout(() => {
+                        notification.style.transform = 'translateX(0)';
+                        notification.style.opacity = '1';
+                    }, 100);
+
+                    // Remove after 5 seconds (longer for debugging)
+                    setTimeout(() => {
+                        notification.style.transform = 'translateX(100%)';
+                        notification.style.opacity = '0';
+                        setTimeout(() => {
+                            if (notification.parentNode) {
+                                notification.parentNode.removeChild(notification);
+                            }
+                        }, 300);
+                    }, 5000);
+                }
+
+                // Your existing export and filter code...
                 document.getElementById('searchInput').addEventListener('input', function(e) {
                     const searchTerm = e.target.value.toLowerCase();
                     const rows = document.querySelectorAll('#tableBody tr');
@@ -911,35 +1053,34 @@
                 const exportBtn = document.getElementById('exportBtn');
                 const dropdown = document.getElementById('exportDropdown');
 
-                exportBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    this.closest('.dropdown').classList.toggle('active');
-                });
-
-                // Close dropdown when clicking outside
-                document.addEventListener('click', function() {
-                    document.querySelectorAll('.dropdown').forEach(drop => {
-                        drop.classList.remove('active');
+                if (exportBtn && dropdown) {
+                    exportBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        this.closest('.dropdown').classList.toggle('active');
                     });
-                });
 
-                // Handle export option clicks
-                document.querySelectorAll('.dropdown-item').forEach(item => {
-                    item.addEventListener('click', function() {
-                        const exportType = this.getAttribute('data-type');
-                        if (exportType === 'csv') {
-                            exportRequests('csv');
-                        } else if (exportType === 'pdf') {
-                            exportToPDF();
-                        }
-                        this.closest('.dropdown').classList.remove('active');
+                    document.addEventListener('click', function() {
+                        document.querySelectorAll('.dropdown').forEach(drop => {
+                            drop.classList.remove('active');
+                        });
                     });
-                });
 
-                // Prevent dropdown from closing when clicking inside it
-                dropdown.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
+                    document.querySelectorAll('.dropdown-item').forEach(item => {
+                        item.addEventListener('click', function() {
+                            const exportType = this.getAttribute('data-type');
+                            if (exportType === 'csv') {
+                                exportRequests('csv');
+                            } else if (exportType === 'pdf') {
+                                exportToPDF();
+                            }
+                            this.closest('.dropdown').classList.remove('active');
+                        });
+                    });
+
+                    dropdown.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                    });
+                }
             });
 
             function applyFilter() {
@@ -1024,55 +1165,6 @@
                 const emptyState = document.querySelector('.empty-state');
                 if (emptyState) {
                     emptyState.style.display = visibleRows.length === 0 ? '' : 'none';
-                }
-            }
-            function approveRequest(type, id) {
-                if (confirm('هل أنت متأكد من قبول هذا الطلب؟')) {
-                    fetch(`/api/sales-reps/${type}-edit-requests/${id}/approve`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                location.reload();
-                            } else {
-                                alert(data.message || 'حدث خطأ أثناء معالجة الطلب');
-                            }
-                        })
-                        .catch(error => {
-                            alert('حدث خطأ في الشبكة');
-                        });
-                }
-            }
-
-            function rejectRequest(type, id) {
-                const notes = prompt('الرجاء إدخال ملاحظات حول سبب الرفض:');
-                if (notes !== null) {
-                    fetch(`/api/sales-reps/${type}-edit-requests/${id}/reject`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({ notes })
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                location.reload();
-                            } else {
-                                alert(data.message || 'حدث خطأ أثناء معالجة الطلب');
-                            }
-                        })
-                        .catch(error => {
-                            alert('حدث خطأ في الشبكة');
-                        });
                 }
             }
 
