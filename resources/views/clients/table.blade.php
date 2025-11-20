@@ -1499,8 +1499,27 @@
                             }
                         });
                     }
+                    initializeFiltersFromURL();
                 });
+                function initializeFiltersFromURL() {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const interestStatus = urlParams.get('interest_status');
 
+                    if (interestStatus) {
+                        document.getElementById('filterSelect').value = interestStatus;
+                    }
+
+                    // You can add similar initialization for other filters if needed
+                    const salesRep = urlParams.get('sales_rep');
+                    if (salesRep) {
+                        document.getElementById('salesRepFilter').value = salesRep;
+                    }
+
+                    const lateDays = urlParams.get('late_days');
+                    if (lateDays) {
+                        document.getElementById('lateDaysInput').value = lateDays;
+                    }
+                }
                 // Simple export function
                 function exportTable(type) {
                     const selectedColumns = getSelectedColumns();
