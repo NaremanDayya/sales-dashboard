@@ -69,13 +69,11 @@ class Client extends Model
             return false;
         }
 
-        // اجلب قيمة late_customer_days أو fallback إلى 3
         $lateDays = Setting::where('key', 'late_customer_days')->value('value') ?? 3;
 
         $time = now()->copy();
         $daysCounted = 0;
 
-        // حساب الأيام المتأخرة مع تجاهل الجمعة والسبت
         while ($daysCounted < $lateDays) {
             $time->subDay();
             // Carbon: 0 = الأحد ... 5 = الجمعة, 6 = السبت
@@ -95,23 +93,23 @@ class Client extends Model
         $last_contact_date = Carbon::Parse($this->last_contact_date);
         return (int)$last_contact_date->diffInDays(now());
     }
-  public function getCompanyLogoAttribute()
-{
-    $logo = $this->attributes['company_logo'] ?? null;
-
-    if (!$logo) {
-        return null;
-    }
-
-    if (Storage::disk('s3')->exists($logo)) {
-        return Storage::disk('s3')->temporaryUrl($logo, now()->addMinutes(1));
-    }
-
-    if (Storage::disk('public')->exists($logo)) {
-        return asset('storage/' . $logo);
-    }
-
-    return 'https://ui-avatars.com/api/?name=' . urlencode($this->attributes['company_name']) . '&background=random';
-}
+//  public function getCompanyLogoAttribute()
+//{
+//    $logo = $this->attributes['company_logo'] ?? null;
+//
+//    if (!$logo) {
+//        return null;
+//    }
+//
+//    if (Storage::disk('s3')->exists($logo)) {
+//        return Storage::disk('s3')->temporaryUrl($logo, now()->addMinutes(1));
+//    }
+//
+//    if (Storage::disk('public')->exists($logo)) {
+//        return asset('storage/' . $logo);
+//    }
+//
+//    return 'https://ui-avatars.com/api/?name=' . urlencode($this->attributes['company_name']) . '&background=random';
+//}
 
 }
