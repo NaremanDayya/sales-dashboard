@@ -5,7 +5,6 @@ namespace App\Livewire;
 use App\Models\Conversation;
 use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 
 class ChatList extends Component
@@ -21,37 +20,11 @@ class ChatList extends Component
     private $lastBatchHasMore = false;
     public $filter = 'newest';
 
-    // Add cache key for this user's unread counts
-    private function getUnreadCountCacheKey()
-    {
-        return 'user_' . Auth::id() . '_conversation_unread_counts';
-    }
-
-    // Method to get cached unread counts
-    private function getCachedUnreadCounts()
-    {
-        return Cache::get($this->getUnreadCountCacheKey(), []);
-    }
-
-    // Method to update cached unread count for a conversation
-    private function updateCachedUnreadCount($conversationId, $count)
-    {
-        $cachedCounts = $this->getCachedUnreadCounts();
-        $cachedCounts[$conversationId] = $count;
-        Cache::put($this->getUnreadCountCacheKey(), $cachedCounts, now()->addHours(2));
-    }
-
-    // Method to clear all cached unread counts
-    private function clearCachedUnreadCounts()
-    {
-        Cache::forget($this->getUnreadCountCacheKey());
-    }
-
     protected $listeners = [
         'conversationUpdated' => 'handleConversationUpdate',
         'newMessageReceived' => 'handleNewMessage',
         'refreshChatList' => 'refresh',
-        'markMessagesAsRead' => 'handleMarkMessagesAsRead', // Add this new listener
+        'updateUnreadCount' => 'updateUnreadCount',
     ];
 
     public function mount($client = null)
@@ -78,52 +51,49 @@ class ChatList extends Component
         $additionalConversations = $this->getConversations($this->page);
         $this->hasMore = $this->lastBatchHasMore;
 
-        // Merge and ensure unread counts are preserved
-        $existingConversations = $this->allConversations->keyBy('id');
-        $newConversations = $additionalConversations->keyBy('id');
-
-        // Preserve unread counts from existing conversations
-        foreach ($existingConversations as $id => $conv) {
-            if ($newConversations->has($id)) {
-                $newConversations[$id]->unread_count = $conv->unread_count ?? $newConversations[$id]->unread_count;
-            }
-        }
-
-        $this->allConversations = $existingConversations
-            ->merge($newConversations)
+        // Merge new conversations with existing ones
+        $this->allConversations = $this->allConversations
+            ->concat($additionalConversations)
+            ->unique('id')
             ->values();
+
         $this->loading = false;
+
+        // Dispatch event to Alpine.js with unread counts
+        $this->dispatch('conversationsLoaded',
+            conversations: $this->allConversations->map(function($conv) {
+                return [
+                    'id' => $conv->id,
+                    'unread_count' => $conv->unread_count ?? 0
+                ];
+            })->toArray()
+        );
     }
 
     public function handleConversationUpdate($conversationId)
     {
-        // Refresh the specific conversation
-        $this->refreshConversation($conversationId);
+        $this->refresh();
     }
 
     public function handleNewMessage($data)
     {
         if (isset($data['conversation_id'])) {
-            $this->refreshConversation($data['conversation_id']);
+            // Update specific conversation's unread count
+            $this->dispatch('updateConversationUnread',
+                conversationId: $data['conversation_id'],
+                increment: true
+            );
         } else {
             $this->refresh();
         }
     }
 
-    public function handleMarkMessagesAsRead($conversationId)
+    public function updateUnreadCount($conversationId, $count)
     {
-        // Update cached unread count to 0 when messages are marked as read
-        $this->updateCachedUnreadCount($conversationId, 0);
-
-        // Also update in the current collection
-        if ($this->allConversations) {
-            $this->allConversations = $this->allConversations->map(function ($conversation) use ($conversationId) {
-                if ($conversation->id == $conversationId) {
-                    $conversation->unread_count = 0;
-                }
-                return $conversation;
-            });
-        }
+        $this->dispatch('updateConversationUnread',
+            conversationId: $conversationId,
+            count: $count
+        );
     }
 
     public function refresh()
@@ -132,25 +102,9 @@ class ChatList extends Component
         $this->hasMore = true;
         $this->loading = false;
         $this->loadInitialConversations();
-    }
 
-    // New method to refresh a specific conversation
-    private function refreshConversation($conversationId)
-    {
-        $refreshedConversation = Conversation::with([
-            'client:id,sales_rep_id,company_name,company_logo',
-            'client.salesRep:id,name',
-        ])->find($conversationId);
-
-        if ($refreshedConversation) {
-            $enhancedConversation = $this->enhanceConversationsWithMessages(collect([$refreshedConversation]))->first();
-
-            if ($this->allConversations) {
-                $this->allConversations = $this->allConversations->map(function ($conversation) use ($enhancedConversation) {
-                    return $conversation->id == $enhancedConversation->id ? $enhancedConversation : $conversation;
-                });
-            }
-        }
+        // Dispatch event to reset Alpine.js store
+        $this->dispatch('resetUnreadStore');
     }
 
     public function updatedFilter()
@@ -184,9 +138,6 @@ class ChatList extends Component
                     ->whereColumn('conversation_id', 'conversations.id')
             ]);
 
-        // Get cached unread counts to ensure consistency
-        $cachedUnreadCounts = $this->getCachedUnreadCounts();
-
         $query->withCount(['messages as unread_count' => function ($sub) use ($user) {
             $sub->whereNull('read_at')
                 ->where('sender_id', '!=', $user->id);
@@ -201,7 +152,7 @@ class ChatList extends Component
             $q->having('unread_count', '=', 0);
         });
 
-        // Apply ordering using latest message timestamp
+        // Apply ordering
         if ($this->filter === 'oldest') {
             $query->orderBy('unread_count', 'desc')
                 ->orderBy('latest_message_created_at', 'asc')
@@ -232,7 +183,6 @@ class ChatList extends Component
         }
 
         $conversationIds = $conversations->pluck('id');
-        $cachedUnreadCounts = $this->getCachedUnreadCounts();
 
         // Get latest messages
         $latestMessages = Message::whereIn('conversation_id', $conversationIds)
@@ -247,7 +197,7 @@ class ChatList extends Component
             ->keyBy('conversation_id');
 
         // Enhance conversations with message data
-        $conversations->each(function ($conversation) use ($latestMessages, $cachedUnreadCounts) {
+        $conversations->each(function ($conversation) use ($latestMessages) {
             $latestMessage = $latestMessages->get($conversation->id);
 
             $conversation->latest_message_text = $latestMessage ? $latestMessage->message : '';
@@ -256,18 +206,9 @@ class ChatList extends Component
             $conversation->receiver_name = $conversation->getReceiver()->name;
             $conversation->is_last_message_read = $conversation->isLastMessageReadByUser();
 
-            // Use cached unread count if available, otherwise calculate and cache it
-            if (isset($cachedUnreadCounts[$conversation->id])) {
-                $conversation->unread_count = $cachedUnreadCounts[$conversation->id];
-            } else {
-                if (!isset($conversation->unread_count)) {
-                    $conversation->unread_count = $conversation->unreadMessagesCount();
-                }
-                // Cache the calculated unread count
-                $this->updateCachedUnreadCount($conversation->id, $conversation->unread_count);
+            if (!isset($conversation->unread_count)) {
+                $conversation->unread_count = $conversation->unreadMessagesCount();
             }
-
-            \Log::debug("Conversation {$conversation->id} unread_count: " . $conversation->unread_count);
         });
 
         return $conversations;
