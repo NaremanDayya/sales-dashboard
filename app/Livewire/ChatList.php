@@ -16,15 +16,15 @@ class ChatList extends Component
     public $hasMore = true;
     public $loading = false;
     public $page = 1;
-    public $allConversations;
-    private $lastBatchHasMore = false;
+    public $allConversations; // This will store Conversation objects
+    private $lastBatchHasMore = false; // track availability of more data based on server fetch
+    // Filter options: unread, read, oldest, newest
     public $filter = 'newest';
 
     protected $listeners = [
         'conversationUpdated' => 'handleConversationUpdate',
         'newMessageReceived' => 'handleNewMessage',
         'refreshChatList' => 'refresh',
-        'updateUnreadCount' => 'updateUnreadCount',
     ];
 
     public function mount($client = null)
@@ -36,6 +36,7 @@ class ChatList extends Component
     public function loadInitialConversations()
     {
         $this->allConversations = $this->getConversations(1);
+        // hasMore is determined by server-side over-fetching
         $this->hasMore = $this->lastBatchHasMore;
     }
 
@@ -49,51 +50,28 @@ class ChatList extends Component
         $this->page++;
 
         $additionalConversations = $this->getConversations($this->page);
+
+        // hasMore is determined by server-side over-fetching
         $this->hasMore = $this->lastBatchHasMore;
 
-        // Merge new conversations with existing ones
+        // Merge new conversations with existing ones (dedupe by id, keep as Collection)
         $this->allConversations = $this->allConversations
             ->concat($additionalConversations)
             ->unique('id')
             ->values();
-
         $this->loading = false;
-
-        // Dispatch event to Alpine.js with unread counts
-        $this->dispatch('conversationsLoaded',
-            conversations: $this->allConversations->map(function($conv) {
-                return [
-                    'id' => $conv->id,
-                    'unread_count' => $conv->unread_count ?? 0
-                ];
-            })->toArray()
-        );
     }
 
     public function handleConversationUpdate($conversationId)
     {
+        // Refresh the entire list to get updated data
         $this->refresh();
     }
 
     public function handleNewMessage($data)
     {
-        if (isset($data['conversation_id'])) {
-            // Update specific conversation's unread count
-            $this->dispatch('updateConversationUnread',
-                conversationId: $data['conversation_id'],
-                increment: true
-            );
-        } else {
-            $this->refresh();
-        }
-    }
-
-    public function updateUnreadCount($conversationId, $count)
-    {
-        $this->dispatch('updateConversationUnread',
-            conversationId: $conversationId,
-            count: $count
-        );
+        // Refresh to show new messages and updated order
+        $this->refresh();
     }
 
     public function refresh()
@@ -102,13 +80,11 @@ class ChatList extends Component
         $this->hasMore = true;
         $this->loading = false;
         $this->loadInitialConversations();
-
-        // Dispatch event to reset Alpine.js store
-        $this->dispatch('resetUnreadStore');
     }
 
     public function updatedFilter()
     {
+        // Reset pagination and reload when filter changes
         $this->refresh();
     }
 
@@ -133,11 +109,13 @@ class ChatList extends Component
                         });
                 });
             })
+            // compute latest message created_at for ordering
             ->addSelect([
                 'latest_message_created_at' => Message::selectRaw('MAX(created_at)')
                     ->whereColumn('conversation_id', 'conversations.id')
             ]);
 
+        // Add unread messages count for filtering/sorting
         $query->withCount(['messages as unread_count' => function ($sub) use ($user) {
             $sub->whereNull('read_at')
                 ->where('sender_id', '!=', $user->id);
@@ -152,22 +130,26 @@ class ChatList extends Component
             $q->having('unread_count', '=', 0);
         });
 
-        // Apply ordering
+        // Apply ordering using latest message timestamp
         if ($this->filter === 'oldest') {
+            // Oldest conversations first by latest message time
             $query->orderBy('unread_count', 'desc')
-                ->orderBy('latest_message_created_at', 'asc')
-                ->orderBy('created_at', 'asc');
+                  ->orderBy('latest_message_created_at', 'asc')
+                  ->orderBy('created_at', 'asc');
         } else {
+            // Default/newest + other filters: unread first then latest message time desc
             $query->orderBy('unread_count', 'desc')
-                ->orderBy('latest_message_created_at', 'desc')
-                ->orderBy('created_at', 'desc');
+                  ->orderBy('latest_message_created_at', 'desc')
+                  ->orderBy('created_at', 'desc');
         }
 
         $conversations = $query
             ->skip($offset)
+            // Fetch one extra record to determine if there are more without another query
             ->take($this->perPage + 1)
             ->get();
 
+        // Determine hasMore for this batch and trim to perPage
         $this->lastBatchHasMore = $conversations->count() > $this->perPage;
         if ($this->lastBatchHasMore) {
             $conversations = $conversations->slice(0, $this->perPage)->values();
@@ -184,7 +166,7 @@ class ChatList extends Component
 
         $conversationIds = $conversations->pluck('id');
 
-        // Get latest messages
+        // Get latest messages (Your existing logic is fine)
         $latestMessages = Message::whereIn('conversation_id', $conversationIds)
             ->whereIn('id', function($query) use ($conversationIds) {
                 $query->select(\DB::raw('MAX(id)'))
@@ -196,24 +178,34 @@ class ChatList extends Component
             ->get()
             ->keyBy('conversation_id');
 
-        // Enhance conversations with message data
-        $conversations->each(function ($conversation) use ($latestMessages) {
+        // Map the collection to add data AND convert to plain objects
+        $enhanced = $conversations->map(function ($conversation) use ($latestMessages) {
             $latestMessage = $latestMessages->get($conversation->id);
 
+            // calculate attributes
             $conversation->latest_message_text = $latestMessage ? $latestMessage->message : '';
             $conversation->latest_message_time = $latestMessage ? $latestMessage->created_at : null;
             $conversation->latest_message_sender_id = $latestMessage ? $latestMessage->sender_id : null;
-            $conversation->receiver_name = $conversation->getReceiver()->name;
+
+            // Fix: Ensure receiver_name is accessed safely or pre-calculated
+            // Note: Ensure getReceiver() doesn't rely on relationships not loaded,
+            // otherwise eager load 'sender' and 'receiver' in getConversations()
+            $conversation->receiver_name = $conversation->getReceiver()->name ?? 'Unknown';
+
             $conversation->is_last_message_read = $conversation->isLastMessageReadByUser();
 
             if (!isset($conversation->unread_count)) {
                 $conversation->unread_count = $conversation->unreadMessagesCount();
             }
+
+            // CRITICAL FIX: Convert to Array, then back to Object.
+            // This creates a "StdClass" object that Livewire will serialize fully,
+            // preventing it from re-fetching from DB and losing your counts.
+            return (object) $conversation->toArray();
         });
 
-        return $conversations;
+        return $enhanced;
     }
-
     public function updatedSearch()
     {
         $this->refresh();

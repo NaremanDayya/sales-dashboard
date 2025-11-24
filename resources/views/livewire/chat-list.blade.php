@@ -1,10 +1,4 @@
-<div class="flex flex-col h-full bg-white border-r border-gray-200"
-     x-data="chatListStore()"
-     x-init="init()"
-     @conversations-loaded.window="handleConversationsLoaded($event.detail)"
-     @update-conversation-unread.window="handleUpdateUnread($event.detail)"
-     @reset-unread-store.window="resetStore()">
-
+<div class="flex flex-col h-full bg-white border-r border-gray-200">
     <header class="px-3 z-10 bg-white sticky top-0 w-full py-10">
         @include('partials.chat-list-header')
     </header>
@@ -30,9 +24,10 @@
             const container = this.$refs.container || this.$el;
             const sentinel = this.$refs.sentinel;
 
+            // Determine scroll root: nearest scrollable ancestor or viewport
             const style = getComputedStyle(container);
             const isScrollable = ['auto', 'scroll'].includes(style.overflowY);
-            const rootEl = isScrollable ? container : null;
+            const rootEl = isScrollable ? container : null; // null => viewport
 
             if (this.observer) this.observer.disconnect();
 
@@ -50,10 +45,13 @@
         },
         init() {
             const container = this.$refs.container || this.$el;
+            // Ensure scroll is visible when used as its own scroll root
             container.style.overflowX = 'hidden';
             if (!container.style.overflowY) container.style.overflowY = 'auto';
 
+            // Cache nearest scrollable ancestor (or window)
             this.scrollParent = this.getScrollParent(container);
+
             this.setupObserver();
 
             // Listen for real-time updates
@@ -69,9 +67,10 @@
                 }
             });
 
-            // Re-attach observer after Livewire DOM updates
+            // Re-attach observer after Livewire DOM updates (e.g., when selecting a conversation)
             if (window.Livewire && typeof window.Livewire.hook === 'function') {
                 window.Livewire.hook('message.processed', (message, component) => {
+                    // Only for this component instance
                     try {
                         if (component.id === this.$wire.__instance.id) {
                             this.$nextTick(() => this.setupObserver());
@@ -117,18 +116,32 @@
         <div class="divide-y divide-gray-100">
             @foreach($conversations as $conversation)
                 @php
-                    $client = $conversation->client ?? null;
-                    $companyName = $client->company_name ?? 'Unknown Company';
-                    $companyLogo = $client->company_logo ?? null;
-                    $salesRepName = $client->salesRep->name ?? 'Sales Rep';
+                    // Handle if $conversation is an Object (StdClass) or Model
+                    // But relationships inside toArray() become Arrays.
+
+                    // 1. Cast the whole conversation to array to be consistent
+                    $convData = (array) $conversation;
+
+                    // 2. Extract Client Data safely
+                    $client = $convData['client'] ?? null;
+                    $clientId = $client['id'] ?? '';
+                    $companyName = $client['company_name'] ?? 'Unknown Company';
+                    $companyLogo = $client['company_logo'] ?? null;
+
+                    // 3. Extract Sales Rep Data safely
+                    $salesRep = $client['sales_rep'] ?? null; // Note: toArray converts camelCase relations to snake_case usually
+                    $salesRepName = $salesRep['name'] ?? 'Sales Rep';
+
+                    // 4. Message Data
+                    $unreadCount = $convData['unread_count'] ?? 0;
+                    $latestMsgTime = $convData['latest_message_time'] ?? null;
+                    $latestMsgText = $convData['latest_message_text'] ?? '';
                 @endphp
 
                 <a
                     wire:key="conv-{{ $conversation->id }}"
-                    href="{{ route('client.chat', ['client' => $client->id ?? '', 'conversation' => $conversation->id]) }}"
-                    class="flex items-center p-4 transition-colors duration-200 cursor-pointer group {{ $conversation->id === ($selectedConversation->id ?? null) ? 'bg-blue-50 border-r-4 border-blue-500' : 'hover:bg-gray-50' }}"
-                    x-data="{ conversationId: {{ $conversation->id }} }"
-                    @click="$store.chatList.markAsRead({{ $conversation->id }})">
+                    href="{{ route('client.chat', ['client' => $clientId ?? '', 'conversation' => $conversation->id]) }}"
+                    class="flex items-center p-4 transition-colors duration-200 cursor-pointer group {{ $conversation->id === ($selectedConversation->id ?? null) ? 'bg-blue-50 border-r-4 border-blue-500' : 'hover:bg-gray-50' }}">
 
                     <!-- Avatar -->
                     <div class="relative flex-shrink-0">
@@ -138,6 +151,7 @@
                                     src="{{ $companyLogo }}"
                                     alt="{{ $companyName }}"
                                     class="max-h-full max-w-full object-contain bg-white rounded-full">
+
                             @else
                                 <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
                                     {{ substr($companyName, 0, 1) }}
@@ -171,11 +185,9 @@
                                 <span>{{ ($conversation->latest_message_text ?? '') === 'like' ? '👍' : ($conversation->latest_message_text ?? '') }}</span>
                             </p>
 
-                            <!-- Use Alpine.js store for unread count -->
-                            <template x-if="$store.chatList.getUnreadCount({{ $conversation->id }}) > 0">
-                                <span class="bg-blue-500 text-white text-xs rounded-full px-2 py-1 min-w-5 text-center transition-all duration-300"
-                                      x-text="$store.chatList.getUnreadCount({{ $conversation->id }})"></span>
-                            </template>
+                            @if(($conversation->unread_count ?? 0) > 0)
+                                <span class="bg-blue-500 text-white text-xs rounded-full px-2 py-1 min-w-5 text-center">{{ $conversation->unread_count }}</span>
+                            @endif
                         </div>
 
                         <p class="text-xs text-gray-500 mt-1 truncate">{{ $salesRepName }}</p>
@@ -218,76 +230,10 @@
             </div>
         @endif
     </div>
-
     @include('partials.client-selection-modal')
     @vite('resources/js/client-chat.js')
 
     <script>
-        // Alpine.js Store for managing unread counts
-        document.addEventListener('alpine:init', () => {
-            Alpine.store('chatList', {
-                unreadCounts: {},
-
-                init() {
-                    // Initialize with current conversation data
-                    @foreach($conversations as $conversation)
-                        this.unreadCounts[{{ $conversation->id }}] = {{ $conversation->unread_count ?? 0 }};
-                    @endforeach
-                },
-
-                getUnreadCount(conversationId) {
-                    return this.unreadCounts[conversationId] || 0;
-                },
-
-                setUnreadCount(conversationId, count) {
-                    this.unreadCounts[conversationId] = count;
-                },
-
-                markAsRead(conversationId) {
-                    this.unreadCounts[conversationId] = 0;
-                    // You can also call Livewire method to update server-side
-                @this.call('markConversationAsRead', conversationId);
-                },
-
-                incrementUnreadCount(conversationId) {
-                    const current = this.unreadCounts[conversationId] || 0;
-                    this.unreadCounts[conversationId] = current + 1;
-                },
-
-                reset() {
-                    this.unreadCounts = {};
-                }
-            });
-        });
-
-        // Chat List Store Component
-        function chatListStore() {
-            return {
-                init() {
-                    // Initial setup if needed
-                },
-
-                handleConversationsLoaded(detail) {
-                    // Update store with new conversation data
-                    detail.conversations.forEach(conv => {
-                        Alpine.store('chatList').setUnreadCount(conv.id, conv.unread_count);
-                    });
-                },
-
-                handleUpdateUnread(detail) {
-                    if (detail.count !== undefined) {
-                        Alpine.store('chatList').setUnreadCount(detail.conversationId, detail.count);
-                    } else if (detail.increment) {
-                        Alpine.store('chatList').incrementUnreadCount(detail.conversationId);
-                    }
-                },
-
-                resetStore() {
-                    Alpine.store('chatList').reset();
-                }
-            }
-        }
-
         function formatTime(dateString) {
             if (!dateString) return '';
             try {
