@@ -126,7 +126,6 @@ class User extends Authenticatable
     }
     public function getPersonalImageAttribute()
     {
-//        test
         $path = $this->attributes['personal_image'] ?? null;
 
         if (!$path) {
@@ -144,12 +143,14 @@ class User extends Authenticatable
                 return Storage::url($path);
             }
 
-            // Check private/local storage with different path variations
+            // Check profile photos directories in private storage
             $pathsToCheck = [
                 $path,
                 'private/' . $path,
-                'temp/' . $path,
-                'private/temp/' . $path,
+                'profile-photos/' . $path,
+                'profile_photos/' . $path,
+                'private/profile-photos/' . $path,
+                'private/profile_photos/' . $path,
             ];
 
             foreach ($pathsToCheck as $checkPath) {
