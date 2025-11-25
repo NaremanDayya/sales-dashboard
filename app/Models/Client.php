@@ -98,31 +98,35 @@ class Client extends Model
         $logo = $this->attributes['company_logo'] ?? null;
 
         if (!$logo) {
-            return '- No logo path in database -';
+            return $this->getDefaultLogo();
         }
 
-        // Check public disk
-        if (Storage::disk('public')->exists($logo)) {
-            return 'public: ' . $logo . ' (Found)';
-        }
+        // Remove any storage path prefixes that might be stored in database
+        $logo = str_replace('storage/app/private/', '', $logo);
+        $logo = str_replace('private/', '', $logo);
+        $logo = ltrim($logo, '/');
 
-        // Check private storage with different path variations
+        // Define possible storage paths to check
         $pathsToCheck = [
-            $logo,
-            'private/' . $logo,
-            'temp/' . $logo,
-            'private/temp/' . $logo,
+            $logo, // original path
+            'private/' . $logo, // with private prefix
+            'temp/' . $logo, // in temp directory
+            'private/temp/' . $logo, // in private/temp directory
         ];
 
+        // Check public disk first
+        if (Storage::disk('public')->exists($logo)) {
+            return asset('storage/' . $logo);
+        }
+
+        // Check all possible private paths
         foreach ($pathsToCheck as $path) {
             if (Storage::disk('local')->exists($path)) {
-                return 'private: ' . $path . ' (Found)';
+                return route('file.serve', ['filename' => $path]);
             }
         }
 
-        // If not found anywhere, show all checked paths
-        $checkedPaths = implode(', ', array_merge([$logo], $pathsToCheck));
-        return 'Not found. Checked paths: ' . $checkedPaths;
+        return $this->getDefaultLogo();
     }
 
     protected function getDefaultLogo()
