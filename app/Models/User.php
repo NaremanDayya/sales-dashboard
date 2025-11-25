@@ -126,6 +126,7 @@ class User extends Authenticatable
     }
     public function getPersonalImageAttribute()
     {
+//        test
         $path = $this->attributes['personal_image'] ?? null;
 
         if (!$path) {
