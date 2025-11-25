@@ -101,20 +101,29 @@ class Client extends Model
             return $this->getDefaultLogo();
         }
 
-        // Check in public disk first
+        // Remove any storage path prefixes that might be stored in database
+        $logo = str_replace('storage/app/private/', '', $logo);
+        $logo = str_replace('private/', '', $logo);
+        $logo = ltrim($logo, '/');
+
+        // Define possible storage paths to check
+        $pathsToCheck = [
+            $logo, // original path
+            'private/' . $logo, // with private prefix
+            'temp/' . $logo, // in temp directory
+            'private/temp/' . $logo, // in private/temp directory
+        ];
+
+        // Check public disk first
         if (Storage::disk('public')->exists($logo)) {
             return asset('storage/' . $logo);
         }
 
-        // Check in local disk (private storage) - with private prefix
-        $privatePath = 'private/' . $logo;
-        if (Storage::disk('local')->exists($privatePath)) {
-            return route('file.serve', ['filename' => $privatePath]);
-        }
-
-        // Also check without private prefix for backward compatibility
-        if (Storage::disk('local')->exists($logo)) {
-            return route('file.serve', ['filename' => $logo]);
+        // Check all possible private paths
+        foreach ($pathsToCheck as $path) {
+            if (Storage::disk('local')->exists($path)) {
+                return route('file.serve', ['filename' => $path]);
+            }
         }
 
         return $this->getDefaultLogo();
