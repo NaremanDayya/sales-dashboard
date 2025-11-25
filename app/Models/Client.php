@@ -93,59 +93,42 @@ class Client extends Model
         $last_contact_date = Carbon::Parse($this->last_contact_date);
         return (int)$last_contact_date->diffInDays(now());
     }
-//    public function getCompanyLogoAttribute()
-//    {
-//        $logo = $this->attributes['company_logo'] ?? null;
-//
-//        if (!$logo) {
-//            return $this->getDefaultLogo();
-//        }
-//
-//        // Remove any storage path prefixes that might be stored in database
-//        $logo = str_replace('storage/app/private/', '', $logo);
-//        $logo = str_replace('private/', '', $logo);
-//        $logo = ltrim($logo, '/');
-//
-//        // Define possible storage paths to check
-//        $pathsToCheck = [
-//            $logo, // original path
-//            'private/' . $logo, // with private prefix
-//            'temp/' . $logo, // in temp directory
-//            'private/temp/' . $logo, // in private/temp directory
-//        ];
-//
-//        // Check public disk first
-//        if (Storage::disk('public')->exists($logo)) {
-//            return asset('storage/' . $logo);
-//        }
-//
-//        // Check all possible private paths
-//        foreach ($pathsToCheck as $path) {
-//            if (Storage::disk('local')->exists($path)) {
-//                return route('file.serve', ['filename' => $path]);
-//            }
-//        }
-//
-//        return $this->getDefaultLogo();
-//    }
     public function getCompanyLogoAttribute()
     {
         $logo = $this->attributes['company_logo'] ?? null;
 
         if (!$logo) {
-            return null;
+            return $this->getDefaultLogo();
         }
 
-        if (Storage::disk('s3')->exists($logo)) {
-            return Storage::disk('s3')->temporaryUrl($logo, now()->addMinutes(1));
-        }
+        // Remove any storage path prefixes that might be stored in database
+        $logo = str_replace('storage/app/private/', '', $logo);
+        $logo = str_replace('private/', '', $logo);
+        $logo = ltrim($logo, '/');
 
+        // Define possible storage paths to check
+        $pathsToCheck = [
+            $logo, // original path
+            'private/' . $logo, // with private prefix
+            'temp/' . $logo, // in temp directory
+            'private/temp/' . $logo, // in private/temp directory
+        ];
+
+        // Check public disk first
         if (Storage::disk('public')->exists($logo)) {
             return asset('storage/' . $logo);
         }
 
-        return 'https://ui-avatars.com/api/?name=' . urlencode($this->attributes['company_name']) . '&background=random';
+        // Check all possible private paths
+        foreach ($pathsToCheck as $path) {
+            if (Storage::disk('local')->exists($path)) {
+                return route('file.serve', ['filename' => $path]);
+            }
+        }
+
+        return $this->getDefaultLogo();
     }
+
     protected function getDefaultLogo()
     {
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->attributes['company_name'] ?? 'Company') . '&background=random';
