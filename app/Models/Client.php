@@ -93,23 +93,34 @@ class Client extends Model
         $last_contact_date = Carbon::Parse($this->last_contact_date);
         return (int)$last_contact_date->diffInDays(now());
     }
-  public function getCompanyLogoAttribute()
-{
-    $logo = $this->attributes['company_logo'] ?? null;
+    public function getCompanyLogoAttribute()
+    {
+        $logo = $this->attributes['company_logo'] ?? null;
 
-    if (!$logo) {
-        return null;
+        if (!$logo) {
+            return $this->getDefaultLogo();
+        }
+
+        // Check in public disk first
+        if (Storage::disk('public')->exists($logo)) {
+            return asset('storage/' . $logo);
+        }
+
+        // Check in local disk (private storage)
+        if (Storage::disk('local')->exists($logo)) {
+            // For private files, you might want to return a route that serves the file
+            // or use a temporary URL if your local disk supports it
+            return route('file.serve', ['filename' => $logo]); // Custom route needed
+            // OR if you want to make private files accessible:
+            // return asset('storage/private/' . $logo); // If you have a symlink for private files
+        }
+
+        return $this->getDefaultLogo();
     }
 
-    if (Storage::disk('s3')->exists($logo)) {
-        return Storage::disk('s3')->temporaryUrl($logo, now()->addMinutes(1));
+    protected function getDefaultLogo()
+    {
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->attributes['company_name'] ?? 'Company') . '&background=random';
     }
-
-    if (Storage::disk('public')->exists($logo)) {
-        return asset('storage/' . $logo);
-    }
-
-    return 'https://ui-avatars.com/api/?name=' . urlencode($this->attributes['company_name']) . '&background=random';
-}
 
 }
