@@ -106,7 +106,7 @@ class Client extends Model
             return asset('storage/' . $logo);
         }
 
-        return $this->getDefaultLogo();
+//        return $this->getDefaultLogo();
     }
 
     protected function getDefaultLogo()
