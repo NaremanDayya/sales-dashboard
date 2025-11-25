@@ -106,13 +106,15 @@ class Client extends Model
             return asset('storage/' . $logo);
         }
 
-        // Check in local disk (private storage)
+        // Check in local disk (private storage) - with private prefix
+        $privatePath = 'private/' . $logo;
+        if (Storage::disk('local')->exists($privatePath)) {
+            return route('file.serve', ['filename' => $privatePath]);
+        }
+
+        // Also check without private prefix for backward compatibility
         if (Storage::disk('local')->exists($logo)) {
-            // For private files, you might want to return a route that serves the file
-            // or use a temporary URL if your local disk supports it
-            return route('file.serve', ['filename' => $logo]); // Custom route needed
-            // OR if you want to make private files accessible:
-            // return asset('storage/private/' . $logo); // If you have a symlink for private files
+            return route('file.serve', ['filename' => $logo]);
         }
 
         return $this->getDefaultLogo();

@@ -345,8 +345,11 @@ Route::get('/admin/client-edit-requests/{clientEditRequest}', [AdminClientEditRe
 Route::middleware(['auth', 'web', \App\Http\Middleware\MarkNotificationAsRead::class])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/mark-as-read', [NotificationController::class, 'markAsRead']);
-    // routes/web.php or routes/api.php
     Route::get('/files/{filename}', function ($filename) {
+        // Remove any leading slashes or problematic characters
+        $filename = ltrim($filename, '/');
+
+        // Check if file exists in local storage
         if (!Storage::disk('local')->exists($filename)) {
             abort(404);
         }
@@ -356,7 +359,7 @@ Route::middleware(['auth', 'web', \App\Http\Middleware\MarkNotificationAsRead::c
 
         return response($file, 200)
             ->header('Content-Type', $type)
-            ->header('Content-Disposition', 'inline; filename="' . $filename . '"');
+            ->header('Content-Disposition', 'inline; filename="' . basename($filename) . '"');
     })->name('file.serve');
 });
 
