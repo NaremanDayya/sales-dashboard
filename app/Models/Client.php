@@ -101,12 +101,21 @@ class Client extends Model
             return $this->getDefaultLogo();
         }
 
-        // Only check public disk
+        // Check in public disk first
         if (Storage::disk('public')->exists($logo)) {
             return asset('storage/' . $logo);
         }
 
-//        return $this->getDefaultLogo();
+        // Check in local disk (private storage)
+        if (Storage::disk('local')->exists($logo)) {
+            // For private files, you might want to return a route that serves the file
+            // or use a temporary URL if your local disk supports it
+            return route('file.serve', ['filename' => $logo]); // Custom route needed
+            // OR if you want to make private files accessible:
+            // return asset('storage/private/' . $logo); // If you have a symlink for private files
+        }
+
+        return $this->getDefaultLogo();
     }
 
     protected function getDefaultLogo()

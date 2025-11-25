@@ -345,6 +345,19 @@ Route::get('/admin/client-edit-requests/{clientEditRequest}', [AdminClientEditRe
 Route::middleware(['auth', 'web', \App\Http\Middleware\MarkNotificationAsRead::class])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/mark-as-read', [NotificationController::class, 'markAsRead']);
+    // routes/web.php or routes/api.php
+    Route::get('/files/{filename}', function ($filename) {
+        if (!Storage::disk('local')->exists($filename)) {
+            abort(404);
+        }
+
+        $file = Storage::disk('local')->get($filename);
+        $type = Storage::disk('local')->mimeType($filename);
+
+        return response($file, 200)
+            ->header('Content-Type', $type)
+            ->header('Content-Disposition', 'inline; filename="' . $filename . '"');
+    })->name('file.serve');
 });
 
 Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])
