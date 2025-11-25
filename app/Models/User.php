@@ -138,15 +138,26 @@ class User extends Authenticatable
         }
 
         try {
-            // Check LOCAL storage FIRST
+            // Check public storage
             if (Storage::disk('public')->exists($path)) {
                 return Storage::url($path);
             }
 
-            // Then check S3 as fallback
-            if (Storage::disk('s3')->exists($path)) {
-                return Storage::disk('s3')->temporaryUrl($path, now()->addMinutes(5));
+            // Check private/local storage with different path variations
+            $pathsToCheck = [
+                $path,
+                'private/' . $path,
+                'temp/' . $path,
+                'private/temp/' . $path,
+            ];
+
+            foreach ($pathsToCheck as $checkPath) {
+                if (Storage::disk('local')->exists($checkPath)) {
+                    // For private files, return the file serving route
+                    return route('file.serve', ['filename' => $checkPath]);
+                }
             }
+
         } catch (\Exception $e) {
             \Log::error('Error accessing storage for image: ' . $e->getMessage());
         }
