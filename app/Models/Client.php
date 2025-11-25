@@ -126,7 +126,7 @@ class Client extends Model
             }
         }
 
-        return $this->getDefaultLogo();
+//        return $this->getDefaultLogo();
     }
 
     protected function getDefaultLogo()
