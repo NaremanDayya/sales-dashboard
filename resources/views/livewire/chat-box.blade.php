@@ -127,74 +127,87 @@
 
     <!-- WhatsApp-Style Image Preview Modal -->
     <template x-teleport="body">
-        <div x-show="showImagePreview" x-cloak 
-             class="fixed inset-0 z-[60] flex flex-col bg-[#0b141a]"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100">
-            
+        <div x-show="showImagePreview" x-cloak
+             class="fixed inset-0 z-[9999] flex flex-col"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             style="background: linear-gradient(135deg, #0b141a 0%, #111b21 100%); backdrop-filter: blur(10px);">
+
             <!-- Header -->
-            <div class="flex items-center justify-between px-4 py-3 bg-[#202c33]">
-                <button @click="closeImagePreview()" 
-                        class="p-2 text-white hover:bg-white/10 rounded-full transition-colors">
+            <div class="flex items-center justify-between px-6 py-4 bg-[#202c33]/95 backdrop-blur-sm border-b border-[#2a3942]">
+                <button @click="closeImagePreview()"
+                        class="p-2.5 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-95">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
-                <h3 class="text-white text-lg font-medium">معاينة الصورة</h3>
+                <h3 class="text-white text-lg font-medium tracking-wide">معاينة الصورة</h3>
                 <div class="w-10"></div>
             </div>
 
             <!-- Image Preview Area -->
-            <div class="flex-1 flex items-center justify-center p-4 overflow-hidden">
-                <div class="relative max-w-4xl max-h-full">
-                    <img :src="imagePreview" 
-                         alt="Preview" 
-                         class="max-w-full max-h-[70vh] object-contain rounded-lg shadow-2xl">
+            <div class="flex-1 flex items-center justify-center p-4 overflow-hidden relative">
+                <!-- Subtle gradient overlay for depth -->
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#0b141a]/20 to-[#0b141a]/40 pointer-events-none"></div>
+
+                <div class="relative max-w-5xl max-h-[75vh] w-full flex items-center justify-center">
+                    <img :src="imagePreview"
+                         alt="Preview"
+                         class="max-w-full max-h-full object-contain rounded-xl shadow-2xl shadow-black/50"
+                         style="animation: imageAppear 0.4s ease-out;">
+
+                    <!-- Loading shimmer effect (optional) -->
+                    <div x-show="!imagePreview" class="absolute inset-0 bg-gradient-to-r from-[#202c33] via-[#2a3942] to-[#202c33] animate-pulse rounded-xl"></div>
                 </div>
             </div>
 
             <!-- Caption Input & Send Button -->
-            <div class="px-4 py-4 bg-[#202c33]">
-                <div class="max-w-4xl mx-auto">
-                    <div class="flex items-end gap-3 bg-[#2a3942] rounded-lg p-2">
-                        <!-- Emoji Button (Optional) -->
-                        <button type="button" 
-                                class="p-2 text-gray-400 hover:text-white transition-colors">
+            <div class="px-6 py-5 bg-[#202c33] border-t border-[#2a3942]">
+                <div class="max-w-3xl mx-auto">
+                    <div class="flex items-end gap-3 bg-[#2a3942] rounded-2xl p-3 border border-[#374248] shadow-lg">
+                        <!-- Emoji Button -->
+                        <button type="button"
+                                class="p-2.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </button>
 
                         <!-- Caption Input -->
                         <div class="flex-1">
-                            <input x-model="imageCaption" 
-                                   type="text" 
+                            <input x-model="imageCaption"
+                                   x-ref="captionInput"
+                                   type="text"
                                    placeholder="أضف تعليقاً..."
-                                   class="w-full bg-transparent text-white placeholder-gray-400 border-0 focus:ring-0 focus:outline-none text-base"
-                                   @keydown.enter="sendImage()">
+                                   class="w-full bg-transparent text-white placeholder-gray-400/70 border-0 focus:ring-0 focus:outline-none text-base py-2"
+                                   @keydown.enter="sendImage()"
+                                   @focus="$refs.captionInput.select()">
                         </div>
 
                         <!-- Send Button -->
-                        <button @click="sendImage()" 
-                                class="p-2.5 bg-[#00a884] hover:bg-[#06cf9c] text-white rounded-full transition-all transform hover:scale-105 active:scale-95">
+                        <button @click="sendImage()"
+                                x-bind:class="imageCaption.trim() ? 'bg-[#00a884] hover:bg-[#06cf9c]' : 'bg-[#00a884]/60'"
+                                class="p-3 text-white rounded-full transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                       d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                             </svg>
                         </button>
                     </div>
 
                     <!-- Helper Text -->
-                    <p class="text-gray-400 text-xs mt-2 text-center">
-                        اضغط Enter للإرسال أو Esc للإلغاء
+                    <p class="text-gray-400/80 text-xs mt-3 text-center font-light tracking-wide">
+                        اضغط <kbd class="px-2 py-1 bg-[#2a3942] rounded text-xs mx-1">Enter</kbd> للإرسال أو <kbd class="px-2 py-1 bg-[#2a3942] rounded text-xs mx-1">Esc</kbd> للإلغاء
                     </p>
                 </div>
             </div>
         </div>
     </template>
-
 
     <!-- Main container -->
     <div class="flex flex-col w-full h-full py-1">
@@ -363,12 +376,12 @@
                                 <div class="flex flex-col gap-2">
                                     @if($imagePath)
                                         <div class="relative group/image">
-                                            <img src="{{ asset('storage/' . $imagePath) }}" 
+                                            <img src="{{ asset('storage/' . $imagePath) }}"
                                                  alt="Shared image"
                                                  class="max-w-full max-h-96 rounded-lg object-contain cursor-pointer hover:opacity-95 transition-opacity"
                                                  onclick="window.open('{{ asset('storage/' . $imagePath) }}', '_blank')">
                                             <!-- Download button overlay -->
-                                            <a href="{{ asset('storage/' . $imagePath) }}" 
+                                            <a href="{{ asset('storage/' . $imagePath) }}"
                                                download
                                                class="absolute top-2 right-2 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full opacity-0 group-hover/image:opacity-100 transition-opacity">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -474,16 +487,16 @@
 
                     <!-- Attachment Button -->
                     <div class="flex items-center">
-                        <input type="file" 
-                               id="imageInput" 
-                               accept="image/*" 
+                        <input type="file"
+                               id="imageInput"
+                               accept="image/*"
                                class="hidden"
                                @change="handleFileSelect($event)">
-                        <button type="button" 
+                        <button type="button"
                                 @click="$el.previousElementSibling.click()"
                                 class="p-2 text-gray-500 hover:text-purple-600 transition-colors">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
                             </svg>
                         </button>
