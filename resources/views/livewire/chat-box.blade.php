@@ -126,89 +126,102 @@
     </template>
 
     <!-- WhatsApp-Style Image Preview Modal -->
+    <!-- WhatsApp-Style Image Preview Modal -->
     <template x-teleport="body">
         <div x-show="showImagePreview" x-cloak
-             class="fixed inset-0 z-[9999] flex flex-col"
+             class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
              x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 scale-95"
-             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
              x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="opacity-100 scale-100"
-             x-transition:leave-end="opacity-0 scale-95"
-             style="background: linear-gradient(135deg, #0b141a 0%, #111b21 100%); backdrop-filter: blur(10px);">
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             style="background: rgba(11, 20, 26, 0.98); backdrop-filter: blur(8px);">
 
-            <!-- Header -->
-            <div class="flex items-center justify-between px-6 py-4 bg-[#202c33]/95 backdrop-blur-sm border-b border-[#2a3942]">
+            <!-- Main Preview Container -->
+            <div class="relative w-full max-w-5xl max-h-[90vh] bg-[#0b141a] rounded-2xl overflow-hidden shadow-2xl shadow-black/50 border border-[#2a3942]"
+                 @click.away="closeImagePreview()"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="scale-95 opacity-0"
+                 x-transition:enter-end="scale-100 opacity-100"
+                 style="animation: modalSlideUp 0.3s ease-out;">
+
+                <!-- Close Button - Top Right -->
                 <button @click="closeImagePreview()"
-                        class="p-2.5 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-95">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="absolute top-4 right-4 z-20 p-3 bg-black/50 hover:bg-black/70 text-white rounded-full transition-all duration-200 hover:scale-110 active:scale-95 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
-                <h3 class="text-white text-lg font-medium tracking-wide">معاينة الصورة</h3>
-                <div class="w-10"></div>
-            </div>
 
-            <!-- Image Preview Area -->
-            <div class="flex-1 flex items-center justify-center p-4 overflow-hidden relative">
-                <!-- Subtle gradient overlay for depth -->
-                <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#0b141a]/20 to-[#0b141a]/40 pointer-events-none"></div>
-
-                <div class="relative max-w-5xl max-h-[75vh] w-full flex items-center justify-center">
+                <!-- Image Preview Area -->
+                <div class="relative h-[65vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#0b141a] to-[#111b21]">
+                    <!-- Image -->
                     <img :src="imagePreview"
                          alt="Preview"
-                         class="max-w-full max-h-full object-contain rounded-xl shadow-2xl shadow-black/50"
+                         class="max-w-full max-h-full object-contain p-4"
                          style="animation: imageAppear 0.4s ease-out;">
 
                     <!-- Loading shimmer effect (optional) -->
-                    <div x-show="!imagePreview" class="absolute inset-0 bg-gradient-to-r from-[#202c33] via-[#2a3942] to-[#202c33] animate-pulse rounded-xl"></div>
+                    <div x-show="!imagePreview" class="absolute inset-0 bg-gradient-to-r from-[#202c33] via-[#2a3942] to-[#202c33] animate-pulse"></div>
                 </div>
-            </div>
 
-            <!-- Caption Input & Send Button -->
-            <div class="px-6 py-5 bg-[#202c33] border-t border-[#2a3942]">
-                <div class="max-w-3xl mx-auto">
-                    <div class="flex items-end gap-3 bg-[#2a3942] rounded-2xl p-3 border border-[#374248] shadow-lg">
-                        <!-- Emoji Button -->
-                        <button type="button"
-                                class="p-2.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </button>
+                <!-- Caption Input & Send Button -->
+                <div class="bg-[#202c33] border-t border-[#2a3942]">
+                    <div class="p-6">
+                        <div class="flex items-center gap-3">
+                            <!-- Caption Input -->
+                            <div class="flex-1">
+                                <input x-model="imageCaption"
+                                       x-ref="captionInput"
+                                       type="text"
+                                       placeholder="أضف تعليقاً (اختياري)..."
+                                       class="w-full bg-[#2a3942] text-white placeholder-gray-400/70 border border-[#374248] focus:border-[#00a884] focus:ring-1 focus:ring-[#00a884] rounded-xl px-4 py-3 text-base transition-all duration-200"
+                                       @keydown.enter="sendImage()"
+                                       @focus="$refs.captionInput.select()">
+                            </div>
 
-                        <!-- Caption Input -->
-                        <div class="flex-1">
-                            <input x-model="imageCaption"
-                                   x-ref="captionInput"
-                                   type="text"
-                                   placeholder="أضف تعليقاً..."
-                                   class="w-full bg-transparent text-white placeholder-gray-400/70 border-0 focus:ring-0 focus:outline-none text-base py-2"
-                                   @keydown.enter="sendImage()"
-                                   @focus="$refs.captionInput.select()">
+                            <!-- Send Button with X Icon -->
+                            <div class="flex items-center gap-2">
+                                <button @click="closeImagePreview()"
+                                        class="p-3.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 border border-[#374248] hover:border-gray-500"
+                                        title="إلغاء">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+
+                                <button @click="sendImage()"
+                                        x-bind:class="imageCaption.trim() ? 'bg-[#00a884] hover:bg-[#06cf9c] shadow-lg' : 'bg-[#00a884]/80 hover:bg-[#00a884]'"
+                                        class="p-3.5 text-white rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 flex items-center gap-2 px-6"
+                                        title="إرسال الصورة">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                              d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                                    </svg>
+                                    <span class="font-medium">إرسال</span>
+                                </button>
+                            </div>
                         </div>
 
-                        <!-- Send Button -->
-                        <button @click="sendImage()"
-                                x-bind:class="imageCaption.trim() ? 'bg-[#00a884] hover:bg-[#06cf9c]' : 'bg-[#00a884]/60'"
-                                class="p-3 text-white rounded-full transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-                            </svg>
-                        </button>
+                        <!-- Helper Text -->
+                        <div class="mt-4 pt-4 border-t border-[#374248]/50">
+                            <div class="flex items-center justify-center gap-6 text-gray-400/70 text-sm">
+                                <div class="flex items-center gap-2">
+                                    <kbd class="px-2.5 py-1 bg-[#2a3942] rounded-lg text-xs font-medium">Esc</kbd>
+                                    <span>للإلغاء</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <kbd class="px-2.5 py-1 bg-[#2a3942] rounded-lg text-xs font-medium">Enter</kbd>
+                                    <span>للإرسال</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
-                    <!-- Helper Text -->
-                    <p class="text-gray-400/80 text-xs mt-3 text-center font-light tracking-wide">
-                        اضغط <kbd class="px-2 py-1 bg-[#2a3942] rounded text-xs mx-1">Enter</kbd> للإرسال أو <kbd class="px-2 py-1 bg-[#2a3942] rounded text-xs mx-1">Esc</kbd> للإلغاء
-                    </p>
                 </div>
             </div>
         </div>
     </template>
-
     <!-- Main container -->
     <div class="flex flex-col w-full h-full py-1">
 
