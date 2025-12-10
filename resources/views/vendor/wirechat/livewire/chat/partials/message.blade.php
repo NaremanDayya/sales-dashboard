@@ -64,8 +64,38 @@
 
 <pre class="whitespace-pre-line tracking-normal text-sm md:text-base dark:text-white lg:tracking-normal"
     style="font-family: inherit;">
-    {!! $message?->body !!}
+    @if(str_contains($message?->body, '||IMAGE||'))
+        @php
+            $parts = explode('||IMAGE||', $message->body);
+            $caption = trim($parts[0]);
+            $imagePath = trim($parts[1] ?? '');
+        @endphp
+        <div class="flex flex-col gap-2">
+            @if($imagePath)
+                <div class="relative group/image">
+                    <img src="{{ asset('storage/' . $imagePath) }}"
+                         alt="Shared image"
+                         class="max-w-full max-h-96 rounded-lg object-contain cursor-pointer hover:opacity-95 transition-opacity"
+                         onclick="window.open('{{ asset('storage/' . $imagePath) }}', '_blank')">
+                    <!-- Download button overlay -->
+                    <a href="{{ asset('storage/' . $imagePath) }}"
+                       download
+                       class="absolute top-2 right-2 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full opacity-0 group-hover/image:opacity-100 transition-opacity">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                    </a>
+                </div>
+            @endif
+            @if($caption && $caption !== '[صورة]')
+                <span class="text-sm md:text-base">{{ $caption }}</span>
+            @endif
+        </div>
+    @else
+        {!! $message?->body !!}
+    @endif
 </pre>
+
 
 {{-- Display the created time based on different conditions --}}
 <span

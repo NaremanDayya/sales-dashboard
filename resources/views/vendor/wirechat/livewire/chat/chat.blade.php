@@ -236,7 +236,8 @@
                                        x-ref="captionInput"
                                        type="text"
                                        placeholder="أضف تعليقاً (اختياري)..."
-                                       class="w-full bg-[#2a3942] text-white placeholder-gray-400/70 border border-[#374248] focus:border-[#00a884] focus:ring-1 focus:ring-[#00a884] rounded-xl px-4 py-3 text-base transition-all duration-200"
+                                       class="w-full bg-[#2a3942] text-white placeholder-gray-400/70 border border-[#374248] focus:border-[#00a884] focus:ring-1 focus:ring-[#00a884] rounded-xl px-4 py-3 text-base transition-all duration-200 caret-white"
+                                       style="color: #ffffff !important;"
                                        @keydown.enter="sendImage()"
                                        @focus="$refs.captionInput.select()">
                             </div>
