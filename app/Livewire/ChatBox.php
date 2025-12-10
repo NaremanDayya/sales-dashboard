@@ -155,6 +155,55 @@ class ChatBox extends Component
             $receiver->id,
         ));
     }
+
+    public function sendImageMessage($imageData, $caption = '')
+    {
+        // Decode base64 image
+        $image = str_replace('data:image/png;base64,', '', $imageData);
+        $image = str_replace('data:image/jpeg;base64,', '', $image);
+        $image = str_replace('data:image/jpg;base64,', '', $image);
+        $image = str_replace(' ', '+', $image);
+        $imageData = base64_decode($image);
+
+        // Generate unique filename
+        $filename = 'chat_image_' . time() . '_' . uniqid() . '.png';
+        $path = 'chat_images/' . $filename;
+
+        // Store image in public disk
+        \Storage::disk('public')->put($path, $imageData);
+
+        // Create message with image path and caption
+        $messageText = $caption ?: '[صورة]';
+        $messageText .= '||IMAGE||' . $path;
+
+        $createdMessage = Message::create([
+            'conversation_id' => $this->selectedConversation->id,
+            'sender_id' => Auth::id(),
+            'receiver_id' => $this->selectedConversation->getReceiver()->id,
+            'message' => $messageText,
+        ]);
+
+        // Eager load relationships
+        $createdMessage->load(['sender', 'receiver']);
+
+        $this->dispatch('scroll-bottom');
+        $this->loadedMessages->push($createdMessage);
+
+        $this->selectedConversation->updated_at = now();
+        $this->selectedConversation->save();
+
+        $this->dispatch('refresh')->to('chat-list');
+
+        // Notify receiver
+        $receiver = $createdMessage->receiver;
+        $receiver->notify(new MessageSent(
+            Auth::user(),
+            $createdMessage,
+            $this->selectedConversation,
+            $receiver->id,
+        ));
+    }
+
     public function deleteConversation($conversationId)
     {
         dd('test');

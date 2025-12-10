@@ -7,7 +7,10 @@
     editingMessageId: null,
     editMessageText: '',
     deleteMessageId: null,
-        deleteConversationId: null,
+    deleteConversationId: null,
+    imagePreview: null,
+    imageCaption: '',
+    showImagePreview: false,
 
     init() {
         this.conversationElement = document.getElementById('conversation');
@@ -20,6 +23,56 @@
                 this.conversationElement.scrollTop = this.conversationElement.scrollHeight;
             });
         });
+
+        // Handle paste event for screenshots
+        document.addEventListener('paste', (e) => {
+            const items = e.clipboardData?.items;
+            if (!items) return;
+
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const blob = items[i].getAsFile();
+                    this.handleImagePaste(blob);
+                    e.preventDefault();
+                    break;
+                }
+            }
+        });
+
+        // Handle keyboard events
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.showImagePreview) {
+                this.closeImagePreview();
+            }
+        });
+    },
+    handleImagePaste(blob) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.imagePreview = e.target.result;
+            this.imageCaption = '';
+            this.showImagePreview = true;
+        };
+        reader.readAsDataURL(blob);
+    },
+    handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            this.handleImagePaste(file);
+        }
+        // Reset input
+        event.target.value = '';
+    },
+    closeImagePreview() {
+        this.showImagePreview = false;
+        this.imagePreview = null;
+        this.imageCaption = '';
+    },
+    sendImage() {
+        if (this.imagePreview) {
+            $wire.sendImageMessage(this.imagePreview, this.imageCaption);
+            this.closeImagePreview();
+        }
     },
     openEditModal(messageId, messageText) {
         this.editingMessageId = messageId;
@@ -71,6 +124,77 @@
             </div>
         </div>
     </template>
+
+    <!-- WhatsApp-Style Image Preview Modal -->
+    <template x-teleport="body">
+        <div x-show="showImagePreview" x-cloak 
+             class="fixed inset-0 z-[60] flex flex-col bg-[#0b141a]"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100">
+            
+            <!-- Header -->
+            <div class="flex items-center justify-between px-4 py-3 bg-[#202c33]">
+                <button @click="closeImagePreview()" 
+                        class="p-2 text-white hover:bg-white/10 rounded-full transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                <h3 class="text-white text-lg font-medium">معاينة الصورة</h3>
+                <div class="w-10"></div>
+            </div>
+
+            <!-- Image Preview Area -->
+            <div class="flex-1 flex items-center justify-center p-4 overflow-hidden">
+                <div class="relative max-w-4xl max-h-full">
+                    <img :src="imagePreview" 
+                         alt="Preview" 
+                         class="max-w-full max-h-[70vh] object-contain rounded-lg shadow-2xl">
+                </div>
+            </div>
+
+            <!-- Caption Input & Send Button -->
+            <div class="px-4 py-4 bg-[#202c33]">
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex items-end gap-3 bg-[#2a3942] rounded-lg p-2">
+                        <!-- Emoji Button (Optional) -->
+                        <button type="button" 
+                                class="p-2 text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </button>
+
+                        <!-- Caption Input -->
+                        <div class="flex-1">
+                            <input x-model="imageCaption" 
+                                   type="text" 
+                                   placeholder="أضف تعليقاً..."
+                                   class="w-full bg-transparent text-white placeholder-gray-400 border-0 focus:ring-0 focus:outline-none text-base"
+                                   @keydown.enter="sendImage()">
+                        </div>
+
+                        <!-- Send Button -->
+                        <button @click="sendImage()" 
+                                class="p-2.5 bg-[#00a884] hover:bg-[#06cf9c] text-white rounded-full transition-all transform hover:scale-105 active:scale-95">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Helper Text -->
+                    <p class="text-gray-400 text-xs mt-2 text-center">
+                        اضغط Enter للإرسال أو Esc للإلغاء
+                    </p>
+                </div>
+            </div>
+        </div>
+    </template>
+
 
     <!-- Main container -->
     <div class="flex flex-col w-full h-full py-1">
@@ -230,6 +354,35 @@
                                               clip-rule="evenodd" />
                                     </svg>
                                 </div>
+                            @elseif(str_contains($message->message, '||IMAGE||'))
+                                @php
+                                    $parts = explode('||IMAGE||', $message->message);
+                                    $caption = trim($parts[0]);
+                                    $imagePath = trim($parts[1] ?? '');
+                                @endphp
+                                <div class="flex flex-col gap-2">
+                                    @if($imagePath)
+                                        <div class="relative group/image">
+                                            <img src="{{ asset('storage/' . $imagePath) }}" 
+                                                 alt="Shared image"
+                                                 class="max-w-full max-h-96 rounded-lg object-contain cursor-pointer hover:opacity-95 transition-opacity"
+                                                 onclick="window.open('{{ asset('storage/' . $imagePath) }}', '_blank')">
+                                            <!-- Download button overlay -->
+                                            <a href="{{ asset('storage/' . $imagePath) }}" 
+                                               download
+                                               class="absolute top-2 right-2 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full opacity-0 group-hover/image:opacity-100 transition-opacity">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    @endif
+                                    @if($caption && $caption !== '[صورة]')
+                                        <p class="whitespace-normal text-sm md:text-base tracking-wide lg:tracking-normal">
+                                            {!! nl2br(e($caption)) !!}
+                                        </p>
+                                    @endif
+                                </div>
                             @else
                                 <p class="whitespace-normal text-sm md:text-base tracking-wide lg:tracking-normal">
                                     {!! nl2br(e($message->message)) !!}
@@ -319,6 +472,23 @@
                     @csrf
                     <input type="hidden" autocomplete="false">
 
+                    <!-- Attachment Button -->
+                    <div class="flex items-center">
+                        <input type="file" 
+                               id="imageInput" 
+                               accept="image/*" 
+                               class="hidden"
+                               @change="handleFileSelect($event)">
+                        <button type="button" 
+                                @click="$el.previousElementSibling.click()"
+                                class="p-2 text-gray-500 hover:text-purple-600 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                            </svg>
+                        </button>
+                    </div>
+
                     <!-- Message Input -->
                     <div class="flex gap-2 sm:px-2 w-full">
                         <input wire:model="message" wire:loading.attr="disabled" autofocus type="text"
@@ -329,6 +499,7 @@
            $nextTick(() => conversationElement.scrollTop = conversationElement.scrollHeight);
        })"
                                class="w-full disabled:cursor-progress resize-none h-auto max-h-20 sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0 hover:ring-0 rounded-lg dark:text-white bg-none dark:bg-inherit focus:outline-hidden">       </div>
+
 
                     <!-- Send Button - FIXED (no longer hidden) -->
                     <div class="w-[5%] justify-start min-w-max items-center gap-2">
