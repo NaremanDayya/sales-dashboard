@@ -231,15 +231,21 @@
                     <div class="p-6">
                         <div class="flex items-center gap-3">
                             <!-- Caption Input -->
-                            <div class="flex-1">
+                            <div class="flex-1 relative">
                                 <input x-model="imageCaption"
                                        x-ref="captionInput"
                                        type="text"
                                        placeholder="أضف تعليقاً (اختياري)..."
-                                       class="w-full bg-[#2a3942] text-white placeholder-gray-400/70 border border-[#374248] focus:border-[#00a884] focus:ring-1 focus:ring-[#00a884] rounded-xl px-4 py-3 text-base transition-all duration-200 caret-white"
-                                       style="color: #ffffff !important;"
+                                       class="w-full bg-[#2a3942] text-white placeholder:text-gray-400/70 border border-[#374248] focus:border-[#00a884] focus:ring-2 focus:ring-[#00a884]/30 rounded-xl px-4 py-3.5 text-base transition-all duration-200 caret-[#00a884] outline-none"
                                        @keydown.enter="sendImage()"
                                        @focus="$refs.captionInput.select()">
+
+                                <!-- Character counter -->
+                                <div x-show="imageCaption.length > 0"
+                                     class="absolute bottom-2 right-3 text-xs"
+                                     :class="imageCaption.length > 100 ? 'text-red-400' : 'text-gray-400'">
+                                    <span x-text="imageCaption.length"></span>/100
+                                </div>
                             </div>
 
                             <!-- Action Buttons -->
@@ -253,14 +259,14 @@
                                 </button>
 
                                 <button @click="sendImage()"
-                                        x-bind:class="imageCaption.trim() ? 'bg-[#00a884] hover:bg-[#06cf9c] shadow-lg' : 'bg-[#00a884]/80 hover:bg-[#00a884]'"
-                                        class="p-3.5 text-white rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 flex items-center gap-2 px-6"
+                                        :class="imageCaption.trim() ? 'bg-[#00a884] hover:bg-[#06cf9c] shadow-lg shadow-[#00a884]/20' : 'bg-[#00a884]/70 hover:bg-[#00a884]/90'"
+                                        class="p-3.5 text-white rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 flex items-center gap-2 px-6 font-medium"
                                         title="إرسال الصورة">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                               d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                                     </svg>
-                                    <span class="font-medium">إرسال</span>
+                                    <span>إرسال</span>
                                 </button>
                             </div>
                         </div>
@@ -269,11 +275,11 @@
                         <div class="mt-4 pt-4 border-t border-[#374248]/50">
                             <div class="flex items-center justify-center gap-6 text-gray-400/70 text-sm">
                                 <div class="flex items-center gap-2">
-                                    <kbd class="px-2.5 py-1 bg-[#2a3942] rounded-lg text-xs font-medium">Esc</kbd>
+                                    <kbd class="px-2.5 py-1 bg-[#2a3942] rounded-lg text-xs font-medium text-gray-300">Esc</kbd>
                                     <span>للإلغاء</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <kbd class="px-2.5 py-1 bg-[#2a3942] rounded-lg text-xs font-medium">Enter</kbd>
+                                    <kbd class="px-2.5 py-1 bg-[#2a3942] rounded-lg text-xs font-medium text-gray-300">Enter</kbd>
                                     <span>للإرسال</span>
                                 </div>
                             </div>
@@ -282,8 +288,7 @@
                 </div>
             </div>
         </div>
-    </template>
-</div>
+    </template></div>
 <script>
     window.addEventListener('open-edit-modal', event => {
         const editModal = new bootstrap.Modal(document.getElementById('editMessageModal'));
