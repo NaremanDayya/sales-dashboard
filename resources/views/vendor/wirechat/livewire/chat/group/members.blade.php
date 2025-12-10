@@ -1,9 +1,8 @@
 @php
-       $authIsAdminInGroup=  $participant?->isAdmin();
-       $authIsOwner=  $participant?->isOwner();
-       $isGroup=  $conversation?->isGroup();
-
-    @endphp
+       $authIsAdminInGroup = $participant?->isAdmin();
+       $authIsOwner = $participant?->isOwner();
+       $isGroup = $conversation?->isGroup();
+@endphp
 
 
 <div x-ref="members"
