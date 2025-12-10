@@ -4,7 +4,7 @@
     </div>
     
     <main  class="  grid  w-full  grow  h-full min-h-min relative overflow-y-auto"  style="contain:content">
-      <livewire:wirechat.chat  conversation="{{$this->conversation->id}}"/>
+      <livewire:wirechat.chat  :conversation="$this->conversation->id"/>
     </main>
 
 </div>
