@@ -1,3 +1,4 @@
+
 @use('Namu\WireChat\Helpers\Helper')
 
 <footer class="shrink-0 h-auto relative   sticky bottom-0 mt-auto">
@@ -27,10 +28,27 @@
                 class=" py-2 sm:px-4 py-1.5    z-50  dark:bg-[var(--wc-dark-secondary)]  bg-[var(--wc-light-secondary)]   flex flex-col gap-3 items-center  w-full mx-auto">
 
                 {{-- Media preview section --}}
-                <section x-show="$wire.media.length>0 ||$wire.files.length>0" x-cloak
+                <section x-show="$wire.media.length>0 ||$wire.files.length>0 || $wire.screenshot" x-cloak
                          class="  flex flex-col w-full gap-3" wire:loading.class="animate-pulse" wire:target="sendMessage">
 
-
+                    {{-- Screenshot preview --}}
+                    <div x-show="$wire.screenshot" x-data="screenshotHandler()" class="flex w-full">
+                        <div class="relative h-24 sm:h-36 aspect-4/3">
+                            <button wire:loading.attr="disabled"
+                                    class="disabled:cursor-progress absolute -top-2 -right-2 z-10 dark:text-gray-50 bg-white dark:bg-gray-800 rounded-full p-0.5 shadow-lg"
+                                    @click="$wire.removeScreenshot()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                     fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+                                    <path
+                                        d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                    <path
+                                        d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+                                </svg>
+                            </button>
+                            <img class="h-full w-full rounded-lg object-scale-down border border-gray-300 dark:border-gray-600"
+                                 x-bind:src="$wire.screenshot" alt="Screenshot preview">
+                        </div>
+                    </div>
 
                     @if (count($media) > 0)
                         <div x-data="attachments('media')">
@@ -234,8 +252,7 @@
                         textarea.style.height = textarea.scrollHeight + 'px';
 
                     }
-                }" x-init="{{-- Emoji picture click event listener --}}
-                document.querySelector('emoji-picker')
+                }" x-init="document.querySelector('emoji-picker')
                     .addEventListener('emoji-click', event => {
                         // Get the emoji unicode from the event
                         const emoji = event.detail['unicode'];
@@ -256,7 +273,7 @@
 
                         inputField.setSelectionRange(startPos + emoji.length, startPos + emoji.length);
                     });"
-                      @submit.prevent="((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)|| ($wire.files && $wire.files.length > 0)) ? $wire.sendMessage() : null"
+                      @submit.prevent="((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)|| ($wire.files && $wire.files.length > 0) || $wire.screenshot) ? $wire.sendMessage() : null"
                       method="POST" autocapitalize="off" @class(['flex items-center col-span-12 w-full  gap-2 gap-5'])>
                     @csrf
 
@@ -285,6 +302,7 @@
                     {{-- Also only show  upload popup if allowed in configuration  --}}
                     @if (count($this->media) == 0 &&
                             count($this->files) == 0 &&
+                            !$this->screenshot &&
                             (config('wirechat.allow_file_attachments', true) || config('wirechat.allow_media_attachments', true)))
                         <x-wirechat::popover position="top" popoverOffset="70">
 
@@ -399,9 +417,12 @@
                                   @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px';"
                                   @keydown.shift.enter.prevent="insertNewLine($el)" {{-- @keydown.enter.prevent prevents the
                                default behavior of Enter key press only if Shift is not held down. --}} @keydown.enter.prevent=""
-                                  @keyup.enter.prevent="$event.shiftKey ? null : (((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0)) ? $wire.sendMessage() : null)"
+                                  @keyup.enter.prevent="$event.shiftKey ? null : (((body && body?.trim().length > 0) || ($wire.media && $wire.media.length > 0) || $wire.screenshot) ? $wire.sendMessage() : null)"
+                                  @paste="handlePaste($event)"
                                   class="w-full disabled:cursor-progress resize-none h-auto max-h-20  sm:max-h-72 flex grow border-0 outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-white bg-none dark:bg-inherit  focus:outline-hidden   "
-                                  x-init="document.querySelector('emoji-picker')
+                                  x-init="
+                                // Enhanced emoji handler
+                                document.querySelector('emoji-picker')
                                 .addEventListener('emoji-click', event => {
                                     const emoji = event.detail['unicode'];
                                     const inputField = $refs.body;
@@ -425,7 +446,31 @@
                                     // Ensure the textarea resizes correctly after adding the emoji
                                     inputField.style.height = 'auto';
                                     inputField.style.height = inputField.scrollHeight + 'px';
-                                });"></textarea>
+                                });
+
+                                // Initialize screenshot handler
+                                function handlePaste(event) {
+                                    const items = Array.from(event.clipboardData?.items || []);
+                                    const imageItems = items.filter(item => item.type.startsWith('image/'));
+
+                                    if (imageItems.length > 0) {
+                                        event.preventDefault();
+
+                                        // Handle the first image (screenshot)
+                                        const imageItem = imageItems[0];
+                                        const file = imageItem.getAsFile();
+
+                                        if (file) {
+                                            // Convert to blob and create preview
+                                            const reader = new FileReader();
+                                            reader.onload = function(e) {
+                                                $wire.handleScreenshotPaste(e.target.result, file);
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }
+                                }
+                            "></textarea>
 
 
                     </div>
@@ -438,7 +483,7 @@
 
                         {{--  Submit button --}}
                         <button
-                            x-show="((body?.trim()?.length>0) ||  $wire.media.length > 0 || $wire.files.length > 0 )"
+                            x-show="((body?.trim()?.length>0) ||  $wire.media.length > 0 || $wire.files.length > 0 || $wire.screenshot)"
                             wire:loading.attr="disabled" wire:target="sendMessage" type="submit"
                             id="sendMessageButton" class="cursor-pointer hover:text-[var(--wc-brand-primary)] transition-color ml-auto disabled:cursor-progress cursor-pointer font-bold">
 
@@ -456,7 +501,7 @@
 
                         {{-- send Like button --}}
                         <button
-                            x-show="!((body?.trim()?.length>0) || $wire.media.length > 0 || $wire.files.length > 0 )"
+                            x-show="!((body?.trim()?.length>0) || $wire.media.length > 0 || $wire.files.length > 0 || $wire.screenshot)"
                             wire:loading.attr="disabled" wire:target="sendMessage" wire:click='sendLike()'
                             type="button" class="hover:scale-105 transition-transform cursor-pointer group disabled:cursor-progress">
 
@@ -474,7 +519,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                                      class="size-6 w-7 h-7   text-red-500">
                                     <path
-                                        d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+                                        d="M11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
                                 </svg>
                             </span>
 
@@ -609,6 +654,13 @@
                         return Promise.resolve(validFiles); // Return valid files for further processing
                     }
                 }));
+
+                // Screenshot handler
+                Alpine.data('screenshotHandler', () => ({
+                    init() {
+                        // Any initialization for screenshot handling
+                    }
+                }));
             </script>
             @endscript
         </div>
@@ -617,3 +669,4 @@
 
 
 </footer>
+
