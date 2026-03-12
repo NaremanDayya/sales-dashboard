@@ -1,17 +1,17 @@
 <div class="border-b justify-between flex items-center pb-2">
-    <div class="flex items-center gap-2">
-        <h5 class="font-extrabold text-2xl">المحادثات</h5>
-    </div>
+{{--    <div class="flex items-center gap-2">--}}
+{{--        <h5 class="font-extrabold text-2xl">المحادثات</h5>--}}
+{{--    </div>--}}
 
     <div class="flex items-center gap-3">
         <!-- Date Filter -->
         <div class="relative flex items-center gap-1">
-            <input type="date" 
+            <input type="date"
                    wire:model.live="dateFilter"
                    class="text-sm rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 py-1 pr-2"
                    placeholder="تصفية حسب التاريخ">
             @if($dateFilter)
-                <button wire:click="$set('dateFilter', null)" 
+                <button wire:click="$set('dateFilter', null)"
                         class="text-gray-400 hover:text-gray-600 transition-colors"
                         title="مسح التاريخ">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,7 +20,7 @@
                 </button>
             @endif
         </div>
-        
+
         <!-- Filter Dropdown -->
         <div class="relative">
             <select wire:model.live="filter"
