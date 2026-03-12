@@ -113,8 +113,6 @@ class ChatList extends Component
         $query = Conversation::with([
             'client:id,sales_rep_id,company_name,company_logo',
             'client.salesRep:id,name',
-            'sender:id,name',
-            'receiver:id,name',
         ])
             ->where(function ($query) use ($user) {
                 $query->where('sender_id', $user->id)
