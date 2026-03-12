@@ -20,6 +20,7 @@ class ChatList extends Component
     private $lastBatchHasMore = false; // track availability of more data based on server fetch
     // Filter options: unread, read, oldest, newest
     public $filter = 'newest';
+    public $dateFilter = null; // Date filter for messages
 
     protected $listeners = [
         'conversationUpdated' => 'handleConversationUpdate',
@@ -88,6 +89,12 @@ class ChatList extends Component
         $this->refresh();
     }
 
+    public function updatedDateFilter()
+    {
+        // Reset pagination and reload when date filter changes
+        $this->refresh();
+    }
+
     private function getConversations($page = 1)
     {
         $user = Auth::user();
@@ -107,6 +114,11 @@ class ChatList extends Component
                         ->orWhereHas('salesRep', function ($q2) {
                             $q2->where('name', 'like', '%' . $this->search . '%');
                         });
+                });
+            })
+            ->when($this->dateFilter, function ($query) {
+                $query->whereHas('messages', function ($q) {
+                    $q->whereDate('created_at', $this->dateFilter);
                 });
             })
             // compute latest message created_at for ordering

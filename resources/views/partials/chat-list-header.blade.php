@@ -4,6 +4,23 @@
     </div>
 
     <div class="flex items-center gap-3">
+        <!-- Date Filter -->
+        <div class="relative flex items-center gap-1">
+            <input type="date" 
+                   wire:model.live="dateFilter"
+                   class="text-sm rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 py-1 pr-2"
+                   placeholder="تصفية حسب التاريخ">
+            @if($dateFilter)
+                <button wire:click="$set('dateFilter', null)" 
+                        class="text-gray-400 hover:text-gray-600 transition-colors"
+                        title="مسح التاريخ">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            @endif
+        </div>
+        
         <!-- Filter Dropdown -->
         <div class="relative">
             <select wire:model.live="filter"
