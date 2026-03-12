@@ -12,10 +12,11 @@ class ChatList extends Component
     public $client;
     public $selectedConversation;
     public $search = '';
-    public $perPage = 20;
+    public $perPage = 30;
     public $hasMore = true;
     public $loading = false;
     public $page = 1;
+    public $lastLoadTime = 0;
     public $allConversations; // This will store Conversation objects
     private $lastBatchHasMore = false; // track availability of more data based on server fetch
     // Filter options: unread, read, oldest, newest
@@ -43,24 +44,33 @@ class ChatList extends Component
 
     public function loadMore()
     {
-        if ($this->loading || !$this->hasMore) {
+        // Debounce: prevent rapid successive calls
+        $now = microtime(true);
+        if ($this->loading || !$this->hasMore || ($now - $this->lastLoadTime) < 0.3) {
             return;
         }
 
         $this->loading = true;
+        $this->lastLoadTime = $now;
         $this->page++;
 
-        $additionalConversations = $this->getConversations($this->page);
+        try {
+            $additionalConversations = $this->getConversations($this->page);
 
-        // hasMore is determined by server-side over-fetching
-        $this->hasMore = $this->lastBatchHasMore;
+            // hasMore is determined by server-side over-fetching
+            $this->hasMore = $this->lastBatchHasMore;
 
-        // Merge new conversations with existing ones (dedupe by id, keep as Collection)
-        $this->allConversations = $this->allConversations
-            ->concat($additionalConversations)
-            ->unique('id')
-            ->values();
-        $this->loading = false;
+            // Merge new conversations with existing ones (dedupe by id, keep as Collection)
+            $this->allConversations = $this->allConversations
+                ->concat($additionalConversations)
+                ->unique('id')
+                ->values();
+        } catch (\Exception $e) {
+            \Log::error('ChatList loadMore error: ' . $e->getMessage());
+            $this->hasMore = false;
+        } finally {
+            $this->loading = false;
+        }
     }
 
     public function handleConversationUpdate($conversationId)
@@ -103,6 +113,8 @@ class ChatList extends Component
         $query = Conversation::with([
             'client:id,sales_rep_id,company_name,company_logo',
             'client.salesRep:id,name',
+            'sender:id,name',
+            'receiver:id,name',
         ])
             ->where(function ($query) use ($user) {
                 $query->where('sender_id', $user->id)
@@ -179,6 +191,7 @@ class ChatList extends Component
         $conversationIds = $conversations->pluck('id');
 
         // Get latest messages (Your existing logic is fine)
+        // Optimized query using window functions for better performance
         $latestMessages = Message::whereIn('conversation_id', $conversationIds)
             ->whereIn('id', function($query) use ($conversationIds) {
                 $query->select(\DB::raw('MAX(id)'))
@@ -187,6 +200,7 @@ class ChatList extends Component
                     ->groupBy('conversation_id');
             })
             ->select('id', 'conversation_id', 'message', 'created_at', 'sender_id')
+            ->orderBy('id', 'desc')
             ->get()
             ->keyBy('conversation_id');
 

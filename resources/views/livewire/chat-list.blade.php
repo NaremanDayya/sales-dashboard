@@ -6,111 +6,145 @@
     <!-- Conversations List -->
     <div class="flex-1 overflow-y-auto" x-ref="container"
          x-data="{
-        loading: @entangle('loading'),
-        hasMore: @entangle('hasMore'),
+        loading: @entangle('loading').live,
+        hasMore: @entangle('hasMore').live,
         throttle: false,
         observer: null,
-        scrollParent: null,
-        getScrollParent(el) {
-            let p = el.parentElement;
-            while (p) {
-                const style = getComputedStyle(p);
-                if (['auto','scroll'].includes(style.overflowY)) return p;
-                p = p.parentElement;
-            }
-            return window;
-        },
+        scrollListener: null,
+        lastScrollTop: 0,
+        isLoadingMore: false,
+        
         setupObserver() {
             const container = this.$refs.container || this.$el;
             const sentinel = this.$refs.sentinel;
 
-            // Determine scroll root: nearest scrollable ancestor or viewport
-            const style = getComputedStyle(container);
-            const isScrollable = ['auto', 'scroll'].includes(style.overflowY);
-            const rootEl = isScrollable ? container : null; // null => viewport
-
+            if (!sentinel) return;
             if (this.observer) this.observer.disconnect();
 
-            const options = { root: rootEl, rootMargin: '0px 0px 200px 0px', threshold: 0 };
+            // Use aggressive rootMargin for early loading (300px before reaching bottom)
+            const options = { 
+                root: container, 
+                rootMargin: '0px 0px 300px 0px', 
+                threshold: [0, 0.1, 0.5, 1.0]
+            };
+            
             this.observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
-                    if (entry.isIntersecting && !this.loading && this.hasMore && !this.throttle) {
-                        this.throttle = true;
-                        @this.loadMore();
-                        setTimeout(() => { this.throttle = false; }, 400);
+                    if (entry.isIntersecting && !this.isLoadingMore && this.hasMore && !this.throttle) {
+                        this.loadMoreData();
                     }
                 });
             }, options);
-            if (sentinel) this.observer.observe(sentinel);
+            
+            this.observer.observe(sentinel);
         },
+        
+        loadMoreData() {
+            if (this.isLoadingMore || !this.hasMore) return;
+            
+            this.throttle = true;
+            this.isLoadingMore = true;
+            
+            @this.loadMore().then(() => {
+                this.isLoadingMore = false;
+                this.$nextTick(() => {
+                    this.throttle = false;
+                    this.checkIfNeedMoreData();
+                });
+            }).catch(() => {
+                this.isLoadingMore = false;
+                this.throttle = false;
+            });
+        },
+        
+        checkIfNeedMoreData() {
+            // Auto-load more if container isn't full
+            const container = this.$refs.container || this.$el;
+            if (this.hasMore && !this.isLoadingMore && container.scrollHeight <= container.clientHeight + 100) {
+                setTimeout(() => this.loadMoreData(), 100);
+            }
+        },
+        
+        setupScrollListener() {
+            const container = this.$refs.container || this.$el;
+            
+            // Optimized scroll handler with requestAnimationFrame
+            let ticking = false;
+            
+            this.scrollListener = () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        const scrollTop = container.scrollTop;
+                        const scrollHeight = container.scrollHeight;
+                        const clientHeight = container.clientHeight;
+                        const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
+                        
+                        // Trigger at 85% scroll
+                        if (scrollPercentage >= 0.85 && !this.isLoadingMore && this.hasMore && !this.throttle) {
+                            this.loadMoreData();
+                        }
+                        
+                        this.lastScrollTop = scrollTop;
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            };
+            
+            container.addEventListener('scroll', this.scrollListener, { passive: true });
+        },
+        
         init() {
             const container = this.$refs.container || this.$el;
-            // Ensure scroll is visible when used as its own scroll root
             container.style.overflowX = 'hidden';
-            if (!container.style.overflowY) container.style.overflowY = 'auto';
-
-            // Cache nearest scrollable ancestor (or window)
-            this.scrollParent = this.getScrollParent(container);
+            container.style.overflowY = 'auto';
+            container.style.willChange = 'scroll-position';
 
             this.setupObserver();
+            this.setupScrollListener();
 
             // Listen for real-time updates
             Livewire.on('conversationUpdated', () => {
                 @this.refresh();
             });
 
-            // Stop observing when no more data
+            // Watch for hasMore changes
             this.$watch('hasMore', (val) => {
-                const sentinel = this.$refs.sentinel;
-                if (!val && this.observer && sentinel) {
-                    this.observer.unobserve(sentinel);
+                if (!val && this.observer) {
+                    const sentinel = this.$refs.sentinel;
+                    if (sentinel) this.observer.unobserve(sentinel);
                 }
             });
 
-            // Re-attach observer after Livewire DOM updates (e.g., when selecting a conversation)
+            // Re-attach observer after Livewire updates
             if (window.Livewire && typeof window.Livewire.hook === 'function') {
                 window.Livewire.hook('message.processed', (message, component) => {
-                    // Only for this component instance
                     try {
                         if (component.id === this.$wire.__instance.id) {
-                            this.$nextTick(() => this.setupObserver());
+                            this.$nextTick(() => {
+                                this.setupObserver();
+                                this.checkIfNeedMoreData();
+                            });
                         }
                     } catch (e) { /* noop */ }
                 });
             }
 
-            // Prefetch if list doesn't fill container
-            const prefetchIfShort = () => {
-                const root = this.$refs.container || this.$el;
-                if (this.hasMore && !this.loading && root.scrollHeight <= root.clientHeight + 50) {
-                    @this.loadMore();
-                    setTimeout(prefetchIfShort, 200);
-                }
-            };
-            setTimeout(prefetchIfShort, 200);
-
-            // Fallback: manually detect scroll bottom on container
-            const onScroll = () => {
-                try {
-                    const el = this.scrollParent === window ? document.documentElement : this.scrollParent;
-                    const scrollTop = this.scrollParent === window ? (window.pageYOffset || document.documentElement.scrollTop) : el.scrollTop;
-                    const clientHeight = this.scrollParent === window ? window.innerHeight : el.clientHeight;
-                    const scrollHeight = this.scrollParent === window ? document.documentElement.scrollHeight : el.scrollHeight;
-                    const atBottom = (scrollTop + clientHeight) >= (scrollHeight - 2);
-                    if (atBottom && this.hasMore && !this.loading && !this.throttle) {
-                        this.throttle = true;
-                        @this.loadMore();
-                        setTimeout(() => { this.throttle = false; }, 400);
-                    }
-                } catch (e) { /* noop */ }
-            };
-            (this.scrollParent === window ? window : this.scrollParent).addEventListener('scroll', onScroll, { passive: true });
+            // Initial check if container needs more data
+            this.$nextTick(() => {
+                setTimeout(() => this.checkIfNeedMoreData(), 300);
+            });
         },
+        
         destroy() {
             if (this.observer) this.observer.disconnect();
+            if (this.scrollListener) {
+                const container = this.$refs.container || this.$el;
+                container.removeEventListener('scroll', this.scrollListener);
+            }
         }
      }"
-         style="overflow-y: auto; overflow-x: hidden;">
+         style="overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;">
 
         <!-- Conversations -->
         <div class="divide-y divide-gray-100">
@@ -197,24 +231,22 @@
         </div>
 
         <!-- Sentinel for IntersectionObserver -->
-        <div x-ref="sentinel" x-show="hasMore" class="h-1"></div>
+        <div x-ref="sentinel" x-show="hasMore" class="h-px"></div>
 
-        <!-- Loading More -->
-        <div x-show="loading" class="p-4 text-center" x-cloak>
-            <div class="inline-flex items-center">
-                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <!-- Loading Indicator -->
+        <div x-show="loading" class="p-3 text-center" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+            <div class="inline-flex items-center space-x-2 space-x-reverse">
+                <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span class="text-sm text-gray-600">جاري تحميل المزيد...</span>
+                <span class="text-sm text-gray-500">جاري التحميل...</span>
             </div>
         </div>
 
-        <!-- Manual Load More Fallback -->
-        <div x-show="!loading && hasMore" class="p-4 text-center" x-cloak>
-            <button @click="$wire.loadMore()" class="px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700">
-                تحميل المزيد
-            </button>
+        <!-- End of List Indicator -->
+        <div x-show="!loading && !hasMore && $wire.allConversations && $wire.allConversations.length > 0" class="p-4 text-center" x-cloak>
+            <span class="text-xs text-gray-400">• لا توجد محادثات أخرى •</span>
         </div>
 
         <!-- No Conversations -->
