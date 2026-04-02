@@ -207,14 +207,14 @@
                                 <div class="info-value">{{
                                     $user->salesRep->translateDurationToArabic($user->salesRep->work_duration) }}</div>
                             </div>
-<div class="info-item">
-    <div class="info-label">
-        <i class="bi bi-calendar-event me-2 text-blue-600"></i>تاريخ الميلاد
-    </div>
-    <div class="info-value">
-        {{ \Carbon\Carbon::parse($user->birthday)->translatedFormat('d F Y') }} — {{ $user->getAge() }} عامًا
-    </div>
-</div>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="bi bi-calendar-event me-2 text-blue-600"></i>تاريخ الميلاد
+                                </div>
+                                <div class="info-value">
+                                    {{ \Carbon\Carbon::parse($user->birthday)->locale('ar')->isoFormat('D MMMM YYYY') }} — {{ $user->getAge() }} عامًا
+                                </div>
+                            </div>
 @php
     $genderLabel = match($salesRep->user?->gender ?? '') {
         'male' => 'ذكر',

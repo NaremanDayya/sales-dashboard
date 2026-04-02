@@ -56,24 +56,10 @@
                         @endif
 
                         @if(Auth::user()->role == 'salesRep' && Auth::user()->salesRep->isManager() && $client->salesRep->manager_id == Auth::user()->salesRep->id)
-                            @php
-                                $managerChat = \App\Models\ManagerClientChat::where('client_id', $client->id)
-                                    ->where('manager_id', Auth::id())
-                                    ->first();
-                            @endphp
-                            @if($managerChat)
-                                <a href="{{ route('manager.chats.show', $managerChat) }}"
-                                   class="inline-flex items-center mt-4 ml-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all shadow hover:shadow-md">
-                                    <i class="fas fa-user-tie mr-2"></i> محادثة مع عضو الفريق
-                                </a>
-                            @else
-                                <form action="{{ route('manager.chats.createFromManager', $client) }}" method="POST" class="inline-block">
-                                    @csrf
-                                    <button type="submit" class="inline-flex items-center mt-4 ml-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all shadow hover:shadow-md">
-                                        <i class="fas fa-user-tie mr-2"></i> محادثة مع عضو الفريق
-                                    </button>
-                                </form>
-                            @endif
+                            <a href="{{ route('manager.chats.show', $client) }}"
+                               class="inline-flex items-center mt-4 ml-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all shadow hover:shadow-md">
+                                <i class="fas fa-user-tie mr-2"></i> محادثة مع عضو الفريق
+                            </a>
                         @endif
                         </div>
 
