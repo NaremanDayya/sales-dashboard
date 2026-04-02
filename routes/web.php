@@ -36,6 +36,7 @@ use App\Http\Controllers\SalesRepLoginIpController;
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/salesRep.php';
+require __DIR__ . '/manager.php';
 
 Route::get('/', function () {
     return view('welcome');
