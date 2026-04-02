@@ -43,7 +43,17 @@
                         <a href="{{ route('client.message',$client->id) }}"
                            class="inline-flex items-center mt-4 ml-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all shadow hover:shadow-md">
                             <i class="fas fa-comments mr-2"></i> مراسلة
-                        </a></div>
+                        </a>
+
+                        @if(Auth::user()->salesRep && Auth::user()->salesRep->hasManager() && $client->sales_rep_id == Auth::user()->salesRep->id)
+                            <form action="{{ route('manager.chats.store', $client) }}" method="POST" class="inline-block">
+                                @csrf
+                                <button type="submit" class="inline-flex items-center mt-4 ml-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all shadow hover:shadow-md">
+                                    <i class="fas fa-user-tie mr-2"></i> Chat with Manager
+                                </button>
+                            </form>
+                        @endif
+                        </div>
 
                     <!-- Quick Stats -->
                     <div class="p-6 border-b">
