@@ -99,6 +99,41 @@
                                 <div class="info-label"><i class="bi bi-clock-history me-2"></i>Work Duration</div>
                                 <div class="info-value">{{ $user->salesRep->work_duration }}</div>
                             </div>
+
+                            <div class="info-item">
+                                <div class="info-label"><i class="bi bi-person-badge me-2"></i>Manager</div>
+                                <div class="info-value">
+                                    @if($user->salesRep->manager)
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>{{ $user->salesRep->manager->name }}</span>
+                                            @can('assignManager', $user->salesRep)
+                                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#removeManagerModal">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            @endcan
+                                        </div>
+                                    @else
+                                        <span class="text-muted">No manager assigned</span>
+                                    @endif
+                                </div>
+                                @can('assignManager', $user->salesRep)
+                                    <button class="btn btn-sm btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#assignManagerModal">
+                                        <i class="bi bi-person-plus"></i> {{ $user->salesRep->manager ? 'Change Manager' : 'Assign Manager' }}
+                                    </button>
+                                @endcan
+                            </div>
+
+                            @if($user->salesRep->isManager())
+                            <div class="info-item">
+                                <div class="info-label"><i class="bi bi-people me-2"></i>Team Members</div>
+                                <div class="info-value">
+                                    {{ $user->salesRep->teamMembers->count() }}
+                                    <a href="{{ route('manager.dashboard') }}" class="btn btn-sm btn-outline-primary ms-2">
+                                        View Team
+                                    </a>
+                                </div>
+                            </div>
+                            @endif
                             @endif
 
                             @if(is_array($user->contact_info) && count($user->contact_info) > 0)
@@ -268,6 +303,67 @@
         </div>
     </div>
 </section>
+
+@if($user->role === 'sales_rep' && $user->salesRep)
+@can('assignManager', $user->salesRep)
+<!-- Assign Manager Modal -->
+<div class="modal fade" id="assignManagerModal" tabindex="-1" aria-labelledby="assignManagerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignManagerModalLabel">Assign Manager</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('manager.assign', $user->salesRep) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="manager_id" class="form-label">Select Manager</label>
+                        <select name="manager_id" id="manager_id" class="form-select" required>
+                            <option value="">Choose a manager...</option>
+                            @foreach(\App\Models\SalesRep::where('id', '!=', $user->salesRep->id)->with('user')->get() as $potentialManager)
+                                @if($potentialManager->canBeAssignedAsManagerTo($user->salesRep))
+                                    <option value="{{ $potentialManager->id }}" {{ $user->salesRep->manager_id == $potentialManager->id ? 'selected' : '' }}>
+                                        {{ $potentialManager->name }} ({{ $potentialManager->user->email }})
+                                    </option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Assign Manager</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Remove Manager Modal -->
+<div class="modal fade" id="removeManagerModal" tabindex="-1" aria-labelledby="removeManagerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title" id="removeManagerModalLabel">Remove Manager</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('manager.remove', $user->salesRep) }}" method="POST">
+                @csrf
+                @method('DELETE')
+                <div class="modal-body">
+                    <p>Are you sure you want to remove the manager assignment for {{ $user->salesRep->name }}?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Remove Manager</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endcan
+@endif
 
 @if($user->role === 'admin')
 <!-- Delete Account Modal -->

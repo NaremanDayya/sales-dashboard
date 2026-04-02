@@ -47,6 +47,7 @@ class User extends Authenticatable
                 'nationality',
                 'gender',
                 'personal_image',
+        'impersonating_manager_id',
     ];
 
     /**
@@ -95,6 +96,51 @@ class User extends Authenticatable
         return $this->hasOne(SalesRep::class, 'user_id');
     }
 
+    public function impersonatingManager()
+    {
+        return $this->belongsTo(SalesRep::class, 'impersonating_manager_id');
+    }
+
+    public function isImpersonatingManager()
+    {
+        return !is_null($this->impersonating_manager_id);
+    }
+
+    public function startImpersonating(SalesRep $manager)
+    {
+        $this->update(['impersonating_manager_id' => $manager->id]);
+    }
+
+    public function stopImpersonating()
+    {
+        $this->update(['impersonating_manager_id' => null]);
+    }
+
+    public function getEffectiveSalesRep()
+    {
+        if ($this->isImpersonatingManager()) {
+            return $this->impersonatingManager;
+        }
+        return $this->salesRep;
+    }
+
+    public function managerClientChatsAsSalesRep()
+    {
+        return $this->hasMany(ManagerClientChat::class, 'sales_rep_id');
+    }
+
+    public function managerClientChatsAsManager()
+    {
+        return $this->hasMany(ManagerClientChat::class, 'manager_id');
+    }
+
+    public function allManagerClientChats()
+    {
+        return ManagerClientChat::where('sales_rep_id', $this->id)
+            ->orWhere('manager_id', $this->id)
+            ->get();
+    }
+
     public function receivesBroadcastNotificationsOn(): array
     {
         $channels = [
@@ -132,18 +178,15 @@ class User extends Authenticatable
             return asset('images/default-avatar.png');
         }
 
-        // If already a full URL, just return it
         if (filter_var($path, FILTER_VALIDATE_URL)) {
             return $path;
         }
 
         try {
-            // Check public storage
             if (Storage::disk('public')->exists($path)) {
                 return Storage::url($path);
             }
 
-            // Check profile photos directories in private storage
             $pathsToCheck = [
                 $path,
                 'private/' . $path,
@@ -155,13 +198,12 @@ class User extends Authenticatable
 
             foreach ($pathsToCheck as $checkPath) {
                 if (Storage::disk('local')->exists($checkPath)) {
-                    // For private files, return the file serving route
                     return route('file.serve', ['filename' => $checkPath]);
                 }
             }
 
         } catch (\Exception $e) {
-            \Log::error('Error accessing storage for image: ' . $e->getMessage());
+            \Log::warning('Error accessing storage for personal image: ' . $e->getMessage());
         }
 
         return asset('images/default-avatar.png');

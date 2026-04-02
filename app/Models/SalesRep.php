@@ -25,6 +25,7 @@ class SalesRep extends Model
         'pending_orders',
         'interested_customers',
         'user_id',
+        'manager_id',
     ];
 protected $appends = ['active_agreements_count', 'inactive_agreements_count'];
 
@@ -44,6 +45,101 @@ protected $appends = ['active_agreements_count', 'inactive_agreements_count'];
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function manager()
+    {
+        return $this->belongsTo(SalesRep::class, 'manager_id');
+    }
+
+    public function teamMembers()
+    {
+        return $this->hasMany(SalesRep::class, 'manager_id');
+    }
+
+    public function isManager()
+    {
+        return $this->teamMembers()->exists();
+    }
+
+    public function hasManager()
+    {
+        return !is_null($this->manager_id);
+    }
+
+    public function canBeAssignedAsManagerTo(SalesRep $salesRep)
+    {
+        if ($this->id === $salesRep->id) {
+            return false;
+        }
+
+        if ($this->wouldCreateCircularHierarchy($salesRep)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function wouldCreateCircularHierarchy(SalesRep $potentialSubordinate)
+    {
+        $current = $this;
+        $visited = [];
+
+        while ($current && $current->manager_id) {
+            if (in_array($current->manager_id, $visited)) {
+                return true;
+            }
+
+            if ($current->manager_id === $potentialSubordinate->id) {
+                return true;
+            }
+
+            $visited[] = $current->manager_id;
+            $current = $current->manager;
+        }
+
+        return false;
+    }
+
+    public function scopeManagers($query)
+    {
+        return $query->has('teamMembers');
+    }
+
+    public function scopeWithoutManager($query)
+    {
+        return $query->whereNull('manager_id');
+    }
+
+    public function getAllTeamMemberIds()
+    {
+        $teamIds = [];
+        $this->collectTeamMemberIds($this, $teamIds);
+        return $teamIds;
+    }
+
+    protected function collectTeamMemberIds(SalesRep $salesRep, &$teamIds)
+    {
+        foreach ($salesRep->teamMembers as $member) {
+            $teamIds[] = $member->id;
+            $this->collectTeamMemberIds($member, $teamIds);
+        }
+    }
+
+    public function getTeamClientsQuery()
+    {
+        $teamMemberIds = $this->getAllTeamMemberIds();
+        $teamMemberIds[] = $this->id;
+
+        return Client::whereIn('sales_rep_id', $teamMemberIds);
+    }
+
+    public function getTeamAgreementsQuery()
+    {
+        $teamMemberIds = $this->getAllTeamMemberIds();
+        $teamMemberIds[] = $this->id;
+
+        return Agreement::whereIn('sales_rep_id', $teamMemberIds);
     }
     public function agreements()
     {

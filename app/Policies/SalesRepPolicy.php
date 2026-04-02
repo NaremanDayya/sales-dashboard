@@ -8,11 +8,30 @@ use Illuminate\Auth\Access\Response;
 
 class SalesRepPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
     public function viewOwn(User $user, SalesRep $salesRep): bool
     {
         return $user->id === $salesRep->user_id;
+    }
+
+    public function assignManager(User $user, SalesRep $salesRep): bool
+    {
+        return $user->isAdmin();
+    }
+
+    public function viewAsManager(User $user, SalesRep $salesRep): bool
+    {
+        $userSalesRep = $user->getEffectiveSalesRep();
+        
+        if (!$userSalesRep) {
+            return false;
+        }
+
+        return $salesRep->manager_id === $userSalesRep->id;
+    }
+
+    public function viewTeamData(User $user): bool
+    {
+        $salesRep = $user->getEffectiveSalesRep();
+        return $salesRep && $salesRep->isManager();
     }
 }
