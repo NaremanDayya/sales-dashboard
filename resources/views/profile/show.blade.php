@@ -231,6 +231,41 @@
                                 <div class="info-label"><i class="bi bi-credit-card-2-front me-2"></i>رقم الهوية</div>
                                 <div class="info-value">{{ $user->id_card }}</div>
                             </div>
+
+                            <div class="info-item">
+                                <div class="info-label"><i class="bi bi-person-badge me-2"></i>المدير المباشر</div>
+                                <div class="info-value">
+                                    @if($user->salesRep->manager)
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>{{ $user->salesRep->manager->name }}</span>
+                                            @if(Auth::user()->role === 'admin')
+                                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#removeManagerModal">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <span class="text-muted">لا يوجد مدير مباشر</span>
+                                    @endif
+                                </div>
+                                @if(Auth::user()->role === 'admin')
+                                    <button class="btn btn-sm btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#assignManagerModal">
+                                        <i class="bi bi-person-plus"></i> {{ $user->salesRep->manager ? 'تغيير المدير' : 'تعيين مدير' }}
+                                    </button>
+                                @endif
+                            </div>
+
+                            @if($user->salesRep->isManager())
+                            <div class="info-item">
+                                <div class="info-label"><i class="bi bi-people me-2"></i>أعضاء الفريق</div>
+                                <div class="info-value">
+                                    {{ $user->salesRep->teamMembers->count() }}
+                                    <a href="{{ route('manager.dashboard') }}" class="btn btn-sm btn-outline-primary ms-2">
+                                        عرض الفريق
+                                    </a>
+                                </div>
+                            </div>
+                            @endif
                             @endif
 
                             @if(is_array($user->contact_info) && count($user->contact_info) > 0)
@@ -772,6 +807,66 @@ $achievedTargetsCount = Target::where('is_achieved', true)
         margin-bottom: 0;
     }
 </style>
+
+@if($user->role === 'salesRep' && $user->salesRep && Auth::user()->role === 'admin')
+<!-- Assign Manager Modal -->
+<div class="modal fade" id="assignManagerModal" tabindex="-1" aria-labelledby="assignManagerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignManagerModalLabel">تعيين مدير</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('manager.assign', $user->salesRep) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="manager_id" class="form-label">اختر المدير</label>
+                        <select name="manager_id" id="manager_id" class="form-select" required>
+                            <option value="">اختر مدير...</option>
+                            @foreach(\App\Models\SalesRep::where('id', '!=', $user->salesRep->id)->with('user')->get() as $potentialManager)
+                                @if($potentialManager->canBeAssignedAsManagerTo($user->salesRep))
+                                    <option value="{{ $potentialManager->id }}" {{ $user->salesRep->manager_id == $potentialManager->id ? 'selected' : '' }}>
+                                        {{ $potentialManager->name }} ({{ $potentialManager->user->email }})
+                                    </option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">تعيين المدير</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Remove Manager Modal -->
+<div class="modal fade" id="removeManagerModal" tabindex="-1" aria-labelledby="removeManagerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title" id="removeManagerModalLabel">إزالة المدير</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('manager.remove', $user->salesRep) }}" method="POST">
+                @csrf
+                @method('DELETE')
+                <div class="modal-body">
+                    <p>هل أنت متأكد من إزالة تعيين المدير لـ {{ $user->salesRep->name }}؟</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-warning">إزالة المدير</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+
 <script>
     document.getElementById('profilePhotoInput').addEventListener('change', function() {
         if (this.files && this.files[0]) {
