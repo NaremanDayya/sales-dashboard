@@ -304,7 +304,7 @@
     </div>
 </section>
 
-@if($user->role === 'sales_rep' && $user->salesRep && Auth::user()->role === 'admin')
+@if(Auth::user()->role === 'admin')
 <!-- Assign Manager Modal -->
 <div class="modal fade" id="assignManagerModal" tabindex="-1" aria-labelledby="assignManagerModalLabel" aria-hidden="true">
     <div class="modal-dialog">
