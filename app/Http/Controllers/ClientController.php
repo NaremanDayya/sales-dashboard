@@ -479,7 +479,7 @@ class ClientController extends Controller
 
 
     // Show a single client
-    public function show(SalesRep $salesRep, Client $client)
+    public function show(Client $client)
     {
         //$this->authorize('view', $client);
         $requestTypes = RequestType::all();
@@ -494,8 +494,13 @@ class ClientController extends Controller
             'interested_service' => 'الخدمة المهتم بها',
             'interested_service_count' => 'عدد الخدمة المهتم بها',
         ];
+        
+        // Get the sales rep from the client
+        $salesRep = $client->salesRep;
+        
+        // Get approved edit request for the authenticated user
         $approvedEditRequest = $client->clientEditRequests()
-            ->where('sales_rep_id', $salesRep->user->id)
+            ->where('sales_rep_id', Auth::id())
             ->where('status', 'approved')
             ->where('request_type', 'client_data_change')
             ->latest()
