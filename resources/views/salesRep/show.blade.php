@@ -106,21 +106,21 @@
                                     @if($user->salesRep->manager)
                                         <div class="d-flex align-items-center justify-content-between">
                                             <span>{{ $user->salesRep->manager->name }}</span>
-                                            @can('assignManager', $user->salesRep)
+                                            @if(Auth::user()->role === 'admin')
                                                 <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#removeManagerModal">
                                                     <i class="bi bi-x-circle"></i>
                                                 </button>
-                                            @endcan
+                                            @endif
                                         </div>
                                     @else
                                         <span class="text-muted">No manager assigned</span>
                                     @endif
                                 </div>
-                                @can('assignManager', $user->salesRep)
+                                @if(Auth::user()->role === 'admin')
                                     <button class="btn btn-sm btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#assignManagerModal">
                                         <i class="bi bi-person-plus"></i> {{ $user->salesRep->manager ? 'Change Manager' : 'Assign Manager' }}
                                     </button>
-                                @endcan
+                                @endif
                             </div>
 
                             @if($user->salesRep->isManager())
@@ -304,8 +304,7 @@
     </div>
 </section>
 
-@if($user->role === 'sales_rep' && $user->salesRep)
-@can('assignManager', $user->salesRep)
+@if($user->role === 'sales_rep' && $user->salesRep && Auth::user()->role === 'admin')
 <!-- Assign Manager Modal -->
 <div class="modal fade" id="assignManagerModal" tabindex="-1" aria-labelledby="assignManagerModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -362,7 +361,6 @@
         </div>
     </div>
 </div>
-@endcan
 @endif
 
 @if($user->role === 'admin')

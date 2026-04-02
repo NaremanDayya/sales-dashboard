@@ -15,7 +15,7 @@ class SalesRepPolicy
 
     public function assignManager(User $user, SalesRep $salesRep): bool
     {
-        return $user->isAdmin();
+        return $user->role === 'admin';
     }
 
     public function viewAsManager(User $user, SalesRep $salesRep): bool
