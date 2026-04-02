@@ -283,8 +283,23 @@
                     @if($user->role === 'salesRep')
                     <!-- Sales Rep Performance Dashboard -->
                     <div class="card shadow-sm mb-4">
-                        <div class="card-header bg-transparent border-0">
-                            <h5 class="section-title"><i class="bi bi-speedometer2 me-2"></i> الأداء</h5>
+                        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+
+                            {{-- العنوان (يمين) --}}
+                            <h5 class="section-title mb-0">
+                                <i class="bi bi-speedometer2 me-2"></i> الأداء
+                            </h5>
+
+                            {{-- الزر (يسار) --}}
+                            @if(Auth::user()->role === 'admin')
+                                <button class="btn btn-sm btn-primary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#assignManagerModal">
+                                    <i class="bi bi-person-plus"></i>
+                                    {{ $user->salesRep->manager ? 'تغيير المدير' : 'تعيين مدير' }}
+                                </button>
+                            @endif
+
                         </div>
                         <div class="card-body">
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
