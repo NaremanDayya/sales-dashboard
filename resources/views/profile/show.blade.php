@@ -133,7 +133,7 @@
             </div>
         </div>
     </div>
-    @endif
+
 
     <!-- Modal -->
     <div x-show="showAdminPasswordModal"
