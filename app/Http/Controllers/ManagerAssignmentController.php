@@ -11,7 +11,6 @@ class ManagerAssignmentController extends Controller
 {
     public function assign(Request $request, SalesRep $salesRep)
     {
-        $this->authorize('assignManager', $salesRep);
 
         $request->validate([
             'manager_id' => 'required|exists:sales_representatives,id',
@@ -34,7 +33,6 @@ class ManagerAssignmentController extends Controller
 
     public function remove(SalesRep $salesRep)
     {
-        $this->authorize('assignManager', $salesRep);
 
         DB::transaction(function () use ($salesRep) {
             $salesRep->update(['manager_id' => null]);
@@ -45,7 +43,6 @@ class ManagerAssignmentController extends Controller
 
     public function availableManagers(SalesRep $salesRep)
     {
-        $this->authorize('assignManager', $salesRep);
 
         $availableManagers = SalesRep::where('id', '!=', $salesRep->id)
             ->with('user')
