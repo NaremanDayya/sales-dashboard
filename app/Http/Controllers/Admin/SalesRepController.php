@@ -122,17 +122,12 @@ class SalesRepController extends Controller
             'password' => $request->password,
         ];
 
-        // Check if CSV exists on S3, create if not
-        try {
-            if (!Storage::disk('s3')->exists($csvPath)) {
-                Storage::disk('s3')->put($csvPath, "Name,Email,Password\n");
-            }
-        } catch (\Exception $e) {
-            // If S3 check fails, create the file
-            Storage::disk('s3')->put($csvPath, "Name,Email,Password\n");
+        // Check if CSV exists, create if not
+        if (!Storage::exists($csvPath)) {
+            Storage::put($csvPath, "Name,Email,Password\n");
         }
 
-        $existingContent = Storage::disk('s3')->get($csvPath);
+        $existingContent = Storage::get($csvPath);
         $lines = explode("\n", $existingContent);
         $headers = array_shift($lines);
 
@@ -164,7 +159,7 @@ class SalesRepController extends Controller
             ]);
         }
 
-        Storage::disk('s3')->put($csvPath, implode("\n", $newContent));
+        Storage::put($csvPath, implode("\n", $newContent));
 
         // Handle personal image upload to S3
         if ($request->hasFile('personal_image')) {
@@ -330,16 +325,12 @@ $validated['personal_image'] = $path;
         'password' => $validated['password'] ?? null,
     ];
 
-    // Check if CSV exists on S3, create if not
-    try {
-        if (!Storage::disk('s3')->exists($csvPath)) {
-            Storage::disk('s3')->put($csvPath, "Name,Email,Password\n");
-        }
-    } catch (\Exception $e) {
-        Storage::disk('s3')->put($csvPath, "Name,Email,Password\n");
+    // Check if CSV exists, create if not
+    if (!Storage::exists($csvPath)) {
+        Storage::put($csvPath, "Name,Email,Password\n");
     }
 
-    $existingContent = Storage::disk('s3')->get($csvPath);
+    $existingContent = Storage::get($csvPath);
     $lines = explode("\n", $existingContent);
     $headers = array_shift($lines);
 
@@ -622,17 +613,13 @@ dd("validation passed");
             'updated_at' => now()->toDateTimeString()
         ];
 
-        // Check if file exists on S3, create if not
-        try {
-            if (!Storage::disk('s3')->exists($csvPath)) {
-                Storage::disk('s3')->put($csvPath, "Name,Email,Password,Updated At\n");
-            }
-        } catch (\Exception $e) {
-            Storage::disk('s3')->put($csvPath, "Name,Email,Password,Updated At\n");
+        // Check if file exists, create if not
+        if (!Storage::exists($csvPath)) {
+            Storage::put($csvPath, "Name,Email,Password,Updated At\n");
         }
 
         // Read existing content
-        $existingContent = Storage::disk('s3')->get($csvPath);
+        $existingContent = Storage::get($csvPath);
         $lines = explode("\n", $existingContent);
         $headers = array_shift($lines); // Remove header row
 
@@ -668,7 +655,7 @@ dd("validation passed");
         }
 
         // Save updated content
-        Storage::disk('s3')->put($csvPath, implode("\n", $newContent));
+        Storage::put($csvPath, implode("\n", $newContent));
 
         return response()->json([
             'success' => true,

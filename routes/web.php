@@ -114,14 +114,12 @@ Route::middleware([
  Route::get('/salesreps/credentials', function () {
         $csvPath = 'exports/sales_reps_credentials.csv';
 
-        try {
-            $csvUrl = Storage::disk('s3')->temporaryUrl($csvPath, now()->addMinutes(10));
-        } catch (\Exception $e) {
+        if (!Storage::exists($csvPath)) {
             return redirect()->back()->with('error', 'No credentials data available yet');
         }
 
         $credentials = [];
-        $file = Storage::disk('s3')->get($csvPath);
+        $file = Storage::get($csvPath);
         $lines = preg_split('/\r\n|\r|\n/', $file);
 
         // Start from index 1 to skip the header row
