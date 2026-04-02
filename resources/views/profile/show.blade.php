@@ -77,63 +77,6 @@
             <i class="bi bi-person-check-fill"></i> الدخول كـ {{ $salesRep->user->name }}
         </a>
     </div>
-    <!-- Assign Manager Modal -->
-    <div class="modal fade" id="assignManagerModal" tabindex="-1" aria-labelledby="assignManagerModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="assignManagerModalLabel">Assign Manager</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ route('manager.assign', $user->salesRep) }}" method="POST">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="manager_id" class="form-label">Select Manager</label>
-                            <select name="manager_id" id="manager_id" class="form-select" required>
-                                <option value="">Choose a manager...</option>
-                                @foreach(\App\Models\SalesRep::where('id', '!=', $user->salesRep->id)->with('user')->get() as $potentialManager)
-                                    @if($potentialManager->canBeAssignedAsManagerTo($user->salesRep))
-                                        <option value="{{ $potentialManager->id }}" {{ $user->salesRep->manager_id == $potentialManager->id ? 'selected' : '' }}>
-                                            {{ $potentialManager->name }} ({{ $potentialManager->user->email }})
-                                        </option>
-                                    @endif
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Assign Manager</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Remove Manager Modal -->
-    <div class="modal fade" id="removeManagerModal" tabindex="-1" aria-labelledby="removeManagerModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-warning">
-                    <h5 class="modal-title" id="removeManagerModalLabel">Remove Manager</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ route('manager.remove', $user->salesRep) }}" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <div class="modal-body">
-                        <p>Are you sure you want to remove the manager assignment for {{ $user->salesRep->name }}?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-warning">Remove Manager</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
 
     <!-- Modal -->
     <div x-show="showAdminPasswordModal"
