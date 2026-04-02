@@ -17,6 +17,11 @@ class Conversation extends Model
         'receiver_id',
         'sender_id',
         'client_id',
+        'is_manager_chat',
+    ];
+
+    protected $casts = [
+        'is_manager_chat' => 'boolean',
     ];
 
 

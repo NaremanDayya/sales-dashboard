@@ -172,10 +172,16 @@
                     $latestMsgText = $convData['latest_message_text'] ?? '';
                 @endphp
 
+                @php
+                    $isManagerChat = $convData['is_manager_chat'] ?? false;
+                    $borderColor = $isManagerChat ? 'border-purple-500' : 'border-blue-500';
+                    $bgColor = $isManagerChat ? 'bg-purple-50' : 'bg-blue-50';
+                    $hoverBg = $isManagerChat ? 'hover:bg-purple-50' : 'hover:bg-gray-50';
+                @endphp
                 <a
                     wire:key="conv-{{ $conversation->id }}"
                     href="{{ route('client.chat', ['client' => $clientId ?? '', 'conversation' => $conversation->id]) }}"
-                    class="flex items-center p-4 transition-colors duration-200 cursor-pointer group {{ $conversation->id === ($selectedConversation->id ?? null) ? 'bg-blue-50 border-r-4 border-blue-500' : 'hover:bg-gray-50' }}">
+                    class="flex items-center p-4 transition-colors duration-200 cursor-pointer group {{ $conversation->id === ($selectedConversation->id ?? null) ? $bgColor . ' border-r-4 ' . $borderColor : $hoverBg }}">
 
                     <!-- Avatar -->
                     <div class="relative flex-shrink-0">
@@ -187,7 +193,7 @@
                                     class="max-h-full max-w-full object-contain bg-white rounded-full">
 
                             @else
-                                <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                                <div class="w-full h-full bg-gradient-to-br {{ $isManagerChat ? 'from-purple-500 to-purple-700' : 'from-blue-500 to-purple-600' }} flex items-center justify-center text-white font-semibold text-sm">
                                     {{ substr($companyName, 0, 1) }}
                                 </div>
                             @endif
@@ -200,7 +206,15 @@
                     <!-- Conversation Info -->
                     <div class="flex-1 min-w-0 mr-3">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $companyName }}</h3>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $companyName }}</h3>
+                                @if($isManagerChat)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                                        <i class="fas fa-user-tie text-xs mr-1"></i>
+                                        مدير
+                                    </span>
+                                @endif
+                            </div>
                             <span class="text-xs text-gray-500 whitespace-nowrap" x-text="formatTime('{{ $conversation->latest_message_time }}')"></span>
                         </div>
 

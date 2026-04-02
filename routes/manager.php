@@ -15,10 +15,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/team/agreements', [ManagerDashboardController::class, 'teamAgreements'])->name('team.agreements');
         
         Route::get('/chats', [ManagerClientChatController::class, 'index'])->name('chats.index');
-        Route::get('/chats/{chat}', [ManagerClientChatController::class, 'show'])->name('chats.show');
+        Route::get('/chats/client/{client}', [ManagerClientChatController::class, 'show'])->name('chats.show');
         Route::post('/chats/client/{client}', [ManagerClientChatController::class, 'store'])->name('chats.store');
         Route::post('/chats/client/{client}/from-manager', [ManagerClientChatController::class, 'createFromManager'])->name('chats.createFromManager');
-        Route::post('/chats/{chat}/message', [ManagerClientChatController::class, 'sendMessage'])->name('chats.send-message');
         
         Route::post('/assign/{salesRep}', [ManagerAssignmentController::class, 'assign'])->name('assign');
         Route::delete('/remove/{salesRep}', [ManagerAssignmentController::class, 'remove'])->name('remove');
