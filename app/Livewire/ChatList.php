@@ -118,6 +118,22 @@ class ChatList extends Component
                 $query->where('sender_id', $user->id)
                     ->orWhere('receiver_id', $user->id);
             })
+            // Filter based on user role and chat type
+            ->when($user->role === 'salesRep' && $user->salesRep && $user->salesRep->isManager(), function ($query) {
+                // Managers only see manager chats (is_manager_chat = true)
+                $query->where('is_manager_chat', true);
+            })
+            ->when($user->role === 'admin', function ($query) {
+                // Admins only see admin chats (is_manager_chat = false or null)
+                $query->where(function ($q) {
+                    $q->where('is_manager_chat', false)
+                      ->orWhereNull('is_manager_chat');
+                });
+            })
+            ->when($user->role === 'salesRep' && (!$user->salesRep || !$user->salesRep->isManager()), function ($query) {
+                // Regular sales reps see all their chats (both admin and manager chats)
+                // No additional filtering needed
+            })
             ->when($this->search, function ($query) {
                 $query->whereHas('client', function ($q) {
                     $q->where('company_name', 'like', '%' . $this->search . '%')
