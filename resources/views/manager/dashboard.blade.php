@@ -66,44 +66,57 @@
             </div>
         </div>
 
-        <div class="team-grid">
-            @forelse($teamMembers as $member)
-                <div class="team-member-card">
-                    <div class="member-header">
-                        <img src="{{ $member->user->personal_image }}" alt="{{ $member->name }}" class="member-avatar">
-                        <div class="member-info">
-                            <h3>{{ $member->name }}</h3>
-                            <p class="text-muted">{{ $member->user->email }}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="member-stats">
-                        <div class="stat-item">
-                            <span class="stat-label">Clients</span>
-                            <span class="stat-value">{{ $member->clients->count() }}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Agreements</span>
-                            <span class="stat-value">{{ $member->agreements->count() }}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Active</span>
-                            <span class="stat-value">{{ $member->active_agreements_count }}</span>
-                        </div>
-                    </div>
-
-                    <div class="member-actions">
-                        <a href="{{ route('manager.team-member.details', $member) }}" class="btn btn-sm btn-primary">
-                            View Details
-                        </a>
-                    </div>
-                </div>
-            @empty
-                <div class="empty-state">
-                    <i class="fas fa-users fa-3x text-muted"></i>
-                    <p>No team members assigned yet.</p>
-                </div>
-            @endforelse
+        <div class="content-card">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Clients</th>
+                            <th>Agreements</th>
+                            <th>Active Agreements</th>
+                            <th>Start Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($teamMembers as $member)
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ $member->user->personal_image }}" alt="{{ $member->name }}" class="member-avatar-sm me-2">
+                                        <strong>{{ $member->name }}</strong>
+                                    </div>
+                                </td>
+                                <td>{{ $member->user->email }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ $member->clients->count() }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ $member->agreements->count() }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">{{ $member->active_agreements_count }}</span>
+                                </td>
+                                <td>{{ \Carbon\Carbon::parse($member->start_work_date)->format('Y-m-d') }}</td>
+                                <td>
+                                    <a href="{{ route('manager.team-member.details', $member) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="fas fa-users fa-3x mb-3 d-block"></i>
+                                    <p>No team members assigned yet.</p>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -161,86 +174,24 @@
     gap: 0.5rem;
 }
 
-.team-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-}
-
-.team-member-card {
+.content-card {
     background: white;
     border-radius: 12px;
     padding: 1.5rem;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.member-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.member-avatar {
-    width: 60px;
-    height: 60px;
+.member-avatar-sm {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
-}
-
-.member-info h3 {
-    margin: 0;
-    font-size: 1.125rem;
-    font-weight: 600;
-}
-
-.member-info p {
-    margin: 0;
-    font-size: 0.875rem;
-}
-
-.member-stats {
-    display: flex;
-    justify-content: space-around;
-    padding: 1rem 0;
-    border-top: 1px solid #e9ecef;
-    border-bottom: 1px solid #e9ecef;
-    margin-bottom: 1rem;
-}
-
-.stat-item {
-    text-align: center;
-}
-
-.stat-label {
-    display: block;
-    font-size: 0.75rem;
-    color: #6c757d;
-    margin-bottom: 0.25rem;
-}
-
-.stat-value {
-    display: block;
-    font-size: 1.25rem;
-    font-weight: 600;
-}
-
-.member-actions {
-    display: flex;
-    gap: 0.5rem;
 }
 
 .impersonation-badge {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-}
-
-.empty-state {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 3rem;
-    color: #6c757d;
 }
 </style>
 @endsection

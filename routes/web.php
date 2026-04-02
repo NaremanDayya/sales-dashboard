@@ -80,6 +80,10 @@ Route::get('/kernel-test', function() {
 Route::middleware(['auth', \App\Http\Middleware\AuthorizeSalesRep::class])->group( function () {
     Route::resource('sales-reps.clients', ClientController::class)->except(['edit', 'update']);
 });
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/clients/{client}', [ClientController::class, 'show'])->name('clients.show');
+});
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
