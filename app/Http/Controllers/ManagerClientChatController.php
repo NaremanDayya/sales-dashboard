@@ -70,6 +70,28 @@ class ManagerClientChatController extends Controller
         return redirect()->route('manager.chats.show', $chat);
     }
 
+    public function createFromManager(Request $request, Client $client)
+    {
+        $user = Auth::user();
+        $salesRep = $user->salesRep;
+
+        if (!$salesRep || !$salesRep->isManager()) {
+            abort(403, 'You are not a manager.');
+        }
+
+        if ($client->salesRep->manager_id !== $salesRep->id) {
+            abort(403, 'This client does not belong to your team.');
+        }
+
+        $chat = ManagerClientChat::firstOrCreate([
+            'client_id' => $client->id,
+            'sales_rep_id' => $client->salesRep->user_id,
+            'manager_id' => $user->id,
+        ]);
+
+        return redirect()->route('manager.chats.show', $chat);
+    }
+
     public function sendMessage(Request $request, ManagerClientChat $chat)
     {
         $user = Auth::user();

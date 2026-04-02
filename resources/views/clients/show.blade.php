@@ -32,26 +32,48 @@
                         <h1 class="text-2xl font-bold text-gray-800 mt-4">{{ $client->company_name }}</h1>
                         <p class="text-gray-600">{{ $client->contact_person }}</p>
 
-                        @if(Auth::user()->role == 'salesRep')
+                        @if(Auth::user()->role == 'salesRep' && $client->sales_rep_id == Auth::user()->salesRep->id)
                             <a href="{{ route('salesrep.agreements.create', ['salesrep' => $client->salesRep->id, 'client_id' => $client->id]) }}"
                                class="inline-flex items-center mt-4 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all shadow hover:shadow-md">
                                 <i class="fas fa-file-contract mr-2"></i> إنشاء اتفاقية
                             </a>
-
                         @endif
 
-                        <a href="{{ route('client.message',$client->id) }}"
-                           class="inline-flex items-center mt-4 ml-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all shadow hover:shadow-md">
-                            <i class="fas fa-comments mr-2"></i> مراسلة
-                        </a>
+                        @if(Auth::user()->role == 'salesRep' && $client->sales_rep_id == Auth::user()->salesRep->id)
+                            <a href="{{ route('client.message',$client->id) }}"
+                               class="inline-flex items-center mt-4 ml-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all shadow hover:shadow-md">
+                                <i class="fas fa-comments mr-2"></i> مراسلة
+                            </a>
+                        @endif
 
                         @if(Auth::user()->salesRep && Auth::user()->salesRep->hasManager() && $client->sales_rep_id == Auth::user()->salesRep->id)
                             <form action="{{ route('manager.chats.store', $client) }}" method="POST" class="inline-block">
                                 @csrf
                                 <button type="submit" class="inline-flex items-center mt-4 ml-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all shadow hover:shadow-md">
-                                    <i class="fas fa-user-tie mr-2"></i> Chat with Manager
+                                    <i class="fas fa-user-tie mr-2"></i> محادثة مع المدير
                                 </button>
                             </form>
+                        @endif
+
+                        @if(Auth::user()->role == 'salesRep' && Auth::user()->salesRep->isManager() && $client->salesRep->manager_id == Auth::user()->salesRep->id)
+                            @php
+                                $managerChat = \App\Models\ManagerClientChat::where('client_id', $client->id)
+                                    ->where('manager_id', Auth::id())
+                                    ->first();
+                            @endphp
+                            @if($managerChat)
+                                <a href="{{ route('manager.chats.show', $managerChat) }}"
+                                   class="inline-flex items-center mt-4 ml-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all shadow hover:shadow-md">
+                                    <i class="fas fa-user-tie mr-2"></i> محادثة مع عضو الفريق
+                                </a>
+                            @else
+                                <form action="{{ route('manager.chats.createFromManager', $client) }}" method="POST" class="inline-block">
+                                    @csrf
+                                    <button type="submit" class="inline-flex items-center mt-4 ml-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all shadow hover:shadow-md">
+                                        <i class="fas fa-user-tie mr-2"></i> محادثة مع عضو الفريق
+                                    </button>
+                                </form>
+                            @endif
                         @endif
                         </div>
 
@@ -76,7 +98,8 @@
                         </div>
                     </div>
 
-                    <!-- Recent Requests -->
+                    <!-- Recent Requests (Only for Sales Rep) -->
+                    @if(Auth::user()->role == 'salesRep' && $client->sales_rep_id == Auth::user()->salesRep->id)
                     <div class="p-6">
                         <h3 class="flex items-center space-x-2 rtl:space-x-reverse text-lg font-semibold text-gray-700 mb-4">
                             <i class="fas fa-history text-blue-500"></i>
@@ -162,6 +185,7 @@
                             </a>
                         @endif
                     </div>
+                    @endif
                 </div>
             </div>
             <!-- Right Column (Details and Forms) -->
