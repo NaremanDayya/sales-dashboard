@@ -122,8 +122,13 @@ class SalesRepController extends Controller
             'password' => $request->password,
         ];
 
-        // Check if CSV exists on S3
-        if (!Storage::disk('s3')->exists($csvPath)) {
+        // Check if CSV exists on S3, create if not
+        try {
+            if (!Storage::disk('s3')->exists($csvPath)) {
+                Storage::disk('s3')->put($csvPath, "Name,Email,Password\n");
+            }
+        } catch (\Exception $e) {
+            // If S3 check fails, create the file
             Storage::disk('s3')->put($csvPath, "Name,Email,Password\n");
         }
 
@@ -317,57 +322,58 @@ $validated['personal_image'] = $path;
 
     // Update user record
     $salesRep->user->update($userData);
-$csvPath = 'exports/sales_reps_credentials.csv';
+    $csvPath = 'exports/sales_reps_credentials.csv';
 
-$credentials = [
-    'name' => $userData['name'],
-    'email' => $userData['email'],
-    // إذا تم تحديث كلمة المرور، استعملها الأصلية (غير مشفرة) لو موجودة، أو خلي القيمة السابقة
-    'password' => $validated['password'] ?? null,
-];
+    $credentials = [
+        'name' => $userData['name'],
+        'email' => $userData['email'],
+        'password' => $validated['password'] ?? null,
+    ];
 
-// اقرأ الملف، أنشئه إذا مش موجود
-if (!Storage::exists($csvPath)) {
-    Storage::put($csvPath, "Name,Email,Password\n");
-}
+    // Check if CSV exists on S3, create if not
+    try {
+        if (!Storage::disk('s3')->exists($csvPath)) {
+            Storage::disk('s3')->put($csvPath, "Name,Email,Password\n");
+        }
+    } catch (\Exception $e) {
+        Storage::disk('s3')->put($csvPath, "Name,Email,Password\n");
+    }
 
-$existingContent = Storage::get($csvPath);
-$lines = explode("\n", $existingContent);
-$headers = array_shift($lines);
+    $existingContent = Storage::disk('s3')->get($csvPath);
+    $lines = explode("\n", $existingContent);
+    $headers = array_shift($lines);
 
-$updated = false;
-$newContent = [$headers];
+    $updated = false;
+    $newContent = [$headers];
 
-foreach ($lines as $line) {
-    if (empty(trim($line))) continue;
+    foreach ($lines as $line) {
+        if (empty(trim($line))) continue;
 
-    $data = str_getcsv($line);
+        $data = str_getcsv($line);
 
-    if (count($data) >= 2 && $data[1] === $credentials['email']) {
-        // إذا فيه كلمة مرور جديدة، حدّثها، وإلا خليك على القديمة
-        $password = $credentials['password'] ?? $data[2];
+        if (count($data) >= 2 && $data[1] === $credentials['email']) {
+            $password = $credentials['password'] ?? $data[2];
 
+            $newContent[] = implode(',', [
+                $credentials['name'],
+                $credentials['email'],
+                $password,
+            ]);
+            $updated = true;
+        } else {
+            $newContent[] = $line;
+        }
+    }
+
+    if (!$updated) {
         $newContent[] = implode(',', [
             $credentials['name'],
             $credentials['email'],
-            $password,
+            $credentials['password'] ?? '',
         ]);
-        $updated = true;
-    } else {
-        $newContent[] = $line;
     }
-}
 
-if (!$updated) {
-    // لو السطر مش موجود، أضفه
-    $newContent[] = implode(',', [
-        $credentials['name'],
-        $credentials['email'],
-        $credentials['password'] ?? '',
-    ]);
-}
-
-Storage::put($csvPath, implode("\n", $newContent));
+    Storage::disk('s3')->put($csvPath, implode("\n", $newContent));
      //dd($salesRep->user);
     // Calculate work duration
     $startDate = Carbon::parse($validated['start_work_date']);
@@ -616,13 +622,17 @@ dd("validation passed");
             'updated_at' => now()->toDateTimeString()
         ];
 
-        // Check if file exists, create if not with headers
-        if (!Storage::exists($csvPath)) {
-            Storage::put($csvPath, "Name,Email,Password,Updated At\n");
+        // Check if file exists on S3, create if not
+        try {
+            if (!Storage::disk('s3')->exists($csvPath)) {
+                Storage::disk('s3')->put($csvPath, "Name,Email,Password,Updated At\n");
+            }
+        } catch (\Exception $e) {
+            Storage::disk('s3')->put($csvPath, "Name,Email,Password,Updated At\n");
         }
 
         // Read existing content
-        $existingContent = Storage::get($csvPath);
+        $existingContent = Storage::disk('s3')->get($csvPath);
         $lines = explode("\n", $existingContent);
         $headers = array_shift($lines); // Remove header row
 
@@ -658,7 +668,7 @@ dd("validation passed");
         }
 
         // Save updated content
-        Storage::put($csvPath, implode("\n", $newContent));
+        Storage::disk('s3')->put($csvPath, implode("\n", $newContent));
 
         return response()->json([
             'success' => true,
