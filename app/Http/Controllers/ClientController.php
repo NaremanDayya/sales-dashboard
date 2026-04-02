@@ -478,8 +478,8 @@ class ClientController extends Controller
     }
 
 
-    // Show a single client
-    public function show(Client $client)
+    // Show a single client (for sales rep viewing their own client)
+    public function show(SalesRep $salesRep, Client $client)
     {
         //$this->authorize('view', $client);
         $requestTypes = RequestType::all();
@@ -494,13 +494,8 @@ class ClientController extends Controller
             'interested_service' => 'الخدمة المهتم بها',
             'interested_service_count' => 'عدد الخدمة المهتم بها',
         ];
-        
-        // Get the sales rep from the client
-        $salesRep = $client->salesRep;
-        
-        // Get approved edit request for the authenticated user
         $approvedEditRequest = $client->clientEditRequests()
-            ->where('sales_rep_id', Auth::id())
+            ->where('sales_rep_id', $salesRep->user->id)
             ->where('status', 'approved')
             ->where('request_type', 'client_data_change')
             ->latest()
@@ -509,6 +504,43 @@ class ClientController extends Controller
         $editableField = $approvedEditRequest ? $approvedEditRequest->edited_field : null;
         // dd($editableField);
         return view('clients.show', compact('client', 'salesRep', 'requestTypes', 'columns', 'editableField','services'));
+    }
+
+    // Show a single client (for managers/admins viewing team member clients)
+    public function showForManager(Client $client)
+    {
+        $user = Auth::user();
+        
+        // Check if user is admin or manager of the client's sales rep
+        if ($user->role === 'admin' || 
+            ($user->role === 'salesRep' && $user->salesRep && $user->salesRep->isManager() && 
+             $client->salesRep->manager_id === $user->salesRep->id)) {
+            
+            $requestTypes = RequestType::all();
+            $columns = [
+                'company_name' => 'اسم الشركة',
+                'logo' => 'الشعار',
+                'address' => 'العنوان',
+                'contact_person' => ' الشخص المسؤول',
+                'contact_position' => ' منصب الشخص المسؤول',
+                'interest_status' => 'حالة الاهتمام',
+                'phone' => 'رقم الجوال',
+                'interested_service' => 'الخدمة المهتم بها',
+                'interested_service_count' => 'عدد الخدمة المهتم بها',
+            ];
+            
+            // Get the sales rep from the client
+            $salesRep = $client->salesRep;
+            
+            // No edit requests for managers viewing team clients
+            $approvedEditRequest = null;
+            $editableField = null;
+            $services = Service::all();
+            
+            return view('clients.show', compact('client', 'salesRep', 'requestTypes', 'columns', 'editableField','services'));
+        }
+        
+        abort(403, 'Unauthorized access to this client.');
     }
 
     // Show form to edit client

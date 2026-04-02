@@ -47,7 +47,7 @@
                             <td>{{ $client->last_contact_date?->format('Y-m-d') }}</td>
                             <td>{{ $client->agreements->count() }}</td>
                             <td>
-                                <a href="{{ route('clients.show', $client) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                <a href="{{ route('clients.show.manager', $client) }}" class="btn btn-sm btn-outline-primary">View</a>
                             </td>
                         </tr>
                     @empty

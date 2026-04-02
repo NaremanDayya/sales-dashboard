@@ -219,7 +219,7 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <a href="{{ route('clients.show', $client) }}" class="btn btn-sm btn-outline-primary">
+                                            <a href="{{ route('clients.show.manager', $client) }}" class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-eye"></i> عرض
                                             </a>
                                         </td>

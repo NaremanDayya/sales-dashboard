@@ -82,7 +82,7 @@ Route::middleware(['auth', \App\Http\Middleware\AuthorizeSalesRep::class])->grou
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/clients/{client}', [ClientController::class, 'show'])->name('clients.show');
+    Route::get('/clients/{client}/manager-view', [ClientController::class, 'showForManager'])->name('clients.show.manager');
 });
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
