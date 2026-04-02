@@ -197,8 +197,8 @@
                             <div class="info-item">
                                 <div class="info-label"><i class="bi bi-calendar-date me-2"></i>تاريخ الإلتحاق بالشركة
                                 </div>
-                                <div class="info-value">{{
-                                    \Carbon\Carbon::parse($user->salesRep->start_work_date)->toFormattedDateString() }}
+                                <div class="info-value">
+                                    {{ \Carbon\Carbon::parse($user->salesRep->start_work_date)->locale('ar')->isoFormat('D MMMM YYYY') }}
                                 </div>
                             </div>
 
