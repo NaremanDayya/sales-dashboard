@@ -281,7 +281,7 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <a href="{{ route('clients.show', $client) }}" class="btn btn-sm btn-outline-primary">
+                                            <a href="{{ route('sales-reps.clients.show', [$client->salesRep->id, $client]) }}" class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-eye"></i> عرض
                                             </a>
                                         </td>
@@ -327,7 +327,7 @@
                                         </td>
                                         <td>{{ number_format($agreement->agreement_amount ?? 0, 2) }}</td>
                                         <td>
-                                            <a href="{{ route('agreements.show', $agreement) }}" class="btn btn-sm btn-outline-primary">
+                                            <a href="{{ route('salesrep.agreements.show', [$agreement->salesRep->id, $agreement]) }}" class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-eye"></i> عرض
                                             </a>
                                         </td>

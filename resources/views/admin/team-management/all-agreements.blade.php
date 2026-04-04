@@ -152,7 +152,7 @@
                                 </td>
                                 <td>{{ number_format($agreement->agreement_amount ?? 0, 2) }}</td>
                                 <td>
-                                    <a href="{{ route('agreements.show', $agreement) }}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ route('salesrep.agreements.show', [$agreement->salesRep->id, $agreement]) }}" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i> عرض
                                     </a>
                                 </td>

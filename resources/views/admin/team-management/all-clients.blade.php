@@ -174,7 +174,7 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="{{ route('clients.show', $client) }}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ route('sales-reps.clients.show', [$client->salesRep->id, $client]) }}" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i> عرض
                                     </a>
                                 </td>
