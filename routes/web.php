@@ -7,6 +7,7 @@ use App\Http\Controllers\ClientEditRequestController;
 use App\Http\Controllers\Admin\ClientRequestController;
 use App\Http\Controllers\Admin\ClientEditRequestController as AdminClientEditRequestController;
 use App\Http\Controllers\Admin\SalesRepController;
+use App\Http\Controllers\Admin\TeamManagementController;
 use App\Http\Controllers\AdminCommissionController;
 use App\Http\Controllers\AgreementEditRequestController;
 use App\Http\Controllers\ChatController;
@@ -139,7 +140,16 @@ Route::middleware([
 
 Route::get('/admin/shared-companies', [ClientController::class, 'sharedCompanies'])->name('admin.shared-companies');
 
-
+// Admin Team Management Routes
+Route::prefix('admin/team')->name('admin.team.')->group(function () {
+    Route::get('/', [TeamManagementController::class, 'index'])->name('index');
+    Route::get('/member/{teamMember}', [TeamManagementController::class, 'teamMemberDetails'])->name('member.details');
+    Route::get('/manager/{manager}', [TeamManagementController::class, 'managerTeam'])->name('manager.team');
+    Route::get('/manager/{manager}/clients', [TeamManagementController::class, 'teamClients'])->name('manager.clients');
+    Route::get('/manager/{manager}/agreements', [TeamManagementController::class, 'teamAgreements'])->name('manager.agreements');
+    Route::get('/all-clients', [TeamManagementController::class, 'allTeamClients'])->name('all-clients');
+    Route::get('/all-agreements', [TeamManagementController::class, 'allTeamAgreements'])->name('all-agreements');
+});
 
 Route::put('/admin/commissions/{commission}/update-type', [AdminCommissionController::class, 'updateCommissionType'])
     ->name('admin.commissions.updateType');
