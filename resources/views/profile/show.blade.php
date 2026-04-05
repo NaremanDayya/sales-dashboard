@@ -65,9 +65,9 @@
 <p class="profile-title text-muted font-bold d-flex align-items-center justify-content-center gap-2">
     {{ $roleText }}
     @if(Auth::user()->role === 'admin' && isset($salesRep))
-<div x-data="{ showAdminPasswordModal: false }">
+<div x-data="{ showSalesRepPasswordModal: false }">
     <!-- Trigger Button -->
-    <button @click="showAdminPasswordModal = true" class="btn btn-primary">
+    <button @click="showSalesRepPasswordModal = true" class="btn btn-primary">
         <i class="bi bi-key"></i> تغيير كلمة المرور
     </button>
 
@@ -77,6 +77,74 @@
             <i class="bi bi-person-check-fill"></i> الدخول كـ {{ $salesRep->user->name }}
         </a>
     </div>
+
+    <!-- Modal -->
+    <div x-show="showSalesRepPasswordModal"
+        x-cloak
+	x-transition.opacity
+         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div @click.away="showSalesRepPasswordModal = false"
+             class="bg-white rounded-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">تغيير كلمة مرور {{ $salesRep->user->name }}</h3>
+                <button @click="showSalesRepPasswordModal = false" class="text-gray-500 hover:text-gray-700">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <form id="salesRepPasswordForm" action="{{ route('salesrep.password.change', ['salesrep' => $salesRep->id]) }}" method="POST">
+                @csrf
+                @method('PUT')
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block mb-1">كلمة المرور الجديدة</label>
+                        <div class="relative">
+                            <input type="password" id="salesrepNewPassword" name="salesrepPassword" required minlength="8"
+                                   class="w-full px-4 py-2 pr-10 border rounded">
+                            <button type="button" onclick="togglePasswordVisibilityProfile('salesrepNewPassword', 'toggleIconNewProfile')"
+                                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                <i id="toggleIconNewProfile" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted">يجب أن تكون كلمة المرور 8 أحرف على الأقل</small>
+                    </div>
+
+                    <div>
+                        <label class="block mb-1">تأكيد كلمة المرور</label>
+                        <div class="relative">
+                            <input type="password" id="salesrepConfirmPassword" name="salesrepPassword_confirmation" required minlength="8"
+                                   class="w-full px-4 py-2 pr-10 border rounded">
+                            <button type="button" onclick="togglePasswordVisibilityProfile('salesrepConfirmPassword', 'toggleIconConfirmProfile')"
+                                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                <i id="toggleIconConfirmProfile" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" @click="showSalesRepPasswordModal = false"
+                                class="px-4 py-2 border rounded hover:bg-gray-50">
+                            إلغاء
+                        </button>
+                        <button type="submit"
+                                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            حفظ كلمة المرور
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+    @endif
+    
+    @if(Auth::user()->role === 'admin' && !isset($salesRep))
+<div x-data="{ showAdminPasswordModal: false }">
+    <!-- Trigger Button for Admin's Own Password -->
+    <button @click="showAdminPasswordModal = true" class="btn btn-primary">
+        <i class="bi bi-key"></i> تغيير كلمة المرور
+    </button>
 
     <!-- Modal -->
     <div x-show="showAdminPasswordModal"
@@ -90,7 +158,6 @@
                 <button @click="showAdminPasswordModal = false" class="text-gray-500 hover:text-gray-700">
                     <i class="bi bi-x-lg"></i>
                 </button>
-
             </div>
 
             <form action="{{ route('admin.password.update') }}" method="POST">
@@ -100,20 +167,38 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block mb-1">كلمة المرور الحالية</label>
-                        <input type="password" name="current_password" required
-                               class="w-full p-2 border rounded">
+                        <div class="relative">
+                            <input type="password" id="adminCurrentPassword" name="current_password" required
+                                   class="w-full px-4 py-2 pr-10 border rounded">
+                            <button type="button" onclick="togglePasswordVisibilityProfile('adminCurrentPassword', 'toggleIconCurrentAdmin')"
+                                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                <i id="toggleIconCurrentAdmin" class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div>
                         <label class="block mb-1">كلمة المرور الجديدة</label>
-                        <input type="password" name="new_password" required
-                               class="w-full p-2 border rounded">
+                        <div class="relative">
+                            <input type="password" id="adminNewPassword" name="new_password" required
+                                   class="w-full px-4 py-2 pr-10 border rounded">
+                            <button type="button" onclick="togglePasswordVisibilityProfile('adminNewPassword', 'toggleIconNewAdmin')"
+                                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                <i id="toggleIconNewAdmin" class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div>
                         <label class="block mb-1">تأكيد كلمة المرور</label>
-                        <input type="password" name="new_password_confirmation" required
-                               class="w-full p-2 border rounded">
+                        <div class="relative">
+                            <input type="password" id="adminConfirmPassword" name="new_password_confirmation" required
+                                   class="w-full px-4 py-2 pr-10 border rounded">
+                            <button type="button" onclick="togglePasswordVisibilityProfile('adminConfirmPassword', 'toggleIconConfirmAdmin')"
+                                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                <i id="toggleIconConfirmAdmin" class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="flex justify-end gap-2 pt-2">
@@ -822,6 +907,88 @@ $achievedTargetsCount = Target::where('is_achieved', true)
         margin-bottom: 0;
     }
 </style>
+
+<script>
+    function togglePasswordVisibilityProfile(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    @if(Auth::user()->role === 'admin' && isset($salesRep))
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordForm = document.getElementById('salesRepPasswordForm');
+        
+        if (passwordForm) {
+            passwordForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const newPassword = document.getElementById('salesrepNewPassword').value;
+                const confirmPassword = document.getElementById('salesrepConfirmPassword').value;
+                
+                if (newPassword !== confirmPassword) {
+                    alert('كلمة المرور وتأكيدها غير متطابقين');
+                    return;
+                }
+                
+                const submitBtn = passwordForm.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'جاري الحفظ...';
+                
+                try {
+                    const response = await fetch(passwordForm.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            _method: 'PUT',
+                            salesrepPassword: newPassword,
+                            salesrepPassword_confirmation: confirmPassword
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        if (data.errors) {
+                            let errorMessages = [];
+                            for (const field in data.errors) {
+                                errorMessages.push(...data.errors[field]);
+                            }
+                            alert(errorMessages.join('\n'));
+                        } else {
+                            throw new Error(data.message || 'حدث خطأ أثناء تحديث كلمة المرور');
+                        }
+                        return;
+                    }
+                    
+                    alert(data.message || 'تم تحديث كلمة المرور بنجاح');
+                    passwordForm.reset();
+                    window.location.reload();
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert(error.message || 'حدث خطأ غير متوقع');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'حفظ كلمة المرور';
+                }
+            });
+        }
+    });
+    @endif
+</script>
 
 @if($user->role === 'salesRep' && $user->salesRep && Auth::user()->role === 'admin')
 <!-- Assign Manager Modal -->
