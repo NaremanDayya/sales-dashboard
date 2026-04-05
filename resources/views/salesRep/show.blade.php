@@ -294,6 +294,12 @@
                     <i class="bi bi-pencil-square me-2"></i> Edit Profile
                 </a>
 
+                @if(Auth::user()->role === 'admin' && $user->role === 'sales_rep')
+                <button type="button" class="btn btn-outline-primary btn-lg px-4 me-3" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                    <i class="bi bi-key me-2"></i> Change Password
+                </button>
+                @endif
+
                 @if($user->role === 'admin')
                 <a href="#" class="btn btn-outline-danger btn-lg px-4" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
                     <i class="bi bi-trash me-2"></i> Delete Account
@@ -304,7 +310,52 @@
     </div>
 </section>
 
-@if(Auth::user()->role === 'admin')
+@if(Auth::user()->role === 'admin' && $user->role === 'sales_rep')
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">تغيير كلمة المرور - {{ $user->name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="changePasswordForm" action="{{ route('salesrep.password.change', ['salesrep' => $user->salesRep->id]) }}" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">كلمة المرور الجديدة</label>
+                        <div class="position-relative">
+                            <input type="password" class="form-control pe-5" id="newPassword" name="salesrepPassword" required minlength="8">
+                            <button type="button" onclick="togglePasswordVisibility('newPassword', 'toggleIconNew')" 
+                                class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-decoration-none">
+                                <i id="toggleIconNew" class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted">يجب أن تكون كلمة المرور 8 أحرف على الأقل</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmNewPassword" class="form-label">تأكيد كلمة المرور</label>
+                        <div class="position-relative">
+                            <input type="password" class="form-control pe-5" id="confirmNewPassword" name="salesrepPassword_confirmation" required minlength="8">
+                            <button type="button" onclick="togglePasswordVisibility('confirmNewPassword', 'toggleIconConfirm')" 
+                                class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-decoration-none">
+                                <i id="toggleIconConfirm" class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ كلمة المرور</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+
+@if($user->role === 'admin')
 <!-- Assign Manager Modal -->
 <div class="modal fade" id="assignManagerModal" tabindex="-1" aria-labelledby="assignManagerModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -392,9 +443,89 @@
 </div>
 @endif
 
-@if($user->role === 'sales_rep')
 @push('scripts')
 <script>
+    function togglePasswordVisibility(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    }
+
+    @if(Auth::user()->role === 'admin' && $user->role === 'sales_rep')
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordForm = document.getElementById('changePasswordForm');
+        
+        if (passwordForm) {
+            passwordForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmNewPassword').value;
+                
+                if (newPassword !== confirmPassword) {
+                    alert('كلمة المرور وتأكيدها غير متطابقين');
+                    return;
+                }
+                
+                const submitBtn = passwordForm.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'جاري الحفظ...';
+                
+                try {
+                    const response = await fetch(passwordForm.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            _method: 'PUT',
+                            salesrepPassword: newPassword,
+                            salesrepPassword_confirmation: confirmPassword
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        if (data.errors) {
+                            let errorMessages = [];
+                            for (const field in data.errors) {
+                                errorMessages.push(...data.errors[field]);
+                            }
+                            alert(errorMessages.join('\n'));
+                        } else {
+                            throw new Error(data.message || 'حدث خطأ أثناء تحديث كلمة المرور');
+                        }
+                        return;
+                    }
+                    
+                    alert(data.message || 'تم تحديث كلمة المرور بنجاح');
+                    bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+                    passwordForm.reset();
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert(error.message || 'حدث خطأ غير متوقع');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'حفظ كلمة المرور';
+                }
+            });
+        }
+    });
+    @endif
+
+    @if($user->role === 'sales_rep')
     document.addEventListener('DOMContentLoaded', function() {
         const generateBtn = document.getElementById('generateReportBtn');
         const spinner = document.getElementById('spinner');
@@ -429,9 +560,9 @@
             });
         }
     });
+    @endif
 </script>
 @endpush
-@endif
 
 <style>
     /* Custom Styles for Modern Profile */
