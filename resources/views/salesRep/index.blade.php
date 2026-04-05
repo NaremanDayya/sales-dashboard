@@ -1256,14 +1256,26 @@ table.data-table thead {
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">كلمة المرور الجديدة</label>
-                                <input type="password" id="salesrepPassword" name="salesrepPassword" required
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                <div class="relative">
+                                    <input type="password" id="salesrepPassword" name="salesrepPassword" required
+                                        class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg">
+                                    <button type="button" onclick="togglePasswordVisibility('salesrepPassword', 'toggleIconNew')"
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                        <i id="toggleIconNew" class="fas fa-eye"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">تأكيد كلمة المرور</label>
-                                <input type="password" id="confirmPassword" name="confirmPassword" required
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                <div class="relative">
+                                    <input type="password" id="confirmPassword" name="confirmPassword" required
+                                        class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg">
+                                    <button type="button" onclick="togglePasswordVisibility('confirmPassword', 'toggleIconConfirm')"
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                        <i id="toggleIconConfirm" class="fas fa-eye"></i>
+                                    </button>
+                                </div>
                             </div>
  <div class="flex justify-end space-x-3 pt-2">
                                 <button type="button" onclick="closePasswordModal()"
@@ -1777,6 +1789,21 @@ function openPasswordModal(salesRepId) {
 function closePasswordModal() {
     document.getElementById('passwordModal').classList.add('hidden');
     document.getElementById('passwordForm').reset();
+}
+
+function togglePasswordVisibility(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
 }
 
 function openDeleteModal(salesRepId) {

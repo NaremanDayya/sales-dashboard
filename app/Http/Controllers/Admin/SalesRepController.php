@@ -582,13 +582,7 @@ dd("validation passed");
 {
     try {
         $validated = $request->validate([
-            'salesrepPassword' => [
-                'required',
-                'confirmed',
-                Password::min(8)
-                    ->mixedCase()
-                    ->numbers()
-            ],
+            'salesrepPassword' => 'required|string|min:8|confirmed',
         ]);
         $user = $salesrep->user;
 
