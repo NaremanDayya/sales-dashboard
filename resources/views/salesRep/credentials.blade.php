@@ -887,30 +887,46 @@
             <th>الاسم</th>
             <th>البريد الإلكتروني</th>
             <th>كلمة المرور</th>
+            <th class="no-print">آخر تغيير</th>
+            <th class="no-print">تم التغيير بواسطة</th>
             <th class="no-print">الإجراءات</th>
         </tr>
     </thead>
     <tbody id="tableBody">
         @forelse($credentials as $credential)
         <tr>
-            <td>{{ $credential[0] ?? 'N/A' }}</td> 
-            <td>{{ $credential[1] ?? 'N/A' }}</td> 
+            <td>{{ $credential->name }}</td> 
+            <td>{{ $credential->email }}</td> 
             <td>
                 <span class="password-field">••••••••</span>
                 <button class="show-password-btn"
-                    data-password="{{ $credential[2] ?? '' }}">إظهار</button>
+                    data-password="{{ $credential->password }}">إظهار</button>
+            </td>
+            <td class="no-print">
+                @if($credential->password_changed_at)
+                    {{ $credential->password_changed_at->diffForHumans() }}
+                @else
+                    -
+                @endif
+            </td>
+            <td class="no-print">
+                @if($credential->changedBy)
+                    {{ $credential->changedBy->name }}
+                @else
+                    النظام
+                @endif
             </td>
             <td class="no-print">
                 <button
                     class="px-3 py-1 bg-blue-100 text-blue-800 rounded-md text-sm hover:bg-blue-200 transition-colors copy-btn"
-                    data-password="{{ $credential[2] ?? '' }}">
+                    data-password="{{ $credential->password }}">
                     نسخ كلمة المرور
                 </button>
             </td>
         </tr>
         @empty
         <tr>
-            <td colspan="4" class="empty-state">
+            <td colspan="6" class="empty-state">
                 <div class="empty-icon">
                     <i class="fas fa-inbox"></i>
                 </div>

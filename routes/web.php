@@ -112,27 +112,8 @@ Route::middleware([
     'auth',
     App\Http\Middleware\AdminRoleMiddleware::class
 ])->group(function () {
- Route::get('/salesreps/credentials', function () {
-        $csvPath = 'exports/sales_reps_credentials.csv';
-
-        if (!Storage::exists($csvPath)) {
-            return redirect()->back()->with('error', 'No credentials data available yet');
-        }
-
-        $credentials = [];
-        $file = Storage::get($csvPath);
-        $lines = preg_split('/\r\n|\r|\n/', $file);
-
-        // Start from index 1 to skip the header row
-        for ($i = 1; $i < count($lines); $i++) {
-            $line = trim($lines[$i]);
-            if (!empty($line)) {
-                $credentials[] = str_getcsv($line);
-            }
-        }
-
-        return view('salesRep.credentials', compact('credentials', 'csvUrl'));
-    })->name('salesreps.credentials');
+    Route::get('/salesreps/credentials', [App\Http\Controllers\Admin\SalesRepController::class, 'showCredentials'])
+        ->name('salesreps.credentials');
 
 
         Route::get('/admin/impersonate/{salesRep}', [SalesRepController::class, 'impersonate'])

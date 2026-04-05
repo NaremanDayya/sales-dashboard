@@ -8,6 +8,7 @@ use App\Models\AgreementEditRequest;
 use App\Models\ClientEditRequest;
 use App\Models\ClientRequest;
 use App\Models\SalesRep;
+use App\Models\SalesRepCredential;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -114,52 +115,7 @@ class SalesRepController extends Controller
             'birthday' => $request->birthday,
         ]);
 
-        // CSV handling (store on S3)
-        $csvPath = 'exports/sales_reps_credentials.csv';
-        $credentials = [
-            'name' => $user->name,
-            'email' => $user->email,
-            'password' => $request->password,
-        ];
-
-        // Check if CSV exists, create if not
-        if (!Storage::exists($csvPath)) {
-            Storage::put($csvPath, "Name,Email,Password\n");
-        }
-
-        $existingContent = Storage::get($csvPath);
-        $lines = explode("\n", $existingContent);
-        $headers = array_shift($lines);
-
-        $updated = false;
-        $newContent = [$headers];
-
-        foreach ($lines as $line) {
-            if (empty(trim($line))) continue;
-
-            $data = str_getcsv($line);
-
-            if (count($data) >= 2 && $data[1] === $credentials['email']) {
-                $newContent[] = implode(',', [
-                    $credentials['name'],
-                    $credentials['email'],
-                    $credentials['password'],
-                ]);
-                $updated = true;
-            } else {
-                $newContent[] = $line;
-            }
-        }
-
-        if (!$updated) {
-            $newContent[] = implode(',', [
-                $credentials['name'],
-                $credentials['email'],
-                $credentials['password'],
-            ]);
-        }
-
-        Storage::put($csvPath, implode("\n", $newContent));
+        // Store credentials in database (will be updated after sales rep is created)
 
         // Handle personal image upload to S3
         if ($request->hasFile('personal_image')) {
@@ -189,6 +145,16 @@ class SalesRepController extends Controller
             'total_orders' => 0,
             'pending_orders' => 0
         ]);
+
+        // Store credentials in database
+        SalesRepCredential::storeCredential(
+            $salesRep->id,
+            $user->id,
+            $user->name,
+            $user->email,
+            $request->password,
+            auth()->id()
+        );
 
         return redirect()->route('sales-reps.index')
             ->with('success', "تم إضافة المندوب {$salesRep->name} بنجاح");
@@ -313,58 +279,20 @@ $validated['personal_image'] = $path;
     // Handle password update if provided
     if (!empty($validated['password'])) {
         $userData['password'] = Hash::make($validated['password']);
+        
+        // Update credentials in database
+        SalesRepCredential::storeCredential(
+            $salesRep->id,
+            $salesRep->user->id,
+            $userData['name'],
+            $userData['email'],
+            $validated['password'],
+            auth()->id()
+        );
     }
 
     // Update user record
     $salesRep->user->update($userData);
-    $csvPath = 'exports/sales_reps_credentials.csv';
-
-    $credentials = [
-        'name' => $userData['name'],
-        'email' => $userData['email'],
-        'password' => $validated['password'] ?? null,
-    ];
-
-    // Check if CSV exists, create if not
-    if (!Storage::exists($csvPath)) {
-        Storage::put($csvPath, "Name,Email,Password\n");
-    }
-
-    $existingContent = Storage::get($csvPath);
-    $lines = explode("\n", $existingContent);
-    $headers = array_shift($lines);
-
-    $updated = false;
-    $newContent = [$headers];
-
-    foreach ($lines as $line) {
-        if (empty(trim($line))) continue;
-
-        $data = str_getcsv($line);
-
-        if (count($data) >= 2 && $data[1] === $credentials['email']) {
-            $password = $credentials['password'] ?? $data[2];
-
-            $newContent[] = implode(',', [
-                $credentials['name'],
-                $credentials['email'],
-                $password,
-            ]);
-            $updated = true;
-        } else {
-            $newContent[] = $line;
-        }
-    }
-
-    if (!$updated) {
-        $newContent[] = implode(',', [
-            $credentials['name'],
-            $credentials['email'],
-            $credentials['password'] ?? '',
-        ]);
-    }
-
-    Storage::disk('s3')->put($csvPath, implode("\n", $newContent));
      //dd($salesRep->user);
     // Calculate work duration
     $startDate = Carbon::parse($validated['start_work_date']);
@@ -598,58 +526,15 @@ dd("validation passed");
             'password' => Hash::make($validated['salesrepPassword']),
         ]);
 
-        // Handle CSV file update
-        $csvPath = 'exports/sales_reps_credentials.csv';
-        $credentials = [
-            'name' => $salesrep->name,
-            'email' => $user->email,
-            'password' => $validated['salesrepPassword'],
-            'updated_at' => now()->toDateTimeString()
-        ];
-
-        // Check if file exists, create if not
-        if (!Storage::exists($csvPath)) {
-            Storage::put($csvPath, "Name,Email,Password,Updated At\n");
-        }
-
-        // Read existing content
-        $existingContent = Storage::get($csvPath);
-        $lines = explode("\n", $existingContent);
-        $headers = array_shift($lines); // Remove header row
-
-        // Find and update existing entry or append new one
-        $updated = false;
-        $newContent = [$headers];
-
-        foreach ($lines as $line) {
-            if (empty(trim($line))) continue;
-
-            $data = str_getcsv($line);
-            if (count($data) >= 2 && $data[1] === $salesrep->email) {
-                // Update existing entry
-                $newContent[] = implode(',', [
-                    $credentials['name'],
-                    $credentials['email'],
-                    $credentials['password'],
-                ]);
-                $updated = true;
-            } else {
-                // Keep other entries unchanged
-                $newContent[] = $line;
-            }
-        }
-
-        // If no existing entry was found, append new one
-        if (!$updated) {
-            $newContent[] = implode(',', [
-                $credentials['name'],
-                $credentials['email'],
-                $credentials['password'],
-            ]);
-        }
-
-        // Save updated content
-        Storage::put($csvPath, implode("\n", $newContent));
+        // Update credentials in database
+        SalesRepCredential::storeCredential(
+            $salesrep->id,
+            $user->id,
+            $salesrep->name,
+            $user->email,
+            $validated['salesrepPassword'],
+            auth()->id()
+        );
 
         return response()->json([
             'success' => true,
@@ -690,6 +575,16 @@ dd("validation passed");
 
         return redirect('/dashboard');
     }
+
+    public function showCredentials()
+    {
+        $credentials = SalesRepCredential::with(['salesRep', 'user', 'changedBy'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('salesRep.credentials', compact('credentials'));
+    }
+
     public function stopImpersonate()
     {
 //        dd(session('impersonator_id'));
