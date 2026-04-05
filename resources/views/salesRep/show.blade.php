@@ -327,7 +327,7 @@
                         <label for="newPassword" class="form-label">كلمة المرور الجديدة</label>
                         <div class="position-relative">
                             <input type="password" class="form-control pe-5" id="newPassword" name="salesrepPassword" required minlength="8">
-                            <button type="button" onclick="togglePasswordVisibility('newPassword', 'toggleIconNew')" 
+                            <button type="button" onclick="togglePasswordVisibility('newPassword', 'toggleIconNew')"
                                 class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-decoration-none">
                                 <i id="toggleIconNew" class="bi bi-eye"></i>
                             </button>
@@ -338,7 +338,7 @@
                         <label for="confirmNewPassword" class="form-label">تأكيد كلمة المرور</label>
                         <div class="position-relative">
                             <input type="password" class="form-control pe-5" id="confirmNewPassword" name="salesrepPassword_confirmation" required minlength="8">
-                            <button type="button" onclick="togglePasswordVisibility('confirmNewPassword', 'toggleIconConfirm')" 
+                            <button type="button" onclick="togglePasswordVisibility('confirmNewPassword', 'toggleIconConfirm')"
                                 class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-decoration-none">
                                 <i id="toggleIconConfirm" class="bi bi-eye"></i>
                             </button>
@@ -448,7 +448,7 @@
     function togglePasswordVisibility(inputId, iconId) {
         const input = document.getElementById(inputId);
         const icon = document.getElementById(iconId);
-        
+
         if (input.type === 'password') {
             input.type = 'text';
             icon.classList.remove('bi-eye');
@@ -463,23 +463,23 @@
     @if(Auth::user()->role === 'admin' && $user->role === 'sales_rep')
     document.addEventListener('DOMContentLoaded', function() {
         const passwordForm = document.getElementById('changePasswordForm');
-        
+
         if (passwordForm) {
             passwordForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                
+
                 const newPassword = document.getElementById('newPassword').value;
                 const confirmPassword = document.getElementById('confirmNewPassword').value;
-                
+
                 if (newPassword !== confirmPassword) {
                     alert('كلمة المرور وتأكيدها غير متطابقين');
                     return;
                 }
-                
+
                 const submitBtn = passwordForm.querySelector('button[type="submit"]');
                 submitBtn.disabled = true;
                 submitBtn.innerText = 'جاري الحفظ...';
-                
+
                 try {
                     const response = await fetch(passwordForm.action, {
                         method: 'POST',
@@ -494,9 +494,9 @@
                             salesrepPassword_confirmation: confirmPassword
                         })
                     });
-                    
+
                     const data = await response.json();
-                    
+
                     if (!response.ok) {
                         if (data.errors) {
                             let errorMessages = [];
@@ -509,7 +509,7 @@
                         }
                         return;
                     }
-                    
+
                     alert(data.message || 'تم تحديث كلمة المرور بنجاح');
                     bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
                     passwordForm.reset();
