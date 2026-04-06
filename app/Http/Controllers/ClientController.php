@@ -712,8 +712,8 @@ class ClientController extends Controller
             $managerChat = \App\Models\ManagerClientChat::firstOrCreate(
                 [
                     'client_id' => $client->id,
-                    'sales_rep_id' => $client->salesRep->user_id,
-                    'manager_id' => $client->salesRep->manager->user_id,
+                    'sales_rep_id' => $client->salesRep->user->id,
+                    'manager_id' => $client->salesRep->manager->user->id,
                 ]
             );
 
@@ -723,7 +723,7 @@ class ClientController extends Controller
                 'message' => $message,
             ]);
         }
-        return back()->with('success', 'تم تحديث اخر تاريخ تواصل مع العميل {$client->company_name} بنجاح.');
+        return back()->with('success', "تم تحديث اخر تاريخ تواصل مع العميل {$client->company_name} بنجاح.");
     }
     public function chatClients()
     {
