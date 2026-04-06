@@ -707,22 +707,6 @@ class ClientController extends Controller
             ]
         );
 
-        // Send notification to Sales Rep ↔ Manager chat if sales rep has a manager
-        if ($client->salesRep && $client->salesRep->hasManager()) {
-            $managerChat = \App\Models\ManagerClientChat::firstOrCreate(
-                [
-                    'client_id' => $client->id,
-                    'sales_rep_id' => $client->salesRep->user_id,
-                    'manager_id' => $client->salesRep->manager->user_id,
-                ]
-            );
-
-            \App\Models\ManagerChatMessage::create([
-                'manager_client_chat_id' => $managerChat->id,
-                'sender_id' => $authenticatedUserId,
-                'message' => $message,
-            ]);
-        }
 
         return back()->with('success', 'تم تحديث اخر تاريخ تواصل مع العميل {$client->company_name} بنجاح.');
     }
