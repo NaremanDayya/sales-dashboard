@@ -707,24 +707,28 @@ class ClientController extends Controller
             ]
         );
 
-        // Send notification to Sales Rep Manager chat if sales rep has a manager
+        // Send notification to Sales Rep ↔ Manager chat if sales rep has a manager
         if ($client->salesRep && $client->salesRep->hasManager()) {
             try {
                 // Load the manager relationship to ensure it exists
                 $salesRep = $client->salesRep->load('manager.user');
                 
                 if ($salesRep->manager && $salesRep->manager->user) {
-                    $managerChat = \App\Models\ManagerClientChat::firstOrCreate(
+                    // Find or create conversation between sales rep and manager for this client
+                    $managerConversation = Conversation::firstOrCreate(
                         [
+                            'sender_id' => $salesRep->user->id,
+                            'receiver_id' => $salesRep->manager->user->id,
                             'client_id' => $client->id,
-                            'sales_rep_id' => $salesRep->user->id,
-                            'manager_id' => $salesRep->manager->user->id,
+                            'is_manager_chat' => true,
                         ]
                     );
 
-                    \App\Models\ManagerChatMessage::create([
-                        'manager_client_chat_id' => $managerChat->id,
+                    // Create message in the manager conversation
+                    Message::create([
+                        'conversation_id' => $managerConversation->id,
                         'sender_id' => $authenticatedUserId,
+                        'receiver_id' => $salesRep->manager->user->id,
                         'message' => $message,
                     ]);
                     
@@ -732,13 +736,7 @@ class ClientController extends Controller
                         'client_id' => $client->id,
                         'sales_rep_id' => $salesRep->user->id,
                         'manager_id' => $salesRep->manager->user->id,
-                        'chat_id' => $managerChat->id
-                    ]);
-                } else {
-                    \Log::warning('Manager or manager user not found', [
-                        'sales_rep_id' => $salesRep->id,
-                        'has_manager' => $salesRep->hasManager(),
-                        'manager_id' => $salesRep->manager_id
+                        'conversation_id' => $managerConversation->id
                     ]);
                 }
             } catch (\Exception $e) {
@@ -748,14 +746,6 @@ class ClientController extends Controller
                     'sales_rep_id' => $client->salesRep->id
                 ]);
             }
-        } else {
-            \Log::info('Manager notification skipped', [
-                'client_id' => $client->id,
-                'has_sales_rep' => $client->salesRep ? true : false,
-                'has_manager' => $client->salesRep ? $client->salesRep->hasManager() : false,
-                'sales_rep_id' => $client->salesRep ? $client->salesRep->id : null,
-                'manager_id' => $client->salesRep ? $client->salesRep->manager_id : null
-            ]);
         }
         return back()->with('success', "تم تحديث اخر تاريخ تواصل مع العميل {$client->company_name} بنجاح.");
     }
