@@ -802,6 +802,7 @@
                                     @endforeach
                                 </select>
                             </div>
+                            @if($isAdmin)
 
                             <div class="filter-item">
                                 <label for="salesRepFilter" class="block text-sm font-medium text-gray-700 mb-2">مندوب المبيعات</label>
@@ -814,7 +815,7 @@
                                     @endforeach
                                 </select>
                             </div>
-
+@endif
                             <div class="filter-item">
                                 <label for="lateDaysInput" class="block text-sm font-medium text-gray-700 mb-2">أيام التأخير</label>
                                 <input type="number"
