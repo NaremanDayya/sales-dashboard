@@ -707,20 +707,54 @@ class ClientController extends Controller
             ]
         );
 
-        // Send notification to Sales Rep ↔ Manager chat if sales rep has a manager
+        // Send notification to Sales Rep Manager chat if sales rep has a manager
         if ($client->salesRep && $client->salesRep->hasManager()) {
-            $managerChat = \App\Models\ManagerClientChat::firstOrCreate(
-                [
-                    'client_id' => $client->id,
-                    'sales_rep_id' => $client->salesRep->user->id,
-                    'manager_id' => $client->salesRep->manager->user->id,
-                ]
-            );
+            try {
+                // Load the manager relationship to ensure it exists
+                $salesRep = $client->salesRep->load('manager.user');
+                
+                if ($salesRep->manager && $salesRep->manager->user) {
+                    $managerChat = \App\Models\ManagerClientChat::firstOrCreate(
+                        [
+                            'client_id' => $client->id,
+                            'sales_rep_id' => $salesRep->user->id,
+                            'manager_id' => $salesRep->manager->user->id,
+                        ]
+                    );
 
-            \App\Models\ManagerChatMessage::create([
-                'manager_client_chat_id' => $managerChat->id,
-                'sender_id' => $authenticatedUserId,
-                'message' => $message,
+                    \App\Models\ManagerChatMessage::create([
+                        'manager_client_chat_id' => $managerChat->id,
+                        'sender_id' => $authenticatedUserId,
+                        'message' => $message,
+                    ]);
+                    
+                    \Log::info('Manager notification sent', [
+                        'client_id' => $client->id,
+                        'sales_rep_id' => $salesRep->user->id,
+                        'manager_id' => $salesRep->manager->user->id,
+                        'chat_id' => $managerChat->id
+                    ]);
+                } else {
+                    \Log::warning('Manager or manager user not found', [
+                        'sales_rep_id' => $salesRep->id,
+                        'has_manager' => $salesRep->hasManager(),
+                        'manager_id' => $salesRep->manager_id
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to send manager notification', [
+                    'error' => $e->getMessage(),
+                    'client_id' => $client->id,
+                    'sales_rep_id' => $client->salesRep->id
+                ]);
+            }
+        } else {
+            \Log::info('Manager notification skipped', [
+                'client_id' => $client->id,
+                'has_sales_rep' => $client->salesRep ? true : false,
+                'has_manager' => $client->salesRep ? $client->salesRep->hasManager() : false,
+                'sales_rep_id' => $client->salesRep ? $client->salesRep->id : null,
+                'manager_id' => $client->salesRep ? $client->salesRep->manager_id : null
             ]);
         }
         return back()->with('success', "تم تحديث اخر تاريخ تواصل مع العميل {$client->company_name} بنجاح.");
