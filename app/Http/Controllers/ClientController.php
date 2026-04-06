@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\Validator;
 
 class ClientController extends Controller
 {
-//    test
+//    test2
     public function allClients(Request $request)
     {
         $query = Client::query();
@@ -510,12 +510,12 @@ class ClientController extends Controller
     public function showForManager(Client $client)
     {
         $user = Auth::user();
-        
+
         // Check if user is admin or manager of the client's sales rep
-        if ($user->role === 'admin' || 
-            ($user->role === 'salesRep' && $user->salesRep && $user->salesRep->isManager() && 
+        if ($user->role === 'admin' ||
+            ($user->role === 'salesRep' && $user->salesRep && $user->salesRep->isManager() &&
              $client->salesRep->manager_id === $user->salesRep->id)) {
-            
+
             $requestTypes = RequestType::all();
             $columns = [
                 'company_name' => 'اسم الشركة',
@@ -528,18 +528,18 @@ class ClientController extends Controller
                 'interested_service' => 'الخدمة المهتم بها',
                 'interested_service_count' => 'عدد الخدمة المهتم بها',
             ];
-            
+
             // Get the sales rep from the client
             $salesRep = $client->salesRep;
-            
+
             // No edit requests for managers viewing team clients
             $approvedEditRequest = null;
             $editableField = null;
             $services = Service::all();
-            
+
             return view('clients.show', compact('client', 'salesRep', 'requestTypes', 'columns', 'editableField','services'));
         }
-        
+
         abort(403, 'Unauthorized access to this client.');
     }
 
