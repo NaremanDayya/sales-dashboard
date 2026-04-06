@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\Validator;
 
 class ClientController extends Controller
 {
-//    test2
+//    test3
     public function allClients(Request $request)
     {
         $query = Client::query();

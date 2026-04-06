@@ -1,7 +1,6 @@
 @extends('layouts.master')
 @section('title','جدول العملاء')
 @push('styles')
-{{--    test--}}
     <style>
         :root {
             --primary: #4f46e5;
