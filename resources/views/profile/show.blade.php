@@ -346,9 +346,11 @@
                                 <div class="info-label"><i class="bi bi-people me-2"></i>أعضاء الفريق</div>
                                 <div class="info-value">
                                     {{ $user->salesRep->teamMembers->count() }}
+                                    @if(Auth::id() === $user->id)
                                     <a href="{{ route('manager.dashboard') }}" class="btn btn-sm btn-outline-primary ms-2">
                                         عرض الفريق
                                     </a>
+                                    @endif
                                 </div>
                             </div>
                             @endif
