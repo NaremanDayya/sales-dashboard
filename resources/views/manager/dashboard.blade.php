@@ -224,10 +224,10 @@
             <div class="table-header">
                 <h2 class="table-title">أعضاء الفريق</h2>
                 <div class="d-flex gap-2">
-                    <a href="{{ route('manager.team.clients') }}" class="btn btn-outline-primary">
+                    <a href="{{ route('manager.team.clients', request()->only('manager_id')) }}" class="btn btn-outline-primary">
                         <i class="fas fa-users"></i> جميع العملاء
                     </a>
-                    <a href="{{ route('manager.team.agreements') }}" class="btn btn-outline-primary">
+                    <a href="{{ route('manager.team.agreements', request()->only('manager_id')) }}" class="btn btn-outline-primary">
                         <i class="fas fa-file-contract"></i> جميع الاتفاقيات
                     </a>
                 </div>

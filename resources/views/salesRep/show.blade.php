@@ -128,7 +128,7 @@
                                 <div class="info-label"><i class="bi bi-people me-2"></i>Team Members</div>
                                 <div class="info-value">
                                     {{ $user->salesRep->teamMembers->count() }}
-                                    <a href="{{ route('manager.dashboard') }}" class="btn btn-sm btn-outline-primary ms-2">
+                                    <a href="{{ route('manager.dashboard', ['manager_id' => $user->salesRep->id]) }}" class="btn btn-sm btn-outline-primary ms-2">
                                         View Team
                                     </a>
                                 </div>
