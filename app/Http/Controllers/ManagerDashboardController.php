@@ -34,6 +34,15 @@ class ManagerDashboardController extends Controller
         $user = Auth::user();
         $salesRep = $user->getEffectiveSalesRep();
 
+        dd([
+            'user_id' => $user->id,
+            'user_role' => $user->role,
+            'is_admin' => $user->isAdmin(),
+            'sales_rep' => $salesRep,
+            'team_member_id' => $teamMember->id,
+            'team_member_manager_id' => $teamMember->manager_id,
+        ]);
+
         if (!$user->isAdmin()) {
             if (!$salesRep || !$salesRep->isManager()) {
                 abort(403, 'You do not have manager privileges.');
