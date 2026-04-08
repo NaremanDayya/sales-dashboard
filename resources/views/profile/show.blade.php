@@ -138,7 +138,7 @@
     </div>
 </div>
     @endif
-    
+
     @if(Auth::user()->role === 'admin' && !isset($salesRep))
 <div x-data="{ showAdminPasswordModal: false }">
     <!-- Trigger Button for Admin's Own Password -->
@@ -339,6 +339,7 @@
                                     </button>
                                 @endif
                             </div>
+                            @endif
 
                             @if($user->salesRep->isManager())
                             <div class="info-item">
@@ -350,7 +351,6 @@
                                     </a>
                                 </div>
                             </div>
-                            @endif
                             @endif
 
                             @if(is_array($user->contact_info) && count($user->contact_info) > 0)
@@ -912,7 +912,7 @@ $achievedTargetsCount = Target::where('is_achieved', true)
     function togglePasswordVisibilityProfile(inputId, iconId) {
         const input = document.getElementById(inputId);
         const icon = document.getElementById(iconId);
-        
+
         if (input.type === 'password') {
             input.type = 'text';
             icon.classList.remove('fa-eye');
@@ -927,23 +927,23 @@ $achievedTargetsCount = Target::where('is_achieved', true)
     @if(Auth::user()->role === 'admin' && isset($salesRep))
     document.addEventListener('DOMContentLoaded', function() {
         const passwordForm = document.getElementById('salesRepPasswordForm');
-        
+
         if (passwordForm) {
             passwordForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                
+
                 const newPassword = document.getElementById('salesrepNewPassword').value;
                 const confirmPassword = document.getElementById('salesrepConfirmPassword').value;
-                
+
                 if (newPassword !== confirmPassword) {
                     alert('كلمة المرور وتأكيدها غير متطابقين');
                     return;
                 }
-                
+
                 const submitBtn = passwordForm.querySelector('button[type="submit"]');
                 submitBtn.disabled = true;
                 submitBtn.innerText = 'جاري الحفظ...';
-                
+
                 try {
                     const response = await fetch(passwordForm.action, {
                         method: 'POST',
@@ -958,9 +958,9 @@ $achievedTargetsCount = Target::where('is_achieved', true)
                             salesrepPassword_confirmation: confirmPassword
                         })
                     });
-                    
+
                     const data = await response.json();
-                    
+
                     if (!response.ok) {
                         if (data.errors) {
                             let errorMessages = [];
@@ -973,7 +973,7 @@ $achievedTargetsCount = Target::where('is_achieved', true)
                         }
                         return;
                     }
-                    
+
                     alert(data.message || 'تم تحديث كلمة المرور بنجاح');
                     passwordForm.reset();
                     window.location.reload();

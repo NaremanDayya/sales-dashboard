@@ -155,7 +155,7 @@
 <div class="min-h-screen bg-gray-50 py-6">
     <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-4">
-            <a href="{{ route('manager.dashboard', request()->only('manager_id')) }}" class="btn btn-outline-secondary">
+            <a href="{{ route('manager.dashboard') }}" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-right"></i> العودة للوحة التحكم
             </a>
         </div>

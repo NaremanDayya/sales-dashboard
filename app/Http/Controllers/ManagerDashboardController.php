@@ -8,31 +8,17 @@ use Illuminate\Support\Facades\Auth;
 
 class ManagerDashboardController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
         $user = Auth::user();
         $salesRep = $user->getEffectiveSalesRep();
 
-        if ($user->isAdmin()) {
-            $managerId = $request->query('manager_id');
-            
-            if ($managerId) {
-                $salesRep = SalesRep::where('id', $managerId)->has('teamMembers')->firstOrFail();
-            } else {
-                $managers = SalesRep::has('teamMembers')
-                    ->with(['user', 'teamMembers.user'])
-                    ->get();
-                
-                return view('manager.admin-managers-list', compact('managers'));
-            }
-        } else {
-            if (!$salesRep || !$salesRep->isManager()) {
-                abort(403, 'You do not have manager privileges.');
-            }
+        if (!$salesRep || !$salesRep->isManager()) {
+            abort(403, 'You do not have manager privileges.');
         }
 
         $teamMembers = $salesRep->teamMembers()->with(['user', 'clients', 'agreements'])->get();
-
+        
         $teamStats = [
             'total_members' => $teamMembers->count(),
             'total_clients' => $salesRep->getTeamClientsQuery()->count(),
@@ -48,15 +34,12 @@ class ManagerDashboardController extends Controller
         $user = Auth::user();
         $salesRep = $user->getEffectiveSalesRep();
 
+        if (!$salesRep || !$salesRep->isManager()) {
+            abort(403, 'You do not have manager privileges.');
+        }
 
-        if (!$user->isAdmin()) {
-            if (!$salesRep || !$salesRep->isManager()) {
-                abort(403, 'You do not have manager privileges.');
-            }
-
-            if ($teamMember->manager_id !== $salesRep->id) {
-                abort(403, 'This sales representative is not in your team.');
-            }
+        if ($teamMember->manager_id !== $salesRep->id) {
+            abort(403, 'This sales representative is not in your team.');
         }
 
         $clients = $teamMember->clients()->with('agreements')->paginate(20);
@@ -65,22 +48,13 @@ class ManagerDashboardController extends Controller
         return view('manager.team-member-details', compact('teamMember', 'clients', 'agreements'));
     }
 
-    public function teamClients(Request $request)
+    public function teamClients()
     {
         $user = Auth::user();
         $salesRep = $user->getEffectiveSalesRep();
 
-        if ($user->isAdmin()) {
-            $managerId = $request->query('manager_id');
-            if ($managerId) {
-                $salesRep = SalesRep::where('id', $managerId)->has('teamMembers')->firstOrFail();
-            } else {
-                abort(400, 'Manager ID is required for admin access.');
-            }
-        } else {
-            if (!$salesRep || !$salesRep->isManager()) {
-                abort(403, 'You do not have manager privileges.');
-            }
+        if (!$salesRep || !$salesRep->isManager()) {
+            abort(403, 'You do not have manager privileges.');
         }
 
         $clients = $salesRep->getTeamClientsQuery()
@@ -90,22 +64,13 @@ class ManagerDashboardController extends Controller
         return view('manager.team-clients', compact('clients', 'salesRep'));
     }
 
-    public function teamAgreements(Request $request)
+    public function teamAgreements()
     {
         $user = Auth::user();
         $salesRep = $user->getEffectiveSalesRep();
 
-        if ($user->isAdmin()) {
-            $managerId = $request->query('manager_id');
-            if ($managerId) {
-                $salesRep = SalesRep::where('id', $managerId)->has('teamMembers')->firstOrFail();
-            } else {
-                abort(400, 'Manager ID is required for admin access.');
-            }
-        } else {
-            if (!$salesRep || !$salesRep->isManager()) {
-                abort(403, 'You do not have manager privileges.');
-            }
+        if (!$salesRep || !$salesRep->isManager()) {
+            abort(403, 'You do not have manager privileges.');
         }
 
         $agreements = $salesRep->getTeamAgreementsQuery()

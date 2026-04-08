@@ -4,7 +4,7 @@
 <div class="app-content">
     <div class="section-header">
         <div>
-            <a href="{{ route('manager.dashboard', request()->only('manager_id')) }}" class="btn btn-sm btn-outline-secondary mb-2">
+            <a href="{{ route('manager.dashboard') }}" class="btn btn-sm btn-outline-secondary mb-2">
                 <i class="fas fa-arrow-left"></i> Back to Dashboard
             </a>
             <h1>Team Agreements</h1>
