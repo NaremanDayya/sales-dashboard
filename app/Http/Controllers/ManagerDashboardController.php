@@ -33,7 +33,7 @@ class ManagerDashboardController extends Controller
     {
         $user = Auth::user();
         $salesRep = $user->getEffectiveSalesRep();
-
+//test
 //        dd([
 //            'user_id' => $user->id,
 //            'user_role' => $user->role,
