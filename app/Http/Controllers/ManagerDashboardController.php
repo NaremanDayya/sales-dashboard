@@ -12,10 +12,14 @@ class ManagerDashboardController extends Controller
     {
         $user = Auth::user();
         $salesRep = $user->getEffectiveSalesRep();
-
-        if (!$salesRep || !$salesRep->isManager()) {
-            abort(403, 'You do not have manager privileges.');
+        if (!$user->isAdmin()) {
+            if (!$salesRep || !$salesRep->isManager()) {
+                abort(403, 'You do not have manager privileges.');
+            }
         }
+//        if (!$salesRep || !$salesRep->isManager()) {
+//            abort(403, 'You do not have manager privileges.');
+//        }
 
         $teamMembers = $salesRep->teamMembers()->with(['user', 'clients', 'agreements'])->get();
 
@@ -33,25 +37,17 @@ class ManagerDashboardController extends Controller
     {
         $user = Auth::user();
         $salesRep = $user->getEffectiveSalesRep();
-//test
-//        dd([
-//            'user_id' => $user->id,
-//            'user_role' => $user->role,
-//            'is_admin' => $user->isAdmin(),
-//            'sales_rep' => $salesRep,
-//            'team_member_id' => $teamMember->id,
-//            'team_member_manager_id' => $teamMember->manager_id,
-//        ]);
 
-//        if (!$user->isAdmin()) {
-//            if (!$salesRep || !$salesRep->isManager()) {
-//                abort(403, 'You do not have manager privileges.');
-//            }
-//
-//            if ($teamMember->manager_id !== $salesRep->id) {
-//                abort(403, 'This sales representative is not in your team.');
-//            }
-//        }
+
+        if (!$user->isAdmin()) {
+            if (!$salesRep || !$salesRep->isManager()) {
+                abort(403, 'You do not have manager privileges.');
+            }
+
+            if ($teamMember->manager_id !== $salesRep->id) {
+                abort(403, 'This sales representative is not in your team.');
+            }
+        }
 
         $clients = $teamMember->clients()->with('agreements')->paginate(20);
         $agreements = $teamMember->agreements()->with('client')->paginate(20);
