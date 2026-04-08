@@ -17,9 +17,9 @@ class ManagerDashboardController extends Controller
             $managerId = $request->query('manager_id');
             
             if ($managerId) {
-                $salesRep = SalesRep::where('id', $managerId)->where('is_manager', true)->firstOrFail();
+                $salesRep = SalesRep::where('id', $managerId)->has('teamMembers')->firstOrFail();
             } else {
-                $managers = SalesRep::where('is_manager', true)
+                $managers = SalesRep::has('teamMembers')
                     ->with(['user', 'teamMembers.user'])
                     ->get();
                 
@@ -73,7 +73,7 @@ class ManagerDashboardController extends Controller
         if ($user->isAdmin()) {
             $managerId = $request->query('manager_id');
             if ($managerId) {
-                $salesRep = SalesRep::where('id', $managerId)->where('is_manager', true)->firstOrFail();
+                $salesRep = SalesRep::where('id', $managerId)->has('teamMembers')->firstOrFail();
             } else {
                 abort(400, 'Manager ID is required for admin access.');
             }
@@ -98,7 +98,7 @@ class ManagerDashboardController extends Controller
         if ($user->isAdmin()) {
             $managerId = $request->query('manager_id');
             if ($managerId) {
-                $salesRep = SalesRep::where('id', $managerId)->where('is_manager', true)->firstOrFail();
+                $salesRep = SalesRep::where('id', $managerId)->has('teamMembers')->firstOrFail();
             } else {
                 abort(400, 'Manager ID is required for admin access.');
             }
