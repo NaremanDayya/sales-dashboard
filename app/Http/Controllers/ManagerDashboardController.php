@@ -34,12 +34,14 @@ class ManagerDashboardController extends Controller
         $user = Auth::user();
         $salesRep = $user->getEffectiveSalesRep();
 
-        if (!$salesRep || !$salesRep->isManager()) {
-            abort(403, 'You do not have manager privileges.');
-        }
+        if (!$user->isAdmin()) {
+            if (!$salesRep || !$salesRep->isManager()) {
+                abort(403, 'You do not have manager privileges.');
+            }
 
-        if ($teamMember->manager_id !== $salesRep->id) {
-            abort(403, 'This sales representative is not in your team.');
+            if ($teamMember->manager_id !== $salesRep->id) {
+                abort(403, 'This sales representative is not in your team.');
+            }
         }
 
         $clients = $teamMember->clients()->with('agreements')->paginate(20);

@@ -107,6 +107,7 @@ Route::get('/admin/impersonate/stop', [SalesRepController::class, 'stopImpersona
 |--------------------------------------------------------------------------
 | Core Features: Clients, Services, Agreements, Targets
 |--------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 */
 Route::middleware([
     'auth',
