@@ -402,7 +402,7 @@ class ClientController extends Controller
             }
 
             // Create client
-            $validated['sales_rep_id'] = Auth::id();
+            $validated['sales_rep_id'] = Auth::user()->salesRep->id;
             $validated['phone'] = $this->generateWhatsappNumber($request->country_code, $request->phone);
             $validated['whatsapp_link'] = $this->generateWhatsappLink($request->country_code, $request->phone);
             $validated['contact_count'] = 1;
