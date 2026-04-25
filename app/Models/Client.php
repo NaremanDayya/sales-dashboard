@@ -36,7 +36,7 @@ class Client extends Model
 
     public function salesRep()
     {
-        return $this->belongsTo(SalesRep::class);
+        return $this->belongsTo(SalesRep::class, 'sales_rep_id', 'user_id');
     }
     public function agreements()
     {
