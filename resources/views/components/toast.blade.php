@@ -7,7 +7,7 @@
                 close: true,
                 gravity: "top",
                 position: "{{ app()->getLocale() == 'ar' ? 'left' : 'right' }}",
-                backgroundColor: "#ff4d4d",
+                backgroundColor: "#e11d48",
                 rtl: {{ app()->getLocale() == 'ar' ? 'true' : 'false' }}
             }).showToast();
         @endif
@@ -19,7 +19,7 @@
                 close: true,
                 gravity: "top",
                 position: "{{ app()->getLocale() == 'ar' ? 'left' : 'right' }}",
-                backgroundColor: "#28a745",
+                backgroundColor: "#059669",
                 rtl: {{ app()->getLocale() == 'ar' ? 'true' : 'false' }}
             }).showToast();
         @endif
@@ -30,7 +30,7 @@
                 close: true,
                 gravity: "top",
                 position: "{{ app()->getLocale() == 'ar' ? 'left' : 'right' }}",
-                backgroundColor: "#ffc107", 
+                backgroundColor: "#d97706",
                 rtl: {{ app()->getLocale() == 'ar' ? 'true' : 'false' }}
             }).showToast();
         @endif

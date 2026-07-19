@@ -1,182 +1,83 @@
-    <!doctype html>
-    <html lang="ar" dir="rtl">
+<!doctype html>
+<html lang="ar" dir="rtl">
 
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>إنشاء حساب - نظام أفاق الخليج</title>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>إنشاء حساب - نظام أفاق الخليج</title>
+    <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.jpg') }}">
 
-        <!-- Bootstrap 5 RTL CSS -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 
-        <!-- Tajawal Arabic Font -->
-        <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    @vite(['resources/css/app.css'])
+</head>
 
-        <!-- Custom Styles -->
-        <style>
-            body {
-                background-color: #f8f9fa;
-                font-family: 'Tajawal', sans-serif;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-            }
-
-            .register-container {
-                max-width: 500px;
-                width: 100%;
-                padding: 40px;
-                background-color: white;
-                border-radius: 12px;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-                margin: 20px;
-            }
-
-            .register-header {
-                text-align: center;
-                margin-bottom: 30px;
-            }
-
-            .company-logo {
-                height: 80px;
-                margin: 0 auto 20px;
-                display: block;
-                object-fit: contain;
-            }
-
-            .register-title {
-                font-size: 1.8rem;
-                font-weight: 700;
-                color: #1a4b8c;
-                margin-bottom: 5px;
-            }
-
-            .company-name {
-                color: #2a6fd6;
-                font-size: 1.1rem;
-                margin-bottom: 30px;
-            }
-
-            .form-control {
-                border-radius: 8px;
-                padding: 12px 15px;
-                border: 1px solid #e2e8f0;
-            }
-
-            .form-control:focus {
-                border-color: #1a4b8c;
-                box-shadow: 0 0 0 0.25rem rgba(26, 75, 140, 0.25);
-            }
-
-            .btn-primary {
-                background-color: #1a4b8c;
-                border-color: #1a4b8c;
-                padding: 12px;
-                border-radius: 8px;
-                font-weight: 600;
-                width: 100%;
-            }
-
-            .btn-primary:hover {
-                background-color: #14427c;
-                border-color: #14427c;
-            }
-
-            .footer-links {
-                display: flex;
-                justify-content: center;
-                margin-top: 20px;
-                font-size: 0.9rem;
-            }
-
-            .footer-link {
-                color: #1a4b8c;
-                text-decoration: none;
-            }
-
-            .footer-link:hover {
-                text-decoration: underline;
-            }
-
-            .form-check-label {
-                font-size: 0.9rem;
-                color: #4a5568;
-            }
-
-            .copyright {
-                text-align: center;
-                margin-top: 30px;
-                font-size: 0.8rem;
-                color: #718096;
-            }
-        </style>
-    </head>
-
-    <body>
-        <div class="register-container">
-            <div class="register-header">
-                <img src="{{ asset('assets/img/logo.png') }}" alt="شعار أفاق الخليج" class="company-logo">
-                <h1 class="register-title">إنشاء حساب جديد</h1>
-                <p class="company-name">أفاق الخليج للاستثمار والتجارة</p>
+<body class="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-10">
+    <div class="w-full max-w-lg">
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-8 sm:p-10">
+            <div class="text-center mb-8">
+                <img src="{{ asset('assets/img/logo.png') }}" alt="شعار أفاق الخليج" class="h-16 mx-auto mb-4 object-contain">
+                <h1 class="text-xl font-bold text-gray-900">إنشاء حساب جديد</h1>
+                <p class="text-sm text-gray-500 mt-1">أفاق الخليج للاستثمار والتجارة</p>
             </div>
 
             <x-validation-errors class="mb-4" />
 
-            <form method="POST" action="{{ route('register') }}">
+            <form method="POST" action="{{ route('register') }}" class="space-y-5">
                 @csrf
 
-                <div class="mb-3">
-                    <label for="name" class="form-label">الاسم الكامل</label>
-                    <input id="name" type="text" class="form-control" name="name" value="{{ old('name') }}" required autofocus>
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1.5">الاسم الكامل</label>
+                    <input id="name" type="text" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" name="name" value="{{ old('name') }}" required autofocus>
                 </div>
 
-                <div class="mb-3">
-                    <label for="username" class="form-label">اسم المستخدم</label>
-                    <input id="username" type="text" class="form-control" name="username" value="{{ old('username') }}" required>
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1.5">اسم المستخدم</label>
+                    <input id="username" type="text" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" name="username" value="{{ old('username') }}" required>
                 </div>
 
-                <div class="mb-3">
-                    <label for="email" class="form-label">البريد الإلكتروني</label>
-                    <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" required>
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">البريد الإلكتروني</label>
+                    <input id="email" type="email" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" name="email" value="{{ old('email') }}" required>
                 </div>
 
-                <div class="mb-3">
-                    <label for="password" class="form-label">كلمة المرور</label>
-                    <input id="password" type="password" class="form-control" name="password" required>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1.5">كلمة المرور</label>
+                    <input id="password" type="password" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" name="password" required>
                 </div>
 
-                <div class="mb-3">
-                    <label for="password_confirmation" class="form-label">تأكيد كلمة المرور</label>
-                    <input id="password_confirmation" type="password" class="form-control" name="password_confirmation" required>
+                <div>
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1.5">تأكيد كلمة المرور</label>
+                    <input id="password_confirmation" type="password" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" name="password_confirmation" required>
                 </div>
 
                 @if (Laravel\Jetstream\Jetstream::hasTermsAndPrivacyPolicyFeature())
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="terms" name="terms" required>
-                        <label class="form-check-label" for="terms">
+                    <div class="flex items-start gap-2">
+                        <input type="checkbox" class="mt-0.5 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" id="terms" name="terms" required>
+                        <label class="text-sm text-gray-600" for="terms">
                             {!! __('أوافق على :terms_of_service و :privacy_policy', [
-                                'terms_of_service' => '<a href="'.route('terms.show').'" target="_blank" class="footer-link">شروط الخدمة</a>',
-                                'privacy_policy' => '<a href="'.route('policy.show').'" target="_blank" class="footer-link">سياسة الخصوصية</a>',
+                                'terms_of_service' => '<a href="'.route('terms.show').'" target="_blank" class="text-indigo-600 hover:underline">شروط الخدمة</a>',
+                                'privacy_policy' => '<a href="'.route('policy.show').'" target="_blank" class="text-indigo-600 hover:underline">سياسة الخصوصية</a>',
                             ]) !!}
                         </label>
                     </div>
                 @endif
 
-                <button type="submit" class="btn btn-primary">تسجيل الحساب</button>
+                <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors duration-150">
+                    تسجيل الحساب
+                </button>
 
-                <div class="footer-links mt-3">
-                    <a href="{{ route('login') }}" class="footer-link">هل لديك حساب؟ تسجيل الدخول</a>
+                <div class="flex justify-center pt-1">
+                    <a href="{{ route('login') }}" class="text-sm text-indigo-600 hover:underline">هل لديك حساب؟ تسجيل الدخول</a>
                 </div>
             </form>
-
-            <div class="copyright">
-                &copy; {{ date('Y') }} أفاق الخليج. جميع الحقوق محفوظة.
-            </div>
         </div>
 
-        <!-- Bootstrap JS -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    </body>
+        <p class="text-center mt-6 text-xs text-gray-400">&copy; {{ date('Y') }} أفاق الخليج. جميع الحقوق محفوظة.</p>
+    </div>
+</body>
 
-    </html>
+</html>

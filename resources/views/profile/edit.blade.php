@@ -5,14 +5,14 @@
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Profile Navigation -->
             <div class="mb-8">
-                <nav class="flex space-x-4" aria-label="Profile navigation">
-                    <a href="#profile-info" class="px-3 py-2 font-medium text-sm rounded-md bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-100">
+                <nav class="flex gap-2 p-1 bg-gray-100 rounded-xl w-fit" aria-label="Profile navigation">
+                    <a href="#profile-info" class="px-3 py-2 font-medium text-sm rounded-lg bg-white shadow-sm text-indigo-700 dark:bg-indigo-900 dark:text-indigo-100">
                         {{ __('Profile Information') }}
                     </a>
-                    <a href="#password" class="px-3 py-2 font-medium text-sm rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <a href="#password" class="px-3 py-2 font-medium text-sm rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                         {{ __('Update Password') }}
                     </a>
-                    <a href="#delete-account" class="px-3 py-2 font-medium text-sm rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <a href="#delete-account" class="px-3 py-2 font-medium text-sm rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                         {{ __('Delete Account') }}
                     </a>
                 </nav>
@@ -20,7 +20,7 @@
 
             <div class="space-y-6">
                 <!-- Profile Information Section -->
-                <div id="profile-info" class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
+                <div id="profile-info" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-2xl overflow-hidden">
                     <div class="p-6 sm:p-8">
                         <div class="flex items-center mb-6">
                             <div class="mr-4">
@@ -42,7 +42,7 @@
                 </div>
 
                 <!-- Update Password Section -->
-                <div id="password" class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
+                <div id="password" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-2xl overflow-hidden">
                     <div class="p-6 sm:p-8">
                         <div class="flex items-center mb-6">
                             <div class="mr-4">
@@ -64,7 +64,7 @@
                 </div>
 
                 <!-- Delete Account Section -->
-                <div id="delete-account" class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
+                <div id="delete-account" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-2xl overflow-hidden">
                     <div class="p-6 sm:p-8">
                         <div class="flex items-center mb-6">
                             <div class="mr-4">
@@ -128,11 +128,11 @@
             navItems.forEach(item => {
                 item.addEventListener('click', function() {
                     navItems.forEach(nav => {
-                        nav.classList.remove('bg-indigo-100', 'text-indigo-700', 'dark:bg-indigo-900', 'dark:text-indigo-100');
+                        nav.classList.remove('bg-white', 'shadow-sm', 'text-indigo-700', 'dark:bg-indigo-900', 'dark:text-indigo-100');
                         nav.classList.add('text-gray-500', 'hover:text-gray-700', 'dark:text-gray-400', 'dark:hover:text-gray-200');
                     });
 
-                    this.classList.add('bg-indigo-100', 'text-indigo-700', 'dark:bg-indigo-900', 'dark:text-indigo-100');
+                    this.classList.add('bg-white', 'shadow-sm', 'text-indigo-700', 'dark:bg-indigo-900', 'dark:text-indigo-100');
                     this.classList.remove('text-gray-500', 'hover:text-gray-700', 'dark:text-gray-400', 'dark:hover:text-gray-200');
                 });
             });
@@ -145,11 +145,11 @@
                 const targetItem = document.querySelector(`[href="${hash}"]`);
                 if (targetItem) {
                     navItems.forEach(nav => {
-                        nav.classList.remove('bg-indigo-100', 'text-indigo-700', 'dark:bg-indigo-900', 'dark:text-indigo-100');
+                        nav.classList.remove('bg-white', 'shadow-sm', 'text-indigo-700', 'dark:bg-indigo-900', 'dark:text-indigo-100');
                         nav.classList.add('text-gray-500', 'hover:text-gray-700', 'dark:text-gray-400', 'dark:hover:text-gray-200');
                     });
 
-                    targetItem.classList.add('bg-indigo-100', 'text-indigo-700', 'dark:bg-indigo-900', 'dark:text-indigo-100');
+                    targetItem.classList.add('bg-white', 'shadow-sm', 'text-indigo-700', 'dark:bg-indigo-900', 'dark:text-indigo-100');
                     targetItem.classList.remove('text-gray-500', 'hover:text-gray-700', 'dark:text-gray-400', 'dark:hover:text-gray-200');
                 }
             }

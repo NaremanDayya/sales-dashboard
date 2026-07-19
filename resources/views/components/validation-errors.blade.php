@@ -1,5 +1,5 @@
 @if ($errors->any())
-    <div {{ $attributes->merge(['class' => 'text-center text-red-600 text-sm']) }}>
-        <p style="color:red; font-size:20px; font-weight:700;">{{ rtrim($errors->first(), '.') }}</p>
+    <div {{ $attributes->merge(['class' => 'rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-700']) }}>
+        {{ rtrim($errors->first(), '.') }}
     </div>
 @endif
