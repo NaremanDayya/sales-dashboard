@@ -216,26 +216,30 @@
 
         /* Improved Filter Section */
         .filters-grid {
-            display: grid;
-            grid-template-columns: 1fr;
+            display: flex;
+            flex-wrap: wrap;
             gap: 1rem;
+            align-items: end;
         }
 
-        @media (min-width: 1024px) {
-            .filters-grid {
-                grid-template-columns: 1fr 2fr;
-            }
+        .filters-grid .filter-item-search {
+            flex: 1 1 220px;
+            max-width: 280px;
         }
 
         .filter-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
             gap: 1rem;
+            flex: 3 1 auto;
         }
 
         .filter-item {
             display: flex;
             flex-direction: column;
+            flex: 1 1 150px;
+            min-width: 130px;
+            max-width: 190px;
         }
 
         .filter-item label {
@@ -243,13 +247,23 @@
             margin-bottom: 0.5rem;
             color: #374151;
             font-size: 0.875rem;
+            white-space: nowrap;
+        }
+
+        .date-range-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
         }
 
         .date-range-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr auto auto;
+            display: flex;
             gap: 0.5rem;
             align-items: end;
+        }
+
+        .date-range-group input {
+            width: 130px;
         }
 
         /* Print styles */
@@ -757,7 +771,7 @@
                 <div class="p-6">
                     <div class="filters-grid">
                         <!-- Search Box -->
-                        <div class="filter-item">
+                        <div class="filter-item filter-item-search">
                             <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2">بحث سريع</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -855,8 +869,8 @@
                     </div>
 
                     <!-- Date Filters item-->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-                        <div class="filter-item">
+                    <div class="date-range-row mt-4">
+                        <div class="filter-item" style="max-width:none;">
                             <label class="block text-sm font-medium text-gray-700 mb-2">نطاق تاريخ الإنشاء</label>
                             <div class="date-range-group">
                                 <input type="text"
@@ -873,13 +887,13 @@
                                        name="created_to_date"
                                        value="{{ request('created_to_date') }}"
                                        onchange="applyLiveFilters()">
-                                <button type="button" onclick="resetCreatedDateRange()" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-200">
+                                <button type="button" onclick="resetCreatedDateRange()" class="px-3 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-200">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
                         </div>
 
-                        <div class="filter-item">
+                        <div class="filter-item" style="max-width:none;">
                             <label class="block text-sm font-medium text-gray-700 mb-2">نطاق تاريخ التواصل</label>
                             <div class="date-range-group">
                                 <input type="text"
@@ -896,7 +910,7 @@
                                        name="to_date"
                                        value="{{ request('to_date') }}"
                                        onchange="applyLiveFilters()">
-                                <button type="button" onclick="resetDateRange()" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-200">
+                                <button type="button" onclick="resetDateRange()" class="px-3 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-200">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
