@@ -33,25 +33,42 @@ class SalesRepWorkHistory extends Model
         return $this->belongsTo(User::class, 'recorded_by');
     }
 
+    public function getIsActiveAttribute()
+    {
+        return is_null($this->end_date);
+    }
+
+    public function getDurationInDaysAttribute()
+    {
+        if (!$this->start_date) {
+            return 0;
+        }
+
+        $end = $this->end_date ? Carbon::parse($this->end_date) : Carbon::now();
+
+        return Carbon::parse($this->start_date)->diffInDays($end);
+    }
+
     public function getPeriodAttribute()
     {
-        if (!$this->start_date || !$this->end_date) {
+        if (!$this->start_date) {
             return null;
         }
 
-        $diff = Carbon::parse($this->start_date)->diff(Carbon::parse($this->end_date));
-        $duration = "{$diff->y} years, {$diff->m} months, {$diff->d} days";
+        $end = $this->end_date ? Carbon::parse($this->end_date) : Carbon::now();
+        $diff = Carbon::parse($this->start_date)->diff($end);
 
-        $replacements = [
-            'years' => 'سنة',
-            'year' => 'سنة',
-            'months' => 'شهر',
-            'month' => 'شهر',
-            'days' => 'يوم',
-            'day' => 'يوم',
-            ',' => '،',
-        ];
+        $parts = [];
+        if ($diff->y > 0) {
+            $parts[] = "{$diff->y} سنة";
+        }
+        if ($diff->m > 0) {
+            $parts[] = "{$diff->m} شهر";
+        }
+        if ($diff->d > 0 || empty($parts)) {
+            $parts[] = "{$diff->d} يوم";
+        }
 
-        return strtr($duration, $replacements);
+        return implode(' و ', $parts);
     }
 }

@@ -98,6 +98,7 @@ Route::post('/admin/update-photo', [ProfileController::class, 'updatePhoto'])->n
 });
 Route::middleware('auth')->group(function () {
     Route::get('/work-history', [App\Http\Controllers\Admin\WorkHistoryController::class, 'index'])->name('work-history.index');
+    Route::get('/work-history/export', [App\Http\Controllers\Admin\WorkHistoryController::class, 'export'])->name('work-history.export');
 });
 
 Route::prefix('sales-reps')->group(function () {

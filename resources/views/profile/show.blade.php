@@ -293,10 +293,27 @@
                                 </div>
                             </div>
 
+                            @php
+                                $workPeriod = new \App\Models\SalesRepWorkHistory([
+                                    'start_date' => $user->salesRep->start_work_date,
+                                    'end_date' => $user->account_status === 'inactive' ? $user->salesRep->stop_work_date : null,
+                                ]);
+                            @endphp
                             <div class="info-item">
                                 <div class="info-label"><i class="bi bi-clock-history me-2"></i>مدة العمل</div>
-                                <div class="info-value">{{
-                                    $user->salesRep->translateDurationToArabic($user->salesRep->work_duration) }}</div>
+                                <div class="info-value d-flex align-items-center flex-wrap gap-2">
+                                    <span>{{ $workPeriod->period }}</span>
+                                    @if($workPeriod->is_active)
+                                        <span class="badge bg-success rounded-pill px-2 py-1"><i class="bi bi-play-fill"></i> نشط</span>
+                                    @else
+                                        <span class="badge bg-secondary rounded-pill px-2 py-1"><i class="bi bi-stop-fill"></i> متوقف</span>
+                                    @endif
+                                </div>
+                                @if(!$workPeriod->is_active && $user->salesRep->stop_work_date)
+                                    <div class="text-muted" style="font-size:.8rem;">
+                                        توقف بتاريخ {{ \Carbon\Carbon::parse($user->salesRep->stop_work_date)->locale('ar')->isoFormat('D MMMM YYYY') }}
+                                    </div>
+                                @endif
                             </div>
                             <div class="info-item">
                                 <div class="info-label">
