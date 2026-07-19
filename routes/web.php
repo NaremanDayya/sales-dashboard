@@ -96,6 +96,9 @@ Route::middleware('auth')->group(function () {
 Route::post('/admin/update-photo', [ProfileController::class, 'updatePhoto'])->name('admin.updatePhoto');
 
 });
+Route::middleware('auth')->group(function () {
+    Route::get('/work-history', [App\Http\Controllers\Admin\WorkHistoryController::class, 'index'])->name('work-history.index');
+});
 
 Route::prefix('sales-reps')->group(function () {
     Route::get('{id}/export-pdf', [pdfController::class, 'exportSalesRepPdf'])->name('salesreps.export.pdf');

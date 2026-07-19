@@ -827,6 +827,30 @@
                                        min="1"
                                        oninput="applyLiveFilters()">
                             </div>
+
+                            <div class="filter-item">
+                                <label for="lastContactFilter" class="block text-sm font-medium text-gray-700 mb-2">آخر تواصل</label>
+                                <select id="lastContactFilter" name="last_contact_filter"
+                                        class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                        onchange="applyLiveFilters()">
+                                    <option value="">الكل</option>
+                                    <option value="latest" {{ request('last_contact_filter') == 'latest' ? 'selected' : '' }}>الأحدث تواصلاً</option>
+                                    <option value="today" {{ request('last_contact_filter') == 'today' ? 'selected' : '' }}>آخر يوم</option>
+                                    <option value="week" {{ request('last_contact_filter') == 'week' ? 'selected' : '' }}>آخر أسبوع</option>
+                                    <option value="month" {{ request('last_contact_filter') == 'month' ? 'selected' : '' }}>آخر شهر</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-item">
+                                <label for="contactCountSort" class="block text-sm font-medium text-gray-700 mb-2">ترتيب حسب عدد التواصل</label>
+                                <select id="contactCountSort" name="contact_count_sort"
+                                        class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                        onchange="applyLiveFilters()">
+                                    <option value="">بدون ترتيب</option>
+                                    <option value="most" {{ request('contact_count_sort') == 'most' ? 'selected' : '' }}>الأكثر تواصلاً</option>
+                                    <option value="least" {{ request('contact_count_sort') == 'least' ? 'selected' : '' }}>الأقل تواصلاً</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -1205,6 +1229,8 @@
                     const createdToDate = document.getElementById('createdToDate').value;
                     const fromDate = document.getElementById('fromDate').value;
                     const toDate = document.getElementById('toDate').value;
+                    const lastContactFilter = document.getElementById('lastContactFilter')?.value || '';
+                    const contactCountSort = document.getElementById('contactCountSort')?.value || '';
 
                     let filteredData = [...ClientsData];
 
@@ -1347,6 +1373,42 @@
                         });
                     }
 
+                    // Apply "last communicated with" bucket filter (day/week/month); 'latest' is a sort, not a filter
+                    if (lastContactFilter && lastContactFilter !== 'latest') {
+                        const now = new Date();
+                        let threshold;
+                        if (lastContactFilter === 'today') {
+                            threshold = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                        } else if (lastContactFilter === 'week') {
+                            threshold = new Date(now);
+                            threshold.setDate(threshold.getDate() - 7);
+                        } else if (lastContactFilter === 'month') {
+                            threshold = new Date(now);
+                            threshold.setMonth(threshold.getMonth() - 1);
+                        }
+
+                        filteredData = filteredData.filter(client => {
+                            if (!client.last_contact_date) return false;
+                            return new Date(client.last_contact_date) >= threshold;
+                        });
+                    }
+
+                    // Sort by most recent contact when "الأحدث تواصلاً" is selected
+                    if (lastContactFilter === 'latest') {
+                        filteredData.sort((a, b) => {
+                            if (!a.last_contact_date) return 1;
+                            if (!b.last_contact_date) return -1;
+                            return new Date(b.last_contact_date) - new Date(a.last_contact_date);
+                        });
+                    }
+
+                    // Sort by communication counter (most/least communicated)
+                    if (contactCountSort === 'most') {
+                        filteredData.sort((a, b) => (b.contact_count || 0) - (a.contact_count || 0));
+                    } else if (contactCountSort === 'least') {
+                        filteredData.sort((a, b) => (a.contact_count || 0) - (b.contact_count || 0));
+                    }
+
                     currentFilteredClients = filteredData;
                     renderTable(currentFilteredClients);
                     updateClientCounter();
@@ -1384,6 +1446,8 @@
                     const createdToDate = document.getElementById('createdToDate').value;
                     const fromDate = document.getElementById('fromDate').value;
                     const toDate = document.getElementById('toDate').value;
+                    const lastContactFilter = document.getElementById('lastContactFilter')?.value || '';
+                    const contactCountSort = document.getElementById('contactCountSort')?.value || '';
 
                     if (search) params.set('search', search);
                     if (interestStatus) params.set('interest_status', interestStatus);
@@ -1394,6 +1458,8 @@
                     if (createdToDate) params.set('created_to_date', createdToDate);
                     if (fromDate) params.set('from_date', fromDate);
                     if (toDate) params.set('to_date', toDate);
+                    if (lastContactFilter) params.set('last_contact_filter', lastContactFilter);
+                    if (contactCountSort) params.set('contact_count_sort', contactCountSort);
 
                     const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
                     window.history.replaceState({}, '', newUrl);
@@ -1409,6 +1475,10 @@
                     document.getElementById('createdToDate').value = '';
                     document.getElementById('fromDate').value = '';
                     document.getElementById('toDate').value = '';
+                    const lastContactFilterEl = document.getElementById('lastContactFilter');
+                    if (lastContactFilterEl) lastContactFilterEl.value = '';
+                    const contactCountSortEl = document.getElementById('contactCountSort');
+                    if (contactCountSortEl) contactCountSortEl.value = '';
 
                     currentFilteredClients = [...ClientsData];
                     renderTable(currentFilteredClients);
@@ -1520,6 +1590,16 @@
                     const lateDays = urlParams.get('late_days');
                     if (lateDays) {
                         document.getElementById('lateDaysInput').value = lateDays;
+                    }
+
+                    const lastContactFilter = urlParams.get('last_contact_filter');
+                    if (lastContactFilter && document.getElementById('lastContactFilter')) {
+                        document.getElementById('lastContactFilter').value = lastContactFilter;
+                    }
+
+                    const contactCountSort = urlParams.get('contact_count_sort');
+                    if (contactCountSort && document.getElementById('contactCountSort')) {
+                        document.getElementById('contactCountSort').value = contactCountSort;
                     }
                 }
                 // Simple export function

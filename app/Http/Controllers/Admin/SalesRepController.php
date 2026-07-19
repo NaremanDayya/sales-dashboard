@@ -9,6 +9,7 @@ use App\Models\ClientEditRequest;
 use App\Models\ClientRequest;
 use App\Models\SalesRep;
 use App\Models\SalesRepCredential;
+use App\Models\SalesRepWorkHistory;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -179,6 +180,7 @@ class SalesRepController extends Controller
                 ->get()
                 ->each(function ($rep) {
                     $rep->user->update(['account_status' => 'active']);
+                    $rep->update(['stop_work_date' => null]);
                 });
 
             return response()->json(['success' => true]);
@@ -198,11 +200,26 @@ class SalesRepController extends Controller
         ]);
 
         try {
+            $today = now()->toDateString();
+
             SalesRep::whereIn('id', $request->ids)
                 ->with('user')
                 ->get()
-                ->each(function ($rep) {
+                ->each(function ($rep) use ($today) {
+                    $wasActive = $rep->user->account_status !== 'inactive';
+
                     $rep->user->update(['account_status' => 'inactive']);
+                    $rep->update(['stop_work_date' => $today]);
+
+                    if ($wasActive) {
+                        SalesRepWorkHistory::create([
+                            'sales_rep_id' => $rep->id,
+                            'sales_rep_name' => $rep->name,
+                            'start_date' => $rep->start_work_date ?? $today,
+                            'end_date' => $today,
+                            'recorded_by' => auth()->id(),
+                        ]);
+                    }
                 });
 
             return response()->json(['success' => true]);
@@ -233,10 +250,15 @@ public function update(Request $request, SalesRep $salesRep)
         'gender' => 'nullable|in:male,female',
         'start_work_date' => 'required|date',
         'status' => 'required|in:active,inactive',
+        'stop_work_date' => 'nullable|date|after_or_equal:start_work_date|required_if:status,inactive',
         'phone' => 'required|string|digits:10',
         'personal_image' => 'nullable|image|mimes:jpeg,png,jpg,webp',
         'remove_personal_image' => 'sometimes|boolean',
     ]);
+
+    // Snapshot the pre-update state so we can detect an active -> inactive transition
+    $previousStatus = $salesRep->user->account_status;
+    $previousStartDate = $salesRep->start_work_date;
 
     // Handle image operations first
   if ($request->boolean('remove_personal_image')) {
@@ -266,6 +288,7 @@ $validated['personal_image'] = $path;
         'id_card' => $validated['id_card'],
         'nationality' => $validated['nationality'],
         'gender' => $validated['gender'],
+        'account_status' => $validated['status'],
         'contact_info' => json_encode([
             'phone' => $validated['phone'],
         ]),
@@ -302,9 +325,20 @@ $validated['personal_image'] = $path;
     // Update sales rep data
     $salesRep->update([
         'start_work_date' => $validated['start_work_date'],
-        'status' => $validated['status'],
+        'stop_work_date' => $validated['status'] === 'inactive' ? $validated['stop_work_date'] : null,
         'work_duration' => $workDuration,
     ]);
+
+    // Record a work-history entry the moment an active rep is switched to inactive
+    if ($previousStatus !== 'inactive' && $validated['status'] === 'inactive') {
+        SalesRepWorkHistory::create([
+            'sales_rep_id' => $salesRep->id,
+            'sales_rep_name' => $salesRep->name,
+            'start_date' => $previousStartDate ?? $validated['start_work_date'],
+            'end_date' => $validated['stop_work_date'],
+            'recorded_by' => auth()->id(),
+        ]);
+    }
 
     return redirect()->route('sales-reps.index')
         ->with('success', "تم تحديث بيانات المندوب {$salesRep->name} بنجاح");

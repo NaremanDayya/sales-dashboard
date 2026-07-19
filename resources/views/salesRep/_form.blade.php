@@ -171,13 +171,25 @@
         <div class="space-y-2">
             <label for="status" class="block text-sm font-medium text-gray-700">حالة الحساب</label>
             <div class="relative">
-                <select id="status" 
-                        name="status" 
+                <select id="status"
+                        name="status"
                         required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 appearance-none focus:ring-blue-500 p-3 border text-right">
                     <option value="active" {{ old('status', $salesRep->user?->account_status ?? '') == 'active' ? 'selected' : '' }}>نشط</option>
                     <option value="inactive" {{ old('status', $salesRep->user?->account_status ?? '') == 'inactive' ? 'selected' : '' }}>غير نشط</option>
                 </select>
+            </div>
+        </div>
+
+        <!-- Stop Work Date (only relevant when marking the rep inactive) -->
+        <div class="space-y-2 {{ old('status', $salesRep->user?->account_status ?? '') == 'inactive' ? '' : 'hidden' }}" id="stop_work_date_wrapper">
+            <label for="stop_work_date" class="block text-sm font-medium text-gray-700">تاريخ توقف العمل</label>
+            <div class="relative">
+                <input type="date"
+                       id="stop_work_date"
+                       name="stop_work_date"
+                       value="{{ old('stop_work_date', isset($salesRep) && $salesRep->stop_work_date ? \Carbon\Carbon::parse($salesRep->stop_work_date)->format('Y-m-d') : '') }}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border pr-10">
             </div>
         </div>
 
@@ -225,6 +237,33 @@
         defaultMinute: 0,
  defaultDate: null,
     });
+
+    flatpickr("#stop_work_date", {
+        locale: "ar",
+        dateFormat: "Y-m-d",
+        allowInput: true,
+        defaultHour: 0,
+        defaultMinute: 0,
+ defaultDate: null,
+    });
+
+    // Show/require the stop-work-date field only while the account is being marked inactive
+    function toggleStopWorkDate() {
+        const statusSelect = document.getElementById('status');
+        const wrapper = document.getElementById('stop_work_date_wrapper');
+        const stopDateInput = document.getElementById('stop_work_date');
+        if (!statusSelect || !wrapper || !stopDateInput) return;
+
+        if (statusSelect.value === 'inactive') {
+            wrapper.classList.remove('hidden');
+            stopDateInput.setAttribute('required', 'required');
+        } else {
+            wrapper.classList.add('hidden');
+            stopDateInput.removeAttribute('required');
+        }
+    }
+    document.getElementById('status')?.addEventListener('change', toggleStopWorkDate);
+    document.addEventListener('DOMContentLoaded', toggleStopWorkDate);
 
   document.getElementById('personal_image')?.addEventListener('change', function(e) {
         if (this.files && this.files[0]) {

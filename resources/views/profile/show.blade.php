@@ -238,6 +238,12 @@
                             <span class="badge bg-light text-dark ms-1">{{ $user->salesRep->clients_count }}</span>
                             @endif
                         </a>
+                        @if($user->salesRep)
+                        <a href="{{ route('work-history.index', ['sales_rep_id' => $user->salesRep->id]) }}"
+                            class="btn btn-outline-secondary btn-sm" title="سجل العمل">
+                            <i class="bi bi-calendar-check me-1"></i> سجل العمل
+                        </a>
+                        @endif
                     </div>
                     @endif
                 </div>
