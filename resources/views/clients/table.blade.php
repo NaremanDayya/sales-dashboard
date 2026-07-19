@@ -223,8 +223,7 @@
         }
 
         .filters-grid .filter-item-search {
-            flex: 1 1 220px;
-            max-width: 280px;
+            flex: 1.4 1 200px;
         }
 
         .filter-group {
@@ -237,9 +236,8 @@
         .filter-item {
             display: flex;
             flex-direction: column;
-            flex: 1 1 150px;
+            flex: 1 1 130px;
             min-width: 130px;
-            max-width: 190px;
         }
 
         .filter-item label {
@@ -256,14 +254,20 @@
             gap: 1.5rem;
         }
 
+        .date-range-row .filter-item {
+            flex: 1 1 280px;
+        }
+
         .date-range-group {
             display: flex;
             gap: 0.5rem;
             align-items: end;
+            flex: 1 1 auto;
         }
 
         .date-range-group input {
-            width: 130px;
+            flex: 1 1 0;
+            min-width: 100px;
         }
 
         /* Print styles */
@@ -870,7 +874,7 @@
 
                     <!-- Date Filters item-->
                     <div class="date-range-row mt-4">
-                        <div class="filter-item" style="max-width:none;">
+                        <div class="filter-item">
                             <label class="block text-sm font-medium text-gray-700 mb-2">نطاق تاريخ الإنشاء</label>
                             <div class="date-range-group">
                                 <input type="text"
@@ -893,7 +897,7 @@
                             </div>
                         </div>
 
-                        <div class="filter-item" style="max-width:none;">
+                        <div class="filter-item">
                             <label class="block text-sm font-medium text-gray-700 mb-2">نطاق تاريخ التواصل</label>
                             <div class="date-range-group">
                                 <input type="text"
