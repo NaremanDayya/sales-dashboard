@@ -931,7 +931,7 @@
                     <button id="columnsBtn" class="export-btn columns-btn" onclick="openColumnsModal()">
                         <span class="btn-icon"><i class="fas fa-columns"></i></span>
                         <span class="btn-text">اختيار الأعمدة</span>
-                        <span id="columnsBadge" class="columns-badge">13</span>
+                        <span id="columnsBadge" class="columns-badge">14</span>
                     </button>
                 </div>
                 <div class="export-options">
@@ -1039,6 +1039,13 @@
                                         <input type="checkbox" value="end_date" checked>
                                         <span class="checkmark"></span>
                                         <span class="column-name"> انتهاء الاتفاقية</span>
+                                    </label>
+                                </div>
+                                <div class="column-item">
+                                    <label class="column-checkbox">
+                                        <input type="checkbox" value="status" checked>
+                                        <span class="checkmark"></span>
+                                        <span class="column-name">حالة الاتفاقية</span>
                                     </label>
                                 </div>
                                 <div class="column-item">
@@ -1173,6 +1180,7 @@
                             <th> إنهاء الاتفاقية</th>
                             <th> تنفيذ الاتفاقية</th>
                             <th> انتهاء الاتفاقية</th>
+                            <th>حالة الاتفاقية</th>
                             <th>أشهر الإخطار </th>
                             <th> الإخطار المتوقع</th>
                             <th>حالة الإخطار</th>
@@ -1478,6 +1486,7 @@
                     termination_type: "إنهاء الاتفاقية",
                     implementation_date: "تنفيذ الاتفاقية",
                     end_date: "انتهاء الاتفاقية",
+                    status: "حالة الاتفاقية",
                     notice_months: "أشهر الإخطار",
                     required_notice_date: "الإخطار المتوقع",
                     notice_status: "حالة الإخطار",
@@ -1524,6 +1533,11 @@
                                     break;
                                 case 'end_date':
                                     value = formatDateForDisplay(agreement.end_date) || '';
+                                    break;
+                                case 'status':
+                                    value = isAgreementFinished(agreement.end_date)
+                                        ? `منتهية (${formatDateForDisplay(agreement.end_date) || '—'})`
+                                        : 'سارية';
                                     break;
                                 case 'notice_months':
                                     value = agreement.notice_months || '';
@@ -1757,6 +1771,7 @@
                 'إنهاء الاتفاقية': 'termination_type',
                 'تنفيذ الاتفاقية': 'implementation_date',
                 'انتهاء الاتفاقية': 'end_date',
+                'حالة الاتفاقية': 'status',
                 'أشهر الإخطار': 'notice_months',
                 'الإخطار المتوقع': 'required_notice_date',
                 'حالة الإخطار': 'notice_status',
@@ -1861,7 +1876,7 @@
             if (!data || data.length === 0) {
                 tbody.innerHTML = `
         <tr>
-            <td colspan="15" class="empty-state">
+            <td colspan="16" class="empty-state">
                 <div class="empty-icon">
                     <i class="fas fa-user-times"></i>
                 </div>
@@ -1950,6 +1965,16 @@
                 <a href="/salesrep/${agreement.sales_rep_id}/agreements/${agreement.agreement_id}" class="no-underline text-inherit">
                     ${formatDateForDisplay(agreement.end_date) || '—'}
                 </a>
+            </div>
+        </td>
+
+        <!-- Status -->
+        <td class="px-4 py-2 text-sm">
+            <div class="flex flex-col items-center gap-1">
+                <span class="status-badge ${isAgreementFinished(agreement.end_date) ? 'status-inactive' : 'status-active'}">
+                    ${isAgreementFinished(agreement.end_date) ? 'منتهية' : 'سارية'}
+                </span>
+                ${agreement.end_date && agreement.end_date !== '—' ? `<span class="text-xs text-gray-500">${formatDateForDisplay(agreement.end_date)}</span>` : ''}
             </div>
         </td>
 
@@ -2194,6 +2219,16 @@
                 notification.style.opacity = '0';
                 setTimeout(() => notification.remove(), 500);
             }, 3000);
+        }
+
+        function isAgreementFinished(endDate) {
+            if (!endDate || endDate === '—') return false;
+            const d = new Date(endDate);
+            if (isNaN(d.getTime())) return false;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            d.setHours(0, 0, 0, 0);
+            return d < today;
         }
 
         function formatDateForDisplay(date) {
