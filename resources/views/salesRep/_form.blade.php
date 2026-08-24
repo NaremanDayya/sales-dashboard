@@ -137,7 +137,7 @@
 
 @if(isset($salesRep) && $salesRep->user?->personal_image)
     <div class="flex items-center mt-2">
-        <input type="hidden" name="remove_personal_image" value="1">
+        <input type="hidden" name="remove_personal_image" value="0">
         <input type="checkbox" 
                id="remove_personal_image" 
                name="remove_personal_image" 
@@ -260,6 +260,9 @@
         } else {
             wrapper.classList.add('hidden');
             stopDateInput.removeAttribute('required');
+            // Clear any stale stop date left over from a previous inactive period so
+            // reactivating with a new start date can't fail the after_or_equal check.
+            stopDateInput.value = '';
         }
     }
     document.getElementById('status')?.addEventListener('change', toggleStopWorkDate);

@@ -250,7 +250,9 @@ public function update(Request $request, SalesRep $salesRep)
         'gender' => 'nullable|in:male,female',
         'start_work_date' => 'required|date',
         'status' => 'required|in:active,inactive',
-        'stop_work_date' => 'nullable|date|after_or_equal:start_work_date|required_if:status,inactive',
+        // Only validated/kept when the rep is being marked inactive - otherwise a stale
+        // stop date from a previous inactive period must not block reactivation.
+        'stop_work_date' => 'nullable|date|exclude_if:status,active|required_if:status,inactive|after_or_equal:start_work_date',
         'phone' => 'required|string|digits:10',
         'personal_image' => 'nullable|image|mimes:jpeg,png,jpg,webp',
         'remove_personal_image' => 'sometimes|boolean',
@@ -325,7 +327,7 @@ $validated['personal_image'] = $path;
     // Update sales rep data
     $salesRep->update([
         'start_work_date' => $validated['start_work_date'],
-        'stop_work_date' => $validated['status'] === 'inactive' ? $validated['stop_work_date'] : null,
+        'stop_work_date' => $validated['status'] === 'inactive' ? ($validated['stop_work_date'] ?? null) : null,
         'work_duration' => $workDuration,
     ]);
 
