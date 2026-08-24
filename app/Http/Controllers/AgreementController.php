@@ -44,6 +44,8 @@ class AgreementController extends Controller
                 'termination_type' => $agreement->termination_type ?? '—',
                 'implementation_date' => $agreement->implementation_date ? $agreement->implementation_date->format('Y-m-d') : '—',
                 'end_date' => $agreement->end_date ? $agreement->end_date->format('Y-m-d') : '—',
+                'agreement_status' => $agreement->agreement_status,
+                'finish_date' => $agreement->finish_date ? $agreement->finish_date->format('Y-m-d') : null,
                 'notice_months' => $agreement->notice_months ?? '—',
                 'notice_date' => $agreement->notice_date ?? '—',
                 'notice_status' => $agreement->notice_status ?? '—',
@@ -77,6 +79,8 @@ class AgreementController extends Controller
                 'termination_type' => $agreement->termination_type ?? '—',
                 'implementation_date' => $agreement->implementation_date ? $agreement->implementation_date->format('Y-m-d') : '—',
                 'end_date' => $agreement->end_date ? $agreement->end_date->format('Y-m-d') : '—',
+                'agreement_status' => $agreement->agreement_status,
+                'finish_date' => $agreement->finish_date ? $agreement->finish_date->format('Y-m-d') : null,
                 'notice_months' => $agreement->notice_months ?? '—',
                 'notice_status' => $agreement->notice_status ?? '—',
                 'service_type' => $agreement->service ? $agreement->service->name : '—',
@@ -642,19 +646,7 @@ class AgreementController extends Controller
 
     protected function renewAgreement(Agreement $agreement)
     {
-        $oldAgreementData = clone $agreement;
-
-        $newSigningDate = now();
-        $newImplementationDate = Carbon::parse($agreement->end_date)->addDay();
-        $newEndDate = $newImplementationDate->copy()->addYears($agreement->duration_years);
-
-        $agreement->update([
-            'signing_date' => $newSigningDate,
-            'implementation_date' => $newImplementationDate,
-            'end_date' => $newEndDate,
-            'notice_date' => null,
-            'notice_status' => 'not_sent',
-        ]);
+        $agreement->renew();
 
         // Notify admins
         $adminUser = User::where('role', 'admin')->first();
@@ -663,6 +655,25 @@ class AgreementController extends Controller
         if ($salesRepUser = $agreement->salesRep->user ?? null) {
             $salesRepUser->notify(new AgreementRenewed($agreement));
         }
+    }
+
+    /**
+     * Manually finish an agreement from the table's "finish" popup.
+     * The finish date may be earlier than the agreement's planned end_date.
+     */
+    public function finish(Request $request, SalesRep $salesrep, Agreement $agreement)
+    {
+        if ($agreement->sales_rep_id !== $salesrep->id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'finish_date' => ['required', 'date'],
+        ]);
+
+        $agreement->finish($validated['finish_date']);
+
+        return redirect()->back()->with('success', 'تم إنهاء الاتفاقية بنجاح.');
     }
 
     public function inlineUpdate(Request $request, Agreement $agreement)
