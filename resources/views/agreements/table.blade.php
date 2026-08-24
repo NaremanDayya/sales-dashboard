@@ -951,8 +951,9 @@
         .stat-card.value .stat-icon { background: #fef3c7; color: #b45309; }
 
         .stat-card .stat-label {
-            font-size: 12px;
-            color: var(--gray-500);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gray-600);
             margin: 0 0 2px 0;
         }
 
