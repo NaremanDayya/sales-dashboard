@@ -29,14 +29,27 @@ class AiAssistantService
         $messages = $history;
         $messages[] = ['role' => 'user', 'content' => $message];
 
+        $malformedRetries = 0;
+
         for ($round = 0; $round < self::MAX_TOOL_ROUNDS; $round++) {
             $response = $this->callClaude($user, $messages);
             $content = $response['content'] ?? [];
             $toolUses = collect($content)->where('type', 'tool_use');
+            $stopReason = $response['stop_reason'] ?? null;
 
-            if (($response['stop_reason'] ?? null) !== 'tool_use' || $toolUses->isEmpty()) {
+            // Rare glitch observed in testing: the API reports stop_reason
+            // "tool_use" but the response has no structured tool_use block
+            // (the model narrates the call as plain text instead). Retry the
+            // same turn instead of surfacing that raw text to the user.
+            if ($stopReason === 'tool_use' && $toolUses->isEmpty() && $malformedRetries < 2) {
+                $malformedRetries++;
+                $round--;
+                continue;
+            }
+
+            if ($stopReason !== 'tool_use' || $toolUses->isEmpty()) {
                 $text = collect($content)->where('type', 'text')->pluck('text')->implode("\n");
-                $messages[] = ['role' => 'assistant', 'content' => $content];
+                $messages[] = ['role' => 'assistant', 'content' => $this->normalizeContent($content)];
 
                 return [
                     'messages' => $messages,
@@ -44,7 +57,7 @@ class AiAssistantService
                 ];
             }
 
-            $messages[] = ['role' => 'assistant', 'content' => $content];
+            $messages[] = ['role' => 'assistant', 'content' => $this->normalizeContent($content)];
 
             $toolResults = $toolUses->map(function (array $toolUse) use ($user) {
                 $result = $this->runTool($user, $toolUse['name'], $toolUse['input'] ?? []);
@@ -63,6 +76,24 @@ class AiAssistantService
             'messages' => $messages,
             'reply' => 'تعذر إكمال الطلب بعد عدة محاولات، برجاء إعادة صياغة السؤال.',
         ];
+    }
+
+    /**
+     * PHP's json_decode() turns a JSON "{}" into an empty array, indistinguishable
+     * from "[]". When we echo a tool_use block back to the API (required to keep
+     * the conversation valid), an argument-less call's input round-trips as a
+     * JSON array and Anthropic rejects it with "Input should be an object".
+     * Force empty tool_use inputs back into an object before re-sending them.
+     */
+    protected function normalizeContent(array $content): array
+    {
+        return array_map(function ($block) {
+            if (($block['type'] ?? null) === 'tool_use' && isset($block['input']) && is_array($block['input']) && $block['input'] === []) {
+                $block['input'] = new \stdClass();
+            }
+
+            return $block;
+        }, $content);
     }
 
     protected function callClaude(User $user, array $messages): array
