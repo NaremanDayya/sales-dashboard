@@ -18,6 +18,7 @@ class SalesRep extends Model
         'id',
         'name',
         'start_work_date',
+        'stop_work_date',
         'work_duration',
         'target_customers',
         'late_customers',
@@ -31,12 +32,18 @@ protected $appends = ['active_agreements_count', 'inactive_agreements_count'];
 
     protected $casts = [
         'start_work_date' => 'date',
+        'stop_work_date' => 'date',
     ];
 
 	public function loginIps()
 {
     return $this->hasMany(SalesRepLoginIp ::class);
 }
+
+    public function workHistories()
+    {
+        return $this->hasMany(SalesRepWorkHistory::class);
+    }
 
     public function clients()
     {

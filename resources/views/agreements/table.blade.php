@@ -909,6 +909,116 @@
                 max-height: 80px;
             }
         }
+
+        /* ==================== Stat cards ==================== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        @media (max-width: 900px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            background: var(--gray-100);
+        }
+
+        .stat-card .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .stat-card.total .stat-icon { background: #e0e7ff; color: var(--primary); }
+        .stat-card.active .stat-icon { background: #d1fae5; color: #059669; }
+        .stat-card.inactive .stat-icon { background: #fee2e2; color: #dc2626; }
+        .stat-card.value .stat-icon { background: #fef3c7; color: #b45309; }
+
+        .stat-card .stat-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gray-600);
+            margin: 0 0 2px 0;
+        }
+
+        .stat-card .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin: 0;
+        }
+
+        .stat-card .stat-sub {
+            font-size: 11px;
+            color: var(--gray-400);
+        }
+
+        /* ==================== Duration badge (agreement status) ==================== */
+        .duration-badge {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .duration-badge.is-active {
+            background: #ecfdf5;
+            color: #059669;
+        }
+
+        .duration-badge.is-finished {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .duration-badge .duration-badge-label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+        }
+
+        .duration-badge .duration-badge-value {
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        /* ==================== Merged notice column ==================== */
+        .notice-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ==================== Finish agreement modal ==================== */
+        #finishAgreementModal {
+            display: none;
+        }
+
+        #finishAgreementModal:not(.hidden) {
+            display: flex !important;
+        }
     </style>
 @endpush
 
@@ -931,7 +1041,7 @@
                     <button id="columnsBtn" class="export-btn columns-btn" onclick="openColumnsModal()">
                         <span class="btn-icon"><i class="fas fa-columns"></i></span>
                         <span class="btn-text">اختيار الأعمدة</span>
-                        <span id="columnsBadge" class="columns-badge">13</span>
+                        <span id="columnsBadge" class="columns-badge">15</span>
                     </button>
                 </div>
                 <div class="export-options">
@@ -1043,6 +1153,13 @@
                                 </div>
                                 <div class="column-item">
                                     <label class="column-checkbox">
+                                        <input type="checkbox" value="status" checked>
+                                        <span class="checkmark"></span>
+                                        <span class="column-name">حالة الاتفاقية</span>
+                                    </label>
+                                </div>
+                                <div class="column-item">
+                                    <label class="column-checkbox">
                                         <input type="checkbox" value="notice_months" checked>
                                         <span class="checkmark"></span>
                                         <span class="column-name">أشهر الإخطار </span>
@@ -1050,16 +1167,9 @@
                                 </div>
                                 <div class="column-item">
                                     <label class="column-checkbox">
-                                        <input type="checkbox" value="required_notice_date" checked>
+                                        <input type="checkbox" value="notice_info" checked>
                                         <span class="checkmark"></span>
-                                        <span class="column-name"> الإخطار المتوقع</span>
-                                    </label>
-                                </div>
-                                <div class="column-item">
-                                    <label class="column-checkbox">
-                                        <input type="checkbox" value="notice_status" checked>
-                                        <span class="checkmark"></span>
-                                        <span class="column-name">حالة الإخطار</span>
+                                        <span class="column-name">الإخطار</span>
                                     </label>
                                 </div>
                                 <div class="column-item">
@@ -1112,6 +1222,39 @@
                     <i class="fas fa-print"></i>
                 </button>
 
+            </div>
+        </div>
+
+        <div class="stats-grid no-print">
+            <div class="stat-card total">
+                <span class="stat-icon"><i class="fas fa-file-contract"></i></span>
+                <div>
+                    <p class="stat-label">إجمالي الاتفاقيات</p>
+                    <p class="stat-value" id="statTotalCount">0</p>
+                </div>
+            </div>
+            <div class="stat-card active">
+                <span class="stat-icon"><i class="fas fa-check-circle"></i></span>
+                <div>
+                    <p class="stat-label">الاتفاقيات النشطة</p>
+                    <p class="stat-value" id="statActiveCount">0</p>
+                    <p class="stat-sub">من إجمالي <span id="statActiveTotal">0</span></p>
+                </div>
+            </div>
+            <div class="stat-card inactive">
+                <span class="stat-icon"><i class="fas fa-times-circle"></i></span>
+                <div>
+                    <p class="stat-label">الاتفاقيات غير النشطة</p>
+                    <p class="stat-value" id="statInactiveCount">0</p>
+                    <p class="stat-sub">من إجمالي <span id="statInactiveTotal">0</span></p>
+                </div>
+            </div>
+            <div class="stat-card value">
+                <span class="stat-icon"><i class="fas fa-sack-dollar"></i></span>
+                <div>
+                    <p class="stat-label">اجمالي القيم</p>
+                    <p class="stat-value" id="statTotalValue">0</p>
+                </div>
             </div>
         </div>
 
@@ -1173,9 +1316,9 @@
                             <th> إنهاء الاتفاقية</th>
                             <th> تنفيذ الاتفاقية</th>
                             <th> انتهاء الاتفاقية</th>
+                            <th>حالة الاتفاقية</th>
                             <th>أشهر الإخطار </th>
-                            <th> الإخطار المتوقع</th>
-                            <th>حالة الإخطار</th>
+                            <th>الإخطار</th>
                             <th> الخدمة</th>
                             <th>عدد المنتج</th>
                             <th>التسعيرة</th>
@@ -1345,6 +1488,43 @@
                 </div>
             </div>
         </div>
+
+        <!-- Finish Agreement Modal -->
+        <div id="finishAgreementModal" class="modal-container hidden">
+            <div class="modal-content" style="max-width: 480px;">
+                <div class="modal-header px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-800" id="finishAgreementTitle">إنهاء الاتفاقية</h3>
+                    <button type="button" class="text-gray-500 hover:text-gray-700 text-xl" onclick="closeFinishAgreementModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <form id="finishAgreementForm" method="POST" action="">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body px-6 py-4">
+                        <p class="text-sm text-gray-600 mb-4">
+                            حدد تاريخ إنهاء هذه الاتفاقية. يمكن أن يكون هذا التاريخ قبل تاريخ الانتهاء المتوقع للاتفاقية.
+                        </p>
+                        <label for="finish_date" class="block text-sm font-medium text-gray-700 mb-1">تاريخ إنهاء الاتفاقية</label>
+                        <input type="date" id="finish_date" name="finish_date" required
+                               class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-red-500">
+                    </div>
+
+                    <div class="modal-footer px-6 py-4 border-t bg-gray-50 flex justify-end gap-3">
+                        <button type="button" onclick="closeFinishAgreementModal()"
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
+                            إلغاء
+                        </button>
+                        <button type="submit"
+                                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition">
+                            <i class="fas fa-flag-checkered"></i>
+                            إنهاء الاتفاقية
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -1368,6 +1548,7 @@
 
             // Render initial table
             renderTable();
+            updateStatCards();
 
             // Initialize export functionality
             initializeExportFunctionality();
@@ -1478,9 +1659,9 @@
                     termination_type: "إنهاء الاتفاقية",
                     implementation_date: "تنفيذ الاتفاقية",
                     end_date: "انتهاء الاتفاقية",
+                    status: "حالة الاتفاقية",
                     notice_months: "أشهر الإخطار",
-                    required_notice_date: "الإخطار المتوقع",
-                    notice_status: "حالة الإخطار",
+                    notice_info: "الإخطار",
                     service_type: "الخدمة",
                     product_quantity: "عدد المنتج",
                     price: "التسعيرة",
@@ -1525,14 +1706,16 @@
                                 case 'end_date':
                                     value = formatDateForDisplay(agreement.end_date) || '';
                                     break;
+                                case 'status':
+                                    value = isAgreementFinished(agreement)
+                                        ? `منتهية (${formatDateForDisplay(agreement.finish_date || agreement.end_date) || '—'})`
+                                        : 'سارية';
+                                    break;
                                 case 'notice_months':
                                     value = agreement.notice_months || '';
                                     break;
-                                case 'required_notice_date':
-                                    value = formatDateForDisplay(agreement.required_notice_date) || '';
-                                    break;
-                                case 'notice_status':
-                                    value = getNoticeStatus(agreement.notice_status);
+                                case 'notice_info':
+                                    value = `${formatDateForDisplay(agreement.required_notice_date) || '—'} - ${getNoticeStatus(agreement.notice_status)}`;
                                     break;
                                 case 'service_type':
                                     value = agreement.service_type || '';
@@ -1757,9 +1940,9 @@
                 'إنهاء الاتفاقية': 'termination_type',
                 'تنفيذ الاتفاقية': 'implementation_date',
                 'انتهاء الاتفاقية': 'end_date',
+                'حالة الاتفاقية': 'status',
                 'أشهر الإخطار': 'notice_months',
-                'الإخطار المتوقع': 'required_notice_date',
-                'حالة الإخطار': 'notice_status',
+                'الإخطار': 'notice_info',
                 'الخدمة': 'service_type',
                 'عدد المنتج': 'product_quantity',
                 'التسعيرة': 'price',
@@ -1953,6 +2136,11 @@
             </div>
         </td>
 
+        <!-- Status (duration badge / agreement counter) -->
+        <td class="px-4 py-2 text-sm">
+            ${renderDurationBadge(agreement)}
+        </td>
+
         <!-- Notice Months -->
         <td class="px-4 py-2 text-sm text-gray-700">
             <div class="flex items-center justify-between">
@@ -1962,16 +2150,12 @@
             </div>
         </td>
 
-        <!-- Required Notice Date -->
-        <td class="px-4 py-2 text-sm text-center ${ agreement.is_notice_at_time ? 'text-red-600 font-bold' : 'text-green-600 font-bold' }">
-            <div class="flex items-center justify-between">
-                ${formatDateForDisplay(agreement.required_notice_date) || '—'}
-            </div>
-        </td>
-
-        <!-- Notice Status -->
-        <td class="px-4 py-2 text-center whitespace-nowrap overflow-x-auto max-w-xs text-ellipsis">
-            <div class="flex items-center justify-between">
+        <!-- Notice (expected date + status merged) -->
+        <td class="px-4 py-2 text-sm">
+            <div class="notice-cell">
+                <span class="${ agreement.is_notice_at_time ? 'text-red-600 font-bold' : 'text-green-600 font-bold' }">
+                    ${formatDateForDisplay(agreement.required_notice_date) || '—'}
+                </span>
                 <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-semibold ${
                     agreement.notice_status === 'sent'
                         ? 'bg-green-100 text-green-600'
@@ -2013,11 +2197,16 @@
 
         <!-- Total Amount -->
         <td class="px-4 py-2 text-sm text-gray-700">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between gap-2">
                 ${agreement.total_amount || '—'}
                 ${isAdmin ? `
                 <button onclick="openAgreementEditModal(${agreement.agreement_id})" class="text-green-600 hover:text-green-800 no-print" title="تعديل بيانات الإتفاقية">
                     <i class="fas fa-edit"></i>
+                </button>
+                ` : ''}
+                ${!isAgreementFinished(agreement) ? `
+                <button onclick="openFinishAgreementModal(${agreement.agreement_id})" class="text-red-600 hover:text-red-800 no-print" title="إنهاء الاتفاقية">
+                    <i class="fas fa-flag-checkered"></i>
                 </button>
                 ` : ''}
             </div>
@@ -2194,6 +2383,114 @@
                 notification.style.opacity = '0';
                 setTimeout(() => notification.remove(), 500);
             }, 3000);
+        }
+
+        // An agreement is finished either because the sales rep ended it manually
+        // (agreement_status = terminated) or because it reached its natural end
+        // without renewing (agreement_status = expired).
+        function isAgreementFinished(agreement) {
+            if (!agreement) return false;
+            if (agreement.agreement_status) {
+                return agreement.agreement_status === 'terminated' || agreement.agreement_status === 'expired';
+            }
+            return isDatePast(agreement.end_date);
+        }
+
+        function isDatePast(dateStr) {
+            if (!dateStr || dateStr === '—') return false;
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return false;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            d.setHours(0, 0, 0, 0);
+            return d < today;
+        }
+
+        function computeDuration(startStr, endStr) {
+            const start = new Date(startStr);
+            const end = endStr ? new Date(endStr) : new Date();
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                return { years: 0, months: 0, days: 0 };
+            }
+
+            let years = end.getFullYear() - start.getFullYear();
+            let months = end.getMonth() - start.getMonth();
+            let days = end.getDate() - start.getDate();
+
+            if (days < 0) {
+                months -= 1;
+                const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
+                days += prevMonth.getDate();
+            }
+            if (months < 0) {
+                years -= 1;
+                months += 12;
+            }
+            if (years < 0) {
+                years = 0; months = 0; days = 0;
+            }
+
+            return { years, months, days };
+        }
+
+        // The status column: a counter showing how long the agreement has run,
+        // styled as an "active since signing" or "lasted (now finished)" pill.
+        function renderDurationBadge(agreement) {
+            const finished = isAgreementFinished(agreement);
+            const end = finished ? (agreement.finish_date || agreement.end_date) : null;
+            const { years, months, days } = computeDuration(agreement.signing_date, end);
+
+            const label = finished ? 'استمرت:' : 'منذ التوقيع:';
+            const icon = finished ? 'fa-clock' : 'fa-play';
+            const cssClass = finished ? 'is-finished' : 'is-active';
+
+            return `
+                <span class="duration-badge ${cssClass}">
+                    <span class="duration-badge-label"><i class="fas ${icon}"></i> ${label}</span>
+                    <span class="duration-badge-value">${years} سنة، ${months} شهر، ${days} يوم</span>
+                </span>
+            `;
+        }
+
+        function updateStatCards() {
+            const total = AgreementsData.length;
+            const activeCount = AgreementsData.filter(a => !isAgreementFinished(a)).length;
+            const inactiveCount = total - activeCount;
+            const totalValue = AgreementsData.reduce((sum, a) => {
+                const v = parseFloat(String(a.total_amount || '0').replace(/,/g, ''));
+                return sum + (isNaN(v) ? 0 : v);
+            }, 0);
+
+            document.getElementById('statTotalCount').textContent = total;
+            document.getElementById('statActiveCount').textContent = activeCount;
+            document.getElementById('statActiveTotal').textContent = total;
+            document.getElementById('statInactiveCount').textContent = inactiveCount;
+            document.getElementById('statInactiveTotal').textContent = total;
+            document.getElementById('statTotalValue').textContent = totalValue.toLocaleString('ar-EG');
+        }
+
+        // ==================== وظائف إنهاء الاتفاقية ====================
+        function openFinishAgreementModal(agreementId) {
+            const agreement = AgreementsData.find(a => a.agreement_id == agreementId);
+            if (!agreement) {
+                showNotification('لم يتم العثور على بيانات الاتفاقية', 'error');
+                return;
+            }
+
+            const form = document.getElementById('finishAgreementForm');
+            form.action = `/sales-reps/${agreement.sales_rep_id}/agreements/${agreementId}/finish`;
+            document.getElementById('finishAgreementTitle').textContent = `إنهاء اتفاقية ${agreement.client_name || ''}`;
+            document.getElementById('finish_date').value = '';
+
+            const modal = document.getElementById('finishAgreementModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+
+        function closeFinishAgreementModal() {
+            const modal = document.getElementById('finishAgreementModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
         }
 
         function formatDateForDisplay(date) {

@@ -219,6 +219,12 @@
                                 <span class="bg-white/20 rounded-full px-1.5 text-xs">{{ $user->salesRep->clients_count }}</span>
                             @endif
                         </a>
+                        @if($user->salesRep)
+                        <a href="{{ route('work-history.index', ['sales_rep_id' => $user->salesRep->id]) }}"
+                            class="btn btn-outline-secondary btn-sm" title="سجل العمل">
+                            <i class="bi bi-calendar-check me-1"></i> سجل العمل
+                        </a>
+                        @endif
                     </div>
                 @endif
             </div>
@@ -290,6 +296,29 @@
                         <div class="py-3">
                             <div class="text-xs font-medium text-gray-400 flex items-center gap-1.5 mb-1"><i class="bi bi-credit-card-2-front"></i>رقم الهوية</div>
                             <div class="text-sm font-medium text-gray-900">{{ $user->id_card }}</div>
+                        </div>
+
+                        @php
+                            $workPeriod = new \App\Models\SalesRepWorkHistory([
+                                'start_date' => $user->salesRep->start_work_date,
+                                'end_date' => $user->account_status === 'inactive' ? $user->salesRep->stop_work_date : null,
+                            ]);
+                        @endphp
+                        <div class="py-3">
+                            <div class="text-xs font-medium text-gray-400 flex items-center gap-1.5 mb-1"><i class="bi bi-clock-history"></i>مدة العمل</div>
+                            <div class="text-sm font-medium text-gray-900 flex items-center flex-wrap gap-2">
+                                <span>{{ $workPeriod->period }}</span>
+                                @if($workPeriod->is_active)
+                                    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-50 text-emerald-700"><i class="bi bi-play-fill"></i> نشط</span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-700"><i class="bi bi-stop-fill"></i> متوقف</span>
+                                @endif
+                            </div>
+                            @if(!$workPeriod->is_active && $user->salesRep->stop_work_date)
+                                <div class="text-xs text-gray-400 mt-1">
+                                    توقف بتاريخ {{ \Carbon\Carbon::parse($user->salesRep->stop_work_date)->locale('ar')->isoFormat('D MMMM YYYY') }}
+                                </div>
+                            @endif
                         </div>
 
                         <div class="py-3">

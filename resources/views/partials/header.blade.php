@@ -51,6 +51,9 @@
             </div>
         </div>
 
+        <!-- AI Assistant -->
+        <livewire:ai-assistant />
+
         <!-- Notifications Dropdown -->
         @php
             $user = Auth::user();

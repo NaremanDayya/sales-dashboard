@@ -96,6 +96,10 @@ Route::middleware('auth')->group(function () {
 Route::post('/admin/update-photo', [ProfileController::class, 'updatePhoto'])->name('admin.updatePhoto');
 
 });
+Route::middleware('auth')->group(function () {
+    Route::get('/work-history', [App\Http\Controllers\Admin\WorkHistoryController::class, 'index'])->name('work-history.index');
+    Route::get('/work-history/export', [App\Http\Controllers\Admin\WorkHistoryController::class, 'export'])->name('work-history.export');
+});
 
 Route::prefix('sales-reps')->group(function () {
     Route::get('{id}/export-pdf', [pdfController::class, 'exportSalesRepPdf'])->name('salesreps.export.pdf');
@@ -166,6 +170,8 @@ Route::get('/run-scheduled-tasks', function () {
 
     Artisan::call('notify:pended-request');
 
+    Log::info('Running agreements:process-end-of-term');
+    Artisan::call('agreements:process-end-of-term');
 
     Log::info('Scheduled tasks triggered via route at: ' . now());
 
@@ -194,6 +200,8 @@ Route::middleware('auth', \App\Http\Middleware\AuthorizeSalesRep::class)->group(
 
     Route::put('sales-reps/{salesrep}/agreements/{agreement}/notice-status', [AgreementController::class, 'updateNoticeStatus'])
         ->name('agreements.updateNoticeStatus');
+    Route::put('sales-reps/{salesrep}/agreements/{agreement}/finish', [AgreementController::class, 'finish'])
+        ->name('agreements.finish');
 });
 Route::middleware(['auth'])->group(function () {
     Route::get('/clients/{client}/edit', [ClientController::class, 'edit'])->name('clients.edit');
