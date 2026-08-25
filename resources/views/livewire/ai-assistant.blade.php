@@ -47,16 +47,16 @@
                 @endif
             </div>
 
-            <form wire:submit.prevent="send" class="flex items-center gap-2 px-3 py-3 border-t dark:border-neutral-700">
-                <input type="text" wire:model="input" placeholder="اكتب سؤالك هنا..."
+            <div class="flex items-center gap-2 px-3 py-3 border-t dark:border-neutral-700">
+                <input type="text" wire:model="input" wire:keydown.enter="send" placeholder="اكتب سؤالك هنا..."
                        class="flex-1 rounded-lg border-gray-300 dark:bg-neutral-800 dark:border-neutral-700 dark:text-gray-100 text-sm focus:ring-purple-500 focus:border-purple-500"
                        @if($loading) disabled @endif>
-                <button type="submit"
+                <button type="button" wire:click="send"
                         class="p-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50"
                         @if($loading) disabled @endif>
                     <i class="fas fa-paper-plane"></i>
                 </button>
-            </form>
+            </div>
         </div>
     </div>
 </div>
