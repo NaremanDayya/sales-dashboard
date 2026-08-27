@@ -30,31 +30,67 @@ class TargetService
         );
     }
 
+    /**
+     * Get the target row for a given sales rep/service/month, creating it (and any
+     * missing months before it, back to the rep's joining month) if needed so the
+     * unmet portion of every prior month's target compounds into this one.
+     */
+    public function getOrCreateTarget(int $salesRepId, int $serviceId, Carbon $date): Target
+    {
+        $month = $date->month;
+        $year = $date->year;
+
+        $existing = Target::where([
+            'sales_rep_id' => $salesRepId,
+            'service_id' => $serviceId,
+            'month' => $month,
+            'year' => $year,
+        ])->first();
+
+        if ($existing) {
+            return $existing;
+        }
+
+        $service = Service::findOrFail($serviceId);
+        $salesRep = SalesRep::findOrFail($salesRepId);
+
+        $targetMonth = Carbon::create($year, $month, 1)->startOfMonth();
+        $joinMonth = $salesRep->start_work_date
+            ? $salesRep->start_work_date->copy()->startOfMonth()
+            : $targetMonth;
+
+        $carriedIn = 0;
+        if ($targetMonth->gt($joinMonth)) {
+            $previousMonth = $targetMonth->copy()->subMonth();
+            $previousTarget = $this->getOrCreateTarget($salesRepId, $serviceId, $previousMonth);
+            $carriedIn = $previousTarget->carried_over_amount;
+        }
+
+        $actualTarget = $service->target_amount + $carriedIn;
+
+        return Target::create([
+            'sales_rep_id' => $salesRepId,
+            'service_id' => $serviceId,
+            'month' => $month,
+            'year' => $year,
+            'target_amount' => $actualTarget,
+            'achieved_amount' => 0,
+            'carried_over_amount' => $actualTarget,
+            'achieved_percentage' => 0,
+            'is_achieved' => false,
+            'commission_due' => false,
+            'needed_achieved_percentage' => Setting::where('key', 'commission_threshold')->value('value') ?? 90,
+        ]);
+    }
+
     protected function updateTarget(
         int $salesRepId,
         int $serviceId,
         Carbon $date,
         float $achievedValue
     ): Target {
-//dd('test');       
  return DB::transaction(function () use ($salesRepId, $serviceId, $date, $achievedValue) {
-            $service = Service::findOrFail($serviceId);
-            $baseTarget = $service->target_amount;
-
-            // Get or create target
-            $target = Target::firstOrCreate(
-                [
-                    'sales_rep_id' => $salesRepId,
-                    'service_id' => $serviceId,
-                    'month' => $date->month,
-                    'year' => $date->year,
-                ],
-                [
-                    'target_amount' => $baseTarget,
-                    'achieved_amount' => 0,
-                    'carried_over_amount' => 0,
-                ]
-            );
+            $target = $this->getOrCreateTarget($salesRepId, $serviceId, $date);
 
             // Update achieved amount
             $target->achieved_amount += $achievedValue;
