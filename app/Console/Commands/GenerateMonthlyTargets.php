@@ -29,17 +29,24 @@ class GenerateMonthlyTargets extends Command
                 continue;
             }
 
-            // A rep's target starts the month they joined; nothing to generate before that.
+            // A rep's target starts the month after they joined; nothing to
+            // generate before that (their joining month itself is training).
             if ($rep->start_work_date->copy()->startOfMonth()->gt($now)) {
                 $this->line("⏩ Skipped Rep ID {$rep->id}: joins in the future ({$rep->start_work_date->format('Y-m-d')})");
                 continue;
             }
 
             foreach ($services as $service) {
-                // getOrCreateTarget backfills every month between the rep's joining
-                // month and now, compounding each month's shortfall into the next,
-                // then returns (or creates) this month's row.
+                // getOrCreateTarget backfills every eligible month between the rep's
+                // first target month and now, compounding each month's shortfall
+                // into the next, then returns (or creates) this month's row. Returns
+                // null if this month is still the rep's training month.
                 $target = $targetService->getOrCreateTarget($rep->id, $service->id, $now);
+
+                if (!$target) {
+                    $this->line("⏩ Rep {$rep->id}, Service {$service->id}: still in training this month ({$now->month}/{$now->year})");
+                    continue;
+                }
 
                 $this->line("✅ Rep {$rep->id}, Service {$service->id}, {$now->month}/{$now->year}, Target: {$target->target_amount}, CarryOver: {$target->carried_over_amount}");
             }
