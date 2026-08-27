@@ -7,13 +7,14 @@ use App\Models\Service;
 use App\Models\Target;
 use App\Models\User;
 use App\Models\Commission;
+use App\Services\TargetService;
 use Illuminate\Http\Request;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Auth;
 
 class TargetController extends Controller
 {
-    public function index(SalesRep $salesRep)
+    public function index(SalesRep $salesRep, TargetService $targetService)
     {
         $selectedYear = request('year', now()->year);
         $selectedMonth = request('month'); // Remove default to show all months
@@ -25,8 +26,21 @@ class TargetController extends Controller
         $startYear = $startDate?->year;
         $startMonth = $startDate?->month;
 
-        // Fetch targets once (grouped by service)
+        // Make sure this month's target (with carry-over from every prior month
+        // since the rep joined) exists before we read it, in case the monthly
+        // generation job hasn't run yet for the current month.
+        $now = now();
+        if ($startDate && $startDate->copy()->startOfMonth()->lte($now->copy()->startOfMonth())) {
+            foreach ($services as $service) {
+                $targetService->getOrCreateTarget($salesRep->id, $service->id, $now);
+            }
+        }
+
+        // Fetch the CURRENT month's target per service (not just "whatever row
+        // happens to exist"), since target/carry-over amounts are month-specific.
         $targetsByService = Target::where('sales_rep_id', $salesRep->id)
+            ->where('month', $now->month)
+            ->where('year', $now->year)
             ->with('commissions') // eager load commissions
             ->get()
             ->keyBy('service_id');
