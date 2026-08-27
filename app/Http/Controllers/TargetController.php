@@ -85,6 +85,9 @@ class TargetController extends Controller
                 'needed_achieved_percentage' => $target?->needed_achieved_percentage ?? 0,
                 'actual_target_amount' => $target ? number_format($target->target_amount) : 0,
                 'carried_over_amount' => $carriedOver,
+                // Banked over-achievement auto-filling future months, one month's
+                // target at a time, until exhausted.
+                'surplus_carried_amount' => (float) ($target?->surplus_carried_amount ?? 0),
                 'achieved_target_percentage_needed' => Setting::where('key', 'commission_threshold')->value('value') ?? 90,
             ];
 

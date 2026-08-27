@@ -38,6 +38,12 @@ class TargetService
      * The rep's joining month itself is a training month and never has a target
      * (returns null if asked for it, or any month before it) - the target clock
      * starts the month after they joined.
+     *
+     * Over-achievement carries forward too: any amount achieved beyond a month's
+     * target is banked (surplus_carried_amount) and auto-applied to future months'
+     * achieved_amount - one month's target at a time - until the bank runs out, at
+     * which point normal shortfall carry-over (carried_over_amount) resumes from
+     * whatever partial amount was left unfilled that month.
      */
     public function getOrCreateTarget(int $salesRepId, int $serviceId, Carbon $date): ?Target
     {
@@ -60,7 +66,8 @@ class TargetService
 
         $targetMonth = Carbon::create($year, $month, 1)->startOfMonth();
 
-        $carriedIn = 0;
+        $carriedShortfall = 0;
+        $carriedSurplus = 0;
         if ($salesRep->start_work_date) {
             $joinMonth = $salesRep->start_work_date->copy()->startOfMonth();
             $firstEligibleMonth = $joinMonth->copy()->addMonth();
@@ -73,11 +80,18 @@ class TargetService
             if ($targetMonth->gt($firstEligibleMonth)) {
                 $previousMonth = $targetMonth->copy()->subMonth();
                 $previousTarget = $this->getOrCreateTarget($salesRepId, $serviceId, $previousMonth);
-                $carriedIn = $previousTarget?->carried_over_amount ?? 0;
+                $carriedShortfall = $previousTarget?->carried_over_amount ?? 0;
+                $carriedSurplus = $previousTarget?->surplus_carried_amount ?? 0;
             }
         }
 
-        $actualTarget = $service->target_amount + $carriedIn;
+        $actualTarget = $service->target_amount + $carriedShortfall;
+
+        // Draw down the banked surplus, but never more than this month needs.
+        $autoFilled = min($carriedSurplus, $actualTarget);
+        $achieved = $autoFilled;
+        $threshold = Setting::where('key', 'commission_threshold')->value('value') ?? 90;
+        $achievedPercentage = $actualTarget > 0 ? ($achieved / $actualTarget) * 100 : 0;
 
         return Target::create([
             'sales_rep_id' => $salesRepId,
@@ -85,12 +99,17 @@ class TargetService
             'month' => $month,
             'year' => $year,
             'target_amount' => $actualTarget,
-            'achieved_amount' => 0,
-            'carried_over_amount' => $actualTarget,
-            'achieved_percentage' => 0,
-            'is_achieved' => false,
+            'achieved_amount' => $achieved,
+            // Shortfall if the bank didn't fully cover this month; leftover bank
+            // (never needed this month) if it did - the two are mutually exclusive.
+            'carried_over_amount' => max(0, $actualTarget - $autoFilled),
+            'surplus_carried_amount' => max(0, $carriedSurplus - $autoFilled),
+            'achieved_percentage' => $achievedPercentage,
+            // Reflects the bank-filled amount for display only - no commission or
+            // notification here, those only fire for real agreements (below).
+            'is_achieved' => $achievedPercentage >= $threshold,
             'commission_due' => false,
-            'needed_achieved_percentage' => Setting::where('key', 'commission_threshold')->value('value') ?? 90,
+            'needed_achieved_percentage' => $threshold,
         ]);
     }
 
@@ -108,11 +127,18 @@ class TargetService
                 return null;
             }
 
-            // Update achieved amount
-            $target->achieved_amount += $achievedValue;
+            // This real value first closes any remaining gap to the target; once
+            // the gap is closed (now or already), everything extra piles onto the
+            // surplus bank for future months instead of being lost.
+            $remainingGap = max(0, $target->carried_over_amount);
+            if ($achievedValue <= $remainingGap) {
+                $target->carried_over_amount = $remainingGap - $achievedValue;
+            } else {
+                $target->carried_over_amount = 0;
+                $target->surplus_carried_amount += ($achievedValue - $remainingGap);
+            }
 
-            // Calculate carryover for NEXT month
-            $target->carried_over_amount = max(0, $target->target_amount - $target->achieved_amount);
+            $target->achieved_amount += $achievedValue;
             //calculate achieved_percentage
             $target->achieved_percentage = ($target->achieved_amount / $target->target_amount) * 100;
             // Check achievement (90% of target_amount)

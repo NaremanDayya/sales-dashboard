@@ -850,7 +850,11 @@ value="{{ old('commission_threshold', \App\Models\Setting::where('key', 'commiss
                     ${target.target_amount || 0}
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-800">
-                    ${target.carried_over_amount || 0}
+                    ${target.carried_over_amount > 0
+                        ? target.carried_over_amount
+                        : (target.surplus_carried_amount > 0
+                            ? `<span class="text-green-600 font-semibold">رصيد إضافي: ${target.surplus_carried_amount}</span>`
+                            : 0)}
                 </td>
                 <td class="px-6 py-4 text-sm">
                     <span class="font-bold ${target.current_month_achieved_amount >= target.actual_target_amount ? 'text-green-600' : (target.current_month_achieved_amount / target.actual_target_amount >= 0.7 ? 'text-yellow-600' : 'text-red-600')}">
@@ -858,6 +862,9 @@ value="{{ old('commission_threshold', \App\Models\Setting::where('key', 'commiss
                     </span>
                     /
                     <span class="text-gray-600">${target.actual_target_amount || 0}</span>
+                    ${target.surplus_carried_amount > 0
+                        ? `<div class="text-xs text-green-600 mt-1">من رصيد إضافي محقق سابقاً</div>`
+                        : ''}
                 </td>
 
                 ${monthlyCellsHTML}
