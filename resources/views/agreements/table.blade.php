@@ -928,6 +928,8 @@
         .stat-card {
             display: flex;
             align-items: center;
+            justify-content: center;
+            text-align: center;
             gap: 12px;
             padding: 14px 16px;
             border-radius: 10px;
@@ -967,6 +969,13 @@
         .stat-card .stat-sub {
             font-size: 11px;
             color: var(--gray-400);
+        }
+
+        .stat-card .stat-sub-danger {
+            margin-top: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--danger);
         }
 
         /* ==================== Duration badge (agreement status) ==================== */
@@ -1254,6 +1263,7 @@
                 <div>
                     <p class="stat-label">اجمالي القيم</p>
                     <p class="stat-value" id="statTotalValue">0</p>
+                    <p class="stat-sub stat-sub-danger">قيمة الاتفاقيات غير النشطة: <span id="statInactiveValue">0</span></p>
                 </div>
             </div>
         </div>
@@ -2204,9 +2214,12 @@
                     <i class="fas fa-edit"></i>
                 </button>
                 ` : ''}
-                ${!isAgreementFinished(agreement) ? `
-                <button onclick="openFinishAgreementModal(${agreement.agreement_id})" class="text-red-600 hover:text-red-800 no-print" title="إنهاء الاتفاقية">
+                <button onclick="openFinishAgreementModal(${agreement.agreement_id})" class="text-red-600 hover:text-red-800 no-print" title="${isAgreementFinished(agreement) ? 'تعديل تاريخ إنهاء الاتفاقية' : 'إنهاء الاتفاقية'}">
                     <i class="fas fa-flag-checkered"></i>
+                </button>
+                ${isAdmin ? `
+                <button onclick="deleteAgreement(${agreement.agreement_id}, ${agreement.sales_rep_id})" class="text-gray-500 hover:text-red-700 no-print" title="حذف الاتفاقية">
+                    <i class="fas fa-trash"></i>
                 </button>
                 ` : ''}
             </div>
@@ -2460,6 +2473,10 @@
                 const v = parseFloat(String(a.total_amount || '0').replace(/,/g, ''));
                 return sum + (isNaN(v) ? 0 : v);
             }, 0);
+            const inactiveValue = AgreementsData.filter(a => isAgreementFinished(a)).reduce((sum, a) => {
+                const v = parseFloat(String(a.total_amount || '0').replace(/,/g, ''));
+                return sum + (isNaN(v) ? 0 : v);
+            }, 0);
 
             document.getElementById('statTotalCount').textContent = total;
             document.getElementById('statActiveCount').textContent = activeCount;
@@ -2467,6 +2484,7 @@
             document.getElementById('statInactiveCount').textContent = inactiveCount;
             document.getElementById('statInactiveTotal').textContent = total;
             document.getElementById('statTotalValue').textContent = totalValue.toLocaleString('ar-EG');
+            document.getElementById('statInactiveValue').textContent = inactiveValue.toLocaleString('ar-EG');
         }
 
         // ==================== وظائف إنهاء الاتفاقية ====================
@@ -2479,8 +2497,11 @@
 
             const form = document.getElementById('finishAgreementForm');
             form.action = `/sales-reps/${agreement.sales_rep_id}/agreements/${agreementId}/finish`;
-            document.getElementById('finishAgreementTitle').textContent = `إنهاء اتفاقية ${agreement.client_name || ''}`;
-            document.getElementById('finish_date').value = '';
+            const alreadyFinished = isAgreementFinished(agreement);
+            document.getElementById('finishAgreementTitle').textContent = alreadyFinished
+                ? `تعديل تاريخ إنهاء اتفاقية ${agreement.client_name || ''}`
+                : `إنهاء اتفاقية ${agreement.client_name || ''}`;
+            document.getElementById('finish_date').value = agreement.finish_date || '';
 
             const modal = document.getElementById('finishAgreementModal');
             modal.classList.remove('hidden');
@@ -2491,6 +2512,42 @@
             const modal = document.getElementById('finishAgreementModal');
             modal.classList.add('hidden');
             modal.style.display = 'none';
+        }
+
+        // ==================== وظائف حذف الاتفاقية ====================
+        function deleteAgreement(agreementId, salesRepId) {
+            const agreement = AgreementsData.find(a => a.agreement_id == agreementId);
+            const label = agreement?.client_name ? ` مع "${agreement.client_name}"` : '';
+
+            if (!confirm(`هل أنت متأكد من حذف هذه الاتفاقية${label}؟ لا يمكن التراجع عن هذا الإجراء.`)) {
+                return;
+            }
+
+            fetch(`/salesrep/${salesRepId}/agreements/${agreementId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+                .then(async response => {
+                    const data = await response.json().catch(() => ({}));
+                    if (!response.ok) {
+                        throw new Error(data.message || `Server error: ${response.status}`);
+                    }
+                    return data;
+                })
+                .then(() => {
+                    AgreementsData = AgreementsData.filter(a => a.agreement_id != agreementId);
+                    currentFilteredAgreements = currentFilteredAgreements.filter(a => a.agreement_id != agreementId);
+                    renderTable();
+                    updateStatCards();
+                    showNotification('تم حذف الاتفاقية بنجاح', 'success');
+                })
+                .catch(error => {
+                    console.error('Error deleting agreement:', error);
+                    showNotification('حدث خطأ أثناء حذف الاتفاقية: ' + error.message, 'error');
+                });
         }
 
         function formatDateForDisplay(date) {

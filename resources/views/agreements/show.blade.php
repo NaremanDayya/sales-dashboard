@@ -192,7 +192,7 @@
                     <!-- End Date -->
                     <div class="relative pl-12">
                         <div class="absolute left-0 top-0 h-8 w-8 rounded-full
-                            {{ $agreement->end_date && now()->gt($agreement->end_date) ? 'bg-red-500' : 'bg-yellow-500' }}
+                            {{ $agreement->finish_date || ($agreement->end_date && now()->gt($agreement->end_date)) ? 'bg-red-500' : 'bg-yellow-500' }}
                             flex items-center justify-center text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                 fill="currentColor">
@@ -204,13 +204,18 @@
                         <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
                             <h4 class="font-semibold text-yellow-800">تاريخ انتهاء الإتفاقية</h4>
                             <p class="text-gray-600">
-                                {{ $agreement->end_date ? $agreement->end_date->format('F j, Y') : '—' }}
+                                {{ $agreement->finish_date ? $agreement->finish_date->format('F j, Y') : ($agreement->end_date ? $agreement->end_date->format('F j, Y') : '—') }}
                             </p>
-                            <p
-                                class="mt-1 text-sm {{ now()->gt($agreement->end_date) ? 'text-red-600' : 'text-yellow-600' }}">
-                                {{ now()->gt($agreement->end_date) ? 'الاتفاقية منتهية' : 'تنتهي بعد
-                                '.$agreement->end_date->diffForHumans() }}
-                            </p>
+                            @if($agreement->finish_date)
+                                <p class="mt-1 text-sm text-red-600">الاتفاقية منتهية</p>
+                                @if($agreement->end_date)
+                                    <p class="mt-1 text-xs text-gray-400">التاريخ المتوقع أصلاً: {{ $agreement->end_date->format('F j, Y') }}</p>
+                                @endif
+                            @else
+                                <p class="mt-1 text-sm {{ $agreement->end_date && now()->gt($agreement->end_date) ? 'text-red-600' : 'text-yellow-600' }}">
+                                    {{ $agreement->end_date && now()->gt($agreement->end_date) ? 'الاتفاقية منتهية' : ($agreement->end_date ? 'تنتهي بعد '.$agreement->end_date->diffForHumans() : '—') }}
+                                </p>
+                            @endif
                         </div>
                     </div>
                 </div>
