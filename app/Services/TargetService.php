@@ -127,6 +127,10 @@ class TargetService
                 return null;
             }
 
+            // Loaded up front so the notification/commission branch below never
+            // lazy-loads these, regardless of how strict the caller's environment is.
+            $target->loadMissing(['salesRep.user', 'service']);
+
             // This real value first closes any remaining gap to the target; once
             // the gap is closed (now or already), everything extra piles onto the
             // surplus bank for future months instead of being lost.
