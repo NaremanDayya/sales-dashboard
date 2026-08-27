@@ -21,6 +21,7 @@ class Target extends Model
         'is_achieved',
         'commission_due',
         'carried_over_amount',
+        'surplus_carried_amount',
         'achieved_percentage',
 	'needed_achieved_percentage',
     ];
