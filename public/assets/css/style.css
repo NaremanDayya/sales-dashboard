@@ -51,6 +51,19 @@ body {
 
 }
 
+/* Native date/time inputs must stay LTR internally or Chrome mirrors their
+   segment order and garbles the Arabic placeholder glyphs (e.g. "يوم-شهر-سنة"
+   renders as "موي-ؤهش-ةسن"). Keep the widget LTR, just align it to the right
+   so it still reads naturally on an RTL page. */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"] {
+    direction: ltr;
+    text-align: right;
+}
+
 a {
     color: #4154f1;
     text-decoration: none;

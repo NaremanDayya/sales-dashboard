@@ -34,7 +34,7 @@ class AgreementController extends Controller
 {
     public function allAgreements()
     {
-        $Agreements = Agreement::with(['client', 'service'])->get()->map(function ($agreement) {
+        $Agreements = Agreement::with(['client', 'service', 'salesRep'])->get()->map(function ($agreement) {
             return [
                 // Client logo (assuming relation `client` exists and client has `company_logo`)
                 'client_logo' => $agreement->client->company_logo,
@@ -69,7 +69,7 @@ class AgreementController extends Controller
 
     public function index(SalesRep $salesrep)
     {
-        $Agreements = Agreement::where('sales_rep_id', $salesrep->id)->with(['client', 'service'])->get()->map(function ($agreement) {
+        $Agreements = Agreement::where('sales_rep_id', $salesrep->id)->with(['client', 'service', 'salesRep'])->get()->map(function ($agreement) {
             return [
                 // Client logo (assuming relation `client` exists and client has `company_logo`)
                 'client_logo' => $agreement->client->company_logo,
@@ -674,6 +674,24 @@ class AgreementController extends Controller
         $agreement->finish($validated['finish_date']);
 
         return redirect()->back()->with('success', 'تم إنهاء الاتفاقية بنجاح.');
+    }
+
+    /**
+     * Delete an agreement (admin only), triggered from the agreements table.
+     */
+    public function destroy(SalesRep $salesrep, Agreement $agreement)
+    {
+        if ($agreement->sales_rep_id !== $salesrep->id) {
+            abort(404);
+        }
+
+        if (auth()->user()->role !== 'admin') {
+            abort(403);
+        }
+
+        $agreement->delete();
+
+        return response()->json(['success' => true, 'message' => 'تم حذف الاتفاقية بنجاح.']);
     }
 
     public function inlineUpdate(Request $request, Agreement $agreement)
