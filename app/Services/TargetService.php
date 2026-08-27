@@ -25,17 +25,21 @@ class TargetService
         $this->updateTarget(
             $agreement->sales_rep_id,
             $agreement->service_id,
-            $agreement->implementation_date,
+            $agreement->signing_date,
             $achievedValue
         );
     }
 
     /**
      * Get the target row for a given sales rep/service/month, creating it (and any
-     * missing months before it, back to the rep's joining month) if needed so the
-     * unmet portion of every prior month's target compounds into this one.
+     * missing months before it, back to the rep's first eligible month) if needed
+     * so the unmet portion of every prior month's target compounds into this one.
+     *
+     * The rep's joining month itself is a training month and never has a target
+     * (returns null if asked for it, or any month before it) - the target clock
+     * starts the month after they joined.
      */
-    public function getOrCreateTarget(int $salesRepId, int $serviceId, Carbon $date): Target
+    public function getOrCreateTarget(int $salesRepId, int $serviceId, Carbon $date): ?Target
     {
         $month = $date->month;
         $year = $date->year;
@@ -55,15 +59,22 @@ class TargetService
         $salesRep = SalesRep::findOrFail($salesRepId);
 
         $targetMonth = Carbon::create($year, $month, 1)->startOfMonth();
-        $joinMonth = $salesRep->start_work_date
-            ? $salesRep->start_work_date->copy()->startOfMonth()
-            : $targetMonth;
 
         $carriedIn = 0;
-        if ($targetMonth->gt($joinMonth)) {
-            $previousMonth = $targetMonth->copy()->subMonth();
-            $previousTarget = $this->getOrCreateTarget($salesRepId, $serviceId, $previousMonth);
-            $carriedIn = $previousTarget->carried_over_amount;
+        if ($salesRep->start_work_date) {
+            $joinMonth = $salesRep->start_work_date->copy()->startOfMonth();
+            $firstEligibleMonth = $joinMonth->copy()->addMonth();
+
+            // The joining month (training) never gets a target.
+            if ($targetMonth->lt($firstEligibleMonth)) {
+                return null;
+            }
+
+            if ($targetMonth->gt($firstEligibleMonth)) {
+                $previousMonth = $targetMonth->copy()->subMonth();
+                $previousTarget = $this->getOrCreateTarget($salesRepId, $serviceId, $previousMonth);
+                $carriedIn = $previousTarget?->carried_over_amount ?? 0;
+            }
         }
 
         $actualTarget = $service->target_amount + $carriedIn;
@@ -88,9 +99,14 @@ class TargetService
         int $serviceId,
         Carbon $date,
         float $achievedValue
-    ): Target {
+    ): ?Target {
  return DB::transaction(function () use ($salesRepId, $serviceId, $date, $achievedValue) {
             $target = $this->getOrCreateTarget($salesRepId, $serviceId, $date);
+
+            if (!$target) {
+                // Signed during the rep's training month - doesn't count toward any target.
+                return null;
+            }
 
             // Update achieved amount
             $target->achieved_amount += $achievedValue;
@@ -154,11 +170,9 @@ $target->save();
         return Agreement::query()
             ->where('sales_rep_id', $salesRepId)
             ->where('service_id', $serviceId)
-            ->whereMonth('implementation_date', $month)
-            ->whereYear('implementation_date', $year)
+            ->whereMonth('signing_date', $month)
+            ->whereYear('signing_date', $year)
         ->sum('total_amount');
-        // dd($agreements);
-
     }
 
 protected function createOrUpdateCommission(

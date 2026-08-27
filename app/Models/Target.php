@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class Target extends Model
 {
@@ -38,76 +39,68 @@ class Target extends Model
     {
         return $this->belongsTo(Service::class);
     }
-    public function currentMonthAchievedAmount(Service $service, SalesRep $salesRep)
-    {
-        $now = now();
-
-        return self::where('sales_rep_id', $salesRep->id)
-            ->where('month', $now->month)
-            ->where('year', $now->year)
-            ->where('service_id', $service->id)
-            ->value('achieved_amount') ?? 0;
-    }
-//dd('test');
     public function commissions()
     {
         return $this->hasMany(Commission::class, 'target_id');
     }
-    public function monthAchievedAmount($month, Service $service, SalesRep $salesRep)
-    {
-        return $this->where('sales_rep_id', $salesRep->id)
-            ->where('month', $month)
-            ->where('year', now()->year)
-            ->where('service_id', $service->id)
-            ->sum('achieved_percentage');
-    }
 
-    public function yearAchievedAmountValue(Service $service, SalesRep $salesRep): float
+    /**
+     * Total achieved amount for a service across a given year (defaults to the
+     * current year), regardless of which months have target rows.
+     */
+    public function yearAchievedAmountValue(Service $service, SalesRep $salesRep, ?int $year = null): float
     {
-        $currentYear = now()->year;
+        $year = $year ?? now()->year;
 
-        $totalAchievedAmount = $this->where('sales_rep_id', $salesRep->id)
+        $totalAchievedAmount = self::where('sales_rep_id', $salesRep->id)
             ->where('service_id', $service->id)
-            ->where('year', $currentYear)
+            ->where('year', $year)
             ->sum('achieved_amount');
 
         return (float) $totalAchievedAmount;
     }
 
-    public function yearAchievedAmount(Service $service, SalesRep $salesRep): float
+    /**
+     * Percentage of the year's cumulative target achieved for a service, for a
+     * given year (defaults to the current year). Only months the rep was
+     * actually eligible for a target (i.e. after their training month, and not
+     * in the future) count toward the denominator.
+     */
+    public function yearAchievedAmount(Service $service, SalesRep $salesRep, ?int $year = null): int
     {
-        $currentYear = now()->year;
-        $currentMonth = now()->month;
+        $year = $year ?? now()->year;
+        $now = now();
 
-        $startDate = optional($salesRep->start_work_date)->startOfMonth();
-
+        $startDate = $salesRep->start_work_date;
         if (!$startDate) {
-            $monthsWorked = $currentMonth;
-        } elseif ($startDate->year > $currentYear) {
-            $monthsWorked = 0;
-        } elseif ($startDate->year == $currentYear) {
-            $startMonth = $startDate->month + 1;
-            $monthsWorked = 12 - $startMonth + 1;
-            $monthsWorked = max(0, $monthsWorked);
-        } else {
-            $monthsWorked = $currentMonth;
+            return 0;
         }
 
-        if ($monthsWorked === 0) {
-            return 0.0;
+        // The rep's first eligible target month is the month after they joined
+        // (their joining month itself is training and carries no target).
+        $firstEligibleMonth = $startDate->copy()->startOfMonth()->addMonth();
+
+        $rangeStart = Carbon::create($year, 1, 1)->max($firstEligibleMonth);
+        $rangeEnd = Carbon::create($year, 12, 1)->min($now->copy()->startOfMonth());
+
+        if ($rangeStart->gt($rangeEnd)) {
+            return 0;
         }
 
-        $totalAchievedAmount = $this->where('sales_rep_id', $salesRep->id)
+        $monthsWorked = $rangeStart->diffInMonths($rangeEnd) + 1;
+
+        $totalAchievedAmount = self::where('sales_rep_id', $salesRep->id)
             ->where('service_id', $service->id)
-            ->where('year', $currentYear)
+            ->where('year', $year)
             ->sum('achieved_amount');
 
-        $targetAmount = ($service->target_amount) * $monthsWorked ?: 1;
+        $targetAmount = $service->target_amount * $monthsWorked;
 
-        $yearAchieved = $totalAchievedAmount / $targetAmount *100;
-//        dd($totalAchievedAmount ,$targetAmount,$yearAchieved);
+        if ($targetAmount <= 0) {
+            return 0;
+        }
 
-        return (int) $yearAchieved;
+        return (int) round($totalAchievedAmount / $targetAmount * 100);
     }
 
     public function getCommissionStatusAttribute()
