@@ -83,3 +83,15 @@ body {
 .app-main {
     min-width: 0;
 }
+
+/* Cancel the legacy old-template body offset (style.css) for pages using
+   the new shell — that rule assumes a fixed-position header/sidebar and
+   pushes body content down/right to clear them, which fights our flex
+   layout. Scoped to body.antialiased (set only by layouts/master.blade.php)
+   so the standalone chat pages, which still rely on the old offset, are
+   untouched. */
+body.antialiased {
+    display: block;
+    padding-top: 0;
+    margin-right: 0;
+}
