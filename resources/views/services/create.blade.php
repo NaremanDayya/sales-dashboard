@@ -3,12 +3,7 @@
 @section('title', 'إضافة خدمة')
 
 @section('content')
-<div class="container">
-<div style="margin-bottom: 20px;">
-    <h1 style="text-align: center; font-size: 24px; font-weight: 800;">
-        إضافة خدمة جديدة
-    </h1>
-</div>
+<x-page-header title="إضافة خدمة جديدة" subtitle="حدد اسم الخدمة، الهدف المطلوب تحقيقه، ونسبة العمولة" />
 
 <form action="{{ route('services.store') }}" method="POST">
     @csrf
@@ -16,6 +11,4 @@
         'button_label' => __('إضافة خدمة')
     ])
 </form>
-</div>
 @endsection
-
