@@ -14,11 +14,11 @@
 <div {{ $attributes->class(['bg-white border border-gray-200 rounded-xl p-5 shadow-sm']) }}>
     <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
-            <p class="text-sm font-medium text-gray-500 truncate">{{ $label }}</p>
-            <p class="mt-2 text-2xl font-semibold text-gray-900">{{ $value }}</p>
+            <p class="text-sm font-semibold text-gray-500 truncate">{{ $label }}</p>
+            <p class="mt-2 text-3xl font-bold text-gray-900">{{ $value }}</p>
 
             @if($trend !== null)
-                <p class="mt-2 inline-flex items-center gap-1 text-xs font-medium {{ $trendUp === null ? 'text-gray-400' : ($trendUp ? 'text-emerald-600' : 'text-rose-600') }}">
+                <p class="mt-2 inline-flex items-center gap-1 text-sm font-semibold {{ $trendUp === null ? 'text-gray-400' : ($trendUp ? 'text-emerald-600' : 'text-rose-600') }}">
                     @if($trendUp !== null)
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             @if($trendUp)

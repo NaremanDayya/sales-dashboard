@@ -14,8 +14,8 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
         إضافة عميل
     </a>
-    <h1 class="text-xl font-semibold text-gray-900">مرحبًا، {{ Auth::user()->name }}</h1>
-    <p class="text-sm text-gray-500">هذا ملخص أداء المبيعات لهذا الشهر</p>
+    <h1 class="text-2xl font-bold text-gray-900">مرحبًا، {{ Auth::user()->name }}</h1>
+    <p class="text-sm font-medium text-gray-500">هذا ملخص أداء المبيعات لهذا الشهر</p>
 </div>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -38,8 +38,8 @@
 
 <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
     <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-        <h2 class="text-sm font-semibold text-gray-900">أحدث الاتفاقيات</h2>
-        <a href="{{ route('allAgreements') }}" class="text-sm text-indigo-600 hover:text-indigo-700 font-medium inline-flex items-center gap-1">
+        <h2 class="text-base font-bold text-gray-900">أحدث الاتفاقيات</h2>
+        <a href="{{ route('allAgreements') }}" class="text-sm text-indigo-600 hover:text-indigo-700 font-semibold inline-flex items-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             عرض الكل
         </a>
@@ -65,12 +65,12 @@
                                 <div class="flex items-center gap-2.5">
                                     <img src="{{ $agreement->client->company_logo }}" alt="{{ $agreement->client->company_name }}" class="h-9 w-9 rounded-full object-cover shrink-0">
                                     <div class="min-w-0">
-                                        <div class="text-sm font-medium text-gray-900 truncate">{{ $agreement->client->company_name }}</div>
+                                        <div class="text-sm font-semibold text-gray-900 truncate">{{ $agreement->client->company_name }}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-5 py-3.5 text-sm text-gray-700 whitespace-nowrap">{{ $agreement->salesRep->name }}</td>
-                            <td class="px-5 py-3.5 text-sm text-gray-700 whitespace-nowrap">{{ number_format($agreement->total_amount) }} ر.س</td>
+                            <td class="px-5 py-3.5 text-sm font-medium text-gray-700 whitespace-nowrap">{{ $agreement->salesRep->name }}</td>
+                            <td class="px-5 py-3.5 text-sm font-medium text-gray-700 whitespace-nowrap">{{ number_format($agreement->total_amount) }} ر.س</td>
                             <td class="px-5 py-3.5">
                                 <x-badge :color="$statusColors[$agreement->agreement_status] ?? 'gray'">
                                     {{ $statusLabels[$agreement->agreement_status] ?? $agreement->agreement_status }}

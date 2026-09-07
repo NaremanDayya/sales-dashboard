@@ -18,9 +18,8 @@
 >
     <!-- Brand -->
     <div class="flex items-center gap-3 h-[--app-topbar-height] px-4 border-b border-gray-100 shrink-0">
-        <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 min-w-0">
-            <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="h-9 w-9 rounded-lg object-contain shrink-0">
-            <span x-show="!sidebarCollapsed" x-transition.opacity class="text-lg font-bold text-gray-900 truncate">آفاق الخليج</span>
+        <a href="{{ route('dashboard') }}" class="flex items-center min-w-0">
+            <img src="{{ asset('assets/img/logo.png') }}" alt="آفاق الخليج" class="h-11 w-auto object-contain shrink-0">
         </a>
         <button @click="sidebarOpen = false" class="ms-auto lg:hidden text-gray-400 hover:text-gray-600 p-1 rounded-md">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
