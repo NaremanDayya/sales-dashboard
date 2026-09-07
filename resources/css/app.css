@@ -90,7 +90,8 @@ body {
    layout. Scoped to body.antialiased (set only by layouts/master.blade.php)
    so the standalone chat pages, which still rely on the old offset, are
    untouched. */
-body.antialiased {
+body.antialiased,
+html:has(> body.antialiased) {
     display: block;
     padding-top: 0;
     margin-right: 0;
