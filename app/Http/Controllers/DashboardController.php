@@ -22,12 +22,8 @@ public function index()
 
     // Admin Role
     if ($user->role == 'admin') {
-        // Redirect to the sales reps index route
-        return redirect()->route('sales-reps.index');
-
-        // OR if you later want to show an admin dashboard instead, comment the above and use:
-        // $data = $this->getAdminDashboardData();
-        // return view('dashboards.AdminDashboard', compact('data'));
+        $data = $this->getAdminDashboardData();
+        return view('dashboards.AdminDashboard', compact('data'));
     }
 
     // Sales Representative Role
@@ -118,23 +114,49 @@ public function index()
         // Pending requests
         $pendingRequestsCount = ClientEditRequest::where('status', 'pending')->count()
             + AgreementEditRequest::where('status', 'pending')->count();
+
+        // Average target achievement rate this month, across reps with a target set
+        $now = now();
+        $currentTargets = Target::where('month', $now->month)->where('year', $now->year)->get();
+        $targetAchievementRate = $currentTargets->isNotEmpty()
+            ? round($currentTargets->avg('achieved_percentage'))
+            : 0;
+
+        // Month-over-month growth for clients and active agreements
+        $totalClientsLastMonth = Client::where('created_at', '<', $now->copy()->startOfMonth())->count();
+        $clientsGrowth = $this->calculateGrowthRate($totalClientsLastMonth, $totalClients);
+
+        $activeAgreementsLastMonth = Agreement::where('agreement_status', 'active')
+            ->where('signing_date', '<', $now->copy()->startOfMonth())
+            ->count();
+        $agreementsGrowth = $this->calculateGrowthRate($activeAgreementsLastMonth, $activeAgreements);
+
+        $latestAgreements = Agreement::with(['client', 'salesRep'])
+            ->latest()
+            ->take(4)
+            ->get();
+
         return [
             'allSalesReps' => $allSalesReps,
             'activeRepsCount' => $activeRepsCount,
             'newRepsThisMonth' => $newRepsThisMonth,
             'repsGrowth' => $repsGrowth,
             'totalClients' => $totalClients,
-            'inerestedClients' => $interestedClients,
-            'notInerestedClients' => $notInterestedClients,
+            'interestedClients' => $interestedClients,
+            'notInterestedClients' => $notInterestedClients,
+            'clientsGrowth' => $clientsGrowth,
             'totalAgreements' => $totalAgreements,
             'activeAgreements' => $activeAgreements,
+            'agreementsGrowth' => $agreementsGrowth,
             'pendingAgreements' => $pendingAgreements,
             'expiredAgreements' => $expiredAgreements,
             'expiringSoon' => $expiringSoon,
             'pendingRequestsCount' => $pendingRequestsCount,
+            'targetAchievementRate' => $targetAchievementRate,
             'onTargetCount' => $performanceCounts['achieved'] ?? 0,
             'nearTargetCount' => $performanceCounts['partially_achieved'] ?? 0,
             'belowTargetCount' => $performanceCounts['not_achieved'] ?? 0,
+            'latestAgreements' => $latestAgreements,
         ];
     }
     private function calculateGrowthRate($previousValue, $currentValue)

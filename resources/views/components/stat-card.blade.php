@@ -18,14 +18,16 @@
             <p class="mt-2 text-2xl font-semibold text-gray-900">{{ $value }}</p>
 
             @if($trend !== null)
-                <p class="mt-2 inline-flex items-center gap-1 text-xs font-medium {{ $trendUp ? 'text-emerald-600' : 'text-rose-600' }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        @if($trendUp)
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                        @else
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
-                        @endif
-                    </svg>
+                <p class="mt-2 inline-flex items-center gap-1 text-xs font-medium {{ $trendUp === null ? 'text-gray-400' : ($trendUp ? 'text-emerald-600' : 'text-rose-600') }}">
+                    @if($trendUp !== null)
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            @if($trendUp)
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                            @else
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
+                            @endif
+                        </svg>
+                    @endif
                     {{ $trend }}
                 </p>
             @endif
