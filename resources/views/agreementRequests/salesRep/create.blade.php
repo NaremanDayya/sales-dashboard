@@ -1,31 +1,36 @@
 @extends('layouts.master')
 @section('title', 'Add Request')
 @section('content')
-<div class="container">
-    <h1> Submit Request for {{ $client->company_name }}</h1>
-    <form action="{{ route('client-request.store')}}" method="POST" enctype="multipart/form-data">
+<x-page-header title="تقديم طلب تعديل" :subtitle="'للعميل ' . $client->company_name" />
+
+<div class="max-w-2xl bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+    <form action="{{ route('client-request.store')}}" method="POST" enctype="multipart/form-data" class="space-y-5">
         @csrf
-        <div class="col-md-4">
-            <label class="block font-medium">Request Type</label>
-            <select name="request_type" class="w-full border rounded px-3 py-2" required>
-                <option value="" disabled selected>Choose request type</option>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">نوع الطلب</label>
+            <select name="request_type" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                <option value="" disabled selected>اختر نوع الطلب</option>
                 @foreach(\App\Models\ClientEditRequest::REQUEST_TYPES as $key => $label)
                 <option value="{{ $key }}">{{ $label }}</option>
                 @endforeach
             </select>
         </div>
 
-            <input type="hidden" name="client_id" id="" value="{{ $client->id }}">
+        <input type="hidden" name="client_id" id="" value="{{ $client->id }}">
 
-        <x-form.floating-control name="description">
-            <x-slot:label>
-                <label for="description">Request Description</label>
-            </x-slot:label>
-            <x-form.textarea name="description" placeholder="Describe the Request" rows="3"></x-form.textarea>
-        </x-form.floating-control>
+        <div>
+            <label for="description" class="block text-sm font-medium text-gray-700 mb-1.5">وصف الطلب</label>
+            <x-form.textarea name="description" placeholder="اشرح تفاصيل الطلب" rows="4"></x-form.textarea>
+            @error('description')
+                <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
 
-        <button type="submit" class="btn ms-2" style="background-color: #198754; color: white;">
-            Send Request
-        </button>
+        <div class="flex justify-end pt-2">
+            <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors">
+                إرسال الطلب
+            </button>
+        </div>
     </form>
-    @endsection
+</div>
+@endsection

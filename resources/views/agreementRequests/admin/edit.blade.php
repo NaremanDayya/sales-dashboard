@@ -3,96 +3,83 @@
 @section('title', 'Review Agreement Edit agreement_request')
 
 @section('content')
+<x-page-header title="مراجعة طلب تعديل الاتفاقية" subtitle="اتخذ قرارًا بشأن طلب التعديل المقدَّم">
+    <x-slot name="actions">
+        <x-badge color="indigo">طلب رقم {{ $agreement_request->id }}</x-badge>
+    </x-slot>
+</x-page-header>
 
-<div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="fw-light">
-            <i class="bi bi-file-earmark-text me-2"></i>مراجعة طلب تعديل الإتفاقية
-        </h1>
-        <div class="badge bg-primary rounded-pill fs-6 p-2">
-            طلب تعديل إتفاقية رقم{{ $agreement_request->id }}
-        </div>
-    </div>
-
-    <div class="card border-0 shadow-sm rounded-lg overflow-hidden mb-4">
-        <div class="card-header bg-light-blue-gradient">
-            <h5 class="mb-0 text-white">
-                <i class="bi bi-file-earmark-text me-2"></i>الإتفاقية رقم{{ $agreement->id }}
+<div class="max-w-4xl space-y-6">
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h5 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <i class="bi bi-file-earmark-text text-indigo-500"></i>الاتفاقية رقم {{ $agreement->id }}
             </h5>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="icon-circle bg-blue-soft me-3">
-                            <i class="bi bi-tag text-blue"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-0 text-muted">نوع تعديل الطلب</h6>
-                            <p class="mb-0 fw-bold">
-تعديل بيانات الإتفاقية                            </p>
-                        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
+                        <i class="bi bi-tag"></i>
+                    </span>
+                    <div>
+                        <h6 class="text-xs font-medium text-gray-400">نوع تعديل الطلب</h6>
+                        <p class="text-sm font-semibold text-gray-900">تعديل بيانات الإتفاقية</p>
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="icon-circle bg-blue-soft me-3">
-                            <i class="bi bi-person text-blue"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-0 text-muted">تم تقديم الطلب من قبل سفير العلامة التجارية:</h6>
-                            <p class="mb-0 fw-bold">
-                                {{ $agreement_request->salesRep?->user?->name }}
-                                <span class="text-muted small d-block">
-                                    {{ $agreement_request->created_at?->format('M d, Y h:i A') }}
-                                </span>
-                            </p>
-                        </div>
+                <div class="flex items-center gap-3">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
+                        <i class="bi bi-person"></i>
+                    </span>
+                    <div>
+                        <h6 class="text-xs font-medium text-gray-400">تم تقديم الطلب من قبل سفير العلامة التجارية</h6>
+                        <p class="text-sm font-semibold text-gray-900">
+                            {{ $agreement_request->salesRep?->user?->name }}
+                            <span class="block text-xs font-normal text-gray-400">
+                                {{ $agreement_request->created_at?->format('M d, Y h:i A') }}
+                            </span>
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <div class="agreement_request-description bg-light-blue-soft p-4 rounded mb-4">
-                <h6 class="text-blue mb-3">
-                    <i class="bi bi-chat-square-text me-2"></i>وصف طلب التعديل
+            <div class="bg-indigo-50/60 rounded-lg p-4 mb-4">
+                <h6 class="text-sm font-semibold text-indigo-700 mb-2 flex items-center gap-2">
+                    <i class="bi bi-chat-square-text"></i>وصف طلب التعديل
                 </h6>
-                <p class="mb-0">{{ $agreement_request->description }}</p>
+                <p class="text-sm text-gray-700">{{ $agreement_request->description }}</p>
             </div>
 
-            <div class="edited-field-info bg-white border-start border-4 border-primary p-3 rounded shadow-sm mb-4">
-                <h6 class="text-primary mb-2">
-                    <i class="bi bi-pencil-square me-2"></i>الحقل المطلوب تعديله
-                <p class="mb-0 text-dark fw-semibold">
+            <div class="bg-white border-s-4 border-indigo-500 rounded-lg shadow-sm p-4 mb-4">
+                <h6 class="text-sm font-semibold text-indigo-700 mb-1 flex items-center gap-2">
+                    <i class="bi bi-pencil-square"></i>الحقل المطلوب تعديله
+                </h6>
+                <p class="text-sm font-semibold text-gray-900">
                     {{ $columns[$agreement_request->edited_field] ?? 'Unknown Field' }}
                 </p>
             </div>
 
             @if($agreement_request->edited_field)
-            <div class="current-value bg-light p-4 rounded mb-4">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6 class="text-muted mb-3">
-                            <i class="bi bi-arrow-left-right me-2"></i>القيمة الحالية
-                        </h6>
-                        <p class="mb-0 fw-semibold">
-                            {{ $agreement->{$agreement_request->edited_field} ?? 'N/A' }}
-                        </p>
-                    </div>
-
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h6 class="text-xs font-medium text-gray-400 mb-2 flex items-center gap-2">
+                        <i class="bi bi-arrow-left-right"></i>القيمة الحالية
+                    </h6>
+                    <p class="text-sm font-semibold text-gray-900">
+                        {{ $agreement->{$agreement_request->edited_field} ?? 'N/A' }}
+                    </p>
                 </div>
-            </div>
             @endif
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-lg">
-        <div class="card-header bg-light">
-            <h5 class="mb-0">
-                <i class="bi bi-check-circle me-2"></i>مراجعة الطلب
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h5 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <i class="bi bi-check-circle text-indigo-500"></i>مراجعة الطلب
             </h5>
         </div>
-        <div class="card-body">
+        <div class="p-6">
             <form method="POST" action="{{ route('admin.agreement-request.update', [
     'agreement' => $agreement->id,
     'agreement_request' => $agreement_request->id,
@@ -100,83 +87,47 @@
                 @csrf
                 @method('PUT')
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="status" class="form-label text-blue">القرار</label>
-                        <div class="btn-group-vertical w-100" role="group">
-                            <input type="radio" class="btn-check" name="status" id="status-approved" value="approved" {{
-                                $agreement_request->status === 'approved' ? 'checked' : '' }}>
-                            <label class="btn btn-outline-success text-start py-3" for="status-approved">
-                                <i class="bi bi-check-circle-fill me-2"></i>
-                                <strong>قبول طلب تعديل الإتفاقية</strong>
-                                <p class="small mb-0 text-muted">سيتم السماح بإجراء تعديل على {{ $columns[$agreement_request->edited_field] }}</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">القرار</label>
+                        <div class="space-y-2">
+                            <label for="status-approved" class="flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer transition-colors has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50 border-gray-200">
+                                <input type="radio" class="mt-1 text-emerald-600 focus:ring-emerald-500" name="status" id="status-approved" value="approved" {{ $agreement_request->status === 'approved' ? 'checked' : '' }}>
+                                <span>
+                                    <span class="flex items-center gap-1.5 text-sm font-semibold text-emerald-700"><i class="bi bi-check-circle-fill"></i> قبول طلب تعديل الإتفاقية</span>
+                                    <span class="block text-xs text-gray-500 mt-0.5">سيتم السماح بإجراء تعديل على {{ $columns[$agreement_request->edited_field] }}</span>
+                                </span>
                             </label>
 
-                            <input type="radio" class="btn-check" name="status" id="status-rejected" value="rejected" {{
-                                $agreement_request->status === 'rejected' ? 'checked' : '' }}>
-                            <label class="btn btn-outline-danger text-start py-3" for="status-rejected">
-                                <i class="bi bi-x-circle-fill me-2"></i>
-                                <strong>رفض التعديل للإتفاقية</strong>
-                                <p class="small mb-0 text-muted">>سيتم منع إجراء تعديل على {{ $columns[$agreement_request->edited_field] }}</p>
+                            <label for="status-rejected" class="flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer transition-colors has-[:checked]:border-rose-500 has-[:checked]:bg-rose-50 border-gray-200">
+                                <input type="radio" class="mt-1 text-rose-600 focus:ring-rose-500" name="status" id="status-rejected" value="rejected" {{ $agreement_request->status === 'rejected' ? 'checked' : '' }}>
+                                <span>
+                                    <span class="flex items-center gap-1.5 text-sm font-semibold text-rose-700"><i class="bi bi-x-circle-fill"></i> رفض التعديل للإتفاقية</span>
+                                    <span class="block text-xs text-gray-500 mt-0.5">سيتم منع إجراء تعديل على {{ $columns[$agreement_request->edited_field] }}</span>
+                                </span>
                             </label>
                         </div>
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label for="notes" class="form-label text-blue">ملاحظات الإدارة</label>
-                        <textarea class="form-control border-blue-soft" name="notes" id="notes" rows="5"
+                    <div>
+                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">ملاحظات الإدارة</label>
+                        <textarea name="notes" id="notes" rows="5"
+                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                             placeholder="أضف أي ملاحظات للمندوب...">{{ old('notes', $agreement_request->notes) }}</textarea>
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mt-4">
+                <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-100">
                     <a href="{{ route('salesrep.agreements.show', ['salesrep' => $agreement->sales_rep_id, 'agreement' => $agreement->id]) }}"
-                        class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-2"></i>الرجوع للإتفاقية
+                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors">
+                        <i class="bi bi-arrow-left"></i>الرجوع للإتفاقية
                     </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-send-check me-2"></i>إرسال القرار
+                    <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors">
+                        <i class="bi bi-send-check"></i>إرسال القرار
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
-<style>
-    .bg-light-blue-gradient {
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    }
-
-    .bg-light-blue-soft {
-        background-color: rgba(59, 130, 246, 0.08);
-    }
-
-    .text-blue {
-        color: #1d4ed8;
-    }
-
-    .border-blue-soft {
-        border-color: rgba(59, 130, 246, 0.3);
-    }
-
-    .icon-circle {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .btn-check:checked+.btn-outline-success {
-        background-color: #22c55e;
-        color: white;
-    }
-
-    .btn-check:checked+.btn-outline-danger {
-        background-color: #ef4444;
-        color: white;
-    }
-</style>
 @endsection
