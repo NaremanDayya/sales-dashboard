@@ -158,6 +158,11 @@ PROMPT;
                 'input_schema' => ['type' => 'object', 'properties' => (object) []],
             ],
             [
+                'name' => 'get_total_agreements_count',
+                'description' => 'يرجع العدد الإجمالي للاتفاقيات (وتوزيعها حسب الحالة: سارية/منتهية/تم إيقافها)، ضمن نطاق صلاحية المستخدم.',
+                'input_schema' => ['type' => 'object', 'properties' => (object) []],
+            ],
+            [
                 'name' => 'get_total_clients_count',
                 'description' => 'يرجع العدد الإجمالي لكل عملاء الشركة (أو عملاء الفريق/المندوب حسب صلاحية المستخدم)، بغض النظر عن حالة التواصل معهم.',
                 'input_schema' => ['type' => 'object', 'properties' => (object) []],
@@ -195,6 +200,7 @@ PROMPT;
     {
         return match ($name) {
             'get_clients_needing_renewal' => $this->getClientsNeedingRenewal($user),
+            'get_total_agreements_count' => $this->getTotalAgreementsCount($user),
             'get_total_clients_count' => $this->getTotalClientsCount($user),
             'get_late_customers' => $this->getLateCustomers($user),
             'get_target_progress' => $this->getTargetProgress($user),
@@ -248,6 +254,18 @@ PROMPT;
             ->values();
 
         return ['count' => $agreements->count(), 'agreements' => $agreements];
+    }
+
+    protected function getTotalAgreementsCount(User $user): array
+    {
+        $scope = $this->agreementsScope($user);
+
+        return [
+            'total' => (clone $scope)->count(),
+            'active' => (clone $scope)->where('agreement_status', 'active')->count(),
+            'expired' => (clone $scope)->where('agreement_status', 'expired')->count(),
+            'terminated' => (clone $scope)->where('agreement_status', 'terminated')->count(),
+        ];
     }
 
     protected function getTotalClientsCount(User $user): array
