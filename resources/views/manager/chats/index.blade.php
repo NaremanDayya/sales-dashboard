@@ -1,11 +1,7 @@
 @extends('layouts.master')
 
 @section('content')
-<div class="app-content">
-    <div class="section-header">
-        <h1>Manager-Rep Chats</h1>
-    </div>
+<x-page-header title="محادثات المدير والمندوبين" subtitle="جميع المحادثات بين المديرين وأعضاء فريقهم" />
 
-    @livewire('manager-chat-list')
-</div>
+@livewire('manager-chat-list')
 @endsection

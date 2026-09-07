@@ -4,11 +4,11 @@
 <div class="container-fluid px-4 py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="fw-semibold mb-1">Notifications</h1>
-            <p class="text-muted mb-0">Your recent alerts and updates</p>
+            <h1 class="fw-semibold mb-1">الإشعارات</h1>
+            <p class="text-muted mb-0">آخر التنبيهات والتحديثات الخاصة بك</p>
         </div>
         <button class="btn btn-sm btn-soft-primary" id="mark-all-read">
-            <i class="bi bi-check2-all me-1"></i> Mark All Read
+            <i class="bi bi-check2-all me-1"></i> تمييز الكل كمقروء
         </button>
     </div>
 
@@ -19,8 +19,8 @@
                     <i class="bi bi-bell"></i>
                 </div>
                 <div>
-                    <h5 class="mb-0">Notification Center</h5>
-                    <small class="text-muted">{{ $notifications->total() }} total notifications</small>
+                    <h5 class="mb-0">مركز الإشعارات</h5>
+                    <small class="text-muted">{{ $notifications->total() }} إشعار</small>
                 </div>
             </div>
         </div>
@@ -65,8 +65,8 @@
                         style="width: 80px; height: 80px;">
                         <i class="bi bi-bell-slash" style="font-size: 2rem;"></i>
                     </div>
-                    <h5 class="fw-semibold">No notifications yet</h5>
-                    <p class="text-muted mb-0">We'll notify you when something arrives</p>
+                    <h5 class="fw-semibold">لا توجد إشعارات بعد</h5>
+                    <p class="text-muted mb-0">سنقوم بإعلامك عند وصول أي جديد</p>
                 </div>
                 @endforelse
             </div>

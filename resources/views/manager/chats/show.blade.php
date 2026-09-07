@@ -1,19 +1,13 @@
 @extends('layouts.master')
 
 @section('content')
-<div class="app-content">
-    <div class="section-header">
-        <div>
-            <a href="{{ route('manager.chats.index') }}" class="btn btn-sm btn-outline-secondary mb-2">
-                <i class="fas fa-arrow-left"></i> Back to Chats
-            </a>
-            <h1>Chat about {{ $chat->client->company_name }}</h1>
-            <p class="text-muted">
-                Between {{ $chat->salesRep->name }} and {{ $chat->manager->name }}
-            </p>
-        </div>
-    </div>
+<x-page-header :title="'محادثة بخصوص ' . $chat->client->company_name" :subtitle="'بين ' . $chat->salesRep->name . ' و ' . $chat->manager->name">
+    <x-slot name="actions">
+        <a href="{{ route('manager.chats.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors">
+            <i class="fas fa-arrow-right"></i> رجوع للمحادثات
+        </a>
+    </x-slot>
+</x-page-header>
 
-    @livewire('manager-client-chat-component', ['chat' => $chat])
-</div>
+@livewire('manager-client-chat-component', ['chat' => $chat])
 @endsection
