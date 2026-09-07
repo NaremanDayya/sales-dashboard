@@ -1,132 +1,102 @@
 @extends('layouts.master')
 
 @section('content')
-<div class="pagetitle">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h1>Client Edit Requests</h1>
-            <nav>
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-                    <li class="breadcrumb-item active">Pending Requests</li>
-                </ol>
-            </nav>
+<x-page-header title="Pending Requests" subtitle="طلبات تعديل بيانات العملاء المعلَّقة">
+    <x-slot name="actions">
+        <div class="relative">
+            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/></svg>
+            </div>
+            <input type="text" class="ps-9 pe-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Search..." id="searchInput" style="width: 220px;">
         </div>
-    </div>
-</div>
+    </x-slot>
+</x-page-header>
 
-<section class="section">
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="card-title m-0">Pending Requests</h5>
-                        <div class="d-flex">
-                            <input type="text" class="form-control me-2" placeholder="Search..." id="searchInput" style="width: 200px;">
-                        </div>
-                    </div>
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+    @if($pendedRequests->count() > 0)
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200" id="pendedRequestsTable">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
+                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">Client</th>
+                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">Request Type</th>
+                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">Sales Rep</th>
+                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-4 py-3 text-end text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-100">
+                    @foreach($pendedRequests as $request)
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-semibold text-gray-700">#{{ $request->id }}</td>
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            <div class="flex items-center gap-3">
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-indigo-600">
+                                    <i class="bi bi-building"></i>
+                                </span>
+                                <div>
+                                    <h6 class="text-sm font-semibold text-gray-900">{{ $request->client->name }}</h6>
+                                    <small class="text-xs text-gray-400">{{ $request->client->company_name ?? 'N/A' }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            <x-badge color="sky">{{ Str::title(str_replace('_', ' ', $request->request_type)) }}</x-badge>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{{ $request->salesRep->name }}</td>
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            @php
+                                $badgeColor = match($request->status) { 'pending' => 'amber', 'approved' => 'emerald', default => 'rose' };
+                            @endphp
+                            <x-badge :color="$badgeColor">{{ ucfirst($request->status) }}</x-badge>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                            <i class="bi bi-calendar text-gray-400 me-1"></i>
+                            {{ $request->created_at->format('M d, Y') }}
+                            <br>
+                            <small class="text-xs text-gray-400">{{ $request->created_at->format('h:i A') }}</small>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-end">
+                            <div class="flex justify-end gap-2">
+                                <a href="{{ route('admin.client-request.edit', [
+                                    'client' => $request->client_id,
+                                    'client_request' => $request->id
+                                ]) }}"
+                                class="inline-flex items-center justify-center h-8 w-8 rounded-full border border-gray-300 text-gray-500 hover:bg-gray-50 transition-colors"
+                                title="Edit Status">
+                                    <i class="bi bi-pencil text-xs"></i>
+                                </a>
 
-                    @if($pendedRequests->count() > 0)
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="text-nowrap">ID</th>
-                                    <th>Client</th>
-                                    <th>Request Type</th>
-                                    <th>Sales Rep</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                    <th class="text-end">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($pendedRequests as $request)
-                                <tr>
-                                    <td class="fw-semibold">#{{ $request->id }}</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-sm me-2">
-                                                <div class="avatar-title bg-light rounded">
-                                                    <i class="bi bi-building text-primary"></i>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-0">{{ $request->client->name }}</h6>
-                                                <small class="text-muted">{{ $request->client->company_name ?? 'N/A' }}</small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-nowrap">
-                                        <span class="badge bg-info bg-opacity-10 text-info">
-                                            {{ Str::title(str_replace('_', ' ', $request->request_type)) }}
-                                        </span>
-                                    </td>
-                                    <td>{{ $request->salesRep->name }}</td>
-                                    <td>
-                                        <span class="badge rounded-pill bg-{{
-                                            $request->status === 'pending' ? 'warning' :
-                                            ($request->status === 'approved' ? 'success' : 'danger')
-                                        }} py-1 px-3">
-                                            {{ ucfirst($request->status) }}
-                                        </span>
-                                    </td>
-                                    <td class="text-nowrap">
-                                        <i class="bi bi-calendar me-1"></i>
-                                        {{ $request->created_at->format('M d, Y') }}
-                                        <br>
-                                        <small class="text-muted">{{ $request->created_at->format('h:i A') }}</small>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex justify-content-end gap-2">
-                                            <a href="{{ route('admin.client-request.edit', [
-                                                'client' => $request->client_id,
-                                                'client_request' => $request->id
-                                            ]) }}"
-                                            class="btn btn-sm btn-outline-primary rounded-pill px-3"
-                                            data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Status">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
+                                <a href="{{ route('admin.client-request.update', [
+                                    'client' => $request->client_id,
+                                    'client_request' => $request->id
+                                ]) }}"
+                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition-colors"
+                                title="Review Request">
+                                    <i class="bi bi-eye"></i> Review
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
 
-                                            <a href="{{ route('admin.client-request.update', [
-                                                'client' => $request->client_id,
-                                                'client_request' => $request->id
-                                            ]) }}"
-                                            class="btn btn-sm btn-primary rounded-pill px-3"
-                                            data-bs-toggle="tooltip" data-bs-placement="top" title="Review Request">
-                                                <i class="bi bi-eye"></i> Review
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="mt-4 d-flex justify-content-between align-items-center">
-                        <div class="text-muted">
-                            Showing {{ $pendedRequests->firstItem() }} to {{ $pendedRequests->lastItem() }} of {{ $pendedRequests->total() }} entries
-                        </div>
-                        <div>
-                            {{ $pendedRequests->links() }}
-                        </div>
-                    </div>
-                    @else
-                    <div class="text-center py-5">
-                        <div class="mb-3">
-                            <i class="bi bi-inbox display-4 text-muted"></i>
-                        </div>
-                        <h4 class="text-muted">No Pending Requests</h4>
-                        <p class="text-muted">There are currently no pending edit requests.</p>
-                    </div>
-                    @endif
-                </div>
+        <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+            <div class="text-xs text-gray-400">
+                Showing {{ $pendedRequests->firstItem() }} to {{ $pendedRequests->lastItem() }} of {{ $pendedRequests->total() }} entries
+            </div>
+            <div>
+                {{ $pendedRequests->links() }}
             </div>
         </div>
-    </div>
-</section>
+    @else
+        <x-empty-state title="No Pending Requests" description="There are currently no pending edit requests." />
+    @endif
+</div>
 @endsection
 
 @section('scripts')
@@ -143,7 +113,7 @@
             var input, filter, table, tr, td, i, txtValue;
             input = document.getElementById("searchInput");
             filter = input.value.toUpperCase();
-            table = document.querySelector(".table");
+            table = document.getElementById("pendedRequestsTable");
             tr = table.getElementsByTagName("tr");
 
             for (i = 0; i < tr.length; i++) {
@@ -169,48 +139,4 @@
         });
     });
 </script>
-@endsection
-
-@section('styles')
-<style>
-    .card {
-        border: none;
-        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.05);
-        border-radius: 0.5rem;
-    }
-
-    .card-title {
-        font-weight: 600;
-        color: #2c3e50;
-    }
-
-    .table th {
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 0.5px;
-        color: #6c757d;
-        border-bottom-width: 1px;
-    }
-
-    .avatar-sm {
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .badge {
-        font-weight: 500;
-    }
-
-    .btn-outline-primary {
-        border-width: 2px;
-    }
-
-    .rounded-pill {
-        border-radius: 50rem !important;
-    }
-</style>
 @endsection

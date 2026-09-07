@@ -3,25 +3,22 @@
 @section('title', 'تفاصيل طلب تعديل بيانات العميل')
 
 @section('content')
-    <div class="container py-4">
-        <div class="max-w-6xl mx-auto">
-            @if(auth()->user()->role === 'admin' && $client_request->status === 'pending')
-                <!-- Header Section -->
-                <div class="flex items-center justify-between mb-6">
-                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">تفاصيل طلب التعديل</h1>
-                    <div class="flex space-x-3 rtl:space-x-reverse">
+    <div class="max-w-6xl">
+            <x-page-header title="تفاصيل طلب التعديل" subtitle="مراجعة طلب تعديل بيانات العميل">
+                @if(auth()->user()->role === 'admin' && $client_request->status === 'pending')
+                    <x-slot name="actions">
                         <a href="{{ route('admin.client-request.edit', ['client' => $client_request->client_id, 'client_request' => $client_request->id]) }}"
-                           class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition duration-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20"
+                           class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ms-2" viewBox="0 0 20 20"
                                  fill="currentColor">
                                 <path
                                     d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                             </svg>
                             تعديل الحالة
                         </a>
-                    </div>
-                </div>
-            @endif
+                    </x-slot>
+                @endif
+            </x-page-header>
 
             <!-- Main Card -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
@@ -194,7 +191,6 @@
                     </div>
                 </div>
             </div>
-        </div>
     </div>
 @endsection
 
