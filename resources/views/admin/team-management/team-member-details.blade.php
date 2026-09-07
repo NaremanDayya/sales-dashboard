@@ -5,8 +5,8 @@
 @push('styles')
 <style>
     :root {
-        --primary: #4154f1;
-        --primary-light: #6a7ef9;
+        --primary: #4f46e5;
+        --primary-light: #6366f1;
         --secondary: #10b981;
         --danger: #ef4444;
         --warning: #f59e0b;
@@ -73,7 +73,7 @@
 
     .btn {
         padding: 8px 16px;
-        border-radius: 6px;
+        border-radius: 8px;
         font-weight: 500;
         font-size: 14px;
         display: inline-flex;
@@ -167,7 +167,7 @@
     .info-item {
         padding: 0.75rem;
         background: #f8fafc;
-        border-radius: 6px;
+        border-radius: 8px;
     }
 
     .info-label {

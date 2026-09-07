@@ -1,81 +1,69 @@
 @extends('layouts.master')
 
 @section('content')
-<div class="app-content">
-    <div class="section-header">
-        <div>
-            <a href="{{ route('manager.dashboard') }}" class="btn btn-sm btn-outline-secondary mb-2">
-                <i class="fas fa-arrow-left"></i> Back to Dashboard
-            </a>
-            <h1>Team Clients</h1>
-            <p class="text-muted">All clients managed by your team</p>
-        </div>
-    </div>
+<x-page-header title="عملاء الفريق" subtitle="جميع العملاء الذين يديرهم فريقك">
+    <x-slot name="actions">
+        <a href="{{ route('manager.dashboard') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors">
+            <i class="fas fa-arrow-right"></i> رجوع للوحة التحكم
+        </a>
+    </x-slot>
+</x-page-header>
 
-    <div class="content-card">
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+    @if($clients->isEmpty())
+        <x-empty-state title="لا يوجد عملاء" />
+    @else
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th>Company</th>
-                        <th>Sales Rep</th>
-                        <th>Contact Person</th>
-                        <th>Phone</th>
-                        <th>Interest Status</th>
-                        <th>Last Contact</th>
-                        <th>Agreements</th>
-                        <th>Actions</th>
+                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">الشركة</th>
+                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">مندوب المبيعات</th>
+                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">الشخص المسؤول</th>
+                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">الجوال</th>
+                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">حالة الاهتمام</th>
+                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">آخر تواصل</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">الاتفاقيات</th>
+                        <th class="px-4 py-3 text-end text-xs font-semibold text-gray-500 uppercase tracking-wider">الإجراءات</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="bg-white divide-y divide-gray-100">
                     @forelse($clients as $client)
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <img src="{{ $client->company_logo }}" alt="{{ $client->company_name }}" class="company-logo-sm">
-                                    {{ $client->company_name }}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <div class="flex items-center gap-2">
+                                    <img src="{{ $client->company_logo }}" alt="{{ $client->company_name }}" class="h-8 w-8 rounded-lg object-cover border border-gray-200">
+                                    <span class="text-sm font-semibold text-gray-900">{{ $client->company_name }}</span>
                                 </div>
                             </td>
-                            <td>{{ $client->salesRep->user->name ?? 'N/A' }}</td>
-                            <td>{{ $client->contact_person }}</td>
-                            <td>{{ $client->phone }}</td>
-                            <td>
-                                <span class="badge badge-{{ $client->interest_status == 'interested' ? 'success' : ($client->interest_status == 'not interested' ? 'danger' : 'secondary') }}">
-                                    {{ ucfirst($client->interest_status) }}
-                                </span>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{{ $client->salesRep->user->name ?? 'N/A' }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{{ $client->contact_person }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{{ $client->phone }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                @php
+                                    $badgeColor = $client->interest_status == 'interested' ? 'emerald' : ($client->interest_status == 'not interested' ? 'rose' : 'gray');
+                                @endphp
+                                <x-badge :color="$badgeColor">{{ ucfirst($client->interest_status) }}</x-badge>
                             </td>
-                            <td>{{ $client->last_contact_date?->format('Y-m-d') }}</td>
-                            <td>{{ $client->agreements->count() }}</td>
-                            <td>
-                                <a href="{{ route('clients.show.manager', $client) }}" class="btn btn-sm btn-outline-primary">View</a>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{{ $client->last_contact_date?->format('Y-m-d') }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-600">{{ $client->agreements->count() }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-end">
+                                <a href="{{ route('clients.show.manager', $client) }}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-semibold hover:bg-indigo-100 transition-colors">عرض</a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted">No clients found.</td>
+                            <td colspan="8">
+                                <x-empty-state title="لا يوجد عملاء" />
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        {{ $clients->links() }}
-    </div>
+        <div class="px-6 py-4 border-t border-gray-100">
+            {{ $clients->links() }}
+        </div>
+    @endif
 </div>
-
-<style>
-.content-card {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.company-logo-sm {
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    object-fit: cover;
-    margin-right: 0.5rem;
-}
-</style>
 @endsection
