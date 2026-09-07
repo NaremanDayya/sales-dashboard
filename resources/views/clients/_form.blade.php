@@ -7,7 +7,7 @@
         <span class="text-sm font-medium text-gray-600">خطوة <span x-text="step"></span> من 6</span>
     </div>
     <div class="w-full bg-gray-200 rounded-full h-2.5">
-        <div class="bg-blue-600 h-2.5 rounded-full" :style="'width: ' + ((step / 6) * 100) + '%'"></div>
+        <div class="bg-indigo-600 h-2.5 rounded-full" :style="'width: ' + ((step / 6) * 100) + '%'"></div>
     </div>
 </div>
 
@@ -29,11 +29,11 @@
                 <label for="company_name" class="block text-sm font-medium text-gray-700 mb-1">اسم الشركة</label>
                 <input type="text" id="company_name" name="company_name" value="{{ old('client_name') }}" x-model="form.company_name"
                     @input="unlockStep()" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border">
+                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border">
             </div>
             <div class="flex justify-end">
  <button type="button" @click="nextStep()" x-show="canContinue"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 foc>
+                    class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 foc>
                     :class="{'opacity-50 cursor-not-allowed': !canContinue}">
                     التالي <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
     <path fill-rule="evenodd" 
@@ -52,12 +52,12 @@
             <div>
                 <label for="address" class="block text-sm font-medium text-gray-700 mb-1">عنوان الشركة</label>
                 <input type="text" id="address" name="address" x-model="form.address" @input="unlockStep()" value="{{ old('address') }}"  required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border">
+                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border">
             </div>
             <div class="flex justify-between">
 
  <button type="button" @click="nextStep()" x-show="canContinue"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 foc>
+                    class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 foc>
                     :class="{'opacity-50 cursor-not-allowed': !canContinue}">
                     التالي <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
     <path fill-rule="evenodd" 
@@ -76,12 +76,12 @@
                 <label for="contact_person" class="block text-sm font-medium text-gray-700 mb-1">الشخص المسؤول</label>
                 <input type="text" id="contact_person" name="contact_person" value="{{ old('contact_person') }}"  x-model="form.contact_person"
                     @input="unlockStep()" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border">
+                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border">
             </div>
             <div class="flex justify-between">
 
  <button type="button" @click="nextStep()" x-show="canContinue"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 foc>
+                    class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 foc>
                     :class="{'opacity-50 cursor-not-allowed': !canContinue}">
                     التالي <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
     <path fill-rule="evenodd" 
@@ -101,12 +101,12 @@
                     المنصب الوظيفي</label>
                 <input type="text" id="contact_position" name="contact_position" value="{{ old('contact_position') }}"  x-model="form.contact_position"
                     @input="unlockStep()"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border"
+                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border"
                     placeholder="Manager, Owner, etc.">
             </div>
             <div class="flex justify-between">
  <button type="button" @click="nextStep()" x-show="canContinue"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 foc>
+                    class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 foc>
                     :class="{'opacity-50 cursor-not-allowed': !canContinue}">
                     التالي <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
     <path fill-rule="evenodd" 
@@ -124,12 +124,12 @@
             <div>
                 <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">رقم الجوال</label>
                 <input type="tel" id="phone" name="phone" value="{{ old('') }}"  x-model="form.phone" @input="unlockStep()" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border">
+                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border">
             </div>
             <div class="flex justify-between">
 
  <button type="button" @click="nextStep()" x-show="canContinue"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 foc>
+                    class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 foc>
                     :class="{'opacity-50 cursor-not-allowed': !canContinue}">
                     التالي <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
     <path fill-rule="evenodd" 
@@ -153,7 +153,7 @@
     <select id="interest_status" name="interest_status" 
             x-model="form.interest_status"
             @change="unlockStep()" required
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border">
+            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border">
         <option value="" disabled {{ $selectedStatus == '' ? 'selected' : '' }}>حالة الاهتمام</option>
         <option value="interested" {{ $selectedStatus == 'interested' ? 'selected' : '' }}>مهتم</option>
         <option value="not interested" {{ $selectedStatus == 'not interested' ? 'selected' : '' }}>غير مهتم</option>
@@ -163,7 +163,7 @@
 <div class="flex justify-between">
 
                 <button type="submit" x-show="canContinue"
-                    class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-lg font-semibold text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                     <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" viewBox="0 0 20 20"
                         fill="currentColor">
                         <path fill-rule="evenodd"

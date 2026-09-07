@@ -22,7 +22,7 @@
             <div class="space-y-2">
                 <label for="client_id" class="block text-sm font-medium text-gray-700">العميل</label>
                 <select id="client_id" name="client_id" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border"
+                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border"
                     {{ $editableField !=='client_id' ? 'disabled' : '' }}>
                     @php
                     $currentClientId = old('client_id', $agreement->client_id ?? '');
@@ -51,7 +51,7 @@
             <div class="space-y-2">
                 <label for="service_id" class="block text-sm font-medium text-gray-700">نوع الخدمة</label>
                 <select id="service_id" name="service_id" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border"
+                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border"
                     {{ $editableField !=='service_id' ? 'disabled' : '' }}>
                     <option value="" disabled {{ old('service_id', $agreement->service_id ?? '') === null ? 'selected' :
                         ''
@@ -81,7 +81,7 @@
                     <label for="signing_date" class="block text-sm font-medium text-gray-700">تاريخ التوقيع</label>
                     <input type="date" id="signing_date" name="signing_date"  placeholder="dd-mm-yyyy"
                         value="{{ old('signing_date', $agreement->signing_date ?? '') }}" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border"
+                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border"
                         {{ $editableField !=='signing_date' ? 'disabled' : '' }}>
                     @error('signing_date')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -95,7 +95,7 @@
                     <input type="date" id="implementation_date" name="implementation_date" placeholder="dd-mm-yyyy"
                         value="{{ old('implementation_date', $agreement->implementation_date ?? '') }}"
                         min="{{ old('signing_date', $agreement->signing_date ?? '') }}" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border"
+                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border"
                         {{ $editableField !=='implementation_date' ? 'disabled' : '' }}>
                     @error('implementation_date')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -107,7 +107,7 @@
                     <label for="duration_years" class="block text-sm font-medium text-gray-700">مدة الإتفاقية(بالسنوات)</label>
                     <input type="number" id="duration_years" name="duration_years"
                         value="{{ old('duration_years', $agreement->duration_years ?? '') }}" min="1" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border"
+                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border"
                         {{ $editableField !=='duration_years' ? 'disabled' : '' }}>
                     @error('duration_years')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -119,7 +119,7 @@
             <div class="mt-4 space-y-2">
                 <label for="expiration_date" class="block text-sm font-medium text-gray-700">تاريخ الإنتهاء</label>
                 <input type="text" id="expiration_date"
-                    class="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm p-3 border" readonly
+                    class="mt-1 block w-full rounded-lg bg-gray-100 border-gray-300 shadow-sm p-3 border" readonly
                     value="{{ isset($agreement) ? $agreement->end_date->format('Y-m-d') : '' }}" </div>
             </div>
 
@@ -132,7 +132,7 @@
                         <label for="termination_type" class="block text-sm font-medium text-gray-700">نوع إنهاء الإتفاقية
                             </label>
                         <select id="termination_type" name="termination_type" required
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border"
                             {{ $editableField !=='termination_type' ? 'disabled' : '' }}>
                             <option value="returnable" {{ old('termination_type', $agreement->termination_type ?? '') ==
                                 'returnable' ? 'selected' : '' }}>
@@ -155,7 +155,7 @@
                             (بالأشهر)</label>
                         <input type="number" id="notice_months" name="notice_months"
                             value="{{ old('notice_months', $agreement->notice_months ?? '') }}" required
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border"
                             {{ $editableField !=='notice_months' ? 'disabled' : '' }}>
                         @error('notice_months')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -167,7 +167,7 @@
                         <label for="agreement_status" class="block text-sm font-medium text-gray-700">حالة الإتفاقية
                             </label>
                         <select id="agreement_status" name="agreement_status" required
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border"
                             {{ $editableField !=='agreement_status' ? 'disabled' : '' }}>
                             <option value="active" {{ old('agreement_status', $agreement->agreement_status ?? '') ==
                                 'active' ?
@@ -202,7 +202,7 @@
                             </label>
                         <input type="number" id="product_quantity" name="product_quantity"
                             value="{{ old('product_quantity', $agreement->product_quantity ?? '') }}" required
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border"
                             {{ $editableField !=='product_quantity' ? 'disabled' : '' }}>
                         @error('product_quantity')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -212,10 +212,10 @@
                     <!-- Price per Service -->
                     <div class="space-y-2">
                         <label for="price" class="block text-sm font-medium text-gray-700">التسعيرة المتفق عليها</label>
-                        <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="mt-1 relative rounded-lg shadow-sm">
                             <input type="number" id="price" name="price"
                                 value="{{ old('price', $agreement->price ?? '') }}" required step="0.01"
-                                class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-12 pr-12 sm:text-sm border-gray-300 rounded-md p-3 border"
+                                class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-12 pr-12 sm:text-sm border-gray-300 rounded-lg p-3 border"
                                 {{ $editableField !=='price' ? 'disabled' : '' }}>
                             <div class="absolute inset-y-0 left-0 pr-3 flex items-center pointer-events-none">
                                 {{ config('app.currency') }}
@@ -230,10 +230,10 @@
                 <!-- Auto-calculated Total -->
                 <div class="mt-4 space-y-2">
                     <label class="block text-sm font-medium text-gray-700">السعر الكلي</label>
-                    <div class="mt-1 relative rounded-md shadow-sm">
+                    <div class="mt-1 relative rounded-lg shadow-sm">
 
                         <input type="text" id="display_total_amount"
-                            class="block w-full pl-12 pr-12 sm:text-sm border-gray-300 rounded-md p-3 border bg-gray-100"
+                            class="block w-full pl-12 pr-12 sm:text-sm border-gray-300 rounded-lg p-3 border bg-gray-100"
                             readonly
                             value="{{ isset($agreement) ? number_format($agreement->total_amount, 2) : '0.00' }}">
                         <div class="absolute inset-y-0 left-0 pr-3 flex items-center pointer-events-none">
@@ -246,7 +246,7 @@
             <!-- Form Actions -->
             <div class="flex justify-end pt-4 border-t border-gray-200">
                 <button type="submit"
-                    class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-lg font-semibold text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                     <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" viewBox="0 0 20 20"
                         fill="currentColor">
                         <path fill-rule="evenodd"

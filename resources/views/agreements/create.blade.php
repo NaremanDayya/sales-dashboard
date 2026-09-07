@@ -1,24 +1,20 @@
 @extends('layouts.master')
 @section('title','أضف إتفاقية جديدة')
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-4xl mx-auto">
-        <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-6">
-<div class="flex justify-between items-center mb-6">
-    <div class="flex-1 text-center"> <!-- Added wrapper div with flex-1 and text-center -->
-        <h2 class="text-2xl font-bold text-gray-800 inline-block">أضف إتفاقية جديدة</h2>
-    </div>
-    <a href="{{ route('salesrep.agreements.index', $salesrep) }}"
-        class="text-blue-600 hover:text-blue-800 flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
-            fill="currentColor">
-            <path fill-rule="evenodd"
-                d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                clip-rule="evenodd" />
-        </svg>
-        الرجوع للإتفاقيات
-    </a>
-</div>
+<x-page-header title="أضف إتفاقية جديدة" subtitle="إنشاء اتفاقية جديدة مع أحد العملاء">
+    <x-slot name="actions">
+        <a href="{{ route('salesrep.agreements.index', $salesrep) }}"
+           class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+            </svg>
+            الرجوع للإتفاقيات
+        </a>
+    </x-slot>
+</x-page-header>
+
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-6">
             <form action="{{ route('salesrep.agreements.store', $salesrep) }}" method="POST" class="space-y-6">
                 @csrf
 
@@ -27,7 +23,7 @@
                     <div class="space-y-2">
                         <label for="client_id" class="block text-sm font-medium text-gray-700">العميل</label>
                         <select id="client_id" name="client_id" required
-                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md shadow-sm">
+                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg shadow-sm">
                             <option value="">إختر العميل</option>
                             @foreach($clients as $client)
                             <option value="{{ $client->id }}" {{ old('client_id')==$client->id ? 'selected' : '' }}>
@@ -43,7 +39,7 @@
                     <!-- Service Selection -->
                     <div class="space-y-2">
                         <label for="service_id" class="block text-sm font-medium text-gray-700">الخدمة</label>
-                        <select id="service_id" name="service_id" onchange="handleServiceChange()" class="form-control mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md shadow-sm"
+                        <select id="service_id" name="service_id" onchange="handleServiceChange()" class="form-control mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg shadow-sm"
                             required>
                             @foreach($services as $service)
                             <option value="{{ $service->id }}"
@@ -69,7 +65,7 @@
     <label for="signing_date" class="block text-sm font-medium text-gray-700">تاريخ التوقيع</label>
     <input type="text" id="signing_date" name="signing_date" dir="rtl"
         value="{{ old('signing_date') }}"
-        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 sm:text-sm text-right">
+        class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2.5 sm:text-sm text-right">
     @error('signing_date')
         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
     @enderror
@@ -80,7 +76,7 @@
     <label for="implementation_date" class="block text-sm font-medium text-gray-700">تاريخ التنفيذ</label>
     <input type="text" id="implementation_date" name="implementation_date" dir="rtl"
         value="{{ old('implementation_date') }}"
-        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 sm:text-sm text-right">
+        class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2.5 sm:text-sm text-right">
     @error('implementation_date')
         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
     @enderror
@@ -91,7 +87,7 @@
     <label for="duration_years" class="block text-sm font-medium text-gray-700">مدة الاتفاقية (بالسنوات)</label>
     <input type="number" id="duration_years" name="duration_years"
         value="{{ old('duration_years') }}" min="1" required
-        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 sm:text-sm">
+        class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2.5 sm:text-sm">
     @error('duration_years')
         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
     @enderror
@@ -108,7 +104,7 @@
                         <div class="space-y-2">
                             <label for="termination_type" class="block text-sm font-medium text-gray-700">نوع إنهاء الإتفاقية</label>
                             <select id="termination_type" name="termination_type" required
-                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md shadow-sm">
+                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg shadow-sm">
                                 <option value="">Select Type</option>
                                 <option value="returnable" {{ old('termination_type')=='returnable' ? 'selected' : ''
                                     }}>مشروط بمقابل</option>
@@ -126,7 +122,7 @@
                                 (بالأشهر)</label>
                             <input type="number" id="notice_months" name="notice_months"
                                 value="{{ old('notice_months', 0) }}" min="0"
-                                class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-lg">
                             @error('notice_months')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -136,7 +132,7 @@
                         <div class="space-y-2">
                             <label for="status" class="block text-sm font-medium text-gray-700">حالة الإتفاقية</label>
                             <select id="status" name="status" required
-                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md shadow-sm">
+                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-lg shadow-sm">
                                 <option value="">إختر الحالة</option>
                                 <option value="active" {{ old('status')=='active' ? 'selected' : '' }}>سارية
                                 </option>
@@ -163,7 +159,7 @@
                             <label for="product_quantity" class="block text-sm font-medium text-gray-700">الكمية المطلوبة</label>
                             <input type="number" id="product_quantity" name="product_quantity"
                                 value="{{ old('product_quantity') }}" min="1"
-                                class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-lg">
                             @error('product_quantity')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -172,13 +168,13 @@
                         <!-- Price -->
                         <div class="space-y-2">
                             <label for="price" class="block text-sm font-medium text-gray-700">السعر المتفق عليه</label>
-                            <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="mt-1 relative rounded-lg shadow-sm">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <span class="text-gray-500 sm:text-sm">{{ config('app.currency') }}</span>
                                 </div>
                                 <input type="number" id="price" name="price" value="{{ old('price') }}" step="0.01"
                                     min="0" required
-                                    class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md">
+                                    class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-lg">
                             </div>
                             @error('price')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -190,18 +186,17 @@
                 <!-- Form Actions -->
                 <div class="flex justify-end space-x-3">
                     <button type="reset"
-                        class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         إعادة تعيين
                     </button>
                     <button type="submit"
-                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         إنشاء إتفاقية
                     </button>
                 </div>
             </form>
         </div>
     </div>
-</div>
 @endsection
 @push('scripts')
 <script>

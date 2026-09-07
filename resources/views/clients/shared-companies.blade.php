@@ -504,7 +504,7 @@
                             @endforeach
                         </td>
                         <td class="text-center" style="font-size: 14px; font-weight: 700;">
-                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-800">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-indigo-800">
                                 {{ count($company['clients']) }}
                             </span>
                         </td>
@@ -644,7 +644,7 @@
                     `).join('')}
                 </td>
                 <td class="text-center" style="font-size: 14px; font-weight: 700;">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-800">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-indigo-800">
                         ${company.clients.length}
                     </span>
                 </td>

@@ -11,7 +11,7 @@
             @endphp
             @if($canEditDate)
             <a href="{{ route('salesrep.agreements.edit', [$salesrep, $agreement]) }}"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 flex items-center">
+                class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path
                         d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
@@ -157,7 +157,7 @@
                     <!-- Signing Date -->
                     <div class="relative pl-12">
                         <div
-                            class="absolute left-0 top-0 h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
+                            class="absolute left-0 top-0 h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                 fill="currentColor">
                                 <path fill-rule="evenodd"
@@ -165,8 +165,8 @@
                                     clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                            <h4 class="font-semibold text-blue-800">تاريخ التوقيع</h4>
+                        <div class="bg-indigo-50 p-4 rounded-lg border border-blue-100">
+                            <h4 class="font-semibold text-indigo-800">تاريخ التوقيع</h4>
                             <p class="text-gray-600">{{ $agreement->signing_date->format('F j, Y') }}</p>
                         </div>
                     </div>
@@ -234,7 +234,7 @@
                 طلبات تعديل الإتفاقية
             </h3>
 
-            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
+            <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 mb-6 rounded-r-lg">
                 <div class="flex">
                     <div class="flex-shrink-0">
                         <svg class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
@@ -257,7 +257,7 @@
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-medium mb-2">الحقل المطلوب تعديله</label>
                         <select id="edited_field" name="edited_field"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                             required>
                             <option value="" disabled selected>اختر الحقل</option>
                             @foreach($columns as $key => $label)
@@ -275,7 +275,7 @@
 
                 <div class="flex justify-end">
                     <button type="submit"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
                         إرسال طلب تعديل
                     </button>
                 </div>
@@ -348,7 +348,7 @@
                 @if($agreement->editRequests->count() > 3)
                 <div class="text-center mt-4">
                     <a href="{{ route('agreement-request.index', $agreement) }}"
-                        class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                        class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
                         عرض جميع طلبات التعديل
                     </a>
                 </div>
@@ -402,7 +402,7 @@
                     </div>
 
                     @if($withinNoticePeriod)
-                    <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div class="mt-4 p-3 bg-indigo-50 rounded-lg border border-blue-200">
                         <p class="text-blue-700 flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
                                 fill="currentColor">

@@ -29,9 +29,9 @@
         name="company_logo"
         class="block w-full text-sm text-gray-500
                file:mr-4 file:py-2 file:px-4
-               file:rounded-md file:border-0
+               file:rounded-lg file:border-0
                file:text-sm file:font-semibold
-               file:bg-blue-50 file:text-blue-700
+               file:bg-indigo-50 file:text-blue-700
                hover:file:bg-blue-100"
         accept="image/jpg,image/jpeg,image/png,image/gif,image/bmp,image/webp,image/svg+xml,image/tiff,image/x-icon"
         {{ session('temp_company_logo') ? '' : 'required' }}
@@ -53,7 +53,7 @@
             <!-- Company Name -->
             <div>
                 <label for="company_name" class="block text-sm font-medium text-gray-700 mb-1">اسم الشركة</label>
-                <input type="text" id="company_name" name="company_name" value="{{ old('company_name') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+                <input type="text" id="company_name" name="company_name" value="{{ old('company_name') }}" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border
                               {{ $errors->has('company_name') ? 'border-red-500' : '' }}" {{ old('company_name') &&
                     !$errors->has('company_name') ? 'readonly' : '' }}
                 required>
@@ -74,7 +74,7 @@
             <!-- Address -->
             <div>
                 <label for="address" class="block text-sm font-medium text-gray-700 mb-1">عنوان الشركة</label>
-                <input type="text" id="address" name="address" value="{{ old('address') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+                <input type="text" id="address" name="address" value="{{ old('address') }}" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border
                               {{ $errors->has('address') ? 'border-red-500' : '' }}" {{ old('address') &&
                     !$errors->has('address') ? 'readonly' : '' }}
                 required>
@@ -94,7 +94,7 @@
                 <div class="flex gap-3 items-center">
                     <!-- خدمة -->
                     <select id="interested_service" name="interested_service"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border
             {{ $errors->has('interested_service') ? 'border-red-500' : '' }}">
                         <option value="">-- اختر الخدمة --</option>
                         @foreach($services as $service)
@@ -110,7 +110,7 @@
                         <input type="number" id="interested_service_count" name="interested_service_count"
                                value="{{ old('interested_service_count', $client->interested_service_count ?? 0) }}"
                                min="0"
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500">
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-indigo-500">
                     </div>
                 </div>
 
@@ -122,7 +122,7 @@
             <!-- Contact Person -->
             <div>
                 <label for="contact_person" class="block text-sm font-medium text-gray-700 mb-1">الشخص المسؤول</label>
-                <input type="text" id="contact_person" name="contact_person" value="{{ old('contact_person') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+                <input type="text" id="contact_person" name="contact_person" value="{{ old('contact_person') }}" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border
                               {{ $errors->has('contact_person') ? 'border-red-500' : '' }}" {{ old('contact_person') &&
                     !$errors->has('contact_person') ? 'readonly' : '' }}
                 required>
@@ -139,7 +139,7 @@
                 <label for="contact_position" class="block text-sm font-medium text-gray-700 mb-1">المنصب
                     الوظيفي</label>
                 <input type="text" id="contact_position" name="contact_position" value="{{ old('contact_position') }}"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border
                               {{ $errors->has('contact_position') ? 'border-red-500' : '' }}" {{
                     old('contact_position') && !$errors->has('contact_position') ? 'readonly' : '' }}
                 placeholder="Manager, Owner, etc.">
@@ -170,7 +170,7 @@
                 <div class="relative">
 <input type="text" id="last_contact_date" name="last_contact_date" dir="rtl"
     value="{{ old('last_contact_date') }}"
-    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border text-right">                </div>
+    class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border text-right">                </div>
 
                 @if(old('last_contact_date') && !$errors->has('last_contact_date'))
                 <p class="mt-2 text-sm text-green-600">{{ $formattedDate }} ✓ تم إدخال تاريخ آخر تواصل</p>
@@ -184,7 +184,7 @@
 <div>
     <label for="contact_details" class="block text-sm font-medium text-gray-700 mb-1">تفاصيل التواصل</label>
     <textarea id="contact_details" name="contact_details"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border
               {{ $errors->has('contact_details') ? 'border-red-500' : '' }}"
         placeholder="أدخل تفاصيل إضافية للتواصل مثل الملاحظات أو معلومات أخرى"
         {{ old('contact_details') && !$errors->has('contact_details') ? 'readonly' : '' }}>{{ old('contact_details') }}</textarea>
@@ -209,7 +209,7 @@
                         <span class="text-gray-700 font-bold text-lg">+<span x-text="countryCode"></span></span>
                         <input type="text" id="country_code" name="country_code"
                                x-model="countryCode"
-                               class="mt-1 block w-28 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+                               class="mt-1 block w-28 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border
             {{ $errors->has('country_code') ? 'border-red-500' : '' }}"
                                placeholder="971" required>
                     </div>
@@ -227,7 +227,7 @@
                         رقم الجوال
                     </label>
                     <input type="tel" id="phone" name="phone" value="{{ old('phone') }}"
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+                           class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border
         {{ $errors->has('phone') ? 'border-red-500' : '' }}"
                            placeholder="501234567" required>
                     <p class="mt-1 text-xs text-gray-500">
@@ -249,7 +249,7 @@
             <!-- Interest Status -->
             <div>
                 <label for="interest_status" class="block text-sm font-medium text-gray-700 mb-1">حالة الاهتمام</label>
-                <select id="interest_status" name="interest_status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+                <select id="interest_status" name="interest_status" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border
                               {{ $errors->has('interest_status') ? 'border-red-500' : '' }}" {{ old('interest_status')
                     && !$errors->has('interest_status') ? 'readonly' : '' }}
                     required>
@@ -271,7 +271,7 @@
             <!-- Submit Button -->
 <div class="flex justify-end pt-6">
 <button type="submit"
-        class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+        class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-lg font-semibold text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
         style="position: relative; z-index: 999"> <!-- Force above other elements -->
     {{ $button_label ?? 'إضافة العميل' }}
 </button>

@@ -41,7 +41,7 @@
 
                         @if(Auth::user()->role == 'salesRep' && $client->sales_rep_id == Auth::user()->salesRep->id)
                             <a href="{{ route('client.message',$client->id) }}"
-                               class="inline-flex items-center mt-4 ml-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all shadow hover:shadow-md">
+                               class="inline-flex items-center mt-4 ml-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all shadow hover:shadow-md">
                                 <i class="fas fa-comments mr-2"></i> مراسلة
                             </a>
                         @endif
@@ -165,7 +165,7 @@
 
                         @if($client->clientEditRequests()->count() > 3)
                             <a href="{{route('myRequests',$client->sales_rep_id)}}"
-                               class="mt-4 inline-flex items-center text-blue-600 hover:text-blue-800 text-sm">
+                               class="mt-4 inline-flex items-center text-indigo-600 hover:text-indigo-800 text-sm">
                                 <i class="fas fa-arrow-down mr-1"></i> عرض
                                 كل {{ $client->clientEditRequests()->count() }} طلب
                             </a>
@@ -249,7 +249,7 @@
                                             <div class="flex items-center space-x-2 rtl:space-x-reverse">
                                                 <i class="fas fa-user-tie text-blue-500"></i>
                                                 <a href="{{ route('sales-reps.show', $client->salesRep->id) }}"
-                                                   class="text-blue-600 hover:underline font-semibold">
+                                                   class="text-indigo-600 hover:underline font-semibold">
                                                     {{ $client->salesRep->name }}
                                                 </a>
                                             </div>
@@ -275,7 +275,7 @@
                                             </span>
                                                 @if(Auth::user()->role == 'salesRep')
                                                     <button onclick="openLastContactModal()"
-                                                            class="text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded-full">
+                                                            class="text-sm bg-blue-100 hover:bg-blue-200 text-indigo-800 px-3 py-1 rounded-full">
                                                         <i class="fas fa-edit mr-1"></i> تحديث
                                                     </button>
                                                 @endif
@@ -289,7 +289,7 @@
                             <!-- Sales Rep Specific Sections -->
                             @if(Auth::user()->role == 'salesRep')
                                 <!-- Edit Request Form -->
-                                <div class="mt-8 bg-blue-50 rounded-xl p-6 border border-blue-100">
+                                <div class="mt-8 bg-indigo-50 rounded-xl p-6 border border-blue-100">
                                     <h3 class="text-lg font-semibold text-gray-800 mb-4">
                                         <i class="fas fa-edit text-blue-500 mr-2"></i> طلب تعديل بيانات العميل
                                     </h3>
@@ -303,7 +303,7 @@
                                                     المطلوب
                                                     تعديله</label>
                                                 <select name="edited_field" required
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
                                                     <option value="" disabled selected>اختر الحقل</option>
                                                     @foreach($columns as $key => $label)
                                                         <option value="{{ $key }}">{{ $label }}</option>
@@ -314,7 +314,7 @@
                                                 <label class="block text-sm font-medium text-gray-700 mb-1">القيمة
                                                     الجديدة</label>
                                                 <input name="new_value" required rows="3"
-                                                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                                                           placeholder="أضف القيمة المستخدمة للتعديل..." >
 
                                             </div>
@@ -323,12 +323,12 @@
                                                 <label class="block text-sm font-medium text-gray-700 mb-1">سبب
                                                     التعديل</label>
                                                 <textarea name="update_message" required rows="3"
-                                                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                                                           placeholder="أضف رسالة توضح سبب التعديل..."></textarea>
                                             </div>
 
                                             <button type="submit" id="submitBtn"
-                                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition">
+                                                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg transition">
                                                 إرسال طلب التعديل
                                             </button>
                                         </div>
@@ -474,7 +474,7 @@
                                         <div class="flex gap-3 items-center">
                                             <!-- خدمة -->
                                             <select id="interested_service" name="interested_service"
-                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border
+                                                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border
             {{ $errors->has('interested_service') ? 'border-red-500' : '' }}" {{ $editableField !== 'interested_service' ? 'disabled' : '' }}>
                                                 <option value="">-- اختر الخدمة --</option>
                                                 @foreach($services as $service)
@@ -494,7 +494,7 @@
                                                        name="interested_service_count"
                                                        value="{{ old('interested_service_count', $client->interested_service_count ?? 0) }}"
                                                        min="0"
-                                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500" {{ $editableField !== 'interested_service_count' ? 'disabled' : '' }}>
+                                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-indigo-500" {{ $editableField !== 'interested_service_count' ? 'disabled' : '' }}>
                                             </div>
                                         </div>
 
@@ -509,7 +509,7 @@
                                             إلغاء
                                         </button>
                                         <button type="submit"
-                                                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">
+                                                class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition">
                                             حفظ التعديلات
                                         </button>
                                     </div>
@@ -560,7 +560,7 @@
                                 إلغاء
                             </button>
                             <button type="submit"
-                                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">
+                                    class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition">
                                 حفظ التحديث
                             </button>
                         </div>
@@ -596,7 +596,7 @@
         }
 
         .tab-button.active {
-            @apply text-blue-600 border-blue-600;
+            @apply text-indigo-600 border-blue-600;
         }
 
         .tab-content {
