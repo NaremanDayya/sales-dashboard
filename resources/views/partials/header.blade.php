@@ -9,7 +9,7 @@
     <!-- Page title slot -->
     <div class="min-w-0 flex-1">
         @hasSection('page-title')
-            <h1 class="text-base font-semibold text-gray-900 truncate">@yield('page-title')</h1>
+            <h1 class="text-lg font-bold text-gray-900 truncate">@yield('page-title')</h1>
         @else
             <span class="hidden sm:block"></span>
         @endif

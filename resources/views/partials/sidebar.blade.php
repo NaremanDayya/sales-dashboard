@@ -20,7 +20,7 @@
     <div class="flex items-center gap-3 h-[--app-topbar-height] px-4 border-b border-gray-100 shrink-0">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 min-w-0">
             <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="h-9 w-9 rounded-lg object-contain shrink-0">
-            <span x-show="!sidebarCollapsed" x-transition.opacity class="font-bold text-gray-900 truncate">آفاق الخليج</span>
+            <span x-show="!sidebarCollapsed" x-transition.opacity class="text-lg font-bold text-gray-900 truncate">آفاق الخليج</span>
         </a>
         <button @click="sidebarOpen = false" class="ms-auto lg:hidden text-gray-400 hover:text-gray-600 p-1 rounded-md">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -38,7 +38,7 @@
                 $classes = $active
                     ? 'bg-indigo-50 text-indigo-700'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900';
-                echo '<a href="' . $href . '" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ' . $classes . '">'
+                echo '<a href="' . $href . '" class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-semibold transition-colors ' . $classes . '">'
                     . '<span class="' . ($active ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-500') . '">' . $navIcon($icon) . '</span>'
                     . '<span x-show="!sidebarCollapsed" x-transition.opacity class="truncate">' . $label . '</span>'
                     . '</a>';
@@ -109,7 +109,7 @@
     <div class="border-t border-gray-100 p-3 shrink-0">
         <button
             @click="sidebarCollapsed = !sidebarCollapsed"
-            class="hidden lg:flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+            class="hidden lg:flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-semibold text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-colors"
         >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 transition-transform" :class="{ 'rotate-180': sidebarCollapsed }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
