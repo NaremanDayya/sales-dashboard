@@ -8,7 +8,7 @@
         <div class="relative flex items-center gap-1">
             <input type="date"
                    wire:model.live="dateFilter"
-                   class="text-sm rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 py-1 pr-2"
+                   class="text-sm rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 py-1 pr-2"
                    placeholder="تصفية حسب التاريخ">
             @if($dateFilter)
                 <button wire:click="$set('dateFilter', null)"
@@ -24,7 +24,7 @@
         <!-- Filter Dropdown -->
         <div class="relative">
             <select wire:model.live="filter"
-                    class="text-sm rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-8 py-1">
+                    class="text-sm rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 pr-8 py-1">
                 <option value="newest">الأحدث</option>
                 <option value="oldest">الأقدم</option>
                 <option value="unread">غير المقروءة</option>

@@ -29,7 +29,7 @@ $salesRepId = Auth::user()->salesRep->id;
             <nav class="nav flex-row items-center gap-1 mx-4 hidden lg:flex">
                 @if(Auth::user()->hasRole('admin'))
                 <a href="{{ route('sales-reps.index') }}"
-                    class="nav-link px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors duration-200 {{ request()->routeIs('sales-reps.index') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800' }}">
+                    class="nav-link px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors duration-200 {{ request()->routeIs('sales-reps.index') ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800' }}">
                     <span class="nav-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
@@ -41,7 +41,7 @@ $salesRepId = Auth::user()->salesRep->id;
                 </a>
                 @elseif(Auth::user()->role == 'salesRep')
                 <a href="{{ route('sales-rep.targets.index',$salesRepId) }}"
-                    class="nav-link px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors duration-200 {{ request()->routeIs('sales-rep.targets.index',Auth::id()) ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800' }}">
+                    class="nav-link px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors duration-200 {{ request()->routeIs('sales-rep.targets.index',Auth::id()) ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800' }}">
                     <span class="nav-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
@@ -61,8 +61,8 @@ $salesRepId = Auth::user()->salesRep->id;
                     class="nav-link px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors
                     duration-200 {{
                     request()->routeIs('allClients') ||
-                    request()->routeIs('sales-reps.clients.index',$salesRepId) ? 'bg-blue-50 dark:bg-blue-900/30
-                    text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100
+                    request()->routeIs('sales-reps.clients.index',$salesRepId) ? 'bg-indigo-50 dark:bg-indigo-900/30
+                    text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100
                     dark:hover:bg-neutral-800'
                     }}">
                     <span class="nav-icon">
@@ -76,7 +76,7 @@ $salesRepId = Auth::user()->salesRep->id;
                 </a>
 
                 <a href="{{ route('services.index') }}"
-                    class="nav-link px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors duration-200 {{ request()->routeIs('services.index') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800' }}">
+                    class="nav-link px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors duration-200 {{ request()->routeIs('services.index') ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800' }}">
                     <span class="nav-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
@@ -95,8 +95,8 @@ $salesRepId = Auth::user()->salesRep->id;
                     class="nav-link px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors
                     duration-200 {{
                     request()->routeIs('allAgreements') ||
-                    request()->routeIs('salesrep.agreements.index',$salesRepId) ? 'bg-blue-50 dark:bg-blue-900/30
-                    text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100
+                    request()->routeIs('salesrep.agreements.index',$salesRepId) ? 'bg-indigo-50 dark:bg-indigo-900/30
+                    text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100
                     dark:hover:bg-neutral-800'
                     }}">
                     <span class="nav-icon">
@@ -117,8 +117,8 @@ $salesRepId = Auth::user()->salesRep->id;
                     class="nav-link px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors
                     duration-200 {{
                     request()->routeIs('admin.allRequests') ||
-                    request()->routeIs('myRequests',$salesRepId) ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600
-                    dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800'
+                    request()->routeIs('myRequests',$salesRepId) ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600
+                    dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800'
                     }}">
                     <span class="nav-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
@@ -136,7 +136,7 @@ $salesRepId = Auth::user()->salesRep->id;
                 <!-- Chat Dropdown -->
                 <div x-data="{ chatDropdownOpen: false }" class="relative">
                     <button @click="chatDropdownOpen = !chatDropdownOpen"
-                        class="p-2 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors duration-200 relative">
+                        class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors duration-200 relative">
 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="1.8">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -161,7 +161,7 @@ $salesRepId = Auth::user()->salesRep->id;
                 @endphp
                 <div x-data="{ notifDropdownOpen: false }" class="relative">
                     <button @click="notifDropdownOpen = !notifDropdownOpen"
-                        class="p-2 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors duration-200 relative">
+                        class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors duration-200 relative">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"

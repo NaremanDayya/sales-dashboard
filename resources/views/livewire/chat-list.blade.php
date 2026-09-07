@@ -175,7 +175,7 @@
                 @php
                     $isManagerChat = $convData['is_manager_chat'] ?? false;
                     $borderColor = $isManagerChat ? 'border-purple-500' : 'border-blue-500';
-                    $bgColor = $isManagerChat ? 'bg-purple-50' : 'bg-blue-50';
+                    $bgColor = $isManagerChat ? 'bg-purple-50' : 'bg-indigo-50';
                     $hoverBg = $isManagerChat ? 'hover:bg-purple-50' : 'hover:bg-gray-50';
                 @endphp
                 <a
@@ -222,7 +222,7 @@
                             <p class="text-sm text-gray-600 truncate flex items-center space-x-1 space-x-reverse">
                                 @if(($conversation->latest_message_sender_id ?? null) == auth()->id())
                                     @if($conversation->is_last_message_read ?? false)
-                                        <span class="text-blue-500">
+                                        <span class="text-indigo-500">
                                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
                                                 <path d="M12.354 4.354a.5.5 0 0 0-.708-.708L5 10.293 1.854 7.146a.5.5 0 1 0-.708.708l3.5 3.5a.5.5 0 0 0 .708 0l7-7z"/>
                                                 <path d="M8.146 11.354l-.896-.897.707-.707.543.543 6.646-6.647a.5.5 0 0 1 .708.708l-7 7a.5.5 0 0 1-.708 0z"/>
@@ -234,7 +234,7 @@
                             </p>
 
                             @if(($conversation->unread_count ?? 0) > 0)
-                                <span class="bg-blue-500 text-white text-xs rounded-full px-2 py-1 min-w-5 text-center">{{ $conversation->unread_count }}</span>
+                                <span class="bg-indigo-500 text-white text-xs rounded-full px-2 py-1 min-w-5 text-center">{{ $conversation->unread_count }}</span>
                             @endif
                         </div>
 
@@ -250,7 +250,7 @@
         <!-- Loading Indicator -->
         <div x-show="loading" class="p-3 text-center" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
             <div class="inline-flex items-center space-x-2 space-x-reverse">
-                <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg class="animate-spin h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>

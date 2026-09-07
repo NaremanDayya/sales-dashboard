@@ -30,12 +30,12 @@
             <nav class="nav flex-row items-center gap-1 mx-4 hidden lg:flex">
                 <!-- Your existing navigation items -->
                 @if(Auth::user()->hasRole('admin'))
-                    <a href="{{ route('sales-reps.index') }}" class="nav-link px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors duration-200 {{ request()->routeIs('sales-reps.index') ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800' }}">
+                    <a href="{{ route('sales-reps.index') }}" class="nav-link px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors duration-200 {{ request()->routeIs('sales-reps.index') ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800' }}">
                         <!-- SVG icon -->
                         <span class="nav-text">سفراء العلامة التجارية</span>
                     </a>
                 @elseif(Auth::user()->role == 'salesRep')
-                    <a href="{{ route('sales-rep.targets.index',$salesRepId) }}" class="nav-link px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors duration-200 {{ request()->routeIs('sales-rep.targets.index',Auth::id()) ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800' }}">
+                    <a href="{{ route('sales-rep.targets.index',$salesRepId) }}" class="nav-link px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors duration-200 {{ request()->routeIs('sales-rep.targets.index',Auth::id()) ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800' }}">
                         <!-- SVG icon -->
                         <span class="nav-text">التارجت</span>
                     </a>
@@ -48,7 +48,7 @@
             <div class="header-actions flex items-center gap-3">
                 <!-- Chat Dropdown -->
                 <div x-data="{ chatDropdownOpen: false }" class="relative">
-                    <button @click="chatDropdownOpen = !chatDropdownOpen" class="p-2 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors duration-200 relative">
+                    <button @click="chatDropdownOpen = !chatDropdownOpen" class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors duration-200 relative">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8 3h8a5 5 0 0 1 5 5v6a5 5 0 0 1-5 5h-4l-4 4v-4H8a5 5 0 0 1-5-5V8a5 5 0 0 1 5-5z" />
                         </svg>
