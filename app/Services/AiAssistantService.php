@@ -53,7 +53,7 @@ class AiAssistantService
 
                 return [
                     'messages' => $messages,
-                    'reply' => $text !== '' ? $text : 'لم أتمكن من الحصول على إجابة، حاول صياغة السؤال بشكل مختلف.',
+                    'reply' => $text !== '' ? $this->stripMarkdown($text) : 'لم أتمكن من الحصول على إجابة، حاول صياغة السؤال بشكل مختلف.',
                 ];
             }
 
@@ -96,6 +96,20 @@ class AiAssistantService
         }, $content);
     }
 
+    /**
+     * The chat widget renders replies as plain text, not markdown, so strip
+     * markdown emphasis/heading markers the model adds despite the system
+     * prompt asking it not to (e.g. "**210**" -> "210", "## عنوان" -> "عنوان").
+     */
+    protected function stripMarkdown(string $text): string
+    {
+        $text = preg_replace('/\*\*(.+?)\*\*/s', '$1', $text);
+        $text = preg_replace('/__(.+?)__/s', '$1', $text);
+        $text = preg_replace('/^#{1,6}\s*/m', '', $text);
+
+        return $text;
+    }
+
     protected function callClaude(User $user, array $messages): array
     {
         $response = Http::withHeaders([
@@ -128,6 +142,7 @@ class AiAssistantService
 
         return <<<PROMPT
 أنت مساعد ذكي داخلي لنظام إدارة مبيعات. تجاوب دائمًا باللغة العربية، بإيجاز ووضوح.
+اكتب ردودك كنص عادي فقط، بدون أي تنسيق ماركداون مثل ** أو ## أو __.
 المستخدم الحالي: {$user->name} - دوره: {$roleLabel}.
 استخدم الأدوات المتاحة فقط للحصول على البيانات الحقيقية، ولا تخترع أرقامًا أو معلومات غير موجودة في نتائج الأدوات.
 إذا كان السؤال خارج نطاق بيانات هذا النظام (العملاء، الاتفاقيات، التارجت، الطلبات المعلقة)، اعتذر بلطف ووضح أنك مخصص لهذا النظام فقط.
