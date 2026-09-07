@@ -1,18 +1,14 @@
 @extends('layouts.master')
 @section('title', 'Add Sales Representative')
 @section('content')
-<div class="container">
-    <div class="mb-6">
-        <h1 class="text-center text-2xl font-bold">أضف مندوب جديد</h1>
-    </div>
+<x-page-header title="أضف مندوب جديد" subtitle="أنشئ حساب سفير علامة تجارية جديد" />
 
-    <form action="{{ route('sales-reps.store') }}" method="POST" enctype="multipart/form-data">
-        @csrf
+<form action="{{ route('sales-reps.store') }}" method="POST" enctype="multipart/form-data">
+    @csrf
 @include('salesRep._form', [
         'button_label' => __('إضافة مندوب '),
         'allPermissions' => $allPermissions ?? collect(),
         'selectedPermission' => [],
 ])
-    </form>
-</div>
+</form>
 @endsection
