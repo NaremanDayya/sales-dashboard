@@ -86,7 +86,7 @@
             margin-top: 4px;
             background: #ffffff;
             border: 1px solid #e5e7eb;
-            border-radius: 6px;
+            border-radius: 8px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             z-index: 1000;
         }
@@ -98,7 +98,7 @@
             padding: 8px 16px;
             background: #ffffff;
             border: 1px solid #d1d5db;
-            border-radius: 6px;
+            border-radius: 8px;
             color: #374151;
             font-size: 14px;
             font-weight: 600;
@@ -163,7 +163,7 @@
             left: 0;
             background: white;
             border: 1px solid var(--gray-200);
-            border-radius: 6px;
+            border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             z-index: 100;
             min-width: 120px;
@@ -254,7 +254,7 @@
             align-items: center;
             gap: 8px;
             padding: 8px 16px;
-            border-radius: 6px;
+            border-radius: 8px;
             background-color: var(--primary);
             color: white;
             border: none;
@@ -350,7 +350,7 @@
         .columns-search input {
             width: 100%;
             padding: 10px 15px 10px 40px;
-            border-radius: 6px;
+            border-radius: 8px;
             border: 1px solid var(--gray-300);
             font-size: 14px;
         }
@@ -379,7 +379,7 @@
             gap: 10px;
             cursor: pointer;
             padding: 8px 10px;
-            border-radius: 6px;
+            border-radius: 8px;
             transition: background-color 0.2s;
         }
 
@@ -453,7 +453,7 @@
 
         .btn-cancel {
             padding: 8px 16px;
-            border-radius: 6px;
+            border-radius: 8px;
             background-color: white;
             color: var(--gray-700);
             border: 1px solid var(--gray-300);
@@ -469,7 +469,7 @@
 
         .btn-apply {
             padding: 8px 16px;
-            border-radius: 6px;
+            border-radius: 8px;
             background-color: var(--primary);
             color: white;
             border: none;
@@ -532,7 +532,7 @@
 
         .btn {
             padding: 8px 16px;
-            border-radius: 6px;
+            border-radius: 8px;
             font-weight: 800;
             font-size: 14px;
             display: inline-flex;
@@ -580,7 +580,7 @@
         .search-input {
             width: 100%;
             padding: 8px 40px 8px 15px;
-            border-radius: 6px;
+            border-radius: 8px;
             border: 1px solid var(--gray-300);
             font-size: 14px;
             transition: all 0.2s ease;
@@ -674,7 +674,7 @@
         .action-btn {
             width: 30px;
             height: 30px;
-            border-radius: 6px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -708,7 +708,7 @@
         .pagination-btn {
             width: 36px;
             height: 36px;
-            border-radius: 6px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -2378,7 +2378,7 @@
         top: 20px;
         right: 20px;
         padding: 15px 20px;
-        border-radius: 6px;
+        border-radius: 8px;
         color: white;
         font-weight: 500;
         z-index: 10000;

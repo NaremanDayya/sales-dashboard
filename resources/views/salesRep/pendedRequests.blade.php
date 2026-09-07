@@ -30,7 +30,7 @@
             padding: 8px 16px;
             background: #ffffff;
             border: 1px solid #d1d5db;
-            border-radius: 6px;
+            border-radius: 8px;
             color: #374151;
             font-size: 14px;
             font-weight: 500;
@@ -56,7 +56,7 @@
             margin-top: 4px;
             background: #ffffff;
             border: 1px solid #e5e7eb;
-            border-radius: 6px;
+            border-radius: 8px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             z-index: 1000;
         }
@@ -141,7 +141,7 @@
 
         .btn {
             padding: 8px 16px;
-            border-radius: 6px;
+            border-radius: 8px;
             font-weight: 800;
             font-size: 14px;
             display: inline-flex;
@@ -189,7 +189,7 @@
         .search-input {
             width: 100%;
             padding: 8px 40px 8px 15px;
-            border-radius: 6px;
+            border-radius: 8px;
             border: 1px solid var(--gray-300);
             font-size: 14px;
             transition: all 0.2s ease;
@@ -283,7 +283,7 @@
         .action-btn {
             width: 30px;
             height: 30px;
-            border-radius: 6px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -317,7 +317,7 @@
         .pagination-btn {
             width: 36px;
             height: 36px;
-            border-radius: 6px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;

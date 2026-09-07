@@ -3,8 +3,8 @@
 @push('styles')
 <style>
     :root {
-        --primary: #4154f1;
-        --primary-light: #6a7ef9;
+        --primary: #4f46e5;
+        --primary-light: #6366f1;
         --secondary: #10b981;
         --danger: #ef4444;
         --warning: #f59e0b;
@@ -42,7 +42,7 @@
         align-items: center;
         gap: 8px;
         padding: 8px 16px;
-        border-radius: 6px;
+        border-radius: 8px;
         background-color: var(--primary);
         color: white;
         border: none;
@@ -60,7 +60,7 @@
     right: 0;
     background-color: white;
     border: 1px solid #e5e7eb;
-    border-radius: 6px;
+    border-radius: 8px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     z-index: 10;
     min-width: 180px;
@@ -156,7 +156,7 @@
     .columns-search input {
         width: 100%;
         padding: 10px 15px 10px 40px;
-        border-radius: 6px;
+        border-radius: 8px;
         border: 1px solid var(--gray-300);
         font-size: 14px;
     }
@@ -185,7 +185,7 @@
         gap: 10px;
         cursor: pointer;
         padding: 8px 10px;
-        border-radius: 6px;
+        border-radius: 8px;
         transition: background-color 0.2s;
     }
 
@@ -259,7 +259,7 @@
 
     .btn-cancel {
         padding: 8px 16px;
-        border-radius: 6px;
+        border-radius: 8px;
         background-color: white;
         color: var(--gray-700);
         border: 1px solid var(--gray-300);
@@ -275,7 +275,7 @@
 
     .btn-apply {
         padding: 8px 16px;
-        border-radius: 6px;
+        border-radius: 8px;
         background-color: var(--primary);
         color: white;
         border: none;
@@ -329,7 +329,7 @@
         padding: 8px 16px;
         background: #ffffff;
         border: 1px solid #d1d5db;
-        border-radius: 6px;
+        border-radius: 8px;
         color: #374151;
         font-size: 14px;
         font-weight: 500;
@@ -349,7 +349,7 @@
         padding: 8px 16px;
         background: #ffffff;
         border: 1px solid #d1d5db;
-        border-radius: 6px;
+        border-radius: 8px;
         color: #374151;
         font-size: 14px;
         font-weight: 500;
@@ -369,7 +369,7 @@
         margin-top: 4px;
         background: #ffffff;
         border: 1px solid #e5e7eb;
-        border-radius: 6px;
+        border-radius: 8px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         z-index: 10;
     }
@@ -435,7 +435,7 @@
 
     .btn {
         padding: 8px 16px;
-        border-radius: 6px;
+        border-radius: 8px;
         font-weight: 500;
         font-size: 14px;
         display: inline-flex;
@@ -499,7 +499,7 @@
     .search-input {
         width: 100%;
         padding: 8px 40px 8px 15px;
-        border-radius: 6px;
+        border-radius: 8px;
         border: 1px solid var(--gray-300);
         font-size: 14px;
         transition: all 0.2s ease;
@@ -532,13 +532,16 @@
     }
 
     .data-table thead th {
-        background: linear-gradient(135deg, #4154f1 0%, #6a7ef9 100%);
-        color: white;
-        font-weight: bold;
+        background: #f8fafc;
+        color: #475569;
+        font-weight: 700;
         padding: 12px 8px;
         text-align: center;
-        border: 1px solid #2d3db8;
-        font-size: 14px;
+        border: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
     }
 
     .data-table tbody td {
@@ -652,7 +655,7 @@
     .action-btn {
         width: 30px;
         height: 30px;
-        border-radius: 6px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -686,7 +689,7 @@
     .pagination-btn {
         width: 36px;
         height: 36px;
-        border-radius: 6px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -771,7 +774,7 @@
     .column-selector-btn {
         background-color: var(--gray-100);
         border: 1px solid var(--gray-300);
-        border-radius: 6px;
+        border-radius: 8px;
         padding: 8px 12px;
         cursor: pointer;
         display: flex;
@@ -788,7 +791,7 @@
         right: 0;
         background-color: white;
         border: 1px solid var(--gray-300);
-        border-radius: 6px;
+        border-radius: 8px;
         padding: 10px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         z-index: 1000;
@@ -911,7 +914,7 @@
     }
 
     .header-text {
-        color: #4154f1;
+        color: #4f46e5;
     }
 
     .header-logo {

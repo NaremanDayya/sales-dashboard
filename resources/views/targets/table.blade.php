@@ -64,7 +64,7 @@
 
     .btn {
         padding: 8px 16px;
-        border-radius: 6px;
+        border-radius: 8px;
         font-weight: 500;
         font-size: 14px;
         display: inline-flex;
@@ -112,7 +112,7 @@
     .search-input {
         width: 100%;
         padding: 8px 40px 8px 15px;
-        border-radius: 6px;
+        border-radius: 8px;
         border: 1px solid var(--gray-300);
         font-size: 14px;
         transition: all 0.2s ease;
@@ -216,7 +216,7 @@
     .action-btn {
         width: 30px;
         height: 30px;
-        border-radius: 6px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -257,7 +257,7 @@
     .pagination-btn {
         width: 36px;
         height: 36px;
-        border-radius: 6px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;

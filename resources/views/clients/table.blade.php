@@ -88,8 +88,9 @@
         /* Improved Table Styles */
         .table-container {
             overflow-x: auto;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
         }
 
         .data-table {
@@ -100,14 +101,16 @@
         }
 
         .data-table th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #f8fafc;
+            color: #475569;
             font-weight: 700;
             padding: 12px 8px;
             text-align: center;
             white-space: nowrap;
-            border: none;
-            font-size: 0.8rem;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
         }
 
         .data-table td {
@@ -124,7 +127,7 @@
         }
 
         .data-table tr:nth-child(even) td {
-            background-color: #f9fafb;
+            background-color: #fbfcfd;
         }
         .pdf-header .header-logo {
             max-height: 180px !important;
@@ -381,30 +384,35 @@
         }
 
         .columns-modal-header {
-            padding: 1.5rem;
+            padding: 1.25rem 1.5rem;
             border-bottom: 1px solid #e5e7eb;
             display: flex;
             justify-content: between;
             align-items: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: white;
+            color: #0f172a;
         }
 
         .columns-modal-title {
-            font-size: 1.25rem;
+            font-size: 1.05rem;
             font-weight: 700;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            color: #0f172a;
         }
 
         .columns-modal-close {
             background: none;
             border: none;
-            color: white;
+            color: #94a3b8;
             font-size: 1.25rem;
             cursor: pointer;
             padding: 0.25rem;
+        }
+
+        .columns-modal-close:hover {
+            color: #475569;
         }
 
         .columns-modal-body {
@@ -557,7 +565,7 @@
             align-items: center;
             gap: 0.5rem;
             padding: 0.5rem 1rem;
-            border-radius: 6px;
+            border-radius: 8px;
             font-weight: 600;
             font-size: 0.875rem;
             text-decoration: none;
