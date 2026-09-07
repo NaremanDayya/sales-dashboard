@@ -29,7 +29,7 @@ class SalesRepController extends Controller
 
     public function index()
     {
-        $salesReps = SalesRep::all()->map(function ($rep) {
+        $salesReps = SalesRep::with(['clients', 'user', 'interestedClients'])->get()->map(function ($rep) {
             return [
                 'id' => $rep->id,
                 'name' => $rep->name,
