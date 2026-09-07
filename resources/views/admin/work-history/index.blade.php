@@ -4,186 +4,8 @@
 
 @push('styles')
 <style>
-    :root {
-        --primary: #4154f1;
-        --success: #10b981;
-        --danger: #ef4444;
-        --gray-100: #f8fafc;
-        --gray-200: #e2e8f0;
-        --gray-400: #94a3b8;
-        --gray-500: #64748b;
-        --gray-700: #334155;
-        --gray-900: #0f172a;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1.25rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .stat-card {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        text-align: center;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .stat-card h3 {
-        margin: 0;
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--gray-900);
-    }
-
-    .stat-card p {
-        margin: .35rem 0 .5rem;
-        color: var(--gray-500);
-        font-size: .875rem;
-        font-weight: 600;
-    }
-
-    .stat-card .stat-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        color: var(--primary);
-        background: rgba(65, 84, 241, .1);
-    }
-
-    .filters-card,
-    .table-container {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        margin-bottom: 1.5rem;
-    }
-
-    .filters-card {
-        padding: 1.25rem;
-    }
-
-    .filters-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 1rem;
-        align-items: end;
-    }
-
-    .filters-grid label {
-        display: block;
-        font-weight: 600;
-        font-size: .8rem;
-        color: var(--gray-700);
-        margin-bottom: .4rem;
-    }
-
-    .filters-grid input,
-    .filters-grid select {
-        width: 100%;
-        border: 1px solid var(--gray-200);
-        border-radius: .5rem;
-        padding: .55rem .75rem;
-        font-size: .875rem;
-    }
-
-    .history-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .history-table th,
-    .history-table td {
-        padding: .9rem 1.25rem;
-        text-align: right;
-        border-bottom: 1px solid var(--gray-200);
-        font-size: .875rem;
-        color: var(--gray-700);
-        vertical-align: middle;
-    }
-
-    .history-table th {
-        background: var(--gray-100);
-        font-weight: 700;
-        color: var(--gray-500);
-        text-transform: uppercase;
-        font-size: .72rem;
-        letter-spacing: .03em;
-    }
-
-    .history-table tbody tr:hover {
-        background: var(--gray-100);
-    }
-
-    .employee-cell {
-        display: flex;
-        align-items: center;
-        gap: .65rem;
-    }
-
-    .employee-cell img {
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        object-fit: cover;
-        flex-shrink: 0;
-    }
-
-    .employee-cell .name {
-        font-weight: 600;
-        color: var(--gray-900);
-    }
-
-    .employee-cell .email {
-        font-size: .78rem;
-        color: var(--gray-500);
-    }
-
-    .period-badge {
-        display: inline-block;
-        padding: .25rem .6rem;
-        border-radius: 9999px;
-        background: rgba(65, 84, 241, .1);
-        color: var(--primary);
-        font-weight: 600;
-        font-size: .8rem;
-    }
-
-    .status-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: .3rem;
-        padding: .3rem .7rem;
-        border-radius: 9999px;
-        font-weight: 700;
-        font-size: .78rem;
-    }
-
-    .status-pill.active {
-        background: rgba(16, 185, 129, .12);
-        color: var(--success);
-    }
-
-    .status-pill.ended {
-        background: rgba(239, 68, 68, .12);
-        color: var(--danger);
-    }
-
-    .empty-state {
-        padding: 3rem 1.5rem;
-        text-align: center;
-        color: var(--gray-500);
-    }
-
     @media print {
-        .no-print,
-        .filters-card,
-        .stats-grid {
+        .no-print {
             display: none !important;
         }
     }
@@ -191,137 +13,132 @@
 @endpush
 
 @section('content')
-<div class="pagetitle mb-4 d-flex flex-wrap justify-content-between align-items-center gap-2 no-print">
-    <h1 class="h4 mb-0 d-flex align-items-center gap-2">
-        <i class="bi bi-clock-history text-primary"></i>
-        سجل عمل الموظفين
+<x-page-header title="سجل عمل الموظفين" :subtitle="$filteredSalesRep ? 'عرض سجل: ' . $filteredSalesRep->name : 'سجل فترات العمل لجميع مندوبي المبيعات'" class="no-print">
+    <x-slot name="actions">
         @if($filteredSalesRep)
-            <span class="text-muted fw-normal fs-6">— {{ $filteredSalesRep->name }}</span>
-            <a href="{{ route('work-history.index') }}" class="btn btn-sm btn-outline-secondary ms-2">
-                <i class="bi bi-x-circle me-1"></i> إزالة الفلتر
+            <a href="{{ route('work-history.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                إزالة الفلتر
             </a>
         @endif
-    </h1>
-
-    <div class="d-flex gap-2">
-        <a href="{{ route('work-history.export', request()->query()) }}" class="btn btn-sm btn-success">
-            <i class="bi bi-file-earmark-excel me-1"></i> تصدير Excel
+        <a href="{{ route('work-history.export', request()->query()) }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H8a2 2 0 01-2-2V5a2 2 0 012-2h6l6 6v9a2 2 0 01-2 2z"/></svg>
+            تصدير Excel
         </a>
-        <button type="button" onclick="window.print()" class="btn btn-sm btn-danger">
-            <i class="bi bi-file-earmark-pdf me-1"></i> تصدير PDF
+        <button type="button" onclick="window.print()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-rose-600 text-white text-sm font-semibold hover:bg-rose-700 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+            تصدير PDF
         </button>
-    </div>
-</div>
+    </x-slot>
+</x-page-header>
 
 <!-- Filters -->
-<div class="filters-card no-print">
-    <form method="GET" action="{{ route('work-history.index') }}" class="filters-grid">
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 mb-6 no-print">
+    <form method="GET" action="{{ route('work-history.index') }}" class="flex flex-wrap items-end gap-4">
         @if(request()->filled('sales_rep_id'))
             <input type="hidden" name="sales_rep_id" value="{{ request('sales_rep_id') }}">
         @endif
 
         @if($isAdmin)
-            <div>
-                <label for="search">البحث بالاسم</label>
-                <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="ابحث باسم الموظف...">
+            <div class="w-full sm:w-56">
+                <label for="search" class="block text-xs font-semibold text-gray-500 mb-1.5">البحث بالاسم</label>
+                <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="ابحث باسم الموظف..."
+                    class="w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
             </div>
         @endif
 
-        <div>
-            <label for="from_date">من تاريخ</label>
-            <input type="date" id="from_date" name="from_date" value="{{ request('from_date') }}">
+        <div class="w-full sm:w-44">
+            <label for="from_date" class="block text-xs font-semibold text-gray-500 mb-1.5">من تاريخ</label>
+            <input type="date" id="from_date" name="from_date" value="{{ request('from_date') }}"
+                class="w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
         </div>
 
-        <div>
-            <label for="to_date">إلى تاريخ</label>
-            <input type="date" id="to_date" name="to_date" value="{{ request('to_date') }}">
+        <div class="w-full sm:w-44">
+            <label for="to_date" class="block text-xs font-semibold text-gray-500 mb-1.5">إلى تاريخ</label>
+            <input type="date" id="to_date" name="to_date" value="{{ request('to_date') }}"
+                class="w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
         </div>
 
-        <div>
-            <label for="status">الحالة</label>
-            <select id="status" name="status">
+        <div class="w-full sm:w-40">
+            <label for="status" class="block text-xs font-semibold text-gray-500 mb-1.5">الحالة</label>
+            <select id="status" name="status" class="w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
                 <option value="">جميع الحالات</option>
                 <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>نشط</option>
                 <option value="ended" {{ request('status') == 'ended' ? 'selected' : '' }}>منتهي</option>
             </select>
         </div>
 
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-sm btn-primary flex-grow-1">
-                <i class="bi bi-search me-1"></i> بحث
+        <div class="flex items-center gap-2">
+            <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607Z"/></svg>
+                بحث
             </button>
-            <a href="{{ route('work-history.index', request()->only('sales_rep_id')) }}" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-arrow-clockwise me-1"></i> إعادة تعيين
+            <a href="{{ route('work-history.index', request()->only('sales_rep_id')) }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                إعادة تعيين
             </a>
         </div>
     </form>
 </div>
 
 <!-- Stats -->
-<div class="stats-grid">
-    <div class="stat-card">
-        <span class="stat-icon"><i class="bi bi-graph-up"></i></span>
-        <h3>{{ $stats['average_days'] }}</h3>
-        <p>متوسط المدة (أيام)</p>
-    </div>
-    <div class="stat-card">
-        <span class="stat-icon"><i class="bi bi-clock"></i></span>
-        <h3>{{ number_format($stats['total_work_days']) }}</h3>
-        <p>إجمالي أيام العمل</p>
-    </div>
-    <div class="stat-card">
-        <span class="stat-icon text-success" style="background: rgba(16,185,129,.12);"><i class="bi bi-play-fill"></i></span>
-        <h3>{{ $stats['active_periods'] }}</h3>
-        <p>فترات نشطة</p>
-    </div>
-    <div class="stat-card">
-        <span class="stat-icon"><i class="bi bi-calendar-range"></i></span>
-        <h3>{{ $stats['total_periods'] }}</h3>
-        <p>إجمالي الفترات</p>
-    </div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <x-stat-card label="متوسط المدة (أيام)" :value="$stats['average_days']" accent="indigo"
+        icon='<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>' />
+    <x-stat-card label="إجمالي أيام العمل" :value="number_format($stats['total_work_days'])" accent="sky"
+        icon='<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' />
+    <x-stat-card label="فترات نشطة" :value="$stats['active_periods']" accent="emerald"
+        icon='<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z"/></svg>' />
+    <x-stat-card label="إجمالي الفترات" :value="$stats['total_periods']" accent="amber"
+        icon='<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>' />
 </div>
 
-<div class="table-container" id="print-area">
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" id="print-area">
     @if($histories->isEmpty())
-        <div class="empty-state">
-            <i class="bi bi-inbox" style="font-size:2rem;"></i>
-            <p class="mt-2 mb-0">لا توجد سجلات عمل مطابقة</p>
-        </div>
+        <x-empty-state title="لا توجد سجلات عمل مطابقة" />
     @else
-        <div class="table-responsive">
-            <table class="history-table">
-                <thead>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th>الموظف</th>
-                        <th>الفترة الزمنية</th>
-                        <th>المدة</th>
-                        <th>الحالة</th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">الموظف</th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">الفترة الزمنية</th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">المدة</th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">الحالة</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-100">
                     @foreach($histories as $row)
-                        <tr>
-                            <td>
-                                <div class="employee-cell">
-                                    <img src="{{ $row['avatar'] }}" alt="{{ $row['name'] }}">
-                                    <div>
-                                        <div class="name">{{ $row['name'] }}</div>
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-5 py-3.5">
+                                <div class="flex items-center gap-2.5">
+                                    <img src="{{ $row['avatar'] }}" alt="{{ $row['name'] }}" class="h-9 w-9 rounded-full object-cover shrink-0">
+                                    <div class="min-w-0">
+                                        <div class="text-sm font-medium text-gray-900 truncate">{{ $row['name'] }}</div>
                                         @if($row['email'])
-                                            <div class="email">{{ $row['email'] }}</div>
+                                            <div class="text-xs text-gray-500 truncate">{{ $row['email'] }}</div>
                                         @endif
                                     </div>
                                 </div>
                             </td>
-                            <td>
+                            <td class="px-5 py-3.5 text-sm text-gray-700 whitespace-nowrap">
                                 من {{ optional($row['start_date'])->format('Y-m-d') }}
                                 إلى {{ $row['end_date'] ? $row['end_date']->format('Y-m-d') : 'الآن' }}
                             </td>
-                            <td><span class="period-badge">{{ $row['period_label'] }}</span></td>
-                            <td>
+                            <td class="px-5 py-3.5">
+                                <x-badge color="indigo">{{ $row['period_label'] }}</x-badge>
+                            </td>
+                            <td class="px-5 py-3.5">
                                 @if($row['is_active'])
-                                    <span class="status-pill active"><i class="bi bi-play-fill"></i> نشط</span>
+                                    <x-badge color="emerald">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z"/></svg>
+                                        نشط
+                                    </x-badge>
                                 @else
-                                    <span class="status-pill ended"><i class="bi bi-stop-fill"></i> منتهي</span>
+                                    <x-badge color="rose">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
+                                        منتهي
+                                    </x-badge>
                                 @endif
                             </td>
                         </tr>
@@ -330,7 +147,7 @@
             </table>
         </div>
 
-        <div class="p-3 no-print">
+        <div class="p-4 border-t border-gray-100 no-print">
             {{ $histories->links() }}
         </div>
     @endif
