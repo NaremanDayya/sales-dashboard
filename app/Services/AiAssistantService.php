@@ -143,6 +143,11 @@ PROMPT;
                 'input_schema' => ['type' => 'object', 'properties' => (object) []],
             ],
             [
+                'name' => 'get_total_clients_count',
+                'description' => 'يرجع العدد الإجمالي لكل عملاء الشركة (أو عملاء الفريق/المندوب حسب صلاحية المستخدم)، بغض النظر عن حالة التواصل معهم.',
+                'input_schema' => ['type' => 'object', 'properties' => (object) []],
+            ],
+            [
                 'name' => 'get_late_customers',
                 'description' => 'يرجع عدد العملاء المتأخر التواصل معهم، ضمن نطاق صلاحية المستخدم.',
                 'input_schema' => ['type' => 'object', 'properties' => (object) []],
@@ -175,6 +180,7 @@ PROMPT;
     {
         return match ($name) {
             'get_clients_needing_renewal' => $this->getClientsNeedingRenewal($user),
+            'get_total_clients_count' => $this->getTotalClientsCount($user),
             'get_late_customers' => $this->getLateCustomers($user),
             'get_target_progress' => $this->getTargetProgress($user),
             'get_pending_requests_count' => $this->getPendingRequestsCount($user),
@@ -227,6 +233,11 @@ PROMPT;
             ->values();
 
         return ['count' => $agreements->count(), 'agreements' => $agreements];
+    }
+
+    protected function getTotalClientsCount(User $user): array
+    {
+        return ['count' => $this->clientsScope($user)->count()];
     }
 
     protected function getLateCustomers(User $user): array
