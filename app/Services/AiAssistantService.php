@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Agreement;
 use App\Models\Client;
-use App\Models\Service;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
@@ -77,70 +76,6 @@ class AiAssistantService
             'messages' => $messages,
             'reply' => 'تعذر إكمال الطلب بعد عدة محاولات، برجاء إعادة صياغة السؤال.',
         ];
-    }
-
-    /**
-     * Suggests the best-matching existing service for a new client based on
-     * its company name alone, to speed up the "interested service" field
-     * when a rep is adding a client. Always human-confirmed, never applied
-     * automatically - returns null when unsure or on any failure.
-     *
-     * @return array{service_id: int|null, reason: string|null}
-     */
-    public function suggestServiceForClient(string $companyName): array
-    {
-        $companyName = trim($companyName);
-        $services = Service::select('id', 'name', 'description')->get();
-
-        if ($companyName === '' || $services->isEmpty()) {
-            return ['service_id' => null, 'reason' => null];
-        }
-
-        $servicesList = $services
-            ->map(fn (Service $s) => "- ID {$s->id}: {$s->name}" . ($s->description ? " ({$s->description})" : ''))
-            ->implode("\n");
-
-        $prompt = <<<PROMPT
-اسم الشركة: "{$companyName}"
-
-الخدمات المتاحة لدينا:
-{$servicesList}
-
-بناءً على اسم الشركة فقط، رجّح أي خدمة من القائمة أعلاه على الأرجح تناسب نشاط هذه الشركة.
-أجب بصيغة JSON فقط بدون أي نص إضافي قبله أو بعده، بهذا الشكل بالضبط:
-{"service_id": <رقم الخدمة، أو null إذا لم تكن متأكدًا على الإطلاق>, "reason": "<سبب مختصر جدًا بالعربية، جملة واحدة>"}
-PROMPT;
-
-        try {
-            $response = Http::withHeaders([
-                'x-api-key' => config('services.anthropic.api_key'),
-                'anthropic-version' => '2023-06-01',
-                'content-type' => 'application/json',
-            ])->timeout(30)->post(self::API_URL, [
-                'model' => config('services.anthropic.model'),
-                'max_tokens' => 256,
-                'messages' => [['role' => 'user', 'content' => $prompt]],
-            ]);
-
-            if ($response->failed()) {
-                Log::error('AI service-suggestion request failed', ['status' => $response->status(), 'body' => $response->body()]);
-
-                return ['service_id' => null, 'reason' => null];
-            }
-
-            $text = collect($response->json('content', []))->where('type', 'text')->pluck('text')->implode('');
-            $parsed = json_decode(trim($text), true);
-
-            if (!is_array($parsed) || !array_key_exists('service_id', $parsed) || !$services->contains('id', $parsed['service_id'])) {
-                return ['service_id' => null, 'reason' => null];
-            }
-
-            return ['service_id' => (int) $parsed['service_id'], 'reason' => $parsed['reason'] ?? null];
-        } catch (\Throwable $e) {
-            Log::error('AI service-suggestion exception', ['message' => $e->getMessage()]);
-
-            return ['service_id' => null, 'reason' => null];
-        }
     }
 
     /**

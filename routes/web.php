@@ -210,7 +210,6 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/clients/{client}/update-last-contact', [ClientController::class, 'updateLastContact'])
         ->name('clients.update-last-contact');
 Route::get('/company-name-suggestions', [ClientController::class, 'suggestCompanyNames'])->name('clients.suggest-company-names');
-Route::post('/clients/suggest-service', [ClientController::class, 'suggestService'])->name('clients.suggest-service');
 
 });
 Route::get('/sales-reps/{salesRep}/pdf', [PdfController::class, 'downloadSalesRepPdf'])
