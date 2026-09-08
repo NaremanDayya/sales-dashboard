@@ -797,6 +797,18 @@ class ClientController extends Controller
 
         return view('clients.shared-companies', compact('sharedCompanies'));
     }
+    public function suggestService(Request $request)
+    {
+        $validated = $request->validate([
+            'company_name' => 'required|string|max:255',
+        ]);
+
+        $suggestion = app(\App\Services\AiAssistantService::class)
+            ->suggestServiceForClient($validated['company_name']);
+
+        return response()->json($suggestion);
+    }
+
     public function suggestCompanyNames(Request $request)
     {
         $query = $request->input('term');
