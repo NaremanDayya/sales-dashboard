@@ -87,6 +87,7 @@ class TargetController extends Controller
                 'real_year_achievement' => $realYearAchievement,
                 'carried_over_last_year' => $yearAggregator->carriedOverFromLastYear($service, $salesRep, $selectedYear, $targetService),
                 'bonus_of_year' => $yearAggregator->bonusOfYear($service, $salesRep, $selectedYear, $realYearAchievement),
+                'own_year_target_to_date' => $yearAggregator->ownYearTargetToDate($service, $salesRep, $selectedYear),
                 'commission_status' => $commissionForMonth?->commission_status ?? 'غير مستحق',
                 'commission_value' => $commissionForMonth?->commission_amount ?? 0,
                 'commission_id' => $commissionForMonth?->id ?? null,

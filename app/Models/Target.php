@@ -151,12 +151,12 @@ class Target extends Model
     }
 
     /**
-     * This year's own bonus: real achievement beyond what this year's own
-     * (eligible months x base target) required, evaluated independently of
-     * any prior year - see carriedOverFromLastYear()'s docblock. Never
-     * negative; a shortfall isn't a "bonus", it's just not one.
+     * This year's own cumulative base target (eligible months x base target)
+     * through the last elapsed month - independent of any carry-over from
+     * prior years or prior months. 0 if the rep isn't eligible for any
+     * month of this year yet.
      */
-    public function bonusOfYear(Service $service, SalesRep $salesRep, int $year, float $realYearAchievement): float
+    public function ownYearTargetToDate(Service $service, SalesRep $salesRep, int $year): float
     {
         $startDate = $salesRep->start_work_date;
         if (!$startDate) {
@@ -172,9 +172,19 @@ class Target extends Model
         }
 
         $monthsEligible = $rangeStart->diffInMonths($rangeEnd) + 1;
-        $ownYearTarget = $service->target_amount * $monthsEligible;
 
-        return max(0, $realYearAchievement - $ownYearTarget);
+        return $service->target_amount * $monthsEligible;
+    }
+
+    /**
+     * This year's own bonus: real achievement beyond what this year's own
+     * (eligible months x base target) required, evaluated independently of
+     * any prior year - see carriedOverFromLastYear()'s docblock. Never
+     * negative; a shortfall isn't a "bonus", it's just not one.
+     */
+    public function bonusOfYear(Service $service, SalesRep $salesRep, int $year, float $realYearAchievement): float
+    {
+        return max(0, $realYearAchievement - $this->ownYearTargetToDate($service, $salesRep, $year));
     }
 
     public function getCommissionStatusAttribute()

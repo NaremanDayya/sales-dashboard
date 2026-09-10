@@ -872,7 +872,7 @@ value="{{ old('commission_threshold', \App\Models\Setting::where('key', 'commiss
                         ${target.current_month_achieved_amount || 0}
                     </span>
                     /
-                    <span class="text-gray-600">${target.actual_target_amount || 0}</span>
+                    <span class="text-gray-600">${target.own_year_target_to_date || 0}</span>
                     ${target.surplus_carried_amount > 0
                         ? `<div class="text-xs text-green-600 mt-1">من رصيد إضافي محقق سابقاً</div>`
                         : ''}
@@ -1186,7 +1186,7 @@ function applyFilter() {
                     target.service_type || 'N/A',
                     formatCellValue(target.target_amount),
                     formatCellValue(target.carried_over_amount),
-                    formatCellValue(target.actual_target_amount),
+                    formatCellValue(target.own_year_target_to_date),
                     formatCellValue(target.month_achieved_1, true), // true for percentage columns
                     formatCellValue(target.month_achieved_2, true),
                     formatCellValue(target.month_achieved_3, true),
