@@ -140,6 +140,57 @@ class TargetController extends Controller
             'salesRep' => $salesRep
         ]);
     }
+    public function allTargets()
+    {
+        $now = now();
+        $selectedYear = (int) request('year', $now->year);
+        $services = Service::all();
+
+        $targetsByService = Target::where('year', $selectedYear)
+            ->get()
+            ->groupBy('service_id');
+
+        $data = $services->map(function ($service) use ($targetsByService, $selectedYear, $now) {
+            $rows = $targetsByService->get($service->id) ?? collect();
+
+            $row = [
+                'service_type' => $service->name,
+                'target_amount' => number_format($service->target_amount),
+                'commission_status' => 'N/A',
+            ];
+
+            $yearTargetSum = 0;
+            $yearAchievedSum = 0;
+
+            for ($month = 1; $month <= 12; $month++) {
+                $isFutureMonth = $selectedYear > $now->year || ($selectedYear == $now->year && $month > $now->month);
+                $monthRows = $rows->where('month', $month);
+
+                if ($isFutureMonth || $monthRows->isEmpty()) {
+                    $row["month_achieved_$month"] = '-';
+                    continue;
+                }
+
+                $monthTargetSum = $monthRows->sum('target_amount');
+                $monthAchievedSum = $monthRows->sum('achieved_amount');
+                $row["month_achieved_$month"] = $monthTargetSum > 0
+                    ? number_format(($monthAchievedSum / $monthTargetSum) * 100, 2)
+                    : '0.00';
+
+                $yearTargetSum += $monthTargetSum;
+                $yearAchievedSum += $monthAchievedSum;
+            }
+
+            $row['year_achieved_target'] = $yearTargetSum > 0
+                ? round(($yearAchievedSum / $yearTargetSum) * 100)
+                : 0;
+
+            return $row;
+        });
+
+        return view('targets.all', ['Targets' => $data]);
+    }
+
     public function create(SalesRep $sales_rep)
     {
         $services = Service::all();
