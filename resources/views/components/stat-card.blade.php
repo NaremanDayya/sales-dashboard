@@ -1,4 +1,4 @@
-@props(['label' => null, 'value' => null, 'icon' => null, 'trend' => null, 'trendUp' => true, 'accent' => 'indigo'])
+@props(['label' => null, 'value' => null, 'icon' => null, 'trend' => null, 'trendUp' => true, 'accent' => 'indigo', 'href' => null])
 
 @php
     $accents = [
@@ -9,9 +9,13 @@
         'sky' => 'bg-sky-50 text-sky-600',
     ];
     $accentClasses = $accents[$accent] ?? $accents['indigo'];
+    $tag = $href ? 'a' : 'div';
 @endphp
 
-<div {{ $attributes->class(['bg-white border border-gray-200 rounded-xl p-5 shadow-sm']) }}>
+<{{ $tag }} @if($href) href="{{ $href }}" @endif {{ $attributes->class([
+    'bg-white border border-gray-200 rounded-xl p-5 shadow-sm',
+    'block transition-shadow hover:shadow-md cursor-pointer' => $href,
+]) }}>
     <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
             <p class="text-sm font-semibold text-gray-500 truncate">{{ $label }}</p>
@@ -39,4 +43,4 @@
             </span>
         @endif
     </div>
-</div>
+</{{ $tag }}>
