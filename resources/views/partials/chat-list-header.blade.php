@@ -5,10 +5,21 @@
 
     <div class="flex items-center gap-3">
         <!-- Date Filter -->
-        <div class="relative flex items-center gap-1">
-            <input type="date"
-                   wire:model.live="dateFilter"
-                   class="text-sm rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 py-1 pr-2"
+        <div class="relative flex items-center gap-1"
+             x-data="{
+                fp: null,
+                init() {
+                    this.fp = flatpickr(this.$refs.dateInput, {
+                        locale: 'ar',
+                        dateFormat: 'Y-m-d',
+                        defaultDate: @js($dateFilter),
+                        onChange: (dates, dateStr) => $wire.set('dateFilter', dateStr || null),
+                    });
+                    $wire.$watch('dateFilter', (value) => { if (!value) this.fp.clear(); });
+                }
+             }">
+            <input type="text" x-ref="dateInput" wire:ignore readonly
+                   class="text-sm rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 py-1 pr-2 cursor-pointer"
                    placeholder="تصفية حسب التاريخ">
             @if($dateFilter)
                 <button wire:click="$set('dateFilter', null)"

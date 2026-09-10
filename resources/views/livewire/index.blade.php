@@ -1,4 +1,7 @@
 @vite(['resources/css/app.css', 'resources/js/app.js'])
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ar.js"></script>
 <script>
     document.title = "محادثات العملاء";
 </script>
