@@ -10,8 +10,9 @@ class SettingController extends Controller
 public function index()
     {
         $lateDays = Setting::where('key', 'late_customer_days')->value('value') ?? 3;
+        $commissionThreshold = Setting::where('key', 'commission_threshold')->value('value') ?? 90;
 
-        return view('admin.settings.index', compact('lateDays'));
+        return view('admin.settings.index', compact('lateDays', 'commissionThreshold'));
     }
 
     public function update(Request $request)
