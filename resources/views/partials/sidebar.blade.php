@@ -66,14 +66,14 @@
 
                 @if(Auth::user()->hasRole('admin'))
                     {!! $navLink('allAgreements', 'الاتفاقيات', 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2') !!}
-                    {!! $navLink('allTargets', 'التارجت العام', 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z') !!}
+                    {{-- {!! $navLink('allTargets', 'التارجت العام', 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z') !!} --}}
                 @elseif(Auth::user()->role == 'salesRep')
                     {!! $navLink('salesrep.agreements.index', 'اتفاقياتي', 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', $salesRepId) !!}
                 @endif
 
                 @if(Auth::user()->hasRole('admin'))
                     {!! $navLink('admin.allRequests', 'الطلبات', 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z') !!}
-                    {!! $navLink('commissions.index', 'العمولات', 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l7-4 7 4z') !!}
+                    {{-- {!! $navLink('commissions.index', 'العمولات', 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l7-4 7 4z') !!} --}}
                 @elseif(Auth::user()->role == 'salesRep')
                     {!! $navLink('myRequests', 'طلباتي', 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', $salesRepId) !!}
                     {!! $navLink('sales-reps.commissions.index', 'عمولاتي', 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l7-4 7 4z', $salesRepId) !!}
