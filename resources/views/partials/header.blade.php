@@ -42,7 +42,7 @@
                 x-transition:leave="ease-in duration-150"
                 x-transition:leave-start="opacity-100 translate-y-0"
                 x-transition:leave-end="opacity-0 translate-y-1"
-                class="absolute end-0 mt-2 w-[22rem] max-w-[92vw] origin-top-end"
+                class="absolute left-0 mt-2 w-[22rem] max-w-[92vw] origin-top-left"
                 x-cloak
             >
                 <div class="text-sm h-[500px] z-50 bg-white border overflow-hidden dark:border-neutral-700 rounded-xl shadow-xl border-gray-200 text-neutral-700 dark:bg-neutral-900">
@@ -77,7 +77,7 @@
                  x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1"
                  x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="ease-in duration-150"
                  x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-1"
-                 class="absolute end-0 mt-2 w-96 max-w-[92vw] origin-top-end z-50" x-cloak>
+                 class="absolute left-0 mt-2 w-96 max-w-[92vw] origin-top-left z-50" x-cloak>
                 <div class="text-sm h-[500px] bg-white border overflow-hidden dark:border-neutral-700 rounded-xl shadow-xl border-gray-200 text-neutral-700 dark:bg-neutral-900">
                     <x-user-notification-menu count:5 />
                 </div>
@@ -102,7 +102,7 @@
                  x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95"
                  x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75"
                  x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                 class="absolute end-0 mt-2 w-56 origin-top-end rounded-xl bg-white shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-neutral-800 dark:border dark:border-neutral-700"
+                 class="absolute left-0 mt-2 w-56 origin-top-left rounded-xl bg-white shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-neutral-800 dark:border dark:border-neutral-700"
                  x-cloak>
                 <div class="px-4 py-3 border-b border-gray-100 dark:border-neutral-700">
                     <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ Auth::user()->name }}</p>
