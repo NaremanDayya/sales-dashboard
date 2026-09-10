@@ -8,6 +8,19 @@
     display: none !important;
 }
 
+/* Chrome mirrors native date input segment order/placeholder glyphs on RTL
+   pages; force LTR internally, right-align so it still reads naturally.
+   Duplicated from public/assets/css/style.css since standalone chat pages
+   don't load that stylesheet. */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"] {
+    direction: ltr;
+    text-align: right;
+}
+
 :root {
     --app-sidebar-width: 17rem;
     --app-sidebar-width-collapsed: 5rem;
