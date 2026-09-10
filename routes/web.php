@@ -193,6 +193,7 @@ Route::get('/generate-monthly-targets', function () {
 Route::middleware('auth', \App\Http\Middleware\AuthorizeSalesRep::class)->group(function () {
     Route::post('/agreements/export', [AgreementController::class, 'export'])->name('agreements.export');
     Route::resource('sales-rep.targets', TargetController::class);
+    Route::get('sales-rep/{sales_rep}/targets-carried-over', [TargetController::class, 'carriedOverOfYears'])->name('sales-rep.targets.carried-over');
     Route::resource('salesrep.agreements', AgreementController::class);
     Route::get('targets', [TargetController::class, 'allTargets'])->name('allTargets');
     Route::get('clients', [ClientController::class, 'allClients'])->name('allClients');

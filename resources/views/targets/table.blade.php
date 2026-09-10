@@ -491,6 +491,11 @@
         <i class="fas fa-chart-line mr-1"></i> عرض العمولات
     </a>
 
+   <a href="{{ route('sales-rep.targets.carried-over', $salesRep->id) }}"
+       class="inline-flex items-center px-3 py-2 bg-indigo-600 text-white text-sm font-semibold rounded hover:bg-indigo-700 transition">
+        <i class="fas fa-layer-group mr-1"></i> المرحل حسب السنوات
+    </a>
+
          <div class="relative" x-data="{ exportOpen: false }">
              <button @click="exportOpen = !exportOpen"
                      class="btn btn-outline flex items-center gap-2">
@@ -629,6 +634,9 @@ value="{{ old('commission_threshold', \App\Models\Setting::where('key', 'commiss
                             <th colspan="12">نسبة تحقيق التارجت الشهري</th>
                             <th>النسبة السنوية المحققة للخدمة</th>
                             <th>المجموع السنوي المحقق للخدمة</th>
+                            <th>تحقيق السنة الفعلي</th>
+                            <th>المرحل من السنة السابقة</th>
+                            <th>بونص السنة</th>
                             <th>حالة العمولة للشهر الحالي</th>
                         </tr>
                         <tr class="text-center">
@@ -648,6 +656,9 @@ value="{{ old('commission_threshold', \App\Models\Setting::where('key', 'commiss
                             <th>10</th>
                             <th>11</th>
                             <th>12</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
                             <th></th>
                             <th></th>
                             <th></th>
@@ -763,7 +774,7 @@ value="{{ old('commission_threshold', \App\Models\Setting::where('key', 'commiss
             if (!targetsData || targetsData.length === 0) {
                 tbody.innerHTML = `
             <tr>
-                <td colspan="19" class="empty-state text-center">
+                <td colspan="22" class="empty-state text-center">
                     <div class="empty-icon">
                         <i class="fas fa-users-slash"></i>
                     </div>
@@ -881,6 +892,20 @@ value="{{ old('commission_threshold', \App\Models\Setting::where('key', 'commiss
 
                 <td class="px-4 py-3 text-sm font-semibold text-center text-gray-700">
                     ${target.year_achieved_amount || 0}
+                </td>
+
+                <td class="px-4 py-3 text-sm font-semibold text-center text-gray-700">
+                    ${target.real_year_achievement || 0}
+                </td>
+
+                <td class="px-4 py-3 text-sm font-semibold text-center ${
+                        (target.carried_over_last_year || 0) < 0 ? 'text-red-600' : ((target.carried_over_last_year || 0) > 0 ? 'text-green-600' : 'text-gray-500')
+                    }">
+                    ${target.carried_over_last_year || 0}
+                </td>
+
+                <td class="px-4 py-3 text-sm font-semibold text-center ${(target.bonus_of_year || 0) > 0 ? 'text-green-600' : 'text-gray-500'}">
+                    ${target.bonus_of_year || 0}
                 </td>
 
                 <td class="px-4 py-3 text-sm text-center">
@@ -1131,6 +1156,9 @@ function applyFilter() {
                     "الشهر 12 (%)",
                     "النسبة السنوية المحققة للخدمة (%)",
                     "المجموع السنوي المحقق للخدمة",
+                    "تحقيق السنة الفعلي",
+                    "المرحل من السنة السابقة",
+                    "بونص السنة",
                     "حالة العمولة للشهر الحالي"
                 ];
 
@@ -1173,6 +1201,9 @@ function applyFilter() {
                     formatCellValue(target.month_achieved_12, true),
                     formatCellValue(target.year_achieved_target, true),
                     formatCellValue(target.year_achieved_amount),
+                    formatCellValue(target.real_year_achievement),
+                    formatCellValue(target.carried_over_last_year),
+                    formatCellValue(target.bonus_of_year),
                     target.commission_status || 'N/A'
                 ]);
 

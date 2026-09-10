@@ -55,7 +55,7 @@ class TargetController extends Controller
 
         $data = $services->map(function ($service) use (
             $salesRep, $targetsByService, $selectedYear, $selectedMonth,
-            $summaryMonth, $startYear, $startMonth, $now
+            $summaryMonth, $startYear, $startMonth, $now, $targetService
         ) {
             $monthsForService = ($targetsByService->get($service->id) ?? collect())->keyBy('month');
             $target = $summaryMonth ? $monthsForService->get($summaryMonth) : null;
@@ -73,12 +73,20 @@ class TargetController extends Controller
             // row existing, so compute them regardless of whether $target is set.
             $yearAggregator = new Target();
 
+            $realYearAchievement = $yearAggregator->realYearAchievement($service, $salesRep, $selectedYear);
+
             $row = [
                 'service_type' => $service->name,
                 'target_amount' => number_format($service->target_amount),
                 'current_month_achieved_amount' => (int) ($target?->achieved_amount ?? 0),
                 'year_achieved_target' => $yearAggregator->yearAchievedAmount($service, $salesRep, $selectedYear),
                 'year_achieved_amount' => $yearAggregator->yearAchievedAmountValue($service, $salesRep, $selectedYear),
+                // The 3 "yearly summary" figures below are each computed
+                // independently per year (see Target::bonusOfYear()'s docblock) -
+                // they are not netted against each other yet.
+                'real_year_achievement' => $realYearAchievement,
+                'carried_over_last_year' => $yearAggregator->carriedOverFromLastYear($service, $salesRep, $selectedYear, $targetService),
+                'bonus_of_year' => $yearAggregator->bonusOfYear($service, $salesRep, $selectedYear, $realYearAchievement),
                 'commission_status' => $commissionForMonth?->commission_status ?? 'غير مستحق',
                 'commission_value' => $commissionForMonth?->commission_amount ?? 0,
                 'commission_id' => $commissionForMonth?->id ?? null,
@@ -189,6 +197,51 @@ class TargetController extends Controller
         });
 
         return view('targets.all', ['Targets' => $data]);
+    }
+
+    /**
+     * Month-by-month audit trail of the real carry-over chain (deficit owed
+     * or surplus banked) for a rep, one row per service, for a selected
+     * year - separate from the independent-per-year "yearly summary" columns
+     * on the main target table, which don't chain across years.
+     */
+    public function carriedOverOfYears(SalesRep $sales_rep, TargetService $targetService)
+    {
+        $now = now();
+        $selectedYear = (int) request('year', $now->year);
+        $services = Service::all();
+
+        $startDate = $sales_rep->start_work_date;
+        $firstEligibleMonth = $startDate ? $startDate->copy()->startOfMonth()->addMonth() : null;
+
+        $rows = $services->map(function ($service) use ($sales_rep, $selectedYear, $now, $firstEligibleMonth, $targetService) {
+            $row = ['service_type' => $service->name];
+
+            for ($month = 1; $month <= 12; $month++) {
+                $monthDate = Carbon::create($selectedYear, $month, 1);
+
+                $isBeforeStart = $firstEligibleMonth && $monthDate->lt($firstEligibleMonth);
+                $isFuture = $monthDate->startOfMonth()->gt($now->copy()->startOfMonth());
+
+                if ($isBeforeStart || $isFuture) {
+                    $row["month_$month"] = '-';
+                    continue;
+                }
+
+                $target = $targetService->getOrCreateTarget($sales_rep->id, $service->id, $monthDate);
+                $row["month_$month"] = $target
+                    ? (float) $target->surplus_carried_amount - (float) $target->carried_over_amount
+                    : '-';
+            }
+
+            return $row;
+        });
+
+        return view('targets.carried-over', [
+            'Rows' => $rows,
+            'selectedYear' => $selectedYear,
+            'salesRep' => $sales_rep,
+        ]);
     }
 
     public function create(SalesRep $sales_rep)
