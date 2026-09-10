@@ -639,6 +639,29 @@ class ClientController extends Controller
     }
 
 
+    public function openChat(Client $client)
+    {
+        $authenticatedUserId = Auth::id();
+
+        $conversation = $client->conversations()
+            ->where(function ($query) use ($authenticatedUserId) {
+                $query->where('sender_id', $authenticatedUserId)
+                    ->orWhere('receiver_id', $authenticatedUserId);
+            })->first();
+
+        if (!$conversation) {
+            $adminUserId = User::where('role', 'admin')->first()->id;
+
+            $conversation = Conversation::create([
+                'sender_id' => $authenticatedUserId,
+                'receiver_id' => $adminUserId,
+                'client_id' => $client->id,
+            ]);
+        }
+
+        return redirect()->route('client.chat', ['client' => $client->id, 'conversation' => $conversation->id]);
+    }
+
     public function startChat($clientId, $conversationId)
     {
         // Validate and load client and conversation

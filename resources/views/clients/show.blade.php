@@ -245,6 +245,15 @@
                                             </a></div>
 
                                         <div>
+                                            <div class="text-gray-500 mb-1">المحادثة</div>
+                                            <a href="{{ route('clients.open-chat', $client->id) }}"
+                                               class="text-indigo-600 font-semibold hover:underline flex items-center space-x-2 rtl:space-x-reverse">
+                                                <i class="fas fa-comment-dots text-lg"></i>
+                                                <span>فتح المحادثة</span>
+                                            </a>
+                                        </div>
+
+                                        <div>
                                             <div class="text-gray-500 mb-1">سفير العلامة التجارية</div>
                                             <div class="flex items-center space-x-2 rtl:space-x-reverse">
                                                 <i class="fas fa-user-tie text-blue-500"></i>

@@ -204,6 +204,7 @@ Route::middleware('auth', \App\Http\Middleware\AuthorizeSalesRep::class)->group(
         ->name('agreements.finish');
 });
 Route::middleware(['auth'])->group(function () {
+    Route::get('/clients/{client}/open-chat', [ClientController::class, 'openChat'])->name('clients.open-chat');
     Route::get('/clients/{client}/edit', [ClientController::class, 'edit'])->name('clients.edit');
     Route::put('/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
     Route::resource('services', ServiceController::class);
