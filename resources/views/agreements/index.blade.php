@@ -651,7 +651,7 @@
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td class="px-4 py-2 text-center">
-                    ${agreement.client_logo ? `<img src="${agreement.client_logo}" alt="شعار" class="h-10 mx-auto rounded-full border" />` : '—'}
+                    ${agreement.client_logo ? `<img src="${agreement.client_logo}" alt="شعار" loading="lazy" decoding="async" class="h-10 mx-auto rounded-full border" />` : '—'}
                 </td>
                 <td class="px-4 py-2 text-sm font-semibold text-gray-800">${agreement.client_name || '—'}</td>
                 <td class="px-4 py-2 text-sm text-gray-700">${agreement.signing_date || '—'}</td>

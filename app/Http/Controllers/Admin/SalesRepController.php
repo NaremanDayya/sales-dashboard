@@ -11,6 +11,7 @@ use App\Models\SalesRep;
 use App\Models\SalesRepCredential;
 use App\Models\SalesRepWorkHistory;
 use App\Models\User;
+use App\Support\ImageOptimizer;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -122,7 +123,7 @@ class SalesRepController extends Controller
         if ($request->hasFile('personal_image')) {
             $file = $request->file('personal_image');
             $path = 'profile-photos/' . $file->hashName();
-            Storage::disk('s3')->putFileAs('profile-photos', $file, $file->hashName());
+            Storage::disk('s3')->put($path, ImageOptimizer::resize($file));
             $user->personal_image = $path;
             $user->save();
         }
@@ -278,7 +279,8 @@ if ($salesRep->user->personal_image && Storage::exists('public/' . $salesRep->us
 // Store new personal image
 $image = $request->file('personal_image');
 $imageName = time() . '_' . $image->getClientOriginalName();
-$path = $request->personal_image->storeAs('profile-images', $imageName, 'public');
+$path = 'profile-images/' . $imageName;
+Storage::disk('public')->put($path, ImageOptimizer::resize($image));
 $validated['personal_image'] = $path;
     }
 

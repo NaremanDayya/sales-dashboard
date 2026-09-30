@@ -1520,7 +1520,7 @@ function setupBulkActions() {
 
 <td class="px-4 py-2 text-center">
   ${rep.personal_image
-    ? `<img src="${rep.personal_image}" alt="شعار" class="h-16 w-16 mx-auto rounded-full border object-cover" />`
+    ? `<img src="${rep.personal_image}" alt="شعار" loading="lazy" decoding="async" class="h-16 w-16 mx-auto rounded-full border object-cover" />`
     : '—'}
 </td>
 <td class="col-name px-6 py-4 whitespace-nowrap text-lg font-bold text-blue-700" x-data="{ deleteModalOpen: false }">

@@ -2062,7 +2062,7 @@
         <!-- Client Logo -->
         <td class="px-4 py-2 text-center">
             ${agreement.client_logo ? `<div class="h-20 w-20 mx-auto border rounded-full p-3 bg-white flex items-center justify-center">
-<img src="${agreement.client_logo}" alt="شعار" class=class="max-h-full max-w-full object-contain" />
+<img src="${agreement.client_logo}" alt="شعار" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain" />
 </div>` : '—'}
         </td>
 

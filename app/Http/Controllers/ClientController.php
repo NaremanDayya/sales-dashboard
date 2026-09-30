@@ -14,6 +14,7 @@ use App\Models\SalesRep;
 use App\Models\User;
 use App\Notifications\LateCustomerNotification;
 use App\Notifications\NewClientNotification;
+use App\Support\ImageOptimizer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -325,7 +326,9 @@ class ClientController extends Controller
         try {
             // Handle temporary upload for preview
             if ($request->hasFile('company_logo')) {
-                $tempPath = $request->file('company_logo')->store('temp', 'public');
+                $logoFile = $request->file('company_logo');
+                $tempPath = 'temp/' . $logoFile->hashName();
+                Storage::disk('public')->put($tempPath, ImageOptimizer::resize($logoFile));
                 session()->put('temp_company_logo', $tempPath);
                 $request->merge(['company_logo_temp' => $tempPath]);
             }
@@ -357,7 +360,8 @@ class ClientController extends Controller
     $file = $request->file('company_logo');
 
     // Store directly into "public/company_logos"
-    $path = $file->store('company_logos', 'public');
+    $path = 'company_logos/' . $file->hashName();
+    Storage::disk('public')->put($path, ImageOptimizer::resize($file));
 
     $validated['company_logo'] = $path;
 
@@ -606,7 +610,10 @@ class ClientController extends Controller
 
         // Special handling for logo
         if ($editableField === 'logo' && $request->hasFile('company_logo')) {
-            $validated['company_logo'] = $request->file('company_logo')->store('clients/logos', 'public');
+            $logoFile = $request->file('company_logo');
+            $logoPath = 'clients/logos/' . $logoFile->hashName();
+            Storage::disk('public')->put($logoPath, ImageOptimizer::resize($logoFile));
+            $validated['company_logo'] = $logoPath;
         }
 
         // Special case for phone: generate whatsapp link
