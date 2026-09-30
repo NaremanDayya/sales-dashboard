@@ -119,11 +119,11 @@ class SalesRepController extends Controller
 
         // Store credentials in database (will be updated after sales rep is created)
 
-        // Handle personal image upload to S3
+        // Handle personal image upload
         if ($request->hasFile('personal_image')) {
             $file = $request->file('personal_image');
             $path = 'profile-photos/' . $file->hashName();
-            Storage::disk('s3')->put($path, ImageOptimizer::resize($file));
+            Storage::disk('public')->put($path, ImageOptimizer::resize($file));
             $user->personal_image = $path;
             $user->save();
         }
