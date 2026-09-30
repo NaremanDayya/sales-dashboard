@@ -200,7 +200,7 @@
                 x-cloak
             >
                 <div class="text-sm h-[500px] z-50 bg-white border overflow-hidden dark:border-neutral-700 rounded-xl shadow-xl border-neutral-200/70 text-neutral-700 dark:bg-neutral-900">
-                    <livewire:wirechat.chats />
+                    <livewire:wirechat.chats lazy />
                 </div>
             </div>
         </div>
