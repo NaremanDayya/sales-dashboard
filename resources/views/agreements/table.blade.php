@@ -970,10 +970,13 @@
         }
 
         /* ==================== Duration badge (agreement status) ==================== */
-        /* Plain block layout, not flexbox: html2canvas (used by the PDF export)
-           has a long-standing bug where text inside flex containers - especially
-           flex-direction:column - fails to render while backgrounds/icons still
-           show. Centering via text-align keeps the same look without tripping it. */
+        /* The PDF export rasterises this markup with html2canvas, which never
+           paints the text of block-level children inside an inline-block parent
+           (only the background and icon show), and draws every text run
+           left-to-right, so a run mixing Arabic with digits, punctuation or a
+           trailing space comes out reordered. Hence the shape of the markup in
+           renderDurationBadge(): two inline lines split by a <br>, with each
+           word, number and separator in its own span. */
         .duration-badge {
             display: inline-block;
             text-align: center;
@@ -981,6 +984,7 @@
             border-radius: 10px;
             font-size: 11px;
             line-height: 1.7;
+            white-space: nowrap;
         }
 
         .duration-badge.is-active {
@@ -994,12 +998,10 @@
         }
 
         .duration-badge .duration-badge-label {
-            display: block;
             font-weight: 600;
         }
 
         .duration-badge .duration-badge-value {
-            display: block;
             font-weight: 700;
             font-size: 12px;
         }
@@ -1815,6 +1817,10 @@
                         useCORS: true,
                         logging: false,
                         backgroundColor: '#ffffff', // optional, ensures background is white
+                        // Without these, exporting while the page is scrolled
+                        // down cuts that many pixels off the top of the PDF.
+                        scrollX: 0,
+                        scrollY: 0,
                         onclone: function(clonedDoc) {
                             // Remove any remaining no-print elements in cloned doc
                             const clonedNoPrint = clonedDoc.querySelectorAll('.no-print');
@@ -1830,11 +1836,8 @@
                     pagebreak: { mode: ['css', 'legacy'] } // handle page breaks
                 };
 
-                // Generate PDF - wait for webfonts (Tajawal + Font Awesome icons)
-                // to finish loading first. html2canvas snapshots synchronously,
-                // and if a font isn't ready yet it renders blank text while
-                // backgrounds/borders/icons still show - exactly the "status
-                // badges with no label" symptom this works around.
+                // Wait for the webfonts (Tajawal + Font Awesome) so html2canvas
+                // measures and draws the text with the final fonts.
                 document.fonts.ready.then(() => {
                     html2pdf().set(options).from(printArea).save();
                 });
@@ -2445,14 +2448,17 @@
             const end = finished ? (agreement.finish_date || agreement.end_date) : null;
             const { years, months, days } = computeDuration(agreement.signing_date, end);
 
-            const label = finished ? 'استمرت:' : 'منذ التوقيع:';
+            const labelWords = finished ? ['استمرت'] : ['منذ', 'التوقيع'];
             const icon = finished ? 'fa-clock' : 'fa-play';
             const cssClass = finished ? 'is-finished' : 'is-active';
 
+            // One span per token, no block-level children: see the .duration-badge CSS comment.
+            const tokens = parts => parts.map(part => `<span>${part}</span>`).join(' ');
+
             return `
                 <span class="duration-badge ${cssClass}">
-                    <span class="duration-badge-label"><i class="fas ${icon}"></i> ${label}</span>
-                    <span class="duration-badge-value">${years} سنة، ${months} شهر، ${days} يوم</span>
+                    <span class="duration-badge-label"><i class="fas ${icon}"></i> ${tokens(labelWords)}<span>:</span></span><br>
+                    <span class="duration-badge-value">${tokens([years, 'سنة', '•', months, 'شهر', '•', days, 'يوم'])}</span>
                 </span>
             `;
         }
