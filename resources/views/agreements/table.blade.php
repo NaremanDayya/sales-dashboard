@@ -979,15 +979,17 @@
         }
 
         /* ==================== Duration badge (agreement status) ==================== */
+        /* Plain block layout, not flexbox: html2canvas (used by the PDF export)
+           has a long-standing bug where text inside flex containers - especially
+           flex-direction:column - fails to render while backgrounds/icons still
+           show. Centering via text-align keeps the same look without tripping it. */
         .duration-badge {
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
+            display: inline-block;
+            text-align: center;
             padding: 6px 14px;
             border-radius: 10px;
             font-size: 11px;
-            line-height: 1.5;
+            line-height: 1.7;
         }
 
         .duration-badge.is-active {
@@ -1001,23 +1003,20 @@
         }
 
         .duration-badge .duration-badge-label {
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            display: block;
             font-weight: 600;
         }
 
         .duration-badge .duration-badge-value {
+            display: block;
             font-weight: 700;
             font-size: 12px;
         }
 
         /* ==================== Merged notice column ==================== */
+        /* Same reason: no flexbox here either, so the PDF export renders the text. */
         .notice-cell {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
+            text-align: center;
         }
 
         /* ==================== Finish agreement modal ==================== */
@@ -2169,10 +2168,10 @@
         <!-- Notice (expected date + status merged) -->
         <td class="px-4 py-2 text-sm">
             <div class="notice-cell">
-                <span class="${ agreement.is_notice_at_time ? 'text-red-600 font-bold' : 'text-green-600 font-bold' }">
+                <span class="block ${ agreement.is_notice_at_time ? 'text-red-600 font-bold' : 'text-green-600 font-bold' }">
                     ${formatDateForDisplay(agreement.required_notice_date) || '—'}
                 </span>
-                <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-semibold ${
+                <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
                     agreement.notice_status === 'sent'
                         ? 'bg-green-100 text-green-600'
                         : (agreement.notice_status === 'not_sent' || agreement.notice_status === 'not sent')
