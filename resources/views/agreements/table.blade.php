@@ -979,10 +979,13 @@
         }
 
         /* ==================== Duration badge (agreement status) ==================== */
-        /* Plain block layout, not flexbox: html2canvas (used by the PDF export)
-           has a long-standing bug where text inside flex containers - especially
-           flex-direction:column - fails to render while backgrounds/icons still
-           show. Centering via text-align keeps the same look without tripping it. */
+        /* The PDF export rasterises this markup with html2canvas, which never
+           paints the text of block-level children inside an inline-block parent
+           (only the background and icon show), and draws every text run
+           left-to-right, so a run mixing Arabic with digits, punctuation or a
+           trailing space comes out reordered. Hence the shape of the markup in
+           renderDurationBadge(): two inline lines split by a <br>, with each
+           word, number and separator in its own span. */
         .duration-badge {
             display: inline-block;
             text-align: center;
@@ -990,6 +993,7 @@
             border-radius: 10px;
             font-size: 11px;
             line-height: 1.7;
+            white-space: nowrap;
         }
 
         .duration-badge.is-active {
@@ -1003,12 +1007,10 @@
         }
 
         .duration-badge .duration-badge-label {
-            display: block;
             font-weight: 600;
         }
 
         .duration-badge .duration-badge-value {
-            display: block;
             font-weight: 700;
             font-size: 12px;
         }
@@ -1540,6 +1542,7 @@
 @push('scripts')
     <!-- مكتبات التصدير -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <script>
@@ -1779,22 +1782,76 @@
         }
 
         function exportToPDF(selectedColumns) {
-            // Rendered server-side (dompdf) instead of a client-side html2canvas
-            // screenshot - that approach repeatedly rendered colored status/notice
-            // badges with no text inside them, depending on font-load timing and
-            // nested flexbox, neither of which a real HTML-to-PDF renderer is
-            // sensitive to.
             try {
+                // Show loading
                 showNotification('جاري إنشاء ملف PDF...', 'success');
 
-                const salesRepId = document.getElementById('current_sales_rep_id').value;
-                const params = new URLSearchParams();
-                selectedColumns.forEach(col => params.append('columns[]', col));
-                if (salesRepId) {
-                    params.append('sales_rep_id', salesRepId);
-                }
+                // Clone the main content
+                const printArea = document.getElementById('print-area').cloneNode(true);
 
-                window.location.href = `{{ route('agreements.exportTablePdf') }}?${params.toString()}`;
+                // Hide unnecessary elements in the clone
+                const elementsToHide = printArea.querySelectorAll('.table-actions, .table-filters, .pagination, .export-options, .btn, .no-print');
+                elementsToHide.forEach(el => el.style.display = 'none');
+
+                // Hide columns that are not selected
+                const table = printArea.querySelector('.data-table');
+                const headers = table.querySelectorAll('thead th');
+
+                headers.forEach((header, index) => {
+                    const columnName = header.textContent.trim();
+                    const columnKey = getColumnKey(columnName);
+
+                    if (!selectedColumns.includes(columnKey)) {
+                        header.style.display = 'none';
+                        table.querySelectorAll('tbody tr').forEach(row => {
+                            if (row.cells[index]) {
+                                row.cells[index].style.display = 'none';
+                            }
+                        });
+                    }
+                });
+
+                // Show PDF header and footer
+                const pdfHeader = printArea.querySelector('.pdf-header');
+                const pdfFooter = printArea.querySelector('.pdf-footer');
+                if (pdfHeader) pdfHeader.style.display = 'block';
+                if (pdfFooter) pdfFooter.style.display = 'block';
+
+                // PDF options
+                const options = {
+                    margin: 10,
+                    filename: `اتفاقيات_الشركة_${new Date().toISOString().slice(0,10)}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#ffffff', // optional, ensures background is white
+                        // Without these, exporting while the page is scrolled
+                        // down cuts that many pixels off the top of the PDF.
+                        scrollX: 0,
+                        scrollY: 0,
+                        onclone: function(clonedDoc) {
+                            // Remove any remaining no-print elements in cloned doc
+                            const clonedNoPrint = clonedDoc.querySelectorAll('.no-print');
+                            clonedNoPrint.forEach(el => el.remove());
+                        }
+                    },
+                    jsPDF: {
+                        unit: 'mm',               // Using mm for better scaling
+                        format: [600, 297],     // Custom size: A2 landscape approx 420x297 mm
+                        orientation: 'landscape',
+                        compress: true
+                    },
+                    pagebreak: { mode: ['css', 'legacy'] } // handle page breaks
+                };
+
+                // Wait for the webfonts (Tajawal + Font Awesome) so html2canvas
+                // measures and draws the text with the final fonts.
+                document.fonts.ready.then(() => {
+                    html2pdf().set(options).from(printArea).save();
+                });
+
             } catch (error) {
                 console.error('Error exporting to PDF:', error);
                 showNotification('حدث خطأ أثناء التصدير إلى PDF', 'error');
@@ -2404,14 +2461,17 @@
             const end = finished ? (agreement.finish_date || agreement.end_date) : null;
             const { years, months, days } = computeDuration(agreement.signing_date, end);
 
-            const label = finished ? 'استمرت:' : 'منذ التوقيع:';
+            const labelWords = finished ? ['استمرت'] : ['منذ', 'التوقيع'];
             const icon = finished ? 'fa-clock' : 'fa-play';
             const cssClass = finished ? 'is-finished' : 'is-active';
 
+            // One span per token, no block-level children: see the .duration-badge CSS comment.
+            const tokens = parts => parts.map(part => `<span>${part}</span>`).join(' ');
+
             return `
                 <span class="duration-badge ${cssClass}">
-                    <span class="duration-badge-label"><i class="fas ${icon}"></i> ${label}</span>
-                    <span class="duration-badge-value">${years} سنة، ${months} شهر، ${days} يوم</span>
+                    <span class="duration-badge-label"><i class="fas ${icon}"></i> ${tokens(labelWords)}<span>:</span></span><br>
+                    <span class="duration-badge-value">${tokens([years, 'سنة', '•', months, 'شهر', '•', days, 'يوم'])}</span>
                 </span>
             `;
         }

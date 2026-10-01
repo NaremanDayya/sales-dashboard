@@ -29,7 +29,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
-use Barryvdh\DomPDF\Facade\Pdf as DomPdf;
 
 class AgreementController extends Controller
 {
@@ -103,36 +102,6 @@ class AgreementController extends Controller
 
 
         return view('agreements.table', data: compact('Agreements', 'services', 'salesrep', 'isAdmin'));
-    }
-
-    /**
-     * Server-side PDF export of the agreements table, rendered with dompdf
-     * instead of the browser (html2canvas was unreliable - text inside
-     * colored status/notice badges would render blank in the exported file).
-     */
-    public function exportTablePdf(Request $request)
-    {
-        $query = Agreement::with(['client', 'service', 'salesRep']);
-
-        if ($request->filled('sales_rep_id')) {
-            $query->where('sales_rep_id', $request->integer('sales_rep_id'));
-        }
-
-        $agreements = $query->latest('signing_date')->get();
-
-        $columns = $request->input('columns', []);
-        $selectedColumns = is_array($columns) && count($columns) > 0
-            ? $columns
-            : ['client_logo', 'client_name', 'sales_Rep_name', 'signing_date', 'duration_years', 'termination_type', 'implementation_date', 'end_date', 'status', 'notice_months', 'notice_info', 'service_type', 'product_quantity', 'price', 'total_amount'];
-
-        $pdf = DomPdf::loadView('pdf.agreements-table', [
-            'agreements' => $agreements,
-            'selectedColumns' => $selectedColumns,
-        ])
-            ->setOptions(['isRemoteEnabled' => true, 'isHtml5ParserEnabled' => true, 'defaultFont' => 'dejavu sans'])
-            ->setPaper('a3', 'landscape');
-
-        return $pdf->stream('اتفاقيات_الشركة_' . now()->format('Y-m-d') . '.pdf');
     }
 
     public function create(SalesRep $salesrep)
