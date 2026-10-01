@@ -571,7 +571,7 @@ function renderTable(data = AgreementsData) {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td class="px-4 py-2 text-center no-print">
-                ${agreement.company_logo ? `<img src="${agreement.company_logo}" alt="شعار" class="h-10 mx-auto rounded-full border" />` : '—'}
+                ${agreement.company_logo ? `<img src="${agreement.company_logo}" alt="شعار" loading="lazy" decoding="async" class="h-10 mx-auto rounded-full border" />` : '—'}
             </td>
             <td class="px-4 py-2 text-sm font-semibold text-gray-800">${agreement.company_name || '—'}</td>
             <td class="px-4 py-2 text-sm text-gray-700">${agreement.signing_date || '—'}</td>
@@ -714,7 +714,12 @@ function generateAgreementsPDF() {
         jsPDF:        { unit: 'in', format: 'a3', orientation: 'landscape' }
     };
 
-    html2pdf().set(options).from(element).save().then(() => {
+    // Wait for webfonts (Tajawal + Font Awesome icons) to finish loading
+    // before snapshotting - otherwise text inside colored badges renders
+    // blank while backgrounds/icons still show.
+    document.fonts.ready.then(() => {
+        return html2pdf().set(options).from(element).save();
+    }).then(() => {
         if (header) header.style.display = 'none';
         if (footer) footer.style.display = 'none';
     }).catch(error => {

@@ -1841,8 +1841,14 @@
                     pagebreak: { mode: ['css', 'legacy'] } // handle page breaks
                 };
 
-                // Generate PDF
-                html2pdf().set(options).from(printArea).save();
+                // Generate PDF - wait for webfonts (Tajawal + Font Awesome icons)
+                // to finish loading first. html2canvas snapshots synchronously,
+                // and if a font isn't ready yet it renders blank text while
+                // backgrounds/borders/icons still show - exactly the "status
+                // badges with no label" symptom this works around.
+                document.fonts.ready.then(() => {
+                    html2pdf().set(options).from(printArea).save();
+                });
 
             } catch (error) {
                 console.error('Error exporting to PDF:', error);
@@ -2072,7 +2078,7 @@
         <!-- Client Logo -->
         <td class="px-4 py-2 text-center">
             ${agreement.client_logo ? `<div class="h-20 w-20 mx-auto border rounded-full p-3 bg-white flex items-center justify-center">
-<img src="${agreement.client_logo}" alt="شعار" class=class="max-h-full max-w-full object-contain" />
+<img src="${agreement.client_logo}" alt="شعار" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain" />
 </div>` : '—'}
         </td>
 
