@@ -1530,7 +1530,6 @@
 @push('scripts')
     <!-- مكتبات التصدير -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <script>
@@ -1770,75 +1769,22 @@
         }
 
         function exportToPDF(selectedColumns) {
+            // Rendered server-side (dompdf) instead of a client-side html2canvas
+            // screenshot - that approach repeatedly rendered colored status/notice
+            // badges with no text inside them, depending on font-load timing and
+            // nested flexbox, neither of which a real HTML-to-PDF renderer is
+            // sensitive to.
             try {
-                // Show loading
                 showNotification('جاري إنشاء ملف PDF...', 'success');
 
-                // Clone the main content
-                const printArea = document.getElementById('print-area').cloneNode(true);
+                const salesRepId = document.getElementById('current_sales_rep_id').value;
+                const params = new URLSearchParams();
+                selectedColumns.forEach(col => params.append('columns[]', col));
+                if (salesRepId) {
+                    params.append('sales_rep_id', salesRepId);
+                }
 
-                // Hide unnecessary elements in the clone
-                const elementsToHide = printArea.querySelectorAll('.table-actions, .table-filters, .pagination, .export-options, .btn, .no-print');
-                elementsToHide.forEach(el => el.style.display = 'none');
-
-                // Hide columns that are not selected
-                const table = printArea.querySelector('.data-table');
-                const headers = table.querySelectorAll('thead th');
-
-                headers.forEach((header, index) => {
-                    const columnName = header.textContent.trim();
-                    const columnKey = getColumnKey(columnName);
-
-                    if (!selectedColumns.includes(columnKey)) {
-                        header.style.display = 'none';
-                        table.querySelectorAll('tbody tr').forEach(row => {
-                            if (row.cells[index]) {
-                                row.cells[index].style.display = 'none';
-                            }
-                        });
-                    }
-                });
-
-                // Show PDF header and footer
-                const pdfHeader = printArea.querySelector('.pdf-header');
-                const pdfFooter = printArea.querySelector('.pdf-footer');
-                if (pdfHeader) pdfHeader.style.display = 'block';
-                if (pdfFooter) pdfFooter.style.display = 'block';
-
-                // PDF options
-                const options = {
-                    margin: 10,
-                    filename: `اتفاقيات_الشركة_${new Date().toISOString().slice(0,10)}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: {
-                        scale: 2,
-                        useCORS: true,
-                        logging: false,
-                        backgroundColor: '#ffffff', // optional, ensures background is white
-                        onclone: function(clonedDoc) {
-                            // Remove any remaining no-print elements in cloned doc
-                            const clonedNoPrint = clonedDoc.querySelectorAll('.no-print');
-                            clonedNoPrint.forEach(el => el.remove());
-                        }
-                    },
-                    jsPDF: {
-                        unit: 'mm',               // Using mm for better scaling
-                        format: [600, 297],     // Custom size: A2 landscape approx 420x297 mm
-                        orientation: 'landscape',
-                        compress: true
-                    },
-                    pagebreak: { mode: ['css', 'legacy'] } // handle page breaks
-                };
-
-                // Generate PDF - wait for webfonts (Tajawal + Font Awesome icons)
-                // to finish loading first. html2canvas snapshots synchronously,
-                // and if a font isn't ready yet it renders blank text while
-                // backgrounds/borders/icons still show - exactly the "status
-                // badges with no label" symptom this works around.
-                document.fonts.ready.then(() => {
-                    html2pdf().set(options).from(printArea).save();
-                });
-
+                window.location.href = `{{ route('agreements.exportTablePdf') }}?${params.toString()}`;
             } catch (error) {
                 console.error('Error exporting to PDF:', error);
                 showNotification('حدث خطأ أثناء التصدير إلى PDF', 'error');

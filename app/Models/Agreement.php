@@ -101,6 +101,28 @@ class Agreement extends Model
     }
 
     /**
+     * The status-column duration pill: how long the agreement has run since
+     * signing (if still active) or how long it ran in total (if finished).
+     * Mirrors the client-side renderDurationBadge()/computeDuration() logic
+     * in agreements/table.blade.php, for use in server-rendered PDF exports.
+     */
+    public function statusDuration(): array
+    {
+        $finished = $this->isFinished();
+        $start = Carbon::parse($this->signing_date);
+        $end = $finished ? Carbon::parse($this->finish_date ?? $this->end_date) : now();
+        $diff = $start->diff($end);
+
+        return [
+            'finished' => $finished,
+            'label' => $finished ? 'استمرت' : 'منذ التوقيع',
+            'years' => $diff->y,
+            'months' => $diff->m,
+            'days' => $diff->d,
+        ];
+    }
+
+    /**
      * Auto-renew the agreement for another term because no cancellation notice
      * was received within the allowed notice period.
      */

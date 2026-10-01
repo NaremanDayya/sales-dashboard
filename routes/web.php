@@ -197,6 +197,7 @@ Route::middleware('auth', \App\Http\Middleware\AuthorizeSalesRep::class)->group(
     Route::get('targets', [TargetController::class, 'allTargets'])->name('allTargets');
     Route::get('clients', [ClientController::class, 'allClients'])->name('allClients');
     Route::get('agreements', [AgreementController::class, 'allAgreements'])->name('allAgreements');
+    Route::get('agreements/export-pdf', [AgreementController::class, 'exportTablePdf'])->name('agreements.exportTablePdf');
 
     Route::put('sales-reps/{salesrep}/agreements/{agreement}/notice-status', [AgreementController::class, 'updateNoticeStatus'])
         ->name('agreements.updateNoticeStatus');
